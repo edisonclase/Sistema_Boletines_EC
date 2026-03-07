@@ -45,19 +45,23 @@ class GeneradorBoletines:
             print(f"Error generando PDF para {datos_estudiante['NOMBRE_ESTUDIANTE']}: {e}")
             return False
 
-    def ejecutar(self):
-        print("--- Iniciando proceso de Segundo Ciclo ---")
-        df = pd.read_csv(self.url_segundo)
+def ejecutar(self):
+        opcion = input("¿Qué ciclo desea generar? (1: Primer Ciclo / 2: Segundo Ciclo): ")
         
-        # Limpiar nombres de columnas por si acaso hay espacios
+        if opcion == "1":
+            url = self.url_primero
+            plantilla = 'academica.html'
+            print("--- Procesando Primer Ciclo ---")
+        else:
+            url = self.url_segundo
+            plantilla = 'tecnica.html'
+            print("--- Procesando Segundo Ciclo ---")
+
+        df = pd.read_csv(url)
         df.columns = df.columns.str.strip()
         
-        count = 0
         for _, fila in df.iterrows():
-            datos = fila.to_dict()
-            if self.generar_boletin_tecnico(datos):
-                count += 1
-                print(f"[{count}] Boletín creado: {datos['NOMBRE_ESTUDIANTE']}")
+            self.generar_pdf_general(fila.to_dict(), plantilla)
 
 if __name__ == "__main__":
     app = GeneradorBoletines()

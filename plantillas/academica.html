@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 10px; margin: 15px; }
+        .header { text-align: center; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
+        .info-table, .data-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        .info-table td { padding: 4px; border: 1px solid #000; }
+        .data-table th, .data-table td { border: 1px solid #000; text-align: center; padding: 3px; }
+        .title-row { background-color: #e9e9e9; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        POLITÉCNICO PROFESOR JOSÉ MERCEDES ALVINO<br>
+        BOLETÍN DE CALIFICACIONES - PRIMER CICLO
+    </div>
+
+    <table class="info-table">
+        <tr>
+            <td><strong>Estudiante:</strong> {{ NOMBRE_ESTUDIANTE }}</td>
+            <td><strong>Matrícula:</strong> {{ ID_ESTUDIANTE }}</td>
+            <td><strong>Curso:</strong> {{ CURSO }}</td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr class="title-row">
+                <th rowspan="2">Asignatura</th>
+                <th colspan="4">Períodos</th>
+                <th colspan="4">Promedio Competencias</th>
+                <th rowspan="2">C.F.</th>
+                <th rowspan="2">% Asis</th>
+                <th rowspan="2">Estado</th>
+            </tr>
+            <tr class="title-row">
+                <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                <th>PC1</th><th>PC2</th><th>PC3</th><th>PC4</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set materias = [
+                ('Lengua Española', 'LEN'), ('Matemática', 'MAT'), 
+                ('Ciencias Sociales', 'SOC'), ('Ciencias Naturaleza', 'NAT'),
+                ('Inglés', 'ING'), ('Francés', 'FRA'),
+                ('Educación Artística', 'ART'), ('Educación Física', 'FIS'),
+                ('Formación Humana', 'FOR')
+            ] %}
+            
+            {% for nombre, prefix in materias %}
+            <tr>
+                <td style="text-align:left;">{{ nombre }}</td>
+                <td>{{ d[prefix ~ '_C1_P1'] }}</td>
+                <td>{{ d[prefix ~ '_C1_P2'] }}</td>
+                <td>{{ d[prefix ~ '_C1_P3'] }}</td>
+                <td>{{ d[prefix ~ '_C1_P4'] }}</td>
+                <td>{{ d[prefix ~ '_PC1'] }}</td>
+                <td>{{ d[prefix ~ '_PC2'] }}</td>
+                <td>{{ d[prefix ~ '_PC3'] }}</td>
+                <td>{{ d[prefix ~ '_PC4'] }}</td>
+                <td><strong>{{ d[prefix ~ '_CF_FINAL'] }}</strong></td>
+                <td>{{ d[prefix ~ '_ASIST_PCT'] }}%</td>
+                <td>{{ d[prefix ~ '_SITU_A'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top:10px;">
+        <strong>Comentario Final:</strong> {{ COMENTARIO_FINAL }}<br><br>
+        <strong>Situación Final:</strong> 
+        {% if SITUACION_PROMOVIDO == 'X' %} PROMOVIDO/A {% endif %}
+        {% if SITUACION_REPITENTE == 'X' %} REPITENTE {% endif %}
+    </div>
+</body>
+</html>
