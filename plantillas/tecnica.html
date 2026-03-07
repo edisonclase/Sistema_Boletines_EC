@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; margin: 20px; }
+        .header { text-align: center; font-weight: bold; margin-bottom: 20px; }
+        .info-table, .data-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        .info-table td { padding: 5px; border: 1px solid #000; }
+        .data-table th, .data-table td { border: 1px solid #000; text-align: center; padding: 4px; }
+        .modulo-header { background-color: #f2f2f2; font-weight: bold; text-align: left; padding-left: 10px; }
+        .footer { margin-top: 30px; display: flex; justify-content: space-between; }
+        .signature { border-top: 1px solid #000; width: 200px; text-align: center; padding-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        POLITÉCNICO PROFESOR JOSÉ MERCEDES ALVINO <br>
+        DEPARTAMENTO DE REGISTRO Y CONTROL ACADÉMICO <br>
+        BOLETÍN DE CALIFICACIONES - SEGUNDO CICLO [cite: 20]
+    </div>
+
+    <table class="info-table">
+        <tr>
+            <td><strong>Nombre:</strong> {{ NOMBRE_ESTUDIANTE }} [cite: 18]</td>
+            <td><strong>Matrícula:</strong> {{ ID_ESTUDIANTE }} [cite: 24]</td>
+        </tr>
+        <tr>
+            <td><strong>Curso:</strong> {{ CURSO }} [cite: 18]</td>
+            <td><strong>Año Escolar:</strong> 2025-2026 [cite: 24]</td>
+        </tr>
+        <tr>
+            <td colspan="2"><strong>Profesor Titular:</strong> {{ PROF_TITULAR }} [cite: 24]</td>
+        </tr>
+    </table>
+
+    <h3>Módulos Formativos</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Módulo</th>
+                <th>RA1</th><th>RA2</th><th>RA3</th><th>RA4</th><th>RA5</th>
+                <th>RA6</th><th>RA7</th><th>RA8</th><th>RA9</th><th>RA10</th>
+                <th>C.F.</th><th>Asis</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(1, 6) %}
+            {% set mod_nombre = "MOD" ~ i ~ "_NOMBRE" %}
+            {% if d[mod_nombre] and d[mod_nombre]|string != 'nan' %}
+            <tr>
+                <td style="text-align:left;">{{ d[mod_nombre] }}</td>
+                <td>{{ d["MOD" ~ i ~ "_RA1"] }}</td>
+                <td>{{ d["MOD" ~ i ~ "_RA2"] }}</td>
+                <td>{{ d["MOD" ~ i ~ "_RA3"] }}</td>
+                <td>{{ d["MOD" ~ i ~ "_RA4"] }}</td>
+                <td>{{ d["MOD" ~ i ~ "_RA5"] }}</td>
+                <td>{{ d["MOD" ~ i ~ "_RA6"] }}</td>
+                <td>{{ d["MOD" ~ i ~ "_RA7"] }}</td>
+                <td>{{ d["MOD" ~ i ~ "_RA8"] }}</td>
+                <td>{{ d["MOD" ~ i ~ "_RA9"] }}</td>
+                <td>{{ d["MOD" ~ i ~ "_RA10"] }}</td>
+                <td><strong>{{ d["MOD" ~ i ~ "_CF"] }}</strong></td>
+                <td>{{ d["MOD" ~ i ~ "_SITU_A"] }}%</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 20px;">
+        <strong>SITUACIÓN FINAL:</strong> 
+        {% if SITUACION_PROMOVIDO == 'X' %} PROMOVIDO/A [cite: 22, 23]
+        {% elif SITUACION_REPITENTE == 'X' %} REPROBADO/A [cite: 31]
+        {% elif SITUACION_PENDIENTE == 'X' %} PROMOVIDO/A CON PENDIENTES [cite: 30]
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <div class="signature">Maestro/a encargado [cite: 32]</div>
+        <div class="signature">Director(a) del Centro [cite: 33]</div>
+    </div>
+
+</body>
+</html>
