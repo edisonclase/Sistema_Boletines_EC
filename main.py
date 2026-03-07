@@ -1,39 +1,63 @@
 import os
 import pandas as pd
 from dotenv import load_dotenv
-from pathlib import Path
+from jinja2 import Environment, FileSystemLoader
+import pdfkit
 
-# Cargar variables de entorno del archivo .env
+# Cargar configuración segura
 load_dotenv()
 
 class GeneradorBoletines:
     def __init__(self):
-        # Extraer enlaces de forma segura
-        self.url_primero = os.getenv("URL_PRIMER_CICLO")
         self.url_segundo = os.getenv("URL_SEGUNDO_CICLO")
-        self.path_wkhtml = os.getenv("WKHTMLTOPDF_PATH")
+        self.wkhtml_path = os.getenv("WKHTMLTOPDF_PATH")
         
-        # Validar que los enlaces existan
-        if not self.url_primero or not self.url_segundo:
-            raise ValueError("Error: No se encontraron los enlaces en el archivo .env")
+        # Configurar pdfkit
+        self.pdf_config = pdfkit.configuration(wkhtmltopdf=self.wkhtml_path)
+        
+        # Configurar Jinja2 para las plantillas
+        self.env = Environment(loader=FileSystemLoader('plantillas'))
 
-    def obtener_datos(self, ciclo="primero"):
-        """Descarga los datos de Google Sheets según el ciclo especificado."""
-        url = self.url_primero if ciclo == "primero" else self.url_segundo
-        print(f"--- Cargando datos del {ciclo} ciclo ---")
+    def generar_boletin_tecnico(self, datos_estudiante):
+        """Renderiza el HTML y lo convierte a PDF."""
+        template = self.env.get_template('tecnica.html')
+        
+        # Pasamos los datos como un diccionario 'd' para la lógica del HTML
+        html_renderizado = template.render(d=datos_estudiante, **datos_estudiante)
+        
+        # Crear ruta de salida: boletines_generados/CURSO/NOMBRE.pdf
+        curso = str(datos_estudiante['CURSO']).replace("/", "-")
+        ruta_carpeta = os.path.join("boletines_generados", curso)
+        os.makedirs(ruta_carpeta, exist_ok=True)
+        
+        archivo_salida = os.path.join(ruta_carpeta, f"{datos_estudiante['NOMBRE_ESTUDIANTE']}.pdf")
+        
+        options = {
+            'page-size': 'Letter',
+            'encoding': "UTF-8",
+            'quiet': ''
+        }
+        
         try:
-            return pd.read_csv(url)
+            pdfkit.from_string(html_renderizado, archivo_salida, configuration=self.pdf_config, options=options)
+            return True
         except Exception as e:
-            print(f"Error al conectar con Google Sheets: {e}")
-            return None
+            print(f"Error generando PDF para {datos_estudiante['NOMBRE_ESTUDIANTE']}: {e}")
+            return False
 
     def ejecutar(self):
-        # Ejemplo de prueba de carga
-        df_primero = self.obtener_datos("primero")
-        if df_primero is not None:
-            print(f"Éxito: Se cargaron {len(df_primero)} registros del primer ciclo.")
-            # Aquí imprimiremos los nombres para verificar
-            print(df_primero[['NOMBRE_ESTUDIANTE', 'CURSO']].head())
+        print("--- Iniciando proceso de Segundo Ciclo ---")
+        df = pd.read_csv(self.url_segundo)
+        
+        # Limpiar nombres de columnas por si acaso hay espacios
+        df.columns = df.columns.str.strip()
+        
+        count = 0
+        for _, fila in df.iterrows():
+            datos = fila.to_dict()
+            if self.generar_boletin_tecnico(datos):
+                count += 1
+                print(f"[{count}] Boletín creado: {datos['NOMBRE_ESTUDIANTE']}")
 
 if __name__ == "__main__":
     app = GeneradorBoletines()
