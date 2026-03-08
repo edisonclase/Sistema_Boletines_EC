@@ -13,7 +13,9 @@ dependencies = [
     "jinja2",
     "pydantic",
     "pydantic-settings",
-    "httpx"
+    "httpx",
+    "weasyprint",
+    "pypdf"
 ]
 
 [dependency-groups]
