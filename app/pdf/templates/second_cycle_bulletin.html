@@ -99,13 +99,19 @@
         }
 
         .logo-cell {
-            width: 135px;
+            width: 180px;
             text-align: center;
         }
 
         .logo {
-            max-width: 95px;
-            max-height: 95px;
+            max-width: 130px;
+            max-height: 130px;
+            object-fit: contain;
+        }
+
+        .minerd-logo {
+            max-width: 125px;
+            max-height: 125px;
             object-fit: contain;
         }
 
@@ -424,7 +430,9 @@
                                 <div class="department-title">{{ settings.institution_academic_department }}</div>
                                 <div class="bulletin-title">Reporte de Evaluaciones</div>
                             </td>
-                            <td class="logo-cell"></td>
+                            <td class="logo-cell">
+                                <img src="app/pdf/assets/minerd.png" alt="Logo Minerd" class="minerd-logo">
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -523,9 +531,7 @@
                     <tbody>
                         {% for subject in student.subjects %}
                         <tr>
-                            <td class="subject-col">
-                                {{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}
-                            </td>
+                            <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
 
                             <td class="{{ cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ render_value(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
                             <td class="{{ cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ render_value(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
@@ -568,20 +574,8 @@
 
                             <td>{{ render_value(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
 
-                            <td>
-                                {% if subject.situ_a is defined and subject.situ_a %}
-                                    {{ subject.situ_a }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if subject.situ_r is defined and subject.situ_r %}
-                                    {{ subject.situ_r }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
+                            <td>{% if subject.situ_a is defined and subject.situ_a %}{{ subject.situ_a }}{% else %}-{% endif %}</td>
+                            <td>{% if subject.situ_r is defined and subject.situ_r %}{{ subject.situ_r }}{% else %}-{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -623,13 +617,7 @@
                             <td>{{ render_value(module.ra9 if module.ra9 is defined else none) }}</td>
                             <td>{{ render_value(module.ra10 if module.ra10 is defined else none) }}</td>
                             <td class="{{ cell_class(module.cf if module.cf is defined else none) }}">{{ render_value(module.cf if module.cf is defined else none) }}</td>
-                            <td>
-                                {% if module.situ_a is defined and module.situ_a %}
-                                    {{ module.situ_a }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
+                            <td>{% if module.situ_a is defined and module.situ_a %}{{ module.situ_a }}{% else %}-{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
