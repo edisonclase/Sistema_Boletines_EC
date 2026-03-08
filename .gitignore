@@ -1,0 +1,47 @@
+# Virtual environment
+.venv/
+
+# Environment variables
+.env
+
+# Python cache / compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+logs/
+
+# Editor / IDE
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local generated files
+output/
+generated/
+temp/
+
+# Local academic data
+*.csv
+*.xlsx
+*.xls
+*.pdf
+
+# Misc
+.python-version
