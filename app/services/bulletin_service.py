@@ -18,8 +18,11 @@ def find_student_by_id(student_id: str) -> dict:
     primer = load_primer_ciclo().copy()
     segundo = load_segundo_ciclo().copy()
 
-    primer["ID_ESTUDIANTE"] = primer["ID_ESTUDIANTE"].apply(normalize_student_id)
-    segundo["ID_ESTUDIANTE"] = segundo["ID_ESTUDIANTE"].apply(normalize_student_id)
+    if "ID_ESTUDIANTE" in primer.columns:
+        primer["ID_ESTUDIANTE"] = primer["ID_ESTUDIANTE"].apply(normalize_student_id)
+
+    if "ID_ESTUDIANTE" in segundo.columns:
+        segundo["ID_ESTUDIANTE"] = segundo["ID_ESTUDIANTE"].apply(normalize_student_id)
 
     student_primer = primer[primer["ID_ESTUDIANTE"] == student_id]
     if not student_primer.empty:

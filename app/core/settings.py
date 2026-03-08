@@ -16,12 +16,22 @@ class Settings(BaseSettings):
     pdf_engine: str = "wkhtmltopdf"
     wkhtmltopdf_path: str = ""
 
-    institution_name: str = "EC"
-    institution_code: str = "EC"
-    institution_logo: str = ""
+    institution_name: str = "Politécnico Profesor José Mercedes Alvino"
+    institution_code: str = "14601"
+    institution_logo: str = "app\pdf\assets\logo.jpg"
+    institution_motto: str = ""
+    institution_address: str = "Avenida Hispanoamericana, Santiago, República Dominicana"
+    institution_email: str = "cejomal.2014@gmail.com"
+    institution_phone: str = "809-570-6598"
+    institution_academic_department: str = "Departamento de Registro y Control Académico"
+    institution_director: str = "Zoilo A. Marrero Sirí"
 
     passing_grade: int = 70
     low_grade_highlight_color: str = "#FFF59D"
+
+    bulletin_generated_by: str = "Sistema de Boletines ECS"
+    bulletin_generated_role: str = "Coordinación de Registro y Control Académico"
+    bulletin_author: str = "ECS"
 
     model_config = SettingsConfigDict(
         env_file=".env",

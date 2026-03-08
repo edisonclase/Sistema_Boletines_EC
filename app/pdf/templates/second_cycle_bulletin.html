@@ -2,238 +2,476 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Boletín - Segundo Ciclo</title>
+    <title>Boletín de Calificaciones - Segundo Ciclo</title>
     <style>
         @page {
             size: A4 landscape;
-            margin: 20mm;
+            margin: 10mm;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            margin: 10px;
-            color: #222;
-            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111;
+            margin: 0;
+            padding: 0;
+            font-size: 10px;
         }
 
-        h1, h2, h3, p {
-            margin: 0;
+        .page {
+            width: 100%;
         }
 
         .header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .logo {
-            height: 70px;
-        }
-
-        .title h2 {
-            font-size: 20px;
-        }
-
-        .title p {
-            margin-top: 4px;
-        }
-
-        .student-info {
-            margin-bottom: 16px;
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-
-        .student-info div {
-            margin-bottom: 4px;
-        }
-
-        table {
             width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
-            margin-bottom: 18px;
+            border-bottom: 2px solid #1f3c88;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
         }
 
-        th, td {
-            border: 1px solid #999;
-            padding: 6px;
-            text-align: center;
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
             vertical-align: middle;
         }
 
-        th {
-            background: #f2f2f2;
-        }
-
-        .subject-name {
+        .logo-cell {
+            width: 90px;
             text-align: left;
-            font-weight: bold;
         }
 
-        .low-grade {
-            background-color: #fff59d;
+        .logo {
+            width: 72px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .title-cell {
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .institution-name {
+            font-size: 17px;
             font-weight: bold;
+            margin: 0;
+            line-height: 1.15;
+            text-transform: uppercase;
+        }
+
+        .institution-meta {
+            margin-top: 3px;
+            font-size: 10px;
+        }
+
+        .bulletin-title {
+            margin-top: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .student-box {
+            border: 1px solid #999;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .student-table td {
+            padding: 4px 6px;
+            vertical-align: top;
+            font-size: 10px;
+        }
+
+        .label {
+            font-weight: bold;
+            white-space: nowrap;
         }
 
         .section-title {
-            margin: 18px 0 8px;
-            font-size: 14px;
+            margin: 12px 0 6px 0;
+            padding: 6px 8px;
+            background: #eef3ff;
+            border: 1px solid #b7c7ef;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 10px;
+        }
+
+        .academic-table,
+        .modules-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 10px;
+        }
+
+        .academic-table th,
+        .academic-table td,
+        .modules-table th,
+        .modules-table td {
+            border: 1px solid #7a7a7a;
+            padding: 3px 2px;
+            text-align: center;
+            font-size: 9px;
+            line-height: 1.1;
+            word-wrap: break-word;
+            vertical-align: middle;
+        }
+
+        .academic-table thead th,
+        .modules-table thead th {
+            background: #eaf0fb;
             font-weight: bold;
         }
 
-        .summary {
-            margin-top: 18px;
-            padding: 10px;
-            border: 1px solid #ccc;
+        .subject-col,
+        .module-col {
+            text-align: left !important;
+            width: 17%;
+            font-weight: bold;
         }
 
-        .footer-note {
-            margin-top: 18px;
-            font-size: 11px;
+        .w-compact {
+            width: 4.4%;
+        }
+
+        .w-final {
+            width: 5.5%;
+        }
+
+        .w-situation {
+            width: 7%;
+        }
+
+        .low-grade {
+            background-color: #FFF59D;
+            font-weight: bold;
+        }
+
+        .summary-box {
+            width: 100%;
+            border: 1px solid #999;
+            padding: 7px 8px;
+            margin-top: 4px;
+            margin-bottom: 16px;
+        }
+
+        .summary-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+            text-transform: uppercase;
         }
 
         .signatures {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-around;
+            width: 100%;
+            margin-top: 18px;
         }
 
-        .signature {
+        .signatures-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signatures-table td {
+            width: 50%;
             text-align: center;
-            width: 300px;
+            padding: 0 20px;
+            vertical-align: top;
         }
 
-        .line {
+        .signature-line {
             border-top: 1px solid #000;
-            margin-bottom: 6px;
+            margin: 28px auto 6px auto;
+            width: 75%;
         }
 
-        .print-info {
-            margin-top: 14px;
+        .signature-name {
+            font-weight: bold;
             font-size: 10px;
+        }
+
+        .signature-role {
+            font-size: 9px;
+        }
+
+        .footer {
+            margin-top: 18px;
+            border-top: 1px solid #bbb;
+            padding-top: 6px;
+            font-size: 9px;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .footer-left,
+        .footer-right {
+            width: 50%;
+        }
+
+        .footer-right {
             text-align: right;
+        }
+
+        .muted {
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        {% if logo_path %}
-        <img src="{{ logo_path }}" class="logo" alt="Logo del centro">
+    {% macro render_value(value) %}
+        {% if value is none %}
+            {{ "" }}
+        {% elif value is string %}
+            {{ value }}
+        {% elif value is iterable %}
+            {{ value | join(" / ") }}
+        {% else %}
+            {{ value }}
+        {% endif %}
+    {% endmacro %}
+
+    {% macro cell_class(value) %}
+        {% if value is not none and value is not string and not (value is iterable) and is_low_grade(value) %}
+            low-grade
+        {% else %}
+            
+        {% endif %}
+    {% endmacro %}
+
+    {% set generated_at = generated_at if generated_at is defined else "" %}
+    {% set generated_by = generated_by if generated_by is defined else settings.bulletin_generated_by %}
+    {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
+    {% set director_name = director_name if director_name is defined else settings.institution_director %}
+
+    <div class="page">
+        <div class="header">
+            <table class="header-table">
+                <tr>
+                    <td class="logo-cell">
+                        {% if settings.institution_logo %}
+                            <img src="{{ settings.institution_logo }}" alt="Logo institucional" class="logo">
+                        {% endif %}
+                    </td>
+                    <td class="title-cell">
+                        <div class="institution-name">{{ settings.institution_name }}</div>
+                        <div class="institution-meta">Código del centro: {{ settings.institution_code }}</div>
+                        <div class="bulletin-title">Boletín de Calificaciones - Segundo Ciclo</div>
+                    </td>
+                    <td class="logo-cell"></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="student-box">
+            <table class="student-table">
+                <tr>
+                    <td><span class="label">ID del estudiante:</span> {{ student.id_estudiante }}</td>
+                    <td><span class="label">Curso:</span> {{ student.curso }}</td>
+                    <td><span class="label">Profesor titular:</span> {{ student.prof_titular }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3"><span class="label">Nombre del estudiante:</span> {{ student.nombre_estudiante }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section-title">Áreas académicas</div>
+
+        <table class="academic-table">
+            <thead>
+                <tr>
+                    <th class="subject-col" rowspan="2">Asignatura</th>
+                    <th colspan="4">Período 1</th>
+                    <th colspan="4">Período 2</th>
+                    <th colspan="4">Período 3</th>
+                    <th colspan="4">Período 4</th>
+                    <th colspan="4">PC</th>
+                    <th class="w-final" rowspan="2">CF Área</th>
+                    <th class="w-final" rowspan="2">Asist. %</th>
+                    <th class="w-final" rowspan="2">CF Final</th>
+                    <th class="w-situation" rowspan="2">Situación</th>
+                </tr>
+                <tr>
+                    <th class="w-compact">C1</th>
+                    <th class="w-compact">C2</th>
+                    <th class="w-compact">C3</th>
+                    <th class="w-compact">C4</th>
+
+                    <th class="w-compact">C1</th>
+                    <th class="w-compact">C2</th>
+                    <th class="w-compact">C3</th>
+                    <th class="w-compact">C4</th>
+
+                    <th class="w-compact">C1</th>
+                    <th class="w-compact">C2</th>
+                    <th class="w-compact">C3</th>
+                    <th class="w-compact">C4</th>
+
+                    <th class="w-compact">C1</th>
+                    <th class="w-compact">C2</th>
+                    <th class="w-compact">C3</th>
+                    <th class="w-compact">C4</th>
+
+                    <th class="w-compact">1</th>
+                    <th class="w-compact">2</th>
+                    <th class="w-compact">3</th>
+                    <th class="w-compact">4</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in student.subjects %}
+                <tr>
+                    <td class="subject-col">
+                        {{ subject.asignatura if subject.asignatura is defined else subject.nombre_asignatura if subject.nombre_asignatura is defined else subject.nombre if subject.nombre is defined else "Asignatura" }}
+                    </td>
+
+                    <td class="{{ cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ render_value(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ render_value(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ render_value(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ render_value(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+
+                    <td class="{{ cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ render_value(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ render_value(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ render_value(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ render_value(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+
+                    <td class="{{ cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ render_value(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ render_value(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ render_value(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ render_value(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+
+                    <td class="{{ cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ render_value(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ render_value(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ render_value(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ render_value(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+
+                    <td>{{ render_value(subject.pc1 if subject.pc1 is defined else none) }}</td>
+                    <td>{{ render_value(subject.pc2 if subject.pc2 is defined else none) }}</td>
+                    <td>{{ render_value(subject.pc3 if subject.pc3 is defined else none) }}</td>
+                    <td>{{ render_value(subject.pc4 if subject.pc4 is defined else none) }}</td>
+
+                    <td class="{{ cell_class(subject.cf_area if subject.cf_area is defined else none) }}">{{ render_value(subject.cf_area if subject.cf_area is defined else none) }}</td>
+                    <td>{{ render_value(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
+                    <td class="{{ cell_class(subject.cf_final if subject.cf_final is defined else none) }}">{{ render_value(subject.cf_final if subject.cf_final is defined else none) }}</td>
+
+                    <td>
+                        {% if subject.situ_r is defined and subject.situ_r %}
+                            {{ subject.situ_r }}
+                        {% elif subject.situ_a is defined and subject.situ_a %}
+                            {{ subject.situ_a }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if student.modules is defined and student.modules %}
+        <div class="section-title">Módulos técnicos</div>
+
+        <table class="modules-table">
+            <thead>
+                <tr>
+                    <th class="module-col">Módulo</th>
+                    <th class="w-compact">RA1</th>
+                    <th class="w-compact">RA2</th>
+                    <th class="w-compact">RA3</th>
+                    <th class="w-compact">RA4</th>
+                    <th class="w-compact">RA5</th>
+                    <th class="w-compact">RA6</th>
+                    <th class="w-compact">RA7</th>
+                    <th class="w-compact">RA8</th>
+                    <th class="w-compact">RA9</th>
+                    <th class="w-compact">RA10</th>
+                    <th class="w-final">CF</th>
+                    <th class="w-situation">Situación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for module in student.modules %}
+                <tr>
+                    <td class="module-col">
+                        {{ module.modulo if module.modulo is defined else module.nombre_modulo if module.nombre_modulo is defined else module.nombre if module.nombre is defined else "Módulo" }}
+                    </td>
+
+                    <td>{{ render_value(module.ra1 if module.ra1 is defined else none) }}</td>
+                    <td>{{ render_value(module.ra2 if module.ra2 is defined else none) }}</td>
+                    <td>{{ render_value(module.ra3 if module.ra3 is defined else none) }}</td>
+                    <td>{{ render_value(module.ra4 if module.ra4 is defined else none) }}</td>
+                    <td>{{ render_value(module.ra5 if module.ra5 is defined else none) }}</td>
+                    <td>{{ render_value(module.ra6 if module.ra6 is defined else none) }}</td>
+                    <td>{{ render_value(module.ra7 if module.ra7 is defined else none) }}</td>
+                    <td>{{ render_value(module.ra8 if module.ra8 is defined else none) }}</td>
+                    <td>{{ render_value(module.ra9 if module.ra9 is defined else none) }}</td>
+                    <td>{{ render_value(module.ra10 if module.ra10 is defined else none) }}</td>
+
+                    <td class="{{ cell_class(module.cf if module.cf is defined else module.cf_final if module.cf_final is defined else none) }}">
+                        {{ render_value(module.cf if module.cf is defined else module.cf_final if module.cf_final is defined else none) }}
+                    </td>
+
+                    <td>
+                        {% if module.situacion is defined and module.situacion %}
+                            {{ module.situacion }}
+                        {% elif module.situ_a is defined and module.situ_a %}
+                            {{ module.situ_a }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
         {% endif %}
 
-        <div class="title">
-            <h2>{{ institution_name }}</h2>
-            <p>Boletín de Calificaciones - Segundo Ciclo</p>
-        </div>
-    </div>
-
-    <div class="student-info">
-        <div><strong>ID:</strong> {{ student.id_estudiante }}</div>
-        <div><strong>Estudiante:</strong> {{ student.nombre_estudiante }}</div>
-        <div><strong>Curso:</strong> {{ student.curso }}</div>
-        <div><strong>Profesor titular:</strong> {{ student.prof_titular or "N/D" }}</div>
-    </div>
-
-    <div class="section-title">Asignaturas Académicas</div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Asignatura</th>
-                <th>P1</th>
-                <th>P2</th>
-                <th>P3</th>
-                <th>P4</th>
-                <th>PC1</th>
-                <th>PC2</th>
-                <th>PC3</th>
-                <th>PC4</th>
-                <th>CF Área</th>
-                <th>Asist.</th>
-                <th>CF Final</th>
-                <th>Situación</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for subject in student.subjects %}
-            <tr>
-                <td class="subject-name">{{ subject.name }}</td>
-                <td class="{% if is_low_grade(subject.p1[0]) %}low-grade{% endif %}">{{ subject.p1[0] }}</td>
-                <td class="{% if is_low_grade(subject.p2[0]) %}low-grade{% endif %}">{{ subject.p2[0] }}</td>
-                <td class="{% if is_low_grade(subject.p3[0]) %}low-grade{% endif %}">{{ subject.p3[0] }}</td>
-                <td class="{% if is_low_grade(subject.p4[0]) %}low-grade{% endif %}">{{ subject.p4[0] }}</td>
-                <td class="{% if is_low_grade(subject.pc[0]) %}low-grade{% endif %}">{{ subject.pc[0] }}</td>
-                <td class="{% if is_low_grade(subject.pc[1]) %}low-grade{% endif %}">{{ subject.pc[1] }}</td>
-                <td class="{% if is_low_grade(subject.pc[2]) %}low-grade{% endif %}">{{ subject.pc[2] }}</td>
-                <td class="{% if is_low_grade(subject.pc[3]) %}low-grade{% endif %}">{{ subject.pc[3] }}</td>
-                <td class="{% if is_low_grade(subject.cf_area) %}low-grade{% endif %}">{{ subject.cf_area }}</td>
-                <td>{{ subject.asistencia_pct }}</td>
-                <td class="{% if is_low_grade(subject.cf_final) %}low-grade{% endif %}">{{ subject.cf_final }}</td>
-                <td>{{ subject.situ_r or subject.situ_a }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    {% if student.modules %}
-    <div class="section-title">Módulos Técnicos</div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Módulo</th>
-                <th>RA1</th>
-                <th>RA2</th>
-                <th>RA3</th>
-                <th>RA4</th>
-                <th>RA5</th>
-                <th>CF</th>
-                <th>Situación</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for module in student.modules %}
-            <tr>
-                <td class="subject-name">{{ module.nombre }}</td>
-                <td>{{ module.ra[0] }}</td>
-                <td>{{ module.ra[1] }}</td>
-                <td>{{ module.ra[2] }}</td>
-                <td>{{ module.ra[3] }}</td>
-                <td>{{ module.ra[4] }}</td>
-                <td>{{ module.cf }}</td>
-                <td>{{ module.situ_a }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-
-    <div class="summary">
-        <div><strong>Promovido:</strong> {{ student.situacion_promovido or "N/D" }}</div>
-        <div><strong>Repitente:</strong> {{ student.situacion_repitente or "N/D" }}</div>
-        <div><strong>Pendiente:</strong> {{ student.situacion_pendiente or "N/D" }}</div>
-    </div>
-
-    <div class="footer-note">
-        <em>Las calificaciones menores de 70 aparecen resaltadas en amarillo.</em>
-    </div>
-
-    <div class="signatures">
-        <div class="signature">
-            <div class="line"></div>
-            <p>Director</p>
+        <div class="summary-box">
+            <div class="summary-title">Observaciones generales</div>
+            <div class="muted">
+                Este boletín presenta el rendimiento académico del estudiante en las áreas comunes y módulos técnicos del segundo ciclo.
+            </div>
         </div>
 
-        <div class="signature">
-            <div class="line"></div>
-            <p>Profesor Titular</p>
+        <div class="signatures">
+            <table class="signatures-table">
+                <tr>
+                    <td>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">{{ director_name }}</div>
+                        <div class="signature-role">Director(a)</div>
+                    </td>
+                    <td>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">{{ student.prof_titular }}</div>
+                        <div class="signature-role">Profesor(a) Titular</div>
+                    </td>
+                </tr>
+            </table>
         </div>
-    </div>
 
-    <div class="print-info">
-        Generado el {{ generated_at }} por {{ generated_by }}
+        <div class="footer">
+            <div class="footer-left">
+                Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %}
+            </div>
+            <div class="footer-right">
+                Desarrollado por {{ settings.bulletin_author }}
+            </div>
+        </div>
     </div>
 </body>
 </html>
