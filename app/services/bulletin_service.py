@@ -1,4 +1,5 @@
 from app.data.fetchers.google_sheets import load_primer_ciclo, load_segundo_ciclo
+from app.data.transformers.student_profile import build_subjects, build_modules
 from app.utils.helpers import safe_value
 
 
@@ -31,6 +32,12 @@ def find_student_by_id(student_id: str) -> dict:
                 "nombre_estudiante": safe_value(row.get("NOMBRE_ESTUDIANTE")),
                 "curso": safe_value(row.get("CURSO")),
                 "prof_titular": safe_value(row.get("PROF_TITULAR")),
+                "asistencia_anual_pct": safe_value(row.get("ASIST_ANUAL_PCT")),
+                "situacion_promovido": safe_value(row.get("SITUACION_PROMOVIDO")),
+                "situacion_repitente": safe_value(row.get("SITUACION_REPITENTE")),
+                "comentario_final": safe_value(row.get("COMENTARIO_FINAL")),
+                "subjects": build_subjects(row, "Primer_Ciclo"),
+                "modules": []
             }
         }
 
@@ -45,6 +52,11 @@ def find_student_by_id(student_id: str) -> dict:
                 "nombre_estudiante": safe_value(row.get("NOMBRE_ESTUDIANTE")),
                 "curso": safe_value(row.get("CURSO")),
                 "prof_titular": safe_value(row.get("PROF_TITULAR")),
+                "situacion_promovido": safe_value(row.get("SITUACION_PROMOVIDO")),
+                "situacion_repitente": safe_value(row.get("SITUACION_REPITENTE")),
+                "situacion_pendiente": safe_value(row.get("SITUACION_PENDIENTE")),
+                "subjects": build_subjects(row, "Segundo_Ciclo"),
+                "modules": build_modules(row)
             }
         }
 
