@@ -1,3 +1,5 @@
+import base64
+import mimetypes
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -17,6 +19,25 @@ env = Environment(
 env.globals["is_low_grade"] = is_low_grade
 env.globals["helpers"] = SimpleNamespace(is_low_grade=is_low_grade)
 env.globals["settings"] = settings
+
+
+def build_logo_data_uri(logo_path: str) -> str:
+    if not logo_path:
+        return ""
+
+    try:
+        file_path = Path(logo_path)
+        if not file_path.exists():
+            return ""
+
+        mime_type, _ = mimetypes.guess_type(str(file_path))
+        if not mime_type:
+            mime_type = "image/png"
+
+        encoded = base64.b64encode(file_path.read_bytes()).decode("utf-8")
+        return f"data:{mime_type};base64,{encoded}"
+    except Exception:
+        return ""
 
 
 def render_template(template_name: str, context: dict) -> str:
@@ -44,5 +65,8 @@ def render_template(template_name: str, context: dict) -> str:
 
     if "school_year" not in safe_context:
         safe_context["school_year"] = "2025-2026"
+
+    if "institution_logo_src" not in safe_context:
+        safe_context["institution_logo_src"] = build_logo_data_uri(settings.institution_logo)
 
     return template.render(**safe_context)
