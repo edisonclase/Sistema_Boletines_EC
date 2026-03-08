@@ -1,11 +1,9 @@
 from app.data.fetchers.google_sheets import load_primer_ciclo, load_segundo_ciclo
+from app.utils.helpers import safe_value
 
 
 def normalize_student_id(value) -> str:
-    if value is None:
-        return ""
-
-    text = str(value).strip()
+    text = safe_value(value)
 
     if text.endswith(".0"):
         text = text[:-2]
@@ -29,10 +27,10 @@ def find_student_by_id(student_id: str) -> dict:
             "found": True,
             "cycle": "Primer_Ciclo",
             "student": {
-                "id_estudiante": row.get("ID_ESTUDIANTE", ""),
-                "nombre_estudiante": row.get("NOMBRE_ESTUDIANTE", ""),
-                "curso": row.get("CURSO", ""),
-                "prof_titular": row.get("PROF_TITULAR", "")
+                "id_estudiante": safe_value(row.get("ID_ESTUDIANTE")),
+                "nombre_estudiante": safe_value(row.get("NOMBRE_ESTUDIANTE")),
+                "curso": safe_value(row.get("CURSO")),
+                "prof_titular": safe_value(row.get("PROF_TITULAR")),
             }
         }
 
@@ -43,10 +41,10 @@ def find_student_by_id(student_id: str) -> dict:
             "found": True,
             "cycle": "Segundo_Ciclo",
             "student": {
-                "id_estudiante": row.get("ID_ESTUDIANTE", ""),
-                "nombre_estudiante": row.get("NOMBRE_ESTUDIANTE", ""),
-                "curso": row.get("CURSO", ""),
-                "prof_titular": row.get("PROF_TITULAR", "")
+                "id_estudiante": safe_value(row.get("ID_ESTUDIANTE")),
+                "nombre_estudiante": safe_value(row.get("NOMBRE_ESTUDIANTE")),
+                "curso": safe_value(row.get("CURSO")),
+                "prof_titular": safe_value(row.get("PROF_TITULAR")),
             }
         }
 

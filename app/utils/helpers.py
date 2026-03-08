@@ -1,4 +1,7 @@
+import pandas as pd
+
+
 def safe_value(value, default=""):
-    if value is None:
+    if pd.isna(value):
         return default
-    return value
+    return str(value).strip()
