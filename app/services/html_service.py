@@ -14,19 +14,12 @@ env = Environment(
     autoescape=select_autoescape(["html", "xml"])
 )
 
-# Permite usar en las plantillas:
-# - is_low_grade(...)
-# - helpers.is_low_grade(...)
 env.globals["is_low_grade"] = is_low_grade
 env.globals["helpers"] = SimpleNamespace(is_low_grade=is_low_grade)
 env.globals["settings"] = settings
 
 
 def render_template(template_name: str, context: dict) -> str:
-    """
-    Renderiza una plantilla HTML del boletín con un contexto enriquecido
-    para evitar errores por variables faltantes.
-    """
     template = env.get_template(template_name)
 
     safe_context = dict(context or {})
@@ -48,5 +41,8 @@ def render_template(template_name: str, context: dict) -> str:
 
     if "director_name" not in safe_context:
         safe_context["director_name"] = settings.institution_director
+
+    if "school_year" not in safe_context:
+        safe_context["school_year"] = "2025-2026"
 
     return template.render(**safe_context)
