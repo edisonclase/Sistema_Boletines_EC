@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boletín - Segundo Ciclo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 24px;
+            color: #222;
+            font-size: 12px;
+        }
+
+        h1, h2, h3 {
+            margin: 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .header p {
+            margin: 4px 0;
+        }
+
+        .student-info {
+            margin-bottom: 16px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .student-info div {
+            margin-bottom: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+        }
+
+        th, td {
+            border: 1px solid #999;
+            padding: 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #f2f2f2;
+        }
+
+        .subject-name {
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .low-grade {
+            background-color: #fff59d;
+            font-weight: bold;
+        }
+
+        .section-title {
+            margin: 18px 0 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .summary {
+            margin-top: 18px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ institution_name }}</h1>
+        <p><strong>Boletín de Calificaciones - Segundo Ciclo</strong></p>
+    </div>
+
+    <div class="student-info">
+        <div><strong>ID:</strong> {{ student.id_estudiante }}</div>
+        <div><strong>Estudiante:</strong> {{ student.nombre_estudiante }}</div>
+        <div><strong>Curso:</strong> {{ student.curso }}</div>
+        <div><strong>Profesor titular:</strong> {{ student.prof_titular or "N/D" }}</div>
+    </div>
+
+    <div class="section-title">Asignaturas Académicas</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Asignatura</th>
+                <th>P1</th>
+                <th>P2</th>
+                <th>P3</th>
+                <th>P4</th>
+                <th>PC1</th>
+                <th>PC2</th>
+                <th>PC3</th>
+                <th>PC4</th>
+                <th>CF Área</th>
+                <th>Asist.</th>
+                <th>CF Final</th>
+                <th>Situación</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject in student.subjects %}
+            <tr>
+                <td class="subject-name">{{ subject.name }}</td>
+
+                <td class="{% if is_low_grade(subject.p1[0]) %}low-grade{% endif %}">{{ subject.p1[0] }}</td>
+                <td class="{% if is_low_grade(subject.p2[0]) %}low-grade{% endif %}">{{ subject.p2[0] }}</td>
+                <td class="{% if is_low_grade(subject.p3[0]) %}low-grade{% endif %}">{{ subject.p3[0] }}</td>
+                <td class="{% if is_low_grade(subject.p4[0]) %}low-grade{% endif %}">{{ subject.p4[0] }}</td>
+
+                <td class="{% if is_low_grade(subject.pc[0]) %}low-grade{% endif %}">{{ subject.pc[0] }}</td>
+                <td class="{% if is_low_grade(subject.pc[1]) %}low-grade{% endif %}">{{ subject.pc[1] }}</td>
+                <td class="{% if is_low_grade(subject.pc[2]) %}low-grade{% endif %}">{{ subject.pc[2] }}</td>
+                <td class="{% if is_low_grade(subject.pc[3]) %}low-grade{% endif %}">{{ subject.pc[3] }}</td>
+
+                <td class="{% if is_low_grade(subject.cf_area) %}low-grade{% endif %}">{{ subject.cf_area }}</td>
+                <td>{{ subject.asistencia_pct }}</td>
+                <td class="{% if is_low_grade(subject.cf_final) %}low-grade{% endif %}">{{ subject.cf_final }}</td>
+                <td>{{ subject.situ_r or subject.situ_a }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if student.modules %}
+    <div class="section-title">Módulos Técnicos</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Módulo</th>
+                <th>RA1</th>
+                <th>RA2</th>
+                <th>RA3</th>
+                <th>RA4</th>
+                <th>RA5</th>
+                <th>CF</th>
+                <th>Situación</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for module in student.modules %}
+            <tr>
+                <td class="subject-name">{{ module.nombre }}</td>
+                <td>{{ module.ra[0] }}</td>
+                <td>{{ module.ra[1] }}</td>
+                <td>{{ module.ra[2] }}</td>
+                <td>{{ module.ra[3] }}</td>
+                <td>{{ module.ra[4] }}</td>
+                <td>{{ module.cf }}</td>
+                <td>{{ module.situ_a }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <div class="summary">
+        <div><strong>Promovido:</strong> {{ student.situacion_promovido or "N/D" }}</div>
+        <div><strong>Repitente:</strong> {{ student.situacion_repitente or "N/D" }}</div>
+        <div><strong>Pendiente:</strong> {{ student.situacion_pendiente or "N/D" }}</div>
+    </div>
+
+    <div class="footer-note">
+        <em>Las calificaciones menores de 70 aparecen resaltadas en amarillo.</em>
+    </div>
+</body>
+</html>
