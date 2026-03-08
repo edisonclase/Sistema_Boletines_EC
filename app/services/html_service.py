@@ -21,12 +21,16 @@ env.globals["helpers"] = SimpleNamespace(is_low_grade=is_low_grade)
 env.globals["settings"] = settings
 
 
-def build_logo_data_uri(logo_path: str) -> str:
-    if not logo_path:
+def build_image_data_uri(image_path: str) -> str:
+    if not image_path:
         return ""
 
     try:
-        file_path = Path(logo_path)
+        file_path = Path(image_path)
+
+        if not file_path.is_absolute():
+            file_path = Path.cwd() / file_path
+
         if not file_path.exists():
             return ""
 
@@ -67,6 +71,9 @@ def render_template(template_name: str, context: dict) -> str:
         safe_context["school_year"] = "2025-2026"
 
     if "institution_logo_src" not in safe_context:
-        safe_context["institution_logo_src"] = build_logo_data_uri(settings.institution_logo)
+        safe_context["institution_logo_src"] = build_image_data_uri(settings.institution_logo)
+
+    if "minerd_logo_src" not in safe_context:
+        safe_context["minerd_logo_src"] = build_image_data_uri(settings.institution_minerd_logo)
 
     return template.render(**safe_context)

@@ -18,7 +18,8 @@ class Settings(BaseSettings):
 
     institution_name: str = "Politécnico Profesor José Mercedes Alvino"
     institution_code: str = "14601"
-    institution_logo: str = "D:/Sistema_Boletines_EC/app/pdf/assets/logo.jpg"
+    institution_logo: str = "app/pdf/assets/logo.jpg"
+    institution_minerd_logo: str = "app/pdf/assets/minerd.png"
     institution_motto: str = ""
     institution_address: str = "Avenida Hispanoamericana, Santiago, República Dominicana"
     institution_email: str = "cejomal.2014@gmail.com"

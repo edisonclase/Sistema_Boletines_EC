@@ -240,7 +240,7 @@
         }
 
         .module-col {
-            width: 180px;
+            width: 190px;
             text-align: left !important;
             font-weight: bold;
         }
@@ -431,7 +431,9 @@
                                 <div class="bulletin-title">Reporte de Evaluaciones</div>
                             </td>
                             <td class="logo-cell">
-                                <img src="app/pdf/assets/minerd.png" alt="Logo Minerd" class="minerd-logo">
+                                {% if minerd_logo_src %}
+                                    <img src="{{ minerd_logo_src }}" alt="Logo Minerd" class="minerd-logo">
+                                {% endif %}
                             </td>
                         </tr>
                     </table>
