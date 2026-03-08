@@ -13,11 +13,9 @@ class Settings(BaseSettings):
     url_primer_ciclo: str = ""
     url_segundo_ciclo: str = ""
 
-    # Motor PDF
     pdf_engine: str = "weasyprint"
     wkhtmltopdf_path: str = ""
 
-    # Información institucional
     institution_name: str = "Politécnico Profesor José Mercedes Alvino"
     institution_code: str = "14601"
     institution_logo: str = "app/pdf/assets/logo.jpg"
@@ -29,17 +27,15 @@ class Settings(BaseSettings):
     institution_academic_department: str = "Departamento de Registro y Control Académico"
     institution_director: str = "Zoilo A. Marrero Sirí"
 
-    # Configuración académica
     passing_grade: int = 70
     low_grade_highlight_color: str = "#FFF59D"
 
-    # Pie del boletín
     bulletin_generated_by: str = "Sistema de Boletines ECS"
     bulletin_generated_role: str = "Coordinación de Registro y Control Académico"
     bulletin_author: str = "ECS"
 
-    # NUEVO: PDF de filosofía institucional
     philosophy_pdf_path: str = "app/pdf/assets/filosofia.pdf"
+    school_year: str = "2025-2026"
 
     model_config = SettingsConfigDict(
         env_file=".env",
