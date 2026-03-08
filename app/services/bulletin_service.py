@@ -1,14 +1,26 @@
 from app.data.fetchers.google_sheets import load_primer_ciclo, load_segundo_ciclo
 
 
-def find_student_by_id(student_id: str) -> dict | None:
-    student_id = str(student_id).strip()
+def normalize_student_id(value) -> str:
+    if value is None:
+        return ""
 
-    primer = load_primer_ciclo()
-    segundo = load_segundo_ciclo()
+    text = str(value).strip()
 
-    primer["ID_ESTUDIANTE"] = primer["ID_ESTUDIANTE"].astype(str).str.strip()
-    segundo["ID_ESTUDIANTE"] = segundo["ID_ESTUDIANTE"].astype(str).str.strip()
+    if text.endswith(".0"):
+        text = text[:-2]
+
+    return text
+
+
+def find_student_by_id(student_id: str) -> dict:
+    student_id = normalize_student_id(student_id)
+
+    primer = load_primer_ciclo().copy()
+    segundo = load_segundo_ciclo().copy()
+
+    primer["ID_ESTUDIANTE"] = primer["ID_ESTUDIANTE"].apply(normalize_student_id)
+    segundo["ID_ESTUDIANTE"] = segundo["ID_ESTUDIANTE"].apply(normalize_student_id)
 
     student_primer = primer[primer["ID_ESTUDIANTE"] == student_id]
     if not student_primer.empty:
