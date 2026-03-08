@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Evaluaciones - Primer Ciclo</title>
+    <title>Reporte de Evaluaciones - Primer Ciclo del Nivel Secundario</title>
     <style>
         @page {
             size: A4 landscape;
@@ -103,16 +103,11 @@
             text-align: center;
         }
 
-        .logo {
-            max-width: 130px;
-            max-height: 130px;
+        .header-logo {
+            width: 130px;
+            height: 130px;
             object-fit: contain;
-        }
-
-        .minerd-logo {
-            max-width: 125px;
-            max-height: 125px;
-            object-fit: contain;
+            display: inline-block;
         }
 
         .title-cell {
@@ -384,7 +379,7 @@
                         <tr>
                             <td class="logo-cell">
                                 {% if institution_logo_src %}
-                                    <img src="{{ institution_logo_src }}" alt="Logo institucional" class="logo">
+                                    <img src="{{ institution_logo_src }}" alt="Logo institucional" class="header-logo">
                                 {% endif %}
                             </td>
                             <td class="title-cell">
@@ -410,7 +405,7 @@
                             </td>
                             <td class="logo-cell">
                                 {% if minerd_logo_src %}
-                                    <img src="{{ minerd_logo_src }}" alt="Logo Minerd" class="minerd-logo">
+                                    <img src="{{ minerd_logo_src }}" alt="Logo Minerd" class="header-logo">
                                 {% endif %}
                             </td>
                         </tr>
