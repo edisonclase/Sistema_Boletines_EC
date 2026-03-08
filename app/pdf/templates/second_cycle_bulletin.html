@@ -4,28 +4,39 @@
     <meta charset="UTF-8">
     <title>Boletín - Segundo Ciclo</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 24px;
-            color: #222;
-            font-size: 12px;
+        @page {
+            size: A4 landscape;
+            margin: 20mm;
         }
 
-        h1, h2, h3 {
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            color: #222;
+            font-size: 11px;
+        }
+
+        h1, h2, h3, p {
             margin: 0;
         }
 
         .header {
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 20px;
             margin-bottom: 20px;
         }
 
-        .header h1 {
+        .logo {
+            height: 70px;
+        }
+
+        .title h2 {
             font-size: 20px;
         }
 
-        .header p {
-            margin: 4px 0;
+        .title p {
+            margin-top: 4px;
         }
 
         .student-info {
@@ -40,6 +51,7 @@
 
         table {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
             margin-bottom: 18px;
         }
@@ -81,12 +93,40 @@
             margin-top: 18px;
             font-size: 11px;
         }
+
+        .signatures {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .signature {
+            text-align: center;
+            width: 300px;
+        }
+
+        .line {
+            border-top: 1px solid #000;
+            margin-bottom: 6px;
+        }
+
+        .print-info {
+            margin-top: 14px;
+            font-size: 10px;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>{{ institution_name }}</h1>
-        <p><strong>Boletín de Calificaciones - Segundo Ciclo</strong></p>
+        {% if logo_path %}
+        <img src="{{ logo_path }}" class="logo" alt="Logo del centro">
+        {% endif %}
+
+        <div class="title">
+            <h2>{{ institution_name }}</h2>
+            <p>Boletín de Calificaciones - Segundo Ciclo</p>
+        </div>
     </div>
 
     <div class="student-info">
@@ -120,17 +160,14 @@
             {% for subject in student.subjects %}
             <tr>
                 <td class="subject-name">{{ subject.name }}</td>
-
                 <td class="{% if is_low_grade(subject.p1[0]) %}low-grade{% endif %}">{{ subject.p1[0] }}</td>
                 <td class="{% if is_low_grade(subject.p2[0]) %}low-grade{% endif %}">{{ subject.p2[0] }}</td>
                 <td class="{% if is_low_grade(subject.p3[0]) %}low-grade{% endif %}">{{ subject.p3[0] }}</td>
                 <td class="{% if is_low_grade(subject.p4[0]) %}low-grade{% endif %}">{{ subject.p4[0] }}</td>
-
                 <td class="{% if is_low_grade(subject.pc[0]) %}low-grade{% endif %}">{{ subject.pc[0] }}</td>
                 <td class="{% if is_low_grade(subject.pc[1]) %}low-grade{% endif %}">{{ subject.pc[1] }}</td>
                 <td class="{% if is_low_grade(subject.pc[2]) %}low-grade{% endif %}">{{ subject.pc[2] }}</td>
                 <td class="{% if is_low_grade(subject.pc[3]) %}low-grade{% endif %}">{{ subject.pc[3] }}</td>
-
                 <td class="{% if is_low_grade(subject.cf_area) %}low-grade{% endif %}">{{ subject.cf_area }}</td>
                 <td>{{ subject.asistencia_pct }}</td>
                 <td class="{% if is_low_grade(subject.cf_final) %}low-grade{% endif %}">{{ subject.cf_final }}</td>
@@ -181,6 +218,22 @@
 
     <div class="footer-note">
         <em>Las calificaciones menores de 70 aparecen resaltadas en amarillo.</em>
+    </div>
+
+    <div class="signatures">
+        <div class="signature">
+            <div class="line"></div>
+            <p>Director</p>
+        </div>
+
+        <div class="signature">
+            <div class="line"></div>
+            <p>Profesor Titular</p>
+        </div>
+    </div>
+
+    <div class="print-info">
+        Generado el {{ generated_at }} por {{ generated_by }}
     </div>
 </body>
 </html>

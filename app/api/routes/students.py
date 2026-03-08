@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
@@ -32,6 +34,9 @@ def get_student_bulletin_html(student_id: str):
             "institution_name": settings.institution_name,
             "student": result["student"],
             "cycle": result["cycle"],
+            "logo_path": settings.institution_logo,
+            "generated_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
+            "generated_by": "Sistema de Boletines",
         }
     )
 

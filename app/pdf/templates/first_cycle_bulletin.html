@@ -1,92 +1,29 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Boletín - Primer Ciclo</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 24px;
-            color: #222;
-            font-size: 12px;
-        }
 
-        h1, h2, h3 {
-            margin: 0;
-        }
+        .signatures{
+    margin-top:40px;
+    display:flex;
+    justify-content:space-around;
+}
 
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+.signature{
+    text-align:center;
+    width:300px;
+}
 
-        .header h1 {
-            font-size: 20px;
-        }
-
-        .header p {
-            margin: 4px 0;
-        }
-
-        .student-info {
-            margin-bottom: 16px;
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-
-        .student-info div {
-            margin-bottom: 4px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 18px;
-        }
-
-        th, td {
-            border: 1px solid #999;
-            padding: 6px;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        th {
-            background: #f2f2f2;
-        }
-
-        .subject-name {
-            text-align: left;
-            font-weight: bold;
-        }
-
-        .low-grade {
-            background-color: #fff59d;
-            font-weight: bold;
-        }
-
-        .section-title {
-            margin: 18px 0 8px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .summary {
-            margin-top: 18px;
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-
-        .footer-note {
-            margin-top: 18px;
-            font-size: 11px;
-        }
+.line{
+    border-top:1px solid #000;
+    margin-bottom:6px;
+}
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>{{ institution_name }}</h1>
-        <p><strong>Boletín de Calificaciones - Primer Ciclo</strong></p>
+    <img src="{{D:\Sistema_Boletines_EC\app\pdf\assets\Para Formularios.PNG}}" class="logo">
+
+        <div class="title">
+            <h2>{{ institution_name }}</h2>
+            <p>Boletín de Calificaciones - {{ cycle }}</p>
+        </div>
     </div>
 
     <div class="student-info">
@@ -147,8 +84,28 @@
         <div><strong>Comentario final:</strong> {{ student.comentario_final or "N/D" }}</div>
     </div>
 
+    
+
     <div class="footer-note">
         <em>Las calificaciones menores de 70 aparecen resaltadas en amarillo.</em>
     </div>
+
+    <div class="signatures">
+
+    <div class="signature">
+        <div class="line"></div>
+        <p>Director</p>
+    </div>
+
+    <div class="signature">
+        <div class="line"></div>
+        <p>Profesor Titular</p>
+    </div>
+
+    <div class="print-info">
+Generado el {{ generated_at }} por {{ generated_by }}
+</div>
+
+</div>
 </body>
 </html>
