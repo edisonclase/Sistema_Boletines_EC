@@ -40,3 +40,32 @@ def data_sources_health():
         }
 
     return result
+
+
+@router.get("/sample-ids")
+def sample_ids():
+    primer = load_primer_ciclo()
+    segundo = load_segundo_ciclo()
+
+    primer_ids = (
+        primer["ID_ESTUDIANTE"]
+        .dropna()
+        .astype(str)
+        .str.strip()
+        .head(10)
+        .tolist()
+    )
+
+    segundo_ids = (
+        segundo["ID_ESTUDIANTE"]
+        .dropna()
+        .astype(str)
+        .str.strip()
+        .head(10)
+        .tolist()
+    )
+
+    return {
+        "primer_ciclo_sample_ids": primer_ids,
+        "segundo_ciclo_sample_ids": segundo_ids,
+    }
