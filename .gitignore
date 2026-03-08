@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Virtual environment
 .venv/
 
@@ -45,3 +46,15 @@ temp/
 
 # Misc
 .python-version
+=======
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+>>>>>>> cae153b77fa5c6d7db690d17fb28a81bfbe13fe4
