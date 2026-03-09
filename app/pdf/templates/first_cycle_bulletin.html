@@ -241,9 +241,9 @@
             width: 100%;
             border: 1.5px solid #66BB6A;
             border-radius: 8px;
-            padding: 5px 8px;
+            padding: 4px 8px;
             margin-top: 4px;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             background: #fcfffc;
         }
 
@@ -254,20 +254,20 @@
             margin-bottom: 3px;
             text-transform: uppercase;
             color: #111;
-            font-size: 7.8px;
+            font-size: 7.6px;
         }
 
         .muted {
             color: #555;
-            font-size: 6.8px;
-            line-height: 1.16;
+            font-size: 6.7px;
+            line-height: 1.14;
         }
 
         .legend-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 2px 10px;
-            font-size: 6.7px;
+            font-size: 6.5px;
             color: #333;
         }
 
@@ -294,7 +294,7 @@
 
         .signature-line {
             border-top: 1px solid #000;
-            margin: 12px auto 3px auto;
+            margin: 10px auto 3px auto;
             width: 62%;
         }
 
@@ -355,7 +355,23 @@
     </style>
 </head>
 <body>
-    {% macro render_value(value) %}
+    {% macro decimal_grade(value) %}
+        {% if value is none or value == "" %}
+            {{ "" }}
+        {% else %}
+            {{ "%.1f"|format(value|float) }}
+        {% endif %}
+    {% endmacro %}
+
+    {% macro integer_grade(value) %}
+        {% if value is none or value == "" %}
+            {{ "" }}
+        {% else %}
+            {{ value|float|round(0)|int }}
+        {% endif %}
+    {% endmacro %}
+
+    {% macro text_value(value) %}
         {% if value is none %}
             {{ "" }}
         {% elif value is string %}
@@ -367,8 +383,8 @@
         {% endif %}
     {% endmacro %}
 
-    {% macro cell_class(value) %}
-        {% if value is not none and value is not string and not (value is iterable) and is_low_grade(value) %}
+    {% macro block_cell_class(value) %}
+        {% if value is not none and value != "" and (value|float) < 70 %}
             low-grade
         {% else %}
         {% endif %}
@@ -524,46 +540,46 @@
                         <tr>
                             <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
 
-                            <td class="{{ cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ render_value(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ render_value(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ render_value(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ render_value(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ decimal_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
 
-                            <td class="{{ cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ render_value(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ render_value(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ render_value(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ render_value(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ decimal_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ decimal_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ decimal_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ decimal_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
 
-                            <td class="{{ cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ render_value(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ render_value(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ render_value(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ render_value(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ decimal_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ decimal_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ decimal_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ decimal_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
 
-                            <td class="{{ cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ render_value(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ render_value(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ render_value(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ render_value(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ decimal_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ decimal_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
 
-                            <td>{{ render_value(subject.pc1 if subject.pc1 is defined else none) }}</td>
-                            <td>{{ render_value(subject.pc2 if subject.pc2 is defined else none) }}</td>
-                            <td>{{ render_value(subject.pc3 if subject.pc3 is defined else none) }}</td>
-                            <td>{{ render_value(subject.pc4 if subject.pc4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.pc1 if subject.pc1 is defined else none) }}">{{ decimal_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.pc2 if subject.pc2 is defined else none) }}">{{ decimal_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.pc3 if subject.pc3 is defined else none) }}">{{ decimal_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.pc4 if subject.pc4 is defined else none) }}">{{ decimal_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
 
-                            <td class="{{ cell_class(subject.final if subject.final is defined else none) }}">{{ render_value(subject.final if subject.final is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.final if subject.final is defined else none) }}</td>
 
-                            <td>{{ render_value(subject.comp_50cf if subject.comp_50cf is defined else none) }}</td>
-                            <td>{{ render_value(subject.comp_cec if subject.comp_cec is defined else none) }}</td>
-                            <td>{{ render_value(subject.comp_50cec if subject.comp_50cec is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.ccf if subject.ccf is defined else none) }}">{{ render_value(subject.ccf if subject.ccf is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.comp_50cf if subject.comp_50cf is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.comp_cec if subject.comp_cec is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.comp_50cec if subject.comp_50cec is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.ccf if subject.ccf is defined else none) }}</td>
 
-                            <td>{{ render_value(subject.ext_30cf if subject.ext_30cf is defined else none) }}</td>
-                            <td>{{ render_value(subject.ext_ceex if subject.ext_ceex is defined else none) }}</td>
-                            <td>{{ render_value(subject.ext_70ceex if subject.ext_70ceex is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.cexf if subject.cexf is defined else none) }}">{{ render_value(subject.cexf if subject.cexf is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.ext_30cf if subject.ext_30cf is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.ext_ceex if subject.ext_ceex is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.ext_70ceex if subject.ext_70ceex is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.cexf if subject.cexf is defined else none) }}</td>
 
-                            <td class="{{ cell_class(subject.ce_especial if subject.ce_especial is defined else none) }}">{{ render_value(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
 
-                            <td>{{ render_value(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
 
                             <td>{% if subject.situ_a is defined and subject.situ_a %}{{ subject.situ_a }}{% else %}-{% endif %}</td>
                             <td>{% if subject.situ_r is defined and subject.situ_r %}{{ subject.situ_r }}{% else %}-{% endif %}</td>
