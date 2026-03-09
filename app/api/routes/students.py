@@ -6,7 +6,11 @@ from fastapi.responses import HTMLResponse, Response
 from app.core.settings import settings
 from app.services.bulletin_service import find_student_by_id
 from app.services.html_service import render_template
-from app.services.pdf_service import generate_complete_bulletin_pdf
+from app.services.pdf_service import (
+    generate_blocks_bulletin_pdf,
+    generate_complete_bulletin_pdf,
+)
+
 
 router = APIRouter(prefix="/students", tags=["students"])
 
@@ -93,6 +97,33 @@ def get_student_bulletin_pdf(student_id: str):
         )
 
     pdf_bytes, filename = generate_complete_bulletin_pdf(student_id)
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"'
+        }
+    )
+
+
+@router.get("/{student_id}/bulletin-blocks-pdf")
+def get_student_bulletin_blocks_pdf(student_id: str):
+    result = find_student_by_id(student_id)
+
+    if not result.get("found"):
+        return HTMLResponse(
+            content=f"<h1>No se encontró ningún estudiante con el ID {student_id}</h1>",
+            status_code=404
+        )
+
+    if result["cycle"] != "Primer_Ciclo":
+        return HTMLResponse(
+            content="<h1>El boletín por bloques actualmente solo está disponible para Primer Ciclo.</h1>",
+            status_code=400
+        )
+
+    pdf_bytes, filename = generate_blocks_bulletin_pdf(student_id)
 
     return Response(
         content=pdf_bytes,

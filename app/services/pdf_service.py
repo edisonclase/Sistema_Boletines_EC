@@ -46,6 +46,17 @@ def _build_pdf_filename(result: dict) -> str:
     return f"{nombre} - {student_id} - {curso} - {school_year}.pdf"
 
 
+def _build_blocks_pdf_filename(result: dict) -> str:
+    student = result.get("student", {})
+
+    nombre = _sanitize_filename(student.get("nombre_estudiante", "Estudiante"))
+    student_id = _sanitize_filename(student.get("id_estudiante", "sin_id"))
+    curso = _sanitize_filename(student.get("curso", "sin_curso"))
+    school_year = _sanitize_filename(settings.school_year)
+
+    return f"{nombre} - {student_id} - {curso} - {school_year} - bloques.pdf"
+
+
 def _build_bulletin_html(result: dict) -> str:
     template_name = (
         "first_cycle_bulletin.html"
@@ -55,6 +66,24 @@ def _build_bulletin_html(result: dict) -> str:
 
     html = render_template(
         template_name,
+        {
+            "institution_name": settings.institution_name,
+            "student": result["student"],
+            "cycle": result["cycle"],
+            "logo_path": settings.institution_logo,
+            "school_year": settings.school_year,
+        }
+    )
+
+    return html
+
+
+def _build_blocks_bulletin_html(result: dict) -> str:
+    if result["cycle"] != "Primer_Ciclo":
+        raise ValueError("El boletín por bloques solo está disponible para Primer Ciclo.")
+
+    html = render_template(
+        "first_cycle_blocks.html",
         {
             "institution_name": settings.institution_name,
             "student": result["student"],
@@ -113,5 +142,22 @@ def generate_complete_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
     bulletin_pdf_bytes = _generate_bulletin_pdf_bytes(html)
     final_pdf_bytes = _append_philosophy_pdf(bulletin_pdf_bytes)
     filename = _build_pdf_filename(result)
+
+    return final_pdf_bytes, filename
+
+
+def generate_blocks_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
+    result = find_student_by_id(student_id)
+
+    if not result.get("found"):
+        raise ValueError(result.get("message", f"No se encontró el estudiante {student_id}"))
+
+    if result["cycle"] != "Primer_Ciclo":
+        raise ValueError("El boletín por bloques solo está disponible para estudiantes de Primer Ciclo.")
+
+    html = _build_blocks_bulletin_html(result)
+    bulletin_pdf_bytes = _generate_bulletin_pdf_bytes(html)
+    final_pdf_bytes = _append_philosophy_pdf(bulletin_pdf_bytes)
+    filename = _build_blocks_pdf_filename(result)
 
     return final_pdf_bytes, filename
