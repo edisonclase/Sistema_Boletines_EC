@@ -6,7 +6,7 @@
     <style>
         @page {
             size: Letter landscape;
-            margin: 0.18in;
+            margin: 0.16in;
         }
 
         * {
@@ -86,7 +86,7 @@
 
         .header {
             width: 100%;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .header-table {
@@ -155,7 +155,7 @@
         }
 
         .info-box {
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             border: 1.5px solid #66BB6A;
             border-radius: 8px;
             overflow: hidden;
@@ -171,6 +171,7 @@
             border: 1px solid #94c79a;
             padding: 3px 6px;
             font-size: 7.8px;
+            height: 20px;
         }
 
         .info-table th {
@@ -189,37 +190,62 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             border: 1.5px solid #66BB6A;
+        }
+
+        .academic-table col.subject-col-width {
+            width: 150px;
+        }
+
+        .academic-table col.grade-col-width {
+            width: 36px;
         }
 
         .academic-table th,
         .academic-table td {
             border: 1px solid #9fbe9f;
-            padding: 2px 1px;
             text-align: center;
-            font-size: 6.75px;
-            line-height: 1.02;
+            font-size: 6.9px;
+            line-height: 1.08;
             word-wrap: break-word;
             overflow-wrap: break-word;
             vertical-align: middle;
+            padding: 0;
         }
 
         .academic-table thead th {
             background: #E8F5E9;
             font-weight: bold;
             color: #111;
+            padding: 3px 2px;
+        }
+
+        .academic-table thead tr:first-child th {
+            font-size: 6.8px;
+            height: 34px;
+        }
+
+        .academic-table thead tr:nth-child(2) th {
+            font-size: 6.7px;
+            height: 20px;
+        }
+
+        .academic-table tbody td {
+            height: 22px;
+            padding: 2px 1px;
         }
 
         .subject-col {
-            width: 110px;
             text-align: left !important;
             font-weight: bold;
-            padding-left: 3px !important;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
+            font-size: 6.8px;
         }
 
         .tiny-col {
-            width: 32px;
+            width: 36px;
         }
 
         .low-grade {
@@ -234,8 +260,8 @@
             border: 1.5px solid #66BB6A;
             border-radius: 8px;
             padding: 4px 8px;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin-top: 8px;
+            margin-bottom: 8px;
             background: #fcfffc;
         }
 
@@ -269,7 +295,7 @@
 
         .signatures {
             width: 100%;
-            margin-top: 18px;
+            margin-top: 14px;
             margin-bottom: 8px;
         }
 
@@ -287,7 +313,7 @@
 
         .signature-line {
             border-top: 1px solid #000;
-            margin: 26px auto 4px auto;
+            margin: 24px auto 4px auto;
             width: 68%;
         }
 
@@ -371,18 +397,6 @@
             {{ "" }}
         {% else %}
             {{ "%.1f"|format(value|float) }}
-        {% endif %}
-    {% endmacro %}
-
-    {% macro text_value(value) %}
-        {% if value is none %}
-            {{ "" }}
-        {% elif value is string %}
-            {{ value }}
-        {% elif value is iterable %}
-            {{ value | join(" / ") }}
-        {% else %}
-            {{ value }}
         {% endif %}
     {% endmacro %}
 
@@ -479,6 +493,14 @@
                 </div>
 
                 <table class="academic-table">
+                    <colgroup>
+                        <col class="subject-col-width">
+
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th class="subject-col" rowspan="2">ASIGNATURA</th>
