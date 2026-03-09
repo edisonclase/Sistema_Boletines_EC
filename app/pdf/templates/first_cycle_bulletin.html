@@ -5,8 +5,8 @@
     <title>Reporte de Evaluaciones - Primer Ciclo del Nivel Secundario</title>
     <style>
         @page {
-            size: A4 landscape;
-            margin: 5mm;
+            size: Letter landscape;
+            margin: 0.18in;
         }
 
         * {
@@ -66,7 +66,7 @@
 
         .page-wrap {
             overflow: auto;
-            padding: 12px;
+            padding: 10px;
         }
 
         .zoom-container {
@@ -75,18 +75,18 @@
         }
 
         .page {
-            width: 1680px;
+            width: 1760px;
             margin: 0 auto;
             background: #fff;
-            padding: 14px 16px 12px 16px;
+            padding: 10px 12px 8px 12px;
             border: 2px solid #66BB6A;
-            border-radius: 12px;
+            border-radius: 10px;
             box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
         }
 
         .header {
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .header-table {
@@ -99,64 +99,63 @@
         }
 
         .logo-cell {
-            width: 110px;
+            width: 95px;
             text-align: center;
         }
 
         .header-logo {
-            width: 72px;
-            height: 72px;
+            width: 64px;
+            height: 64px;
             object-fit: contain;
             display: inline-block;
         }
 
         .title-cell {
             text-align: center;
-            padding: 0 8px;
+            padding: 0 4px;
         }
 
         .institution-name {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: bold;
             margin: 0;
-            line-height: 1.1;
+            line-height: 1.05;
             text-transform: uppercase;
             color: #111;
         }
 
         .institution-motto {
-            margin-top: 3px;
-            font-size: 9px;
+            margin-top: 2px;
+            font-size: 8px;
             font-style: italic;
             color: #4b4b4b;
         }
 
         .institution-contact {
-            margin-top: 5px;
-            font-size: 8px;
-            line-height: 1.25;
+            margin-top: 3px;
+            font-size: 7.4px;
+            line-height: 1.15;
             color: #333;
         }
 
         .department-title {
-            margin-top: 6px;
-            font-size: 10px;
+            margin-top: 4px;
+            font-size: 9px;
             font-weight: bold;
             text-transform: uppercase;
             color: #111;
         }
 
         .bulletin-title {
-            margin-top: 4px;
-            font-size: 10px;
+            margin-top: 2px;
+            font-size: 9px;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.2px;
             color: #111;
         }
 
         .info-box {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             border: 1.5px solid #66BB6A;
             border-radius: 8px;
             overflow: hidden;
@@ -171,7 +170,7 @@
         .info-table td {
             border: 1px solid #94c79a;
             padding: 3px 6px;
-            font-size: 8px;
+            font-size: 7.8px;
         }
 
         .info-table th {
@@ -190,7 +189,7 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             border: 1.5px solid #66BB6A;
         }
 
@@ -199,8 +198,8 @@
             border: 1px solid #9fbe9f;
             padding: 2px 1px;
             text-align: center;
-            font-size: 6.2px;
-            line-height: 1.0;
+            font-size: 6.75px;
+            line-height: 1.02;
             word-wrap: break-word;
             overflow-wrap: break-word;
             vertical-align: middle;
@@ -213,18 +212,18 @@
         }
 
         .subject-col {
-            width: 90px;
+            width: 100px;
             text-align: left !important;
             font-weight: bold;
             padding-left: 3px !important;
         }
 
         .tiny-col {
-            width: 22px;
+            width: 23px;
         }
 
         .small-col {
-            width: 28px;
+            width: 31px;
         }
 
         .situation-col {
@@ -236,35 +235,49 @@
             font-weight: bold;
         }
 
+        .legend-box,
         .comment-box,
         .summary-box {
             width: 100%;
             border: 1.5px solid #66BB6A;
             border-radius: 8px;
-            padding: 6px 8px;
-            margin-top: 6px;
-            margin-bottom: 8px;
+            padding: 5px 8px;
+            margin-top: 4px;
+            margin-bottom: 5px;
             background: #fcfffc;
         }
 
+        .legend-title,
         .comment-title,
         .summary-title {
             font-weight: bold;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             text-transform: uppercase;
             color: #111;
-            font-size: 8px;
+            font-size: 7.8px;
         }
 
         .muted {
             color: #555;
-            font-size: 7px;
-            line-height: 1.2;
+            font-size: 6.8px;
+            line-height: 1.16;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px 10px;
+            font-size: 6.7px;
+            color: #333;
+        }
+
+        .legend-item strong {
+            color: #111;
         }
 
         .signatures {
             width: 100%;
-            margin-top: 8px;
+            margin-top: 2px;
         }
 
         .signatures-table {
@@ -281,24 +294,24 @@
 
         .signature-line {
             border-top: 1px solid #000;
-            margin: 16px auto 4px auto;
-            width: 65%;
+            margin: 12px auto 3px auto;
+            width: 62%;
         }
 
         .signature-name {
             font-weight: bold;
-            font-size: 8px;
+            font-size: 7.5px;
         }
 
         .signature-role {
-            font-size: 7px;
+            font-size: 6.7px;
         }
 
         .footer {
-            margin-top: 8px;
+            margin-top: 4px;
             border-top: 1px solid #b8d8ba;
-            padding-top: 4px;
-            font-size: 6.5px;
+            padding-top: 3px;
+            font-size: 6px;
             color: #444;
             display: flex;
             justify-content: space-between;
@@ -449,7 +462,7 @@
                 <table class="academic-table">
                     <thead>
                         <tr>
-                            <th class="subject-col" rowspan="2">COMPETENCIAS<br>FUND.</th>
+                            <th class="subject-col" rowspan="2">COMP.<br>FUND.</th>
 
                             <th colspan="4">COMUNICATIVA</th>
                             <th colspan="4">PENS. LÓGICO<br>CREATIVO Y CRÍTICO</th>
@@ -491,8 +504,8 @@
                             <th class="tiny-col">PC4</th>
 
                             <th class="tiny-col">50%<br>C.F.</th>
-                            <th class="tiny-col">C.E.C</th>
-                            <th class="tiny-col">50%<br>C.E.C</th>
+                            <th class="tiny-col">C.E.C.</th>
+                            <th class="tiny-col">50%<br>C.E.C.</th>
                             <th class="tiny-col">C.C.F.</th>
 
                             <th class="tiny-col">30%<br>C.F.</th>
@@ -558,6 +571,20 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                <div class="legend-box">
+                    <div class="legend-title">Leyenda de abreviaturas</div>
+                    <div class="legend-grid">
+                        <div class="legend-item"><strong>COMP. FUND.</strong> = Competencias fundamentales</div>
+                        <div class="legend-item"><strong>PROM. GRUPO COMP. ESP.</strong> = Promedio grupo de competencias específicas</div>
+                        <div class="legend-item"><strong>CALIF. FINAL</strong> = Calificación final</div>
+                        <div class="legend-item"><strong>CALIF. COMPL.</strong> = Calificación completiva</div>
+                        <div class="legend-item"><strong>CALIF. EXTRA.</strong> = Calificación extraordinaria</div>
+                        <div class="legend-item"><strong>EVAL. ESP.</strong> = Evaluación especial</div>
+                        <div class="legend-item"><strong>ASIST.</strong> = Asistencia</div>
+                        <div class="legend-item"><strong>SIT. FINAL</strong> = Situación final en la asignatura</div>
+                    </div>
+                </div>
 
                 <div class="comment-box">
                     <div class="comment-title">Comentario del profesor titular</div>

@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     pdf_engine: str = "weasyprint"
     wkhtmltopdf_path: str = ""
 
-    institution_name: str = "Politécnico Profesor José Mercedes Alvino"
+    institution_name: str = "Politécnico Prof. José Mercedes Alvino - CEJOMA"
     institution_code: str = "14601"
     institution_logo: str = "app/pdf/assets/logo.jpg"
     institution_minerd_logo: str = "app/pdf/assets/minerd.png"
