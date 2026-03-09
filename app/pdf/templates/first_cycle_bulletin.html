@@ -6,7 +6,7 @@
     <style>
         @page {
             size: A4 landscape;
-            margin: 10mm;
+            margin: 5mm;
         }
 
         * {
@@ -18,7 +18,7 @@
             color: #111;
             margin: 0;
             padding: 0;
-            font-size: 10px;
+            font-size: 9px;
             background: #f4f7f4;
         }
 
@@ -28,11 +28,11 @@
             z-index: 999;
             background: #ffffff;
             border-bottom: 1px solid #d7e8d8;
-            padding: 10px 14px;
+            padding: 8px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .toolbar-left {
@@ -51,7 +51,7 @@
             border: 1px solid #bdd8c0;
             background: #fff;
             border-radius: 6px;
-            padding: 6px 10px;
+            padding: 5px 9px;
             cursor: pointer;
             font-size: 12px;
             font-weight: bold;
@@ -66,7 +66,7 @@
 
         .page-wrap {
             overflow: auto;
-            padding: 18px;
+            padding: 12px;
         }
 
         .zoom-container {
@@ -75,18 +75,18 @@
         }
 
         .page {
-            width: 1800px;
+            width: 1680px;
             margin: 0 auto;
             background: #fff;
-            padding: 26px;
-            border: 3px solid #66BB6A;
-            border-radius: 16px;
+            padding: 14px 16px 12px 16px;
+            border: 2px solid #66BB6A;
+            border-radius: 12px;
             box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
         }
 
         .header {
             width: 100%;
-            margin-bottom: 22px;
+            margin-bottom: 10px;
         }
 
         .header-table {
@@ -99,66 +99,66 @@
         }
 
         .logo-cell {
-            width: 180px;
+            width: 110px;
             text-align: center;
         }
 
         .header-logo {
-            width: 130px;
-            height: 130px;
+            width: 72px;
+            height: 72px;
             object-fit: contain;
             display: inline-block;
         }
 
         .title-cell {
             text-align: center;
-            padding: 0 14px;
+            padding: 0 8px;
         }
 
         .institution-name {
-            font-size: 28px;
+            font-size: 18px;
             font-weight: bold;
             margin: 0;
-            line-height: 1.15;
+            line-height: 1.1;
             text-transform: uppercase;
             color: #111;
         }
 
         .institution-motto {
-            margin-top: 6px;
-            font-size: 12px;
+            margin-top: 3px;
+            font-size: 9px;
             font-style: italic;
             color: #4b4b4b;
         }
 
         .institution-contact {
-            margin-top: 10px;
-            font-size: 11px;
-            line-height: 1.5;
+            margin-top: 5px;
+            font-size: 8px;
+            line-height: 1.25;
             color: #333;
         }
 
         .department-title {
-            margin-top: 12px;
-            font-size: 15px;
+            margin-top: 6px;
+            font-size: 10px;
             font-weight: bold;
             text-transform: uppercase;
             color: #111;
         }
 
         .bulletin-title {
-            margin-top: 8px;
-            font-size: 15px;
+            margin-top: 4px;
+            font-size: 10px;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.2px;
             color: #111;
         }
 
         .info-box {
-            margin-bottom: 16px;
-            border: 2px solid #66BB6A;
-            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1.5px solid #66BB6A;
+            border-radius: 8px;
             overflow: hidden;
         }
 
@@ -170,12 +170,12 @@
         .info-table th,
         .info-table td {
             border: 1px solid #94c79a;
-            padding: 6px 8px;
-            font-size: 11px;
+            padding: 3px 6px;
+            font-size: 8px;
         }
 
         .info-table th {
-            width: 220px;
+            width: 180px;
             text-align: left;
             background: #E8F5E9;
             color: #111;
@@ -190,19 +190,19 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 14px;
-            border: 2px solid #66BB6A;
-            overflow: hidden;
+            margin-bottom: 8px;
+            border: 1.5px solid #66BB6A;
         }
 
         .academic-table th,
         .academic-table td {
             border: 1px solid #9fbe9f;
-            padding: 4px 2px;
+            padding: 2px 1px;
             text-align: center;
-            font-size: 9px;
-            line-height: 1.15;
+            font-size: 6.2px;
+            line-height: 1.0;
             word-wrap: break-word;
+            overflow-wrap: break-word;
             vertical-align: middle;
         }
 
@@ -213,21 +213,22 @@
         }
 
         .subject-col {
-            width: 125px;
+            width: 90px;
             text-align: left !important;
             font-weight: bold;
+            padding-left: 3px !important;
         }
 
         .tiny-col {
-            width: 42px;
+            width: 22px;
         }
 
         .small-col {
-            width: 52px;
+            width: 28px;
         }
 
         .situation-col {
-            width: 44px;
+            width: 20px;
         }
 
         .low-grade {
@@ -238,29 +239,32 @@
         .comment-box,
         .summary-box {
             width: 100%;
-            border: 2px solid #66BB6A;
-            border-radius: 10px;
-            padding: 10px 12px;
-            margin-top: 8px;
-            margin-bottom: 14px;
+            border: 1.5px solid #66BB6A;
+            border-radius: 8px;
+            padding: 6px 8px;
+            margin-top: 6px;
+            margin-bottom: 8px;
             background: #fcfffc;
         }
 
         .comment-title,
         .summary-title {
             font-weight: bold;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             text-transform: uppercase;
             color: #111;
+            font-size: 8px;
         }
 
         .muted {
             color: #555;
+            font-size: 7px;
+            line-height: 1.2;
         }
 
         .signatures {
             width: 100%;
-            margin-top: 20px;
+            margin-top: 8px;
         }
 
         .signatures-table {
@@ -271,34 +275,34 @@
         .signatures-table td {
             width: 50%;
             text-align: center;
-            padding: 0 20px;
+            padding: 0 14px;
             vertical-align: top;
         }
 
         .signature-line {
             border-top: 1px solid #000;
-            margin: 32px auto 6px auto;
-            width: 75%;
+            margin: 16px auto 4px auto;
+            width: 65%;
         }
 
         .signature-name {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 8px;
         }
 
         .signature-role {
-            font-size: 10px;
+            font-size: 7px;
         }
 
         .footer {
-            margin-top: 18px;
+            margin-top: 8px;
             border-top: 1px solid #b8d8ba;
-            padding-top: 8px;
-            font-size: 9px;
+            padding-top: 4px;
+            font-size: 6.5px;
             color: #444;
             display: flex;
             justify-content: space-between;
-            gap: 12px;
+            gap: 10px;
         }
 
         .footer-left,
@@ -332,6 +336,7 @@
                 width: 100%;
                 margin: 0;
                 box-shadow: none;
+                border-radius: 0;
             }
         }
     </style>
@@ -444,20 +449,20 @@
                 <table class="academic-table">
                     <thead>
                         <tr>
-                            <th class="subject-col" rowspan="2">COMPETENCIAS FUNDAMENTALES</th>
+                            <th class="subject-col" rowspan="2">COMPETENCIAS<br>FUND.</th>
 
-                            <th colspan="4">- Comunicativa</th>
-                            <th colspan="4">- Pensamiento Lógico, Creativo y Crítico<br>- Resolución de Problemas</th>
-                            <th colspan="4">- Científica y Tecnológica<br>- Ambiental y de la Salud</th>
-                            <th colspan="4">- Ética y Ciudadana<br>- Desarrollo Personal y Espiritual</th>
-                            <th colspan="4">PROMEDIO GRUPO DE COMPETENCIAS ESPECÍFICAS</th>
+                            <th colspan="4">COMUNICATIVA</th>
+                            <th colspan="4">PENS. LÓGICO<br>CREATIVO Y CRÍTICO</th>
+                            <th colspan="4">CIENTÍFICA Y TEC.<br>AMBIENTAL Y SALUD</th>
+                            <th colspan="4">ÉTICA Y CIUD.<br>DES. PERS. Y ESP.</th>
+                            <th colspan="4">PROM. GRUPO<br>COMP. ESP.</th>
 
-                            <th class="small-col" rowspan="2">CALIFICACIÓN FINAL</th>
-                            <th colspan="4">CALIFICACIÓN COMPLETIVA</th>
-                            <th colspan="4">CALIFICACIÓN EXTRAORDINARIA</th>
-                            <th colspan="1">EVALUACIÓN ESPECIAL</th>
-                            <th class="small-col" rowspan="2">ASISTENCIA</th>
-                            <th colspan="2">SITUACIÓN FINAL EN LA ASIGNATURA</th>
+                            <th class="small-col" rowspan="2">CALIF.<br>FINAL</th>
+                            <th colspan="4">CALIF.<br>COMPL.</th>
+                            <th colspan="4">CALIF.<br>EXTRA.</th>
+                            <th colspan="1">EVAL.<br>ESP.</th>
+                            <th class="small-col" rowspan="2">ASIST.</th>
+                            <th colspan="2">SIT.<br>FINAL</th>
                         </tr>
                         <tr>
                             <th class="tiny-col">P1</th>
@@ -485,14 +490,14 @@
                             <th class="tiny-col">PC3</th>
                             <th class="tiny-col">PC4</th>
 
-                            <th class="tiny-col">50% C.F.</th>
+                            <th class="tiny-col">50%<br>C.F.</th>
                             <th class="tiny-col">C.E.C</th>
-                            <th class="tiny-col">50% C.E.C</th>
+                            <th class="tiny-col">50%<br>C.E.C</th>
                             <th class="tiny-col">C.C.F.</th>
 
-                            <th class="tiny-col">30% C.F.</th>
+                            <th class="tiny-col">30%<br>C.F.</th>
                             <th class="tiny-col">C.E.EX.</th>
-                            <th class="tiny-col">70% C.E.EX.</th>
+                            <th class="tiny-col">70%<br>C.E.EX.</th>
                             <th class="tiny-col">C.EX.F.</th>
 
                             <th class="tiny-col">C.E.</th>
