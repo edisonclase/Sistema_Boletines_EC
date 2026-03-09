@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte por Bloques de Competencias - Primer Ciclo del Nivel Secundario</title>
+    <style>
+        @page {
+            size: Letter landscape;
+            margin: 0.18in;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111;
+            margin: 0;
+            padding: 0;
+            font-size: 9px;
+            background: #f4f7f4;
+        }
+
+        .screen-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background: #ffffff;
+            border-bottom: 1px solid #d7e8d8;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar-left {
+            font-size: 12px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .zoom-btn {
+            border: 1px solid #bdd8c0;
+            background: #fff;
+            border-radius: 6px;
+            padding: 5px 9px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .zoom-label {
+            font-size: 12px;
+            min-width: 52px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .page-wrap {
+            overflow: auto;
+            padding: 10px;
+        }
+
+        .zoom-container {
+            transform-origin: top center;
+            transition: transform 0.18s ease;
+        }
+
+        .page {
+            width: 1760px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 10px 12px 8px 12px;
+            border: 2px solid #66BB6A;
+            border-radius: 10px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+        }
+
+        .logo-cell {
+            width: 95px;
+            text-align: center;
+        }
+
+        .header-logo {
+            width: 82px;
+            height: 82px;
+            object-fit: contain;
+            display: inline-block;
+        }
+
+        .title-cell {
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .institution-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1.05;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .institution-motto {
+            margin-top: 2px;
+            font-size: 8px;
+            font-style: italic;
+            color: #4b4b4b;
+        }
+
+        .institution-contact {
+            margin-top: 3px;
+            font-size: 7.4px;
+            line-height: 1.15;
+            color: #333;
+        }
+
+        .department-title {
+            margin-top: 4px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .bulletin-title {
+            margin-top: 2px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .info-box {
+            margin-bottom: 14px;
+            border: 1.5px solid #66BB6A;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table th,
+        .info-table td {
+            border: 1px solid #94c79a;
+            padding: 3px 6px;
+            font-size: 7.8px;
+        }
+
+        .info-table th {
+            width: 180px;
+            text-align: left;
+            background: #E8F5E9;
+            color: #111;
+        }
+
+        .info-table td {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .academic-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 16px;
+            border: 1.5px solid #66BB6A;
+        }
+
+        .academic-table th,
+        .academic-table td {
+            border: 1px solid #9fbe9f;
+            padding: 2px 1px;
+            text-align: center;
+            font-size: 6.75px;
+            line-height: 1.02;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            vertical-align: middle;
+        }
+
+        .academic-table thead th {
+            background: #E8F5E9;
+            font-weight: bold;
+            color: #111;
+        }
+
+        .subject-col {
+            width: 110px;
+            text-align: left !important;
+            font-weight: bold;
+            padding-left: 3px !important;
+        }
+
+        .tiny-col {
+            width: 32px;
+        }
+
+        .low-grade {
+            background-color: #FFF59D;
+            font-weight: bold;
+        }
+
+        .legend-box,
+        .comment-box,
+        .summary-box {
+            width: 100%;
+            border: 1.5px solid #66BB6A;
+            border-radius: 8px;
+            padding: 4px 8px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            background: #fcfffc;
+        }
+
+        .legend-title,
+        .comment-title,
+        .summary-title {
+            font-weight: bold;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            color: #111;
+            font-size: 7.6px;
+        }
+
+        .muted {
+            color: #555;
+            font-size: 6.7px;
+            line-height: 1.14;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px 10px;
+            font-size: 6.5px;
+            color: #333;
+        }
+
+        .legend-item strong {
+            color: #111;
+        }
+
+        .signatures {
+            width: 100%;
+            margin-top: 18px;
+            margin-bottom: 8px;
+        }
+
+        .signatures-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signatures-table td {
+            width: 50%;
+            text-align: center;
+            padding: 0 22px;
+            vertical-align: top;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            margin: 26px auto 4px auto;
+            width: 68%;
+        }
+
+        .signature-name {
+            font-weight: bold;
+            font-size: 7.5px;
+        }
+
+        .signature-role {
+            font-size: 6.7px;
+        }
+
+        .footer {
+            margin-top: 4px;
+            border-top: 1px solid #b8d8ba;
+            padding-top: 3px;
+            font-size: 6px;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .footer-left,
+        .footer-right {
+            width: 50%;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        @media print {
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .screen-toolbar {
+                display: none !important;
+            }
+
+            .page-wrap {
+                width: 100%;
+                padding: 0;
+                overflow: visible;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .zoom-container {
+                transform: none !important;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .page {
+                width: 100%;
+                margin: 0 auto;
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% macro decimal_grade(value) %}
+        {% if value is none or value == "" %}
+            {{ "" }}
+        {% else %}
+            {{ "%.1f"|format(value|float) }}
+        {% endif %}
+    {% endmacro %}
+
+    {% macro text_value(value) %}
+        {% if value is none %}
+            {{ "" }}
+        {% elif value is string %}
+            {{ value }}
+        {% elif value is iterable %}
+            {{ value | join(" / ") }}
+        {% else %}
+            {{ value }}
+        {% endif %}
+    {% endmacro %}
+
+    {% macro block_cell_class(value) %}
+        {% if value is not none and value != "" and (value|float) < 70 %}
+            low-grade
+        {% else %}
+        {% endif %}
+    {% endmacro %}
+
+    {% set generated_at = generated_at if generated_at is defined else "" %}
+    {% set generated_by = generated_by if generated_by is defined else settings.bulletin_generated_by %}
+    {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
+    {% set director_name = director_name if director_name is defined else settings.institution_director %}
+
+    <div class="screen-toolbar">
+        <div class="toolbar-left">Vista previa del boletín por bloques</div>
+        <div class="toolbar-right">
+            <button class="zoom-btn" type="button" onclick="changeZoom(-0.1)">−</button>
+            <div class="zoom-label" id="zoomLabel">100%</div>
+            <button class="zoom-btn" type="button" onclick="changeZoom(0.1)">+</button>
+            <button class="zoom-btn" type="button" onclick="resetZoom()">Restablecer</button>
+        </div>
+    </div>
+
+    <div class="page-wrap">
+        <div class="zoom-container" id="zoomContainer">
+            <div class="page">
+                <div class="header">
+                    <table class="header-table">
+                        <tr>
+                            <td class="logo-cell">
+                                {% if institution_logo_src %}
+                                    <img src="{{ institution_logo_src }}" alt="Logo institucional" class="header-logo">
+                                {% endif %}
+                            </td>
+                            <td class="title-cell">
+                                <div class="institution-name">{{ settings.institution_name }}</div>
+
+                                {% if settings.institution_motto %}
+                                    <div class="institution-motto">{{ settings.institution_motto }}</div>
+                                {% endif %}
+
+                                <div class="institution-contact">
+                                    {% if settings.institution_address %}<div>{{ settings.institution_address }}</div>{% endif %}
+                                    {% if settings.institution_email or settings.institution_phone %}
+                                        <div>
+                                            {% if settings.institution_email %}{{ settings.institution_email }}{% endif %}
+                                            {% if settings.institution_email and settings.institution_phone %} | {% endif %}
+                                            {% if settings.institution_phone %}{{ settings.institution_phone }}{% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="department-title">{{ settings.institution_academic_department }}</div>
+                                <div class="bulletin-title">Reporte de Evaluaciones por Bloques de Competencias</div>
+                            </td>
+                            <td class="logo-cell">
+                                {% if minerd_logo_src %}
+                                    <img src="{{ minerd_logo_src }}" alt="Logo Minerd" class="header-logo">
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="info-box">
+                    <table class="info-table">
+                        <tr>
+                            <th>AÑO ESCOLAR</th>
+                            <td>{{ school_year if school_year is defined else "2025-2026" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Nombre (s) y apellido (s)</th>
+                            <td>{{ student.nombre_estudiante }}</td>
+                        </tr>
+                        <tr>
+                            <th>Número</th>
+                            <td>{{ student.numero if student.numero is defined and student.numero else "1" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Matrícula / ID</th>
+                            <td>{{ student.id_estudiante }}</td>
+                        </tr>
+                        <tr>
+                            <th>Curso</th>
+                            <td>{{ student.curso }}</td>
+                        </tr>
+                        <tr>
+                            <th>Profesor titular</th>
+                            <td>{{ student.prof_titular }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <table class="academic-table">
+                    <thead>
+                        <tr>
+                            <th class="subject-col" rowspan="2">ASIGNATURA</th>
+
+                            <th colspan="4">COMUNICATIVA</th>
+                            <th colspan="4">PENSAMIENTO LÓGICO,<br>CREATIVO Y CRÍTICO</th>
+                            <th colspan="4">CIENTÍFICA Y TÉCNICA,<br>AMBIENTAL Y SALUD</th>
+                            <th colspan="4">ÉTICA Y CIUDADANA,<br>DESARROLLO PERSONAL Y ESPIRITUAL</th>
+                        </tr>
+                        <tr>
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject in student.subjects %}
+                        <tr>
+                            <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
+
+                            <td class="{{ block_cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ decimal_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+
+                            <td class="{{ block_cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ decimal_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ decimal_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ decimal_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ decimal_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+
+                            <td class="{{ block_cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ decimal_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ decimal_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ decimal_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ decimal_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+
+                            <td class="{{ block_cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ decimal_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ decimal_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="legend-box">
+                    <div class="legend-title">Leyenda de bloques de competencias</div>
+                    <div class="legend-grid">
+                        <div class="legend-item"><strong>COMUNICATIVA</strong> = Competencia comunicativa</div>
+                        <div class="legend-item"><strong>PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO</strong> = Competencia de razonamiento y análisis</div>
+                        <div class="legend-item"><strong>CIENTÍFICA Y TÉCNICA, AMBIENTAL Y SALUD</strong> = Competencia científica, técnica y de cuidado integral</div>
+                        <div class="legend-item"><strong>ÉTICA Y CIUDADANA, DESARROLLO PERSONAL Y ESPIRITUAL</strong> = Competencia ética, ciudadana y de formación personal</div>
+                    </div>
+                </div>
+
+                <div class="comment-box">
+                    <div class="comment-title">Comentario del profesor titular</div>
+                    <div class="muted">
+                        {% if student.teacher_comment is defined and student.teacher_comment %}
+                            {{ student.teacher_comment }}
+                        {% else %}
+                            ________________________________________________
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="summary-box">
+                    <div class="summary-title">Observaciones generales</div>
+                    <div class="muted">
+                        Este reporte presenta el desempeño del estudiante por bloques de competencias fundamentales en los cuatro períodos del año escolar.
+                    </div>
+                </div>
+
+                <div class="signatures">
+                    <table class="signatures-table">
+                        <tr>
+                            <td>
+                                <div class="signature-line"></div>
+                                <div class="signature-name">{{ director_name }}</div>
+                                <div class="signature-role">Director(a)</div>
+                            </td>
+                            <td>
+                                <div class="signature-line"></div>
+                                <div class="signature-name">{{ student.prof_titular }}</div>
+                                <div class="signature-role">Profesor(a) Titular</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-left">
+                        Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %}
+                    </div>
+                    <div class="footer-right">
+                        Desarrollado por {{ settings.bulletin_author }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentZoom = 1.0;
+
+        function updateZoom() {
+            const container = document.getElementById("zoomContainer");
+            const label = document.getElementById("zoomLabel");
+            container.style.transform = `scale(${currentZoom})`;
+            label.textContent = `${Math.round(currentZoom * 100)}%`;
+        }
+
+        function changeZoom(step) {
+            currentZoom += step;
+            if (currentZoom < 0.5) currentZoom = 0.5;
+            if (currentZoom > 1.8) currentZoom = 1.8;
+            updateZoom();
+        }
+
+        function resetZoom() {
+            currentZoom = 1.0;
+            updateZoom();
+        }
+
+        updateZoom();
+    </script>
+</body>
+</html>
