@@ -38,6 +38,24 @@ def _sanitize_filename(value: str) -> str:
     return value or "sin_valor"
 
 
+def _normalize_text(value: str) -> str:
+    value = safe_value(value)
+    value = re.sub(r"\s+", " ", value).strip()
+    return value.casefold()
+
+
+def _normalize_cycle_name(value: str) -> str:
+    text = _normalize_text(value)
+
+    if text in {"primer_ciclo", "primer ciclo"}:
+        return "Primer_Ciclo"
+
+    if text in {"segundo_ciclo", "segundo ciclo"}:
+        return "Segundo_Ciclo"
+
+    return safe_value(value)
+
+
 def _build_pdf_filename(result: dict) -> str:
     student = result.get("student", {})
 
@@ -147,6 +165,8 @@ def _append_philosophy_pdf(bulletin_pdf_bytes: bytes) -> bytes:
 
 
 def _load_cycle_dataframe(cycle: str):
+    cycle = _normalize_cycle_name(cycle)
+
     if cycle == "Primer_Ciclo":
         df = load_primer_ciclo().copy()
     elif cycle == "Segundo_Ciclo":
@@ -160,7 +180,7 @@ def _load_cycle_dataframe(cycle: str):
     if "CURSO" in df.columns:
         df["CURSO"] = df["CURSO"].apply(safe_value)
 
-    return df
+    return df, cycle
 
 
 def _unique_filename(filename: str, used_names: set[str]) -> str:
@@ -212,7 +232,6 @@ def generate_blocks_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
 
 def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = "complete") -> tuple[bytes, str]:
     course = safe_value(course)
-    cycle = safe_value(cycle)
 
     if not course:
         raise ValueError("Debes indicar el curso.")
@@ -220,18 +239,30 @@ def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = 
     if bulletin_type not in {"complete", "blocks"}:
         raise ValueError("El tipo de boletín debe ser 'complete' o 'blocks'.")
 
-    if bulletin_type == "blocks" and cycle != "Primer_Ciclo":
-        raise ValueError("El boletín por bloques masivo solo está disponible para Primer Ciclo.")
+    df, normalized_cycle = _load_cycle_dataframe(cycle)
 
-    df = _load_cycle_dataframe(cycle)
+    if bulletin_type == "blocks" and normalized_cycle != "Primer_Ciclo":
+        raise ValueError("El boletín por bloques masivo solo está disponible para Primer Ciclo.")
 
     if "CURSO" not in df.columns:
         raise ValueError("No existe la columna CURSO en la fuente de datos.")
 
-    course_students = df[df["CURSO"] == course]
+    requested_course_normalized = _normalize_text(course)
+    course_students = df[df["CURSO"].apply(_normalize_text) == requested_course_normalized]
 
     if course_students.empty:
-        raise ValueError(f"No se encontraron estudiantes para el curso '{course}' en {cycle}.")
+        available_courses = sorted(
+            {
+                safe_value(value)
+                for value in df["CURSO"].dropna().tolist()
+                if safe_value(value)
+            }
+        )
+        available_preview = ", ".join(available_courses[:12]) if available_courses else "sin cursos disponibles"
+        raise ValueError(
+            f"No se encontraron estudiantes para el curso '{course}' en {normalized_cycle}. "
+            f"Cursos detectados: {available_preview}"
+        )
 
     zip_buffer = BytesIO()
     used_names: set[str] = set()
@@ -252,7 +283,7 @@ def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = 
             zip_file.writestr(final_name, pdf_bytes)
 
     zip_buffer.seek(0)
-    zip_filename = _build_course_zip_filename(course, cycle, bulletin_type)
+    zip_filename = _build_course_zip_filename(course, normalized_cycle, bulletin_type)
 
     return zip_buffer.getvalue(), zip_filename
 

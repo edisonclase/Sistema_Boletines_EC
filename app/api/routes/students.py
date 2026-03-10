@@ -9,8 +9,9 @@ from app.services.html_service import render_template
 from app.services.pdf_service import (
     generate_blocks_bulletin_pdf,
     generate_complete_bulletin_pdf,
+    generate_course_blocks_bulletins_zip,
+    generate_course_complete_bulletins_zip,
 )
-
 
 router = APIRouter(prefix="/students", tags=["students"])
 
@@ -128,6 +129,42 @@ def get_student_bulletin_blocks_pdf(student_id: str):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"'
+        }
+    )
+
+
+@router.get("/course/{cycle}/{course}/bulletins-zip")
+def get_course_complete_bulletins_zip(cycle: str, course: str):
+    try:
+        zip_bytes, filename = generate_course_complete_bulletins_zip(course=course, cycle=cycle)
+    except ValueError as e:
+        return HTMLResponse(content=f"<h1>{str(e)}</h1>", status_code=400)
+    except FileNotFoundError as e:
+        return HTMLResponse(content=f"<h1>{str(e)}</h1>", status_code=500)
+
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"'
+        }
+    )
+
+
+@router.get("/course/Primer_Ciclo/{course}/bulletins-blocks-zip")
+def get_course_blocks_bulletins_zip(course: str):
+    try:
+        zip_bytes, filename = generate_course_blocks_bulletins_zip(course=course)
+    except ValueError as e:
+        return HTMLResponse(content=f"<h1>{str(e)}</h1>", status_code=400)
+    except FileNotFoundError as e:
+        return HTMLResponse(content=f"<h1>{str(e)}</h1>", status_code=500)
+
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"'
         }
