@@ -9,6 +9,14 @@
             margin: 10mm;
         }
 
+        .viewer {
+            width: 100%;
+            height: 100vh;
+            overflow: auto;
+            background: #fafafa;
+            padding: 20px;
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -214,126 +222,128 @@
     </style>
 </head>
 <body>
-    <div class="page">
-        <div class="header">
-            <table class="header-table">
-                <tr>
-                    <td class="logo-cell">
-                        {% if institution_logo_src %}
-                            <img src="{{ institution_logo_src }}" alt="Logo institución" class="header-logo">
-                        {% endif %}
-                    </td>
-                    <td class="title-cell">
-                        <div class="institution-name">{{ settings.institution_name }}</div>
-                        <div class="department-title">Segundo Ciclo del Nivel Secundario</div>
-                        <div class="bulletin-title">Boletín de Módulos</div>
-                    </td>
-                    <td class="logo-cell">
-                        {% if minerd_logo_src %}
-                            <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="header-logo">
-                        {% endif %}
-                    </td>
-                </tr>
+    <div class="viewer">
+        <div class="page">
+            <div class="header">
+                <table class="header-table">
+                    <tr>
+                        <td class="logo-cell">
+                            {% if institution_logo_src %}
+                                <img src="{{ institution_logo_src }}" alt="Logo institución" class="header-logo">
+                            {% endif %}
+                        </td>
+                        <td class="title-cell">
+                            <div class="institution-name">{{ settings.institution_name }}</div>
+                            <div class="department-title">Segundo Ciclo del Nivel Secundario</div>
+                            <div class="bulletin-title">Boletín de Módulos</div>
+                        </td>
+                        <td class="logo-cell">
+                            {% if minerd_logo_src %}
+                                <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="header-logo">
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="student-box">
+                <table class="student-table">
+                    <tr>
+                        <th>No.</th>
+                        <td>{{ student.numero }}</td>
+                        <th>ID Estudiante</th>
+                        <td>{{ student.id_estudiante }}</td>
+                        <th>Curso</th>
+                        <td>{{ student.curso }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nombre</th>
+                        <td colspan="3">{{ student.nombre_estudiante }}</td>
+                        <th>Profesor Titular</th>
+                        <td>{{ student.prof_titular }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section-title">Módulos técnicos</div>
+
+            {% if student.modules %}
+            <table class="modules-table">
+                <thead>
+                    <tr>
+                        <th class="module-col">Módulo</th>
+                        <th class="ra-col">RA1</th>
+                        <th class="ra-col">RA2</th>
+                        <th class="ra-col">RA3</th>
+                        <th class="ra-col">RA4</th>
+                        <th class="ra-col">RA5</th>
+                        <th class="ra-col">RA6</th>
+                        <th class="ra-col">RA7</th>
+                        <th class="ra-col">RA8</th>
+                        <th class="ra-col">RA9</th>
+                        <th class="ra-col">RA10</th>
+                        <th class="cf-col">CF</th>
+                        <th class="situ-col">Situación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for module in student.modules %}
+                    <tr>
+                        <td class="module-col">{{ module.modulo }}</td>
+                        <td>{% if module.ra1 is defined and module.ra1 not in [None, ""] %}{{ module.ra1 }}{% endif %}</td>
+                        <td>{% if module.ra2 is defined and module.ra2 not in [None, ""] %}{{ module.ra2 }}{% endif %}</td>
+                        <td>{% if module.ra3 is defined and module.ra3 not in [None, ""] %}{{ module.ra3 }}{% endif %}</td>
+                        <td>{% if module.ra4 is defined and module.ra4 not in [None, ""] %}{{ module.ra4 }}{% endif %}</td>
+                        <td>{% if module.ra5 is defined and module.ra5 not in [None, ""] %}{{ module.ra5 }}{% endif %}</td>
+                        <td>{% if module.ra6 is defined and module.ra6 not in [None, ""] %}{{ module.ra6 }}{% endif %}</td>
+                        <td>{% if module.ra7 is defined and module.ra7 not in [None, ""] %}{{ module.ra7 }}{% endif %}</td>
+                        <td>{% if module.ra8 is defined and module.ra8 not in [None, ""] %}{{ module.ra8 }}{% endif %}</td>
+                        <td>{% if module.ra9 is defined and module.ra9 not in [None, ""] %}{{ module.ra9 }}{% endif %}</td>
+                        <td>{% if module.ra10 is defined and module.ra10 not in [None, ""] %}{{ module.ra10 }}{% endif %}</td>
+                        <td class="{% if module.cf is not none and is_low_grade(module.cf) %}low-grade{% endif %}">
+                            {{ module.cf if module.cf is not none else "" }}
+                        </td>
+                        <td>
+                            {% if module.situ_a %}
+                                {{ module.situ_a }}
+                            {% elif module.situ_r %}
+                                {{ module.situ_r }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
-        </div>
+            {% else %}
+            <div class="empty-box">
+                Este estudiante no tiene módulos técnicos registrados.
+            </div>
+            {% endif %}
 
-        <div class="student-box">
-            <table class="student-table">
-                <tr>
-                    <th>No.</th>
-                    <td>{{ student.numero }}</td>
-                    <th>ID Estudiante</th>
-                    <td>{{ student.id_estudiante }}</td>
-                    <th>Curso</th>
-                    <td>{{ student.curso }}</td>
-                </tr>
-                <tr>
-                    <th>Nombre</th>
-                    <td colspan="3">{{ student.nombre_estudiante }}</td>
-                    <th>Profesor Titular</th>
-                    <td>{{ student.prof_titular }}</td>
-                </tr>
-            </table>
-        </div>
+            <div class="signatures">
+                <table class="signatures-table">
+                    <tr>
+                        <td>
+                            <div class="signature-line"></div>
+                            <div class="signature-name">{{ director_name }}</div>
+                            <div class="signature-role">Director/a</div>
+                        </td>
+                        <td>
+                            <div class="signature-line"></div>
+                            <div class="signature-name">{{ student.prof_titular }}</div>
+                            <div class="signature-role">Profesor/a Titular</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
 
-        <div class="section-title">Módulos técnicos</div>
-
-        {% if student.modules %}
-        <table class="modules-table">
-            <thead>
-                <tr>
-                    <th class="module-col">Módulo</th>
-                    <th class="ra-col">RA1</th>
-                    <th class="ra-col">RA2</th>
-                    <th class="ra-col">RA3</th>
-                    <th class="ra-col">RA4</th>
-                    <th class="ra-col">RA5</th>
-                    <th class="ra-col">RA6</th>
-                    <th class="ra-col">RA7</th>
-                    <th class="ra-col">RA8</th>
-                    <th class="ra-col">RA9</th>
-                    <th class="ra-col">RA10</th>
-                    <th class="cf-col">CF</th>
-                    <th class="situ-col">Situación</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for module in student.modules %}
-                <tr>
-                    <td class="module-col">{{ module.modulo }}</td>
-                    <td>{% if module.ra1 is defined and module.ra1 not in [None, ""] %}{{ module.ra1 }}{% endif %}</td>
-                    <td>{% if module.ra2 is defined and module.ra2 not in [None, ""] %}{{ module.ra2 }}{% endif %}</td>
-                    <td>{% if module.ra3 is defined and module.ra3 not in [None, ""] %}{{ module.ra3 }}{% endif %}</td>
-                    <td>{% if module.ra4 is defined and module.ra4 not in [None, ""] %}{{ module.ra4 }}{% endif %}</td>
-                    <td>{% if module.ra5 is defined and module.ra5 not in [None, ""] %}{{ module.ra5 }}{% endif %}</td>
-                    <td>{% if module.ra6 is defined and module.ra6 not in [None, ""] %}{{ module.ra6 }}{% endif %}</td>
-                    <td>{% if module.ra7 is defined and module.ra7 not in [None, ""] %}{{ module.ra7 }}{% endif %}</td>
-                    <td>{% if module.ra8 is defined and module.ra8 not in [None, ""] %}{{ module.ra8 }}{% endif %}</td>
-                    <td>{% if module.ra9 is defined and module.ra9 not in [None, ""] %}{{ module.ra9 }}{% endif %}</td>
-                    <td>{% if module.ra10 is defined and module.ra10 not in [None, ""] %}{{ module.ra10 }}{% endif %}</td>
-                    <td class="{% if module.cf is not none and is_low_grade(module.cf) %}low-grade{% endif %}">
-                        {{ module.cf if module.cf is not none else "" }}
-                    </td>
-                    <td>
-                        {% if module.situ_a %}
-                            {{ module.situ_a }}
-                        {% elif module.situ_r %}
-                            {{ module.situ_r }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="empty-box">
-            Este estudiante no tiene módulos técnicos registrados.
-        </div>
-        {% endif %}
-
-        <div class="signatures">
-            <table class="signatures-table">
-                <tr>
-                    <td>
-                        <div class="signature-line"></div>
-                        <div class="signature-name">{{ director_name }}</div>
-                        <div class="signature-role">Director/a</div>
-                    </td>
-                    <td>
-                        <div class="signature-line"></div>
-                        <div class="signature-name">{{ student.prof_titular }}</div>
-                        <div class="signature-role">Profesor/a Titular</div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="footer">
-            <div>Año escolar: {{ school_year }}</div>
-            <div>Generado el {{ generated_at }}</div>
-            <div>{{ generated_by }}{% if generated_role %} · {{ generated_role }}{% endif %}</div>
+            <div class="footer">
+                <div>Año escolar: {{ school_year }}</div>
+                <div>Generado el {{ generated_at }}</div>
+                <div>{{ generated_by }}{% if generated_role %} · {{ generated_role }}{% endif %}</div>
+            </div>
         </div>
     </div>
 </body>
