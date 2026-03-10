@@ -44,9 +44,7 @@ def build_image_data_uri(image_path: str) -> str:
         return ""
 
 
-def render_template(template_name: str, context: dict) -> str:
-    template = env.get_template(template_name)
-
+def build_base_context(context: dict | None = None) -> dict:
     safe_context = dict(context or {})
 
     if "settings" not in safe_context:
@@ -76,4 +74,34 @@ def render_template(template_name: str, context: dict) -> str:
     if "minerd_logo_src" not in safe_context:
         safe_context["minerd_logo_src"] = build_image_data_uri(settings.institution_minerd_logo)
 
+    return safe_context
+
+
+def render_template(template_name: str, context: dict) -> str:
+    template = env.get_template(template_name)
+    safe_context = build_base_context(context)
     return template.render(**safe_context)
+
+
+def render_second_cycle_modules_only(student: dict, extra_context: dict | None = None) -> str:
+    context = {
+        "student": student,
+        **(extra_context or {})
+    }
+    return render_template("second_cycle_modules_only.html", context)
+
+
+def render_second_cycle_blocks_and_modules(student: dict, extra_context: dict | None = None) -> str:
+    context = {
+        "student": student,
+        **(extra_context or {})
+    }
+    return render_template("second_cycle_blocks_and_modules.html", context)
+
+
+def render_second_cycle_full(student: dict, extra_context: dict | None = None) -> str:
+    context = {
+        "student": student,
+        **(extra_context or {})
+    }
+    return render_template("second_cycle_full.html", context)

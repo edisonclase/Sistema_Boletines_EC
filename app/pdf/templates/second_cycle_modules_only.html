@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boletín de Módulos - Segundo Ciclo</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111;
+            margin: 0;
+            padding: 0;
+            font-size: 11px;
+        }
+
+        .page {
+            width: 100%;
+        }
+
+        .header {
+            width: 100%;
+            margin-bottom: 18px;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+        }
+
+        .logo-cell {
+            width: 90px;
+            text-align: center;
+        }
+
+        .header-logo {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+        }
+
+        .title-cell {
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .institution-name {
+            font-size: 17px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        .department-title {
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        .bulletin-title {
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        .student-box {
+            margin-bottom: 14px;
+            border: 2px solid #66BB6A;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .student-table th,
+        .student-table td {
+            border: 1px solid #a5c9a7;
+            padding: 6px 8px;
+            font-size: 10px;
+        }
+
+        .student-table th {
+            background: #E8F5E9;
+            text-align: left;
+            width: 18%;
+        }
+
+        .student-table td {
+            font-weight: bold;
+        }
+
+        .section-title {
+            margin: 14px 0 8px 0;
+            padding: 8px 10px;
+            background: #E8F5E9;
+            border: 2px solid #66BB6A;
+            border-radius: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .modules-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 2px solid #66BB6A;
+        }
+
+        .modules-table th,
+        .modules-table td {
+            border: 1px solid #a5c9a7;
+            padding: 6px 8px;
+            font-size: 10px;
+            vertical-align: top;
+        }
+
+        .modules-table th {
+            background: #E8F5E9;
+            text-align: center;
+        }
+
+        .module-col {
+            width: 30%;
+            font-weight: bold;
+        }
+
+        .ra-col {
+            width: 50%;
+        }
+
+        .small-col {
+            width: 10%;
+            text-align: center;
+        }
+
+        .low-grade {
+            background-color: #FFF59D;
+            font-weight: bold;
+        }
+
+        .empty-box {
+            padding: 16px;
+            text-align: center;
+            border: 2px dashed #a5c9a7;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .signatures {
+            width: 100%;
+            margin-top: 28px;
+        }
+
+        .signatures-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signatures-table td {
+            width: 50%;
+            text-align: center;
+            padding: 0 18px;
+            vertical-align: top;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            margin: 40px auto 6px auto;
+            width: 75%;
+        }
+
+        .signature-name {
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .signature-role {
+            font-size: 10px;
+        }
+
+        .footer {
+            margin-top: 18px;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+            font-size: 9px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <table class="header-table">
+                <tr>
+                    <td class="logo-cell">
+                        {% if institution_logo_src %}
+                            <img src="{{ institution_logo_src }}" alt="Logo institución" class="header-logo">
+                        {% endif %}
+                    </td>
+                    <td class="title-cell">
+                        <div class="institution-name">{{ settings.institution_name }}</div>
+                        <div class="department-title">Segundo Ciclo del Nivel Secundario</div>
+                        <div class="bulletin-title">Boletín de Módulos</div>
+                    </td>
+                    <td class="logo-cell">
+                        {% if minerd_logo_src %}
+                            <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="header-logo">
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="student-box">
+            <table class="student-table">
+                <tr>
+                    <th>No.</th>
+                    <td>{{ student.numero }}</td>
+                    <th>ID Estudiante</th>
+                    <td>{{ student.id_estudiante }}</td>
+                </tr>
+                <tr>
+                    <th>Nombre</th>
+                    <td colspan="3">{{ student.nombre_estudiante }}</td>
+                </tr>
+                <tr>
+                    <th>Curso</th>
+                    <td>{{ student.curso }}</td>
+                    <th>Profesor Titular</th>
+                    <td>{{ student.prof_titular }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section-title">Módulos técnicos con resultados de aprendizaje evaluados</div>
+
+        {% if student.modules_with_ras %}
+        <table class="modules-table">
+            <thead>
+                <tr>
+                    <th class="module-col">Módulo</th>
+                    <th class="ra-col">Resultados de aprendizaje con notas</th>
+                    <th class="small-col">CF</th>
+                    <th class="small-col">Situación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for module in student.modules_with_ras %}
+                <tr>
+                    <td class="module-col">{{ module.modulo }}</td>
+                    <td class="ra-col">
+                        {% for ra in module.ras_visibles %}
+                            <div>
+                                <strong>{{ ra.label }}:</strong> {{ ra.value }}
+                            </div>
+                        {% endfor %}
+                    </td>
+                    <td class="{% if module.cf is not none and is_low_grade(module.cf) %}low-grade{% endif %}">
+                        {{ module.cf if module.cf is not none else "" }}
+                    </td>
+                    <td>
+                        {% if module.situ_a %}
+                            {{ module.situ_a }}
+                        {% elif module.situ_r %}
+                            {{ module.situ_r }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-box">
+            Este estudiante no tiene resultados de aprendizaje con notas en módulos técnicos.
+        </div>
+        {% endif %}
+
+        <div class="signatures">
+            <table class="signatures-table">
+                <tr>
+                    <td>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">{{ director_name }}</div>
+                        <div class="signature-role">Director/a</div>
+                    </td>
+                    <td>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">{{ student.prof_titular }}</div>
+                        <div class="signature-role">Profesor/a Titular</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer">
+            <div>Año escolar: {{ school_year }}</div>
+            <div>Generado el {{ generated_at }}</div>
+            <div>{{ generated_by }}{% if generated_role %} · {{ generated_role }}{% endif %}</div>
+        </div>
+    </div>
+</body>
+</html>
