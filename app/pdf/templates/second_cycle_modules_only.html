@@ -5,8 +5,8 @@
     <title>Boletín de Módulos - Segundo Ciclo</title>
     <style>
         @page {
-            size: A4 portrait;
-            margin: 12mm;
+            size: A4 landscape;
+            margin: 10mm;
         }
 
         * {
@@ -18,7 +18,7 @@
             color: #111;
             margin: 0;
             padding: 0;
-            font-size: 11px;
+            font-size: 10px;
         }
 
         .page {
@@ -27,7 +27,7 @@
 
         .header {
             width: 100%;
-            margin-bottom: 18px;
+            margin-bottom: 10px;
         }
 
         .header-table {
@@ -45,8 +45,8 @@
         }
 
         .header-logo {
-            width: 75px;
-            height: 75px;
+            width: 70px;
+            height: 70px;
             object-fit: contain;
         }
 
@@ -56,7 +56,7 @@
         }
 
         .institution-name {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: bold;
             text-transform: uppercase;
             margin: 0;
@@ -77,7 +77,7 @@
         }
 
         .student-box {
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             border: 2px solid #66BB6A;
             border-radius: 8px;
             overflow: hidden;
@@ -91,14 +91,14 @@
         .student-table th,
         .student-table td {
             border: 1px solid #a5c9a7;
-            padding: 6px 8px;
-            font-size: 10px;
+            padding: 5px 7px;
+            font-size: 9px;
         }
 
         .student-table th {
             background: #E8F5E9;
             text-align: left;
-            width: 18%;
+            width: 12%;
         }
 
         .student-table td {
@@ -106,8 +106,8 @@
         }
 
         .section-title {
-            margin: 14px 0 8px 0;
-            padding: 8px 10px;
+            margin: 10px 0 8px 0;
+            padding: 7px 10px;
             background: #E8F5E9;
             border: 2px solid #66BB6A;
             border-radius: 8px;
@@ -120,33 +120,40 @@
             border-collapse: collapse;
             table-layout: fixed;
             border: 2px solid #66BB6A;
+            font-size: 8.5px;
         }
 
         .modules-table th,
         .modules-table td {
             border: 1px solid #a5c9a7;
-            padding: 6px 8px;
-            font-size: 10px;
-            vertical-align: top;
+            padding: 4px 3px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
         }
 
         .modules-table th {
             background: #E8F5E9;
-            text-align: center;
-        }
-
-        .module-col {
-            width: 30%;
             font-weight: bold;
         }
 
-        .ra-col {
-            width: 50%;
+        .module-col {
+            width: 22%;
+            text-align: left !important;
+            font-weight: bold;
+            padding-left: 6px !important;
         }
 
-        .small-col {
-            width: 10%;
-            text-align: center;
+        .ra-col {
+            width: 5.2%;
+        }
+
+        .cf-col {
+            width: 6%;
+        }
+
+        .situ-col {
+            width: 8%;
         }
 
         .low-grade {
@@ -165,7 +172,7 @@
 
         .signatures {
             width: 100%;
-            margin-top: 28px;
+            margin-top: 20px;
         }
 
         .signatures-table {
@@ -182,24 +189,24 @@
 
         .signature-line {
             border-top: 1px solid #000;
-            margin: 40px auto 6px auto;
+            margin: 35px auto 6px auto;
             width: 75%;
         }
 
         .signature-name {
             font-weight: bold;
-            font-size: 11px;
-        }
-
-        .signature-role {
             font-size: 10px;
         }
 
-        .footer {
-            margin-top: 18px;
-            border-top: 1px solid #ccc;
-            padding-top: 8px;
+        .signature-role {
             font-size: 9px;
+        }
+
+        .footer {
+            margin-top: 14px;
+            border-top: 1px solid #ccc;
+            padding-top: 6px;
+            font-size: 8px;
             display: flex;
             justify-content: space-between;
             gap: 10px;
@@ -237,43 +244,53 @@
                     <td>{{ student.numero }}</td>
                     <th>ID Estudiante</th>
                     <td>{{ student.id_estudiante }}</td>
+                    <th>Curso</th>
+                    <td>{{ student.curso }}</td>
                 </tr>
                 <tr>
                     <th>Nombre</th>
                     <td colspan="3">{{ student.nombre_estudiante }}</td>
-                </tr>
-                <tr>
-                    <th>Curso</th>
-                    <td>{{ student.curso }}</td>
                     <th>Profesor Titular</th>
                     <td>{{ student.prof_titular }}</td>
                 </tr>
             </table>
         </div>
 
-        <div class="section-title">Módulos técnicos con resultados de aprendizaje evaluados</div>
+        <div class="section-title">Módulos técnicos</div>
 
-        {% if student.modules_with_ras %}
+        {% if student.modules %}
         <table class="modules-table">
             <thead>
                 <tr>
                     <th class="module-col">Módulo</th>
-                    <th class="ra-col">Resultados de aprendizaje con notas</th>
-                    <th class="small-col">CF</th>
-                    <th class="small-col">Situación</th>
+                    <th class="ra-col">RA1</th>
+                    <th class="ra-col">RA2</th>
+                    <th class="ra-col">RA3</th>
+                    <th class="ra-col">RA4</th>
+                    <th class="ra-col">RA5</th>
+                    <th class="ra-col">RA6</th>
+                    <th class="ra-col">RA7</th>
+                    <th class="ra-col">RA8</th>
+                    <th class="ra-col">RA9</th>
+                    <th class="ra-col">RA10</th>
+                    <th class="cf-col">CF</th>
+                    <th class="situ-col">Situación</th>
                 </tr>
             </thead>
             <tbody>
-                {% for module in student.modules_with_ras %}
+                {% for module in student.modules %}
                 <tr>
                     <td class="module-col">{{ module.modulo }}</td>
-                    <td class="ra-col">
-                        {% for ra in module.ras_visibles %}
-                            <div>
-                                <strong>{{ ra.label }}:</strong> {{ ra.value }}
-                            </div>
-                        {% endfor %}
-                    </td>
+                    <td>{% if module.ra1 is defined and module.ra1 not in [None, ""] %}{{ module.ra1 }}{% endif %}</td>
+                    <td>{% if module.ra2 is defined and module.ra2 not in [None, ""] %}{{ module.ra2 }}{% endif %}</td>
+                    <td>{% if module.ra3 is defined and module.ra3 not in [None, ""] %}{{ module.ra3 }}{% endif %}</td>
+                    <td>{% if module.ra4 is defined and module.ra4 not in [None, ""] %}{{ module.ra4 }}{% endif %}</td>
+                    <td>{% if module.ra5 is defined and module.ra5 not in [None, ""] %}{{ module.ra5 }}{% endif %}</td>
+                    <td>{% if module.ra6 is defined and module.ra6 not in [None, ""] %}{{ module.ra6 }}{% endif %}</td>
+                    <td>{% if module.ra7 is defined and module.ra7 not in [None, ""] %}{{ module.ra7 }}{% endif %}</td>
+                    <td>{% if module.ra8 is defined and module.ra8 not in [None, ""] %}{{ module.ra8 }}{% endif %}</td>
+                    <td>{% if module.ra9 is defined and module.ra9 not in [None, ""] %}{{ module.ra9 }}{% endif %}</td>
+                    <td>{% if module.ra10 is defined and module.ra10 not in [None, ""] %}{{ module.ra10 }}{% endif %}</td>
                     <td class="{% if module.cf is not none and is_low_grade(module.cf) %}low-grade{% endif %}">
                         {{ module.cf if module.cf is not none else "" }}
                     </td>
@@ -292,7 +309,7 @@
         </table>
         {% else %}
         <div class="empty-box">
-            Este estudiante no tiene resultados de aprendizaje con notas en módulos técnicos.
+            Este estudiante no tiene módulos técnicos registrados.
         </div>
         {% endif %}
 
