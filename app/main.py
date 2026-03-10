@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.api.routes.students import router as students_router
 from app.api.routes.data_sources import router as data_sources_router
+from app.api.routes.ui import router as ui_router
 
 app = FastAPI(
     title="Sistema_Boletines_EC",
@@ -10,6 +11,7 @@ app = FastAPI(
 
 app.include_router(students_router)
 app.include_router(data_sources_router)
+app.include_router(ui_router)
 
 
 @app.get("/")
