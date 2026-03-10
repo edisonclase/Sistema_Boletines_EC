@@ -6,7 +6,7 @@
     <style>
         @page {
             size: A4 landscape;
-            margin: 10mm;
+            margin: 8mm;
         }
 
         * {
@@ -19,7 +19,7 @@
             margin: 0;
             padding: 0;
             font-size: 10px;
-            background: #f4f7f4;
+            background: #fafafa;
         }
 
         .screen-toolbar {
@@ -75,10 +75,10 @@
         }
 
         .page {
-            width: 1800px;
+            width: 1760px;
             margin: 0 auto;
             background: #fff;
-            padding: 26px;
+            padding: 22px;
             border: 3px solid #66BB6A;
             border-radius: 16px;
             box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
@@ -86,7 +86,8 @@
 
         .header {
             width: 100%;
-            margin-bottom: 22px;
+            margin-bottom: 18px;
+            page-break-after: avoid;
         }
 
         .header-table {
@@ -99,24 +100,24 @@
         }
 
         .logo-cell {
-            width: 180px;
+            width: 160px;
             text-align: center;
         }
 
         .header-logo {
-            width: 130px;
-            height: 130px;
+            width: 120px;
+            height: 120px;
             object-fit: contain;
             display: inline-block;
         }
 
         .title-cell {
             text-align: center;
-            padding: 0 14px;
+            padding: 0 12px;
         }
 
         .institution-name {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: bold;
             margin: 0;
             line-height: 1.15;
@@ -156,10 +157,12 @@
         }
 
         .info-box {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             border: 2px solid #66BB6A;
             border-radius: 10px;
             overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .info-table {
@@ -171,7 +174,7 @@
         .info-table td {
             border: 1px solid #94c79a;
             padding: 6px 8px;
-            font-size: 11px;
+            font-size: 10px;
         }
 
         .info-table th {
@@ -187,15 +190,16 @@
         }
 
         .section-title {
-            margin: 18px 0 8px 0;
-            padding: 10px 12px;
+            margin: 14px 0 8px 0;
+            padding: 9px 12px;
             background: #E8F5E9;
             border: 2px solid #66BB6A;
             border-radius: 10px;
             font-weight: bold;
             text-transform: uppercase;
             color: #111;
-            font-size: 12px;
+            font-size: 11px;
+            page-break-after: avoid;
         }
 
         .academic-table,
@@ -203,9 +207,21 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             border: 2px solid #66BB6A;
             overflow: hidden;
+        }
+
+        .academic-table {
+            font-size: 8px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .modules-table {
+            font-size: 8.8px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .academic-table th,
@@ -213,10 +229,9 @@
         .modules-table th,
         .modules-table td {
             border: 1px solid #9fbe9f;
-            padding: 4px 2px;
+            padding: 3px 2px;
             text-align: center;
-            font-size: 9px;
-            line-height: 1.15;
+            line-height: 1.1;
             word-wrap: break-word;
             vertical-align: middle;
         }
@@ -229,27 +244,29 @@
         }
 
         .subject-col {
-            width: 125px;
+            width: 118px;
             text-align: left !important;
             font-weight: bold;
+            padding-left: 5px !important;
         }
 
         .module-col {
-            width: 190px;
+            width: 185px;
             text-align: left !important;
             font-weight: bold;
+            padding-left: 5px !important;
         }
 
         .tiny-col {
-            width: 42px;
+            width: 36px;
         }
 
         .small-col {
-            width: 52px;
+            width: 46px;
         }
 
         .situation-col {
-            width: 44px;
+            width: 34px;
         }
 
         .low-grade {
@@ -257,6 +274,7 @@
             font-weight: bold;
         }
 
+        .legend-box,
         .comment-box,
         .summary-box {
             width: 100%;
@@ -264,10 +282,13 @@
             border-radius: 10px;
             padding: 10px 12px;
             margin-top: 8px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             background: #fcfffc;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
+        .legend-title,
         .comment-title,
         .summary-title {
             font-weight: bold;
@@ -276,13 +297,23 @@
             color: #111;
         }
 
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px 12px;
+            font-size: 9px;
+            line-height: 1.25;
+        }
+
         .muted {
             color: #555;
         }
 
         .signatures {
             width: 100%;
-            margin-top: 20px;
+            margin-top: 18px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .signatures-table {
@@ -299,7 +330,7 @@
 
         .signature-line {
             border-top: 1px solid #000;
-            margin: 32px auto 6px auto;
+            margin: 30px auto 6px auto;
             width: 75%;
         }
 
@@ -313,7 +344,7 @@
         }
 
         .footer {
-            margin-top: 18px;
+            margin-top: 16px;
             border-top: 1px solid #b8d8ba;
             padding-top: 8px;
             font-size: 9px;
@@ -321,6 +352,8 @@
             display: flex;
             justify-content: space-between;
             gap: 12px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .footer-left,
@@ -330,6 +363,11 @@
 
         .footer-right {
             text-align: right;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         @media print {
@@ -354,6 +392,7 @@
                 width: 100%;
                 margin: 0;
                 box-shadow: none;
+                border-radius: 0;
             }
         }
     </style>
@@ -468,20 +507,20 @@
                 <table class="academic-table">
                     <thead>
                         <tr>
-                            <th class="subject-col" rowspan="2">COMPETENCIAS FUNDAMENTALES</th>
+                            <th class="subject-col" rowspan="2">ASIGNATURA</th>
 
-                            <th colspan="4">- Comunicativa</th>
-                            <th colspan="4">- Pensamiento Lógico, Creativo y Crítico<br>- Resolución de Problemas</th>
-                            <th colspan="4">- Científica y Tecnológica<br>- Ambiental y de la Salud</th>
-                            <th colspan="4">- Ética y Ciudadana<br>- Desarrollo Personal y Espiritual</th>
-                            <th colspan="4">PROMEDIO GRUPO DE COMPETENCIAS ESPECÍFICAS</th>
+                            <th colspan="4">COM</th>
+                            <th colspan="4">PLC / RES</th>
+                            <th colspan="4">CYT / AS</th>
+                            <th colspan="4">EC / DPE</th>
+                            <th colspan="4">PC</th>
 
-                            <th class="small-col" rowspan="2">CALIFICACIÓN FINAL</th>
-                            <th colspan="4">CALIFICACIÓN COMPLETIVA</th>
-                            <th colspan="4">CALIFICACIÓN EXTRAORDINARIA</th>
-                            <th colspan="1">EVALUACIÓN ESPECIAL</th>
-                            <th class="small-col" rowspan="2">ASISTENCIA</th>
-                            <th colspan="2">SITUACIÓN FINAL EN LA ASIGNATURA</th>
+                            <th class="small-col" rowspan="2">CF</th>
+                            <th colspan="4">COMP</th>
+                            <th colspan="4">EXT</th>
+                            <th colspan="1">ESP</th>
+                            <th class="small-col" rowspan="2">ASIS</th>
+                            <th colspan="2">SIT</th>
                         </tr>
                         <tr>
                             <th class="tiny-col">P1</th>
@@ -509,17 +548,17 @@
                             <th class="tiny-col">PC3</th>
                             <th class="tiny-col">PC4</th>
 
-                            <th class="tiny-col">50% C.F.</th>
-                            <th class="tiny-col">C.E.C</th>
-                            <th class="tiny-col">50% C.E.C</th>
-                            <th class="tiny-col">C.C.F.</th>
+                            <th class="tiny-col">50 CF</th>
+                            <th class="tiny-col">CEC</th>
+                            <th class="tiny-col">50 CEC</th>
+                            <th class="tiny-col">CCF</th>
 
-                            <th class="tiny-col">30% C.F.</th>
-                            <th class="tiny-col">C.E.EX.</th>
-                            <th class="tiny-col">70% C.E.EX.</th>
-                            <th class="tiny-col">C.EX.F.</th>
+                            <th class="tiny-col">30 CF</th>
+                            <th class="tiny-col">CEEX</th>
+                            <th class="tiny-col">70 CEEX</th>
+                            <th class="tiny-col">CEXF</th>
 
-                            <th class="tiny-col">C.E.</th>
+                            <th class="tiny-col">CE</th>
 
                             <th class="situation-col">A</th>
                             <th class="situation-col">R</th>
@@ -577,6 +616,28 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                <div class="legend-box">
+                    <div class="legend-title">Leyenda de competencias y abreviaturas</div>
+                    <div class="legend-grid">
+                        <div><strong>COM:</strong> Comunicativa</div>
+                        <div><strong>PLC:</strong> Pensamiento Lógico, Creativo y Crítico</div>
+                        <div><strong>RES:</strong> Resolución de Problemas</div>
+                        <div><strong>CYT:</strong> Científica y Tecnológica</div>
+                        <div><strong>AS:</strong> Ambiental y de la Salud</div>
+                        <div><strong>EC:</strong> Ética y Ciudadana</div>
+                        <div><strong>DPE:</strong> Desarrollo Personal y Espiritual</div>
+                        <div><strong>PC:</strong> Promedio de Competencias</div>
+                        <div><strong>CF:</strong> Calificación Final</div>
+                        <div><strong>COMP:</strong> Completivo</div>
+                        <div><strong>EXT:</strong> Extraordinario</div>
+                        <div><strong>ESP:</strong> Evaluación Especial</div>
+                        <div><strong>ASIS:</strong> Asistencia</div>
+                        <div><strong>SIT:</strong> Situación Final</div>
+                        <div><strong>A:</strong> Aprobado</div>
+                        <div><strong>R:</strong> Reprobado</div>
+                    </div>
+                </div>
 
                 {% if student.modules is defined and student.modules %}
                 <div class="section-title">Módulos técnicos</div>

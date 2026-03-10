@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Evaluaciones - Primer Ciclo del Nivel Secundario</title>
+    <title>Reporte de Evaluaciones - Segundo Ciclo del Nivel Secundario</title>
     <style>
         @page {
             size: Letter landscape;
@@ -19,7 +19,7 @@
             margin: 0;
             padding: 0;
             font-size: 9px;
-            background: #f4f7f4;
+            background: #fafafa;
         }
 
         .screen-toolbar {
@@ -66,7 +66,7 @@
 
         .page-wrap {
             overflow: auto;
-            padding: 10px;
+            padding: 8px;
         }
 
         .zoom-container {
@@ -86,7 +86,8 @@
 
         .header {
             width: 100%;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+            page-break-after: avoid;
         }
 
         .header-table {
@@ -155,10 +156,12 @@
         }
 
         .info-box {
-            margin-bottom: 14px;
+            margin-bottom: 8px;
             border: 1.5px solid #66BB6A;
             border-radius: 8px;
             overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .info-table {
@@ -185,34 +188,67 @@
             font-weight: bold;
         }
 
-        .academic-table {
+        .section-title {
+            margin: 6px 0 4px 0;
+            padding: 4px 8px;
+            background: #E8F5E9;
+            border: 1.5px solid #66BB6A;
+            border-radius: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #111;
+            font-size: 8px;
+            page-break-after: avoid;
+        }
+
+        .academic-table,
+        .modules-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 16px;
             border: 1.5px solid #66BB6A;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .academic-table {
+            margin-bottom: 8px;
+        }
+
+        .modules-table {
+            margin-bottom: 8px;
         }
 
         .academic-table th,
-        .academic-table td {
+        .academic-table td,
+        .modules-table th,
+        .modules-table td {
             border: 1px solid #9fbe9f;
             padding: 2px 1px;
             text-align: center;
-            font-size: 6.75px;
-            line-height: 1.02;
+            font-size: 6.6px;
+            line-height: 1.0;
             word-wrap: break-word;
             overflow-wrap: break-word;
             vertical-align: middle;
         }
 
-        .academic-table thead th {
+        .academic-table thead th,
+        .modules-table thead th {
             background: #E8F5E9;
             font-weight: bold;
             color: #111;
         }
 
         .subject-col {
-            width: 100px;
+            width: 92px;
+            text-align: left !important;
+            font-weight: bold;
+            padding-left: 3px !important;
+        }
+
+        .module-col {
+            width: 140px;
             text-align: left !important;
             font-weight: bold;
             padding-left: 3px !important;
@@ -242,9 +278,11 @@
             border: 1.5px solid #66BB6A;
             border-radius: 8px;
             padding: 4px 8px;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin-top: 5px;
+            margin-bottom: 6px;
             background: #fcfffc;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .legend-title,
@@ -277,8 +315,10 @@
 
         .signatures {
             width: 100%;
-            margin-top: 18px;
-            margin-bottom: 8px;
+            margin-top: 8px;
+            margin-bottom: 6px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .signatures-table {
@@ -295,7 +335,7 @@
 
         .signature-line {
             border-top: 1px solid #000;
-            margin: 26px auto 4px auto;
+            margin: 18px auto 4px auto;
             width: 68%;
         }
 
@@ -317,6 +357,8 @@
             display: flex;
             justify-content: space-between;
             gap: 10px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .footer-left,
@@ -328,49 +370,54 @@
             text-align: right;
         }
 
-@media print {
-    html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        background: #fff;
-    }
+        tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
 
-    body {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+        @media print {
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
 
-    .screen-toolbar {
-        display: none !important;
-    }
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
 
-    .page-wrap {
-        width: 100%;
-        padding: 0;
-        overflow: visible;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+            .screen-toolbar {
+                display: none !important;
+            }
 
-    .zoom-container {
-        transform: none !important;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+            .page-wrap {
+                width: 100%;
+                padding: 0;
+                overflow: visible;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
 
-    .page {
-        width: 100%;
-        margin: 0 auto;
-        box-shadow: none;
-        border-radius: 0;
-    }
-}
+            .zoom-container {
+                transform: none !important;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .page {
+                width: 100%;
+                margin: 0 auto;
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -494,23 +541,25 @@
                     </table>
                 </div>
 
+                <div class="section-title">Áreas académicas</div>
+
                 <table class="academic-table">
                     <thead>
                         <tr>
-                            <th class="subject-col" rowspan="2">COMP.<br>FUND.</th>
+                            <th class="subject-col" rowspan="2">ASIG.</th>
 
-                            <th colspan="4">COMUNICATIVA</th>
-                            <th colspan="4">PENS. LÓGICO<br>CREATIVO Y CRÍTICO</th>
-                            <th colspan="4">CIENTÍFICA Y TEC.<br>AMBIENTAL Y SALUD</th>
-                            <th colspan="4">ÉTICA Y CIUD.<br>DES. PERS. Y ESP.</th>
-                            <th colspan="4">PROM. GRUPO<br>COMP. ESP.</th>
+                            <th colspan="4">COM</th>
+                            <th colspan="4">PLC</th>
+                            <th colspan="4">CYT</th>
+                            <th colspan="4">EC / DPE</th>
+                            <th colspan="4">PC</th>
 
-                            <th class="small-col" rowspan="2">CALIF.<br>FINAL</th>
-                            <th colspan="4">CALIF.<br>COMPL.</th>
-                            <th colspan="4">CALIF.<br>EXTRA.</th>
-                            <th colspan="1">EVAL.<br>ESP.</th>
-                            <th class="small-col" rowspan="2">ASIST.</th>
-                            <th colspan="2">SIT.<br>FINAL</th>
+                            <th class="small-col" rowspan="2">CF</th>
+                            <th colspan="4">COMP</th>
+                            <th colspan="4">EXT</th>
+                            <th colspan="1">ESP</th>
+                            <th class="small-col" rowspan="2">ASIS</th>
+                            <th colspan="2">SIT</th>
                         </tr>
                         <tr>
                             <th class="tiny-col">P1</th>
@@ -538,17 +587,17 @@
                             <th class="tiny-col">PC3</th>
                             <th class="tiny-col">PC4</th>
 
-                            <th class="tiny-col">50%<br>C.F.</th>
-                            <th class="tiny-col">C.E.C.</th>
-                            <th class="tiny-col">50%<br>C.E.C.</th>
-                            <th class="tiny-col">C.C.F.</th>
+                            <th class="tiny-col">50CF</th>
+                            <th class="tiny-col">CEC</th>
+                            <th class="tiny-col">50CEC</th>
+                            <th class="tiny-col">CCF</th>
 
-                            <th class="tiny-col">30%<br>C.F.</th>
-                            <th class="tiny-col">C.E.EX.</th>
-                            <th class="tiny-col">70%<br>C.E.EX.</th>
-                            <th class="tiny-col">C.EX.F.</th>
+                            <th class="tiny-col">30CF</th>
+                            <th class="tiny-col">CEEX</th>
+                            <th class="tiny-col">70CE</th>
+                            <th class="tiny-col">CEXF</th>
 
-                            <th class="tiny-col">C.E.</th>
+                            <th class="tiny-col">CE</th>
 
                             <th class="situation-col">A</th>
                             <th class="situation-col">R</th>
@@ -610,16 +659,63 @@
                 <div class="legend-box">
                     <div class="legend-title">Leyenda de abreviaturas</div>
                     <div class="legend-grid">
-                        <div class="legend-item"><strong>COMP. FUND.</strong> = Competencias fundamentales</div>
-                        <div class="legend-item"><strong>PROM. GRUPO COMP. ESP.</strong> = Promedio grupo de competencias específicas</div>
-                        <div class="legend-item"><strong>CALIF. FINAL</strong> = Calificación final</div>
-                        <div class="legend-item"><strong>CALIF. COMPL.</strong> = Calificación completiva</div>
-                        <div class="legend-item"><strong>CALIF. EXTRA.</strong> = Calificación extraordinaria</div>
-                        <div class="legend-item"><strong>EVAL. ESP.</strong> = Evaluación especial</div>
-                        <div class="legend-item"><strong>ASIST.</strong> = Asistencia</div>
-                        <div class="legend-item"><strong>SIT. FINAL</strong> = Situación final en la asignatura</div>
+                        <div class="legend-item"><strong>COM</strong> = Comunicativa</div>
+                        <div class="legend-item"><strong>PLC</strong> = Pensamiento Lógico, Creativo y Crítico</div>
+                        <div class="legend-item"><strong>CYT</strong> = Científica y Tecnológica</div>
+                        <div class="legend-item"><strong>EC / DPE</strong> = Ética y Ciudadana / Desarrollo Personal y Espiritual</div>
+                        <div class="legend-item"><strong>PC</strong> = Promedio de competencias</div>
+                        <div class="legend-item"><strong>CF</strong> = Calificación final</div>
+                        <div class="legend-item"><strong>COMP</strong> = Completivo</div>
+                        <div class="legend-item"><strong>EXT</strong> = Extraordinario</div>
+                        <div class="legend-item"><strong>ESP</strong> = Evaluación especial</div>
+                        <div class="legend-item"><strong>ASIS</strong> = Asistencia</div>
+                        <div class="legend-item"><strong>SIT</strong> = Situación final</div>
+                        <div class="legend-item"><strong>A / R</strong> = Aprobado / Reprobado</div>
                     </div>
                 </div>
+
+                {% if student.modules is defined and student.modules %}
+                <div class="section-title">Módulos técnicos</div>
+
+                <table class="modules-table">
+                    <thead>
+                        <tr>
+                            <th class="module-col">MÓDULO</th>
+                            <th class="tiny-col">RA1</th>
+                            <th class="tiny-col">RA2</th>
+                            <th class="tiny-col">RA3</th>
+                            <th class="tiny-col">RA4</th>
+                            <th class="tiny-col">RA5</th>
+                            <th class="tiny-col">RA6</th>
+                            <th class="tiny-col">RA7</th>
+                            <th class="tiny-col">RA8</th>
+                            <th class="tiny-col">RA9</th>
+                            <th class="tiny-col">RA10</th>
+                            <th class="small-col">CF</th>
+                            <th class="small-col">A</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for module in student.modules %}
+                        <tr>
+                            <td class="module-col">{{ module.modulo if module.modulo is defined else "Módulo" }}</td>
+                            <td>{{ text_value(module.ra1 if module.ra1 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra2 if module.ra2 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra3 if module.ra3 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra4 if module.ra4 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra5 if module.ra5 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra6 if module.ra6 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra7 if module.ra7 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra8 if module.ra8 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra9 if module.ra9 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra10 if module.ra10 is defined else none) }}</td>
+                            <td>{{ integer_grade(module.cf if module.cf is defined else none) }}</td>
+                            <td>{% if module.situ_a is defined and module.situ_a %}{{ module.situ_a }}{% else %}-{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
 
                 <div class="comment-box">
                     <div class="comment-title">Comentario del profesor titular</div>
