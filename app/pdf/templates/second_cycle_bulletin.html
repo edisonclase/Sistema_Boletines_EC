@@ -5,8 +5,8 @@
     <title>Reporte de Evaluaciones - Segundo Ciclo del Nivel Secundario</title>
     <style>
         @page {
-            size: A4 landscape;
-            margin: 8mm;
+            size: Letter landscape;
+            margin: 0.15in;
         }
 
         * {
@@ -18,7 +18,7 @@
             color: #111;
             margin: 0;
             padding: 0;
-            font-size: 10px;
+            font-size: 8px;
             background: #fafafa;
         }
 
@@ -28,15 +28,15 @@
             z-index: 999;
             background: #ffffff;
             border-bottom: 1px solid #d7e8d8;
-            padding: 10px 14px;
+            padding: 7px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .toolbar-left {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             color: #2E7D32;
         }
@@ -44,29 +44,29 @@
         .toolbar-right {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
         }
 
         .zoom-btn {
             border: 1px solid #bdd8c0;
             background: #fff;
             border-radius: 6px;
-            padding: 6px 10px;
+            padding: 4px 8px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
         }
 
         .zoom-label {
-            font-size: 12px;
-            min-width: 52px;
+            font-size: 11px;
+            min-width: 48px;
             text-align: center;
             font-weight: bold;
         }
 
         .page-wrap {
             overflow: auto;
-            padding: 18px;
+            padding: 6px;
         }
 
         .zoom-container {
@@ -78,15 +78,15 @@
             width: 1760px;
             margin: 0 auto;
             background: #fff;
-            padding: 22px;
-            border: 3px solid #66BB6A;
-            border-radius: 16px;
+            padding: 8px 9px 6px 9px;
+            border: 1.5px solid #66BB6A;
+            border-radius: 8px;
             box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
         }
 
         .header {
             width: 100%;
-            margin-bottom: 18px;
+            margin-bottom: 5px;
             page-break-after: avoid;
         }
 
@@ -100,66 +100,65 @@
         }
 
         .logo-cell {
-            width: 160px;
+            width: 72px;
             text-align: center;
         }
 
         .header-logo {
-            width: 120px;
-            height: 120px;
+            width: 58px;
+            height: 58px;
             object-fit: contain;
             display: inline-block;
         }
 
         .title-cell {
             text-align: center;
-            padding: 0 12px;
+            padding: 0 2px;
         }
 
         .institution-name {
-            font-size: 26px;
+            font-size: 14px;
             font-weight: bold;
             margin: 0;
-            line-height: 1.15;
+            line-height: 1.0;
             text-transform: uppercase;
             color: #111;
         }
 
         .institution-motto {
-            margin-top: 6px;
-            font-size: 12px;
+            margin-top: 1px;
+            font-size: 7px;
             font-style: italic;
             color: #4b4b4b;
         }
 
         .institution-contact {
-            margin-top: 10px;
-            font-size: 11px;
-            line-height: 1.5;
+            margin-top: 2px;
+            font-size: 6.6px;
+            line-height: 1.05;
             color: #333;
         }
 
         .department-title {
-            margin-top: 12px;
-            font-size: 15px;
+            margin-top: 2px;
+            font-size: 7.4px;
             font-weight: bold;
             text-transform: uppercase;
             color: #111;
         }
 
         .bulletin-title {
-            margin-top: 8px;
-            font-size: 15px;
+            margin-top: 1px;
+            font-size: 7.6px;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
             color: #111;
         }
 
         .info-box {
-            margin-bottom: 14px;
-            border: 2px solid #66BB6A;
-            border-radius: 10px;
+            margin-bottom: 4px;
+            border: 1px solid #66BB6A;
+            border-radius: 6px;
             overflow: hidden;
             page-break-inside: avoid;
             break-inside: avoid;
@@ -173,12 +172,12 @@
         .info-table th,
         .info-table td {
             border: 1px solid #94c79a;
-            padding: 6px 8px;
-            font-size: 10px;
+            padding: 2px 5px;
+            font-size: 6.8px;
         }
 
         .info-table th {
-            width: 220px;
+            width: 155px;
             text-align: left;
             background: #E8F5E9;
             color: #111;
@@ -190,15 +189,16 @@
         }
 
         .section-title {
-            margin: 14px 0 8px 0;
-            padding: 9px 12px;
+            margin: 3px 0 0 0;
+            padding: 2px 6px;
             background: #E8F5E9;
-            border: 2px solid #66BB6A;
-            border-radius: 10px;
+            border: 1px solid #66BB6A;
+            border-bottom: 0;
+            border-radius: 6px 6px 0 0;
             font-weight: bold;
             text-transform: uppercase;
             color: #111;
-            font-size: 11px;
+            font-size: 7px;
             page-break-after: avoid;
         }
 
@@ -207,21 +207,18 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 12px;
-            border: 2px solid #66BB6A;
-            overflow: hidden;
+            border: 1px solid #66BB6A;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            margin-top: 0;
         }
 
         .academic-table {
-            font-size: 8px;
-            page-break-inside: avoid;
-            break-inside: avoid;
+            margin-bottom: 4px;
         }
 
         .modules-table {
-            font-size: 8.8px;
-            page-break-inside: avoid;
-            break-inside: avoid;
+            margin-bottom: 4px;
         }
 
         .academic-table th,
@@ -229,10 +226,12 @@
         .modules-table th,
         .modules-table td {
             border: 1px solid #9fbe9f;
-            padding: 3px 2px;
+            padding: 1px 1px;
             text-align: center;
-            line-height: 1.1;
+            font-size: 6.1px;
+            line-height: 0.98;
             word-wrap: break-word;
+            overflow-wrap: break-word;
             vertical-align: middle;
         }
 
@@ -244,29 +243,29 @@
         }
 
         .subject-col {
-            width: 118px;
+            width: 88px;
             text-align: left !important;
             font-weight: bold;
-            padding-left: 5px !important;
+            padding-left: 2px !important;
         }
 
         .module-col {
-            width: 185px;
+            width: 135px;
             text-align: left !important;
             font-weight: bold;
-            padding-left: 5px !important;
+            padding-left: 2px !important;
         }
 
         .tiny-col {
-            width: 36px;
+            width: 21px;
         }
 
         .small-col {
-            width: 46px;
+            width: 28px;
         }
 
         .situation-col {
-            width: 34px;
+            width: 18px;
         }
 
         .low-grade {
@@ -278,11 +277,11 @@
         .comment-box,
         .summary-box {
             width: 100%;
-            border: 2px solid #66BB6A;
-            border-radius: 10px;
-            padding: 10px 12px;
-            margin-top: 8px;
-            margin-bottom: 12px;
+            border: 1px solid #66BB6A;
+            border-radius: 6px;
+            padding: 3px 6px;
+            margin-top: 3px;
+            margin-bottom: 4px;
             background: #fcfffc;
             page-break-inside: avoid;
             break-inside: avoid;
@@ -292,26 +291,34 @@
         .comment-title,
         .summary-title {
             font-weight: bold;
-            margin-bottom: 6px;
+            margin-bottom: 2px;
             text-transform: uppercase;
             color: #111;
+            font-size: 7px;
+        }
+
+        .muted {
+            color: #555;
+            font-size: 6.2px;
+            line-height: 1.06;
         }
 
         .legend-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px 12px;
-            font-size: 9px;
-            line-height: 1.25;
+            gap: 1px 7px;
+            font-size: 6px;
+            color: #333;
         }
 
-        .muted {
-            color: #555;
+        .legend-item strong {
+            color: #111;
         }
 
         .signatures {
             width: 100%;
-            margin-top: 18px;
+            margin-top: 4px;
+            margin-bottom: 3px;
             page-break-inside: avoid;
             break-inside: avoid;
         }
@@ -324,34 +331,34 @@
         .signatures-table td {
             width: 50%;
             text-align: center;
-            padding: 0 20px;
+            padding: 0 18px;
             vertical-align: top;
         }
 
         .signature-line {
             border-top: 1px solid #000;
-            margin: 30px auto 6px auto;
-            width: 75%;
+            margin: 10px auto 2px auto;
+            width: 62%;
         }
 
         .signature-name {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 6.8px;
         }
 
         .signature-role {
-            font-size: 10px;
+            font-size: 6px;
         }
 
         .footer {
-            margin-top: 16px;
+            margin-top: 2px;
             border-top: 1px solid #b8d8ba;
-            padding-top: 8px;
-            font-size: 9px;
+            padding-top: 2px;
+            font-size: 5.7px;
             color: #444;
             display: flex;
             justify-content: space-between;
-            gap: 12px;
+            gap: 8px;
             page-break-inside: avoid;
             break-inside: avoid;
         }
@@ -371,8 +378,18 @@
         }
 
         @media print {
-            body {
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
                 background: #fff;
+            }
+
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .screen-toolbar {
@@ -380,25 +397,50 @@
             }
 
             .page-wrap {
+                width: 100%;
                 padding: 0;
                 overflow: visible;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .zoom-container {
                 transform: none !important;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .page {
                 width: 100%;
-                margin: 0;
+                margin: 0 auto;
                 box-shadow: none;
                 border-radius: 0;
+                border: 1px solid #66BB6A;
             }
         }
     </style>
 </head>
 <body>
-    {% macro render_value(value) %}
+    {% macro decimal_grade(value) %}
+        {% if value is none or value == "" %}
+            {{ "" }}
+        {% else %}
+            {{ "%.1f"|format(value|float) }}
+        {% endif %}
+    {% endmacro %}
+
+    {% macro integer_grade(value) %}
+        {% if value is none or value == "" %}
+            {{ "" }}
+        {% else %}
+            {{ value|float|round(0)|int }}
+        {% endif %}
+    {% endmacro %}
+
+    {% macro text_value(value) %}
         {% if value is none %}
             {{ "" }}
         {% elif value is string %}
@@ -410,8 +452,8 @@
         {% endif %}
     {% endmacro %}
 
-    {% macro cell_class(value) %}
-        {% if value is not none and value is not string and not (value is iterable) and is_low_grade(value) %}
+    {% macro block_cell_class(value) %}
+        {% if value is not none and value != "" and (value|float) < 70 %}
             low-grade
         {% else %}
         {% endif %}
@@ -502,16 +544,15 @@
                     </table>
                 </div>
 
-                <div class="section-title">Áreas académicas</div>
-
+                <div class="section-title">ÁREAS ACADÉMICAS</div>
                 <table class="academic-table">
                     <thead>
                         <tr>
-                            <th class="subject-col" rowspan="2">ASIGNATURA</th>
+                            <th class="subject-col" rowspan="2">ASIG.</th>
 
                             <th colspan="4">COM</th>
-                            <th colspan="4">PLC / RES</th>
-                            <th colspan="4">CYT / AS</th>
+                            <th colspan="4">PLC</th>
+                            <th colspan="4">CYT</th>
                             <th colspan="4">EC / DPE</th>
                             <th colspan="4">PC</th>
 
@@ -548,14 +589,14 @@
                             <th class="tiny-col">PC3</th>
                             <th class="tiny-col">PC4</th>
 
-                            <th class="tiny-col">50 CF</th>
+                            <th class="tiny-col">50CF</th>
                             <th class="tiny-col">CEC</th>
-                            <th class="tiny-col">50 CEC</th>
+                            <th class="tiny-col">50CEC</th>
                             <th class="tiny-col">CCF</th>
 
-                            <th class="tiny-col">30 CF</th>
+                            <th class="tiny-col">30CF</th>
                             <th class="tiny-col">CEEX</th>
-                            <th class="tiny-col">70 CEEX</th>
+                            <th class="tiny-col">70CE</th>
                             <th class="tiny-col">CEXF</th>
 
                             <th class="tiny-col">CE</th>
@@ -569,46 +610,46 @@
                         <tr>
                             <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
 
-                            <td class="{{ cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ render_value(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ render_value(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ render_value(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ render_value(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ decimal_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
 
-                            <td class="{{ cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ render_value(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ render_value(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ render_value(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ render_value(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ decimal_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ decimal_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ decimal_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ decimal_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
 
-                            <td class="{{ cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ render_value(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ render_value(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ render_value(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ render_value(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ decimal_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ decimal_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ decimal_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ decimal_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
 
-                            <td class="{{ cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ render_value(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ render_value(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ render_value(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ render_value(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ decimal_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ decimal_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
 
-                            <td>{{ render_value(subject.pc1 if subject.pc1 is defined else none) }}</td>
-                            <td>{{ render_value(subject.pc2 if subject.pc2 is defined else none) }}</td>
-                            <td>{{ render_value(subject.pc3 if subject.pc3 is defined else none) }}</td>
-                            <td>{{ render_value(subject.pc4 if subject.pc4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.pc1 if subject.pc1 is defined else none) }}">{{ decimal_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.pc2 if subject.pc2 is defined else none) }}">{{ decimal_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.pc3 if subject.pc3 is defined else none) }}">{{ decimal_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.pc4 if subject.pc4 is defined else none) }}">{{ decimal_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
 
-                            <td class="{{ cell_class(subject.final if subject.final is defined else none) }}">{{ render_value(subject.final if subject.final is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.final if subject.final is defined else none) }}</td>
 
-                            <td>{{ render_value(subject.comp_50cf if subject.comp_50cf is defined else none) }}</td>
-                            <td>{{ render_value(subject.comp_cec if subject.comp_cec is defined else none) }}</td>
-                            <td>{{ render_value(subject.comp_50cec if subject.comp_50cec is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.ccf if subject.ccf is defined else none) }}">{{ render_value(subject.ccf if subject.ccf is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.comp_50cf if subject.comp_50cf is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.comp_cec if subject.comp_cec is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.comp_50cec if subject.comp_50cec is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.ccf if subject.ccf is defined else none) }}</td>
 
-                            <td>{{ render_value(subject.ext_30cf if subject.ext_30cf is defined else none) }}</td>
-                            <td>{{ render_value(subject.ext_ceex if subject.ext_ceex is defined else none) }}</td>
-                            <td>{{ render_value(subject.ext_70ceex if subject.ext_70ceex is defined else none) }}</td>
-                            <td class="{{ cell_class(subject.cexf if subject.cexf is defined else none) }}">{{ render_value(subject.cexf if subject.cexf is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.ext_30cf if subject.ext_30cf is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.ext_ceex if subject.ext_ceex is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.ext_70ceex if subject.ext_70ceex is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.cexf if subject.cexf is defined else none) }}</td>
 
-                            <td class="{{ cell_class(subject.ce_especial if subject.ce_especial is defined else none) }}">{{ render_value(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
 
-                            <td>{{ render_value(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
+                            <td>{{ integer_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
 
                             <td>{% if subject.situ_a is defined and subject.situ_a %}{{ subject.situ_a }}{% else %}-{% endif %}</td>
                             <td>{% if subject.situ_r is defined and subject.situ_r %}{{ subject.situ_r }}{% else %}-{% endif %}</td>
@@ -618,30 +659,25 @@
                 </table>
 
                 <div class="legend-box">
-                    <div class="legend-title">Leyenda de competencias y abreviaturas</div>
+                    <div class="legend-title">Leyenda de abreviaturas</div>
                     <div class="legend-grid">
-                        <div><strong>COM:</strong> Comunicativa</div>
-                        <div><strong>PLC:</strong> Pensamiento Lógico, Creativo y Crítico</div>
-                        <div><strong>RES:</strong> Resolución de Problemas</div>
-                        <div><strong>CYT:</strong> Científica y Tecnológica</div>
-                        <div><strong>AS:</strong> Ambiental y de la Salud</div>
-                        <div><strong>EC:</strong> Ética y Ciudadana</div>
-                        <div><strong>DPE:</strong> Desarrollo Personal y Espiritual</div>
-                        <div><strong>PC:</strong> Promedio de Competencias</div>
-                        <div><strong>CF:</strong> Calificación Final</div>
-                        <div><strong>COMP:</strong> Completivo</div>
-                        <div><strong>EXT:</strong> Extraordinario</div>
-                        <div><strong>ESP:</strong> Evaluación Especial</div>
-                        <div><strong>ASIS:</strong> Asistencia</div>
-                        <div><strong>SIT:</strong> Situación Final</div>
-                        <div><strong>A:</strong> Aprobado</div>
-                        <div><strong>R:</strong> Reprobado</div>
+                        <div class="legend-item"><strong>COM</strong> = Comunicativa</div>
+                        <div class="legend-item"><strong>PLC</strong> = Pensamiento Lógico, Creativo y Crítico</div>
+                        <div class="legend-item"><strong>CYT</strong> = Científica y Tecnológica</div>
+                        <div class="legend-item"><strong>EC / DPE</strong> = Ética y Ciudadana / Desarrollo Personal y Espiritual</div>
+                        <div class="legend-item"><strong>PC</strong> = Promedio de competencias</div>
+                        <div class="legend-item"><strong>CF</strong> = Calificación final</div>
+                        <div class="legend-item"><strong>COMP</strong> = Completivo</div>
+                        <div class="legend-item"><strong>EXT</strong> = Extraordinario</div>
+                        <div class="legend-item"><strong>ESP</strong> = Evaluación especial</div>
+                        <div class="legend-item"><strong>ASIS</strong> = Asistencia</div>
+                        <div class="legend-item"><strong>SIT</strong> = Situación final</div>
+                        <div class="legend-item"><strong>A / R</strong> = Aprobado / Reprobado</div>
                     </div>
                 </div>
 
                 {% if student.modules is defined and student.modules %}
-                <div class="section-title">Módulos técnicos</div>
-
+                <div class="section-title">MÓDULOS TÉCNICOS</div>
                 <table class="modules-table">
                     <thead>
                         <tr>
@@ -664,17 +700,17 @@
                         {% for module in student.modules %}
                         <tr>
                             <td class="module-col">{{ module.modulo if module.modulo is defined else "Módulo" }}</td>
-                            <td>{{ render_value(module.ra1 if module.ra1 is defined else none) }}</td>
-                            <td>{{ render_value(module.ra2 if module.ra2 is defined else none) }}</td>
-                            <td>{{ render_value(module.ra3 if module.ra3 is defined else none) }}</td>
-                            <td>{{ render_value(module.ra4 if module.ra4 is defined else none) }}</td>
-                            <td>{{ render_value(module.ra5 if module.ra5 is defined else none) }}</td>
-                            <td>{{ render_value(module.ra6 if module.ra6 is defined else none) }}</td>
-                            <td>{{ render_value(module.ra7 if module.ra7 is defined else none) }}</td>
-                            <td>{{ render_value(module.ra8 if module.ra8 is defined else none) }}</td>
-                            <td>{{ render_value(module.ra9 if module.ra9 is defined else none) }}</td>
-                            <td>{{ render_value(module.ra10 if module.ra10 is defined else none) }}</td>
-                            <td class="{{ cell_class(module.cf if module.cf is defined else none) }}">{{ render_value(module.cf if module.cf is defined else none) }}</td>
+                            <td>{{ text_value(module.ra1 if module.ra1 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra2 if module.ra2 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra3 if module.ra3 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra4 if module.ra4 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra5 if module.ra5 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra6 if module.ra6 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra7 if module.ra7 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra8 if module.ra8 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra9 if module.ra9 is defined else none) }}</td>
+                            <td>{{ text_value(module.ra10 if module.ra10 is defined else none) }}</td>
+                            <td>{{ integer_grade(module.cf if module.cf is defined else none) }}</td>
                             <td>{% if module.situ_a is defined and module.situ_a %}{{ module.situ_a }}{% else %}-{% endif %}</td>
                         </tr>
                         {% endfor %}
