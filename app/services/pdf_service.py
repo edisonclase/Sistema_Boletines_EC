@@ -10,7 +10,11 @@ from pypdf import PdfReader, PdfWriter
 
 from app.core.settings import settings
 from app.data.fetchers.google_sheets import load_primer_ciclo, load_segundo_ciclo
-from app.services.bulletin_service import find_student_by_id, normalize_student_id
+from app.services.bulletin_service import (
+    build_student_result_from_row,
+    find_student_by_id,
+    normalize_student_id,
+)
 from app.services.html_service import render_template
 from app.utils.helpers import safe_value
 
@@ -42,6 +46,15 @@ def _normalize_text(value: str) -> str:
     value = safe_value(value)
     value = re.sub(r"\s+", " ", value).strip()
     return value.casefold()
+
+
+def _normalize_course_name(value: str) -> str:
+    text = safe_value(value).strip().casefold()
+    text = text.replace("º", "o").replace("°", "o")
+    text = re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"\b(\d+)\s*(?:do|to|ro|mo|vo|no|er|o)\b", r"\1", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
 
 
 def _normalize_cycle_name(value: str) -> str:
@@ -96,7 +109,7 @@ def _build_bulletin_html(result: dict) -> str:
         else "second_cycle_bulletin.html"
     )
 
-    html = render_template(
+    return render_template(
         template_name,
         {
             "institution_name": settings.institution_name,
@@ -107,14 +120,12 @@ def _build_bulletin_html(result: dict) -> str:
         }
     )
 
-    return html
-
 
 def _build_blocks_bulletin_html(result: dict) -> str:
     if result["cycle"] != "Primer_Ciclo":
         raise ValueError("El boletín por bloques solo está disponible para Primer Ciclo.")
 
-    html = render_template(
+    return render_template(
         "first_cycle_blocks.html",
         {
             "institution_name": settings.institution_name,
@@ -125,27 +136,29 @@ def _build_blocks_bulletin_html(result: dict) -> str:
         }
     )
 
-    return html
-
 
 def _generate_bulletin_pdf_bytes(html: str) -> bytes:
     from weasyprint import HTML
 
-    pdf_bytes = HTML(
+    return HTML(
         string=html,
         base_url=str(_project_root())
     ).write_pdf()
 
-    return pdf_bytes
 
-
-def _append_philosophy_pdf(bulletin_pdf_bytes: bytes) -> bytes:
+def _get_philosophy_pdf_path() -> Path:
     philosophy_path = _resolve_path(settings.philosophy_pdf_path)
 
     if not philosophy_path.exists():
         raise FileNotFoundError(
             f"No se encontró el PDF de filosofía en: {philosophy_path}"
         )
+
+    return philosophy_path
+
+
+def _append_philosophy_pdf(bulletin_pdf_bytes: bytes) -> bytes:
+    philosophy_path = _get_philosophy_pdf_path()
 
     writer = PdfWriter()
 
@@ -162,6 +175,30 @@ def _append_philosophy_pdf(bulletin_pdf_bytes: bytes) -> bytes:
     output.seek(0)
 
     return output.getvalue()
+
+
+def _generate_final_pdf_from_result(
+    result: dict,
+    bulletin_type: str,
+    append_philosophy: bool = True
+) -> tuple[bytes, str]:
+    if bulletin_type == "blocks":
+        if result["cycle"] != "Primer_Ciclo":
+            raise ValueError("El boletín por bloques solo está disponible para estudiantes de Primer Ciclo.")
+        html = _build_blocks_bulletin_html(result)
+        filename = _build_blocks_pdf_filename(result)
+    else:
+        html = _build_bulletin_html(result)
+        filename = _build_pdf_filename(result)
+
+    bulletin_pdf_bytes = _generate_bulletin_pdf_bytes(html)
+
+    if append_philosophy:
+        final_pdf_bytes = _append_philosophy_pdf(bulletin_pdf_bytes)
+    else:
+        final_pdf_bytes = bulletin_pdf_bytes
+
+    return final_pdf_bytes, filename
 
 
 def _load_cycle_dataframe(cycle: str):
@@ -205,12 +242,7 @@ def generate_complete_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
     if not result.get("found"):
         raise ValueError(result.get("message", f"No se encontró el estudiante {student_id}"))
 
-    html = _build_bulletin_html(result)
-    bulletin_pdf_bytes = _generate_bulletin_pdf_bytes(html)
-    final_pdf_bytes = _append_philosophy_pdf(bulletin_pdf_bytes)
-    filename = _build_pdf_filename(result)
-
-    return final_pdf_bytes, filename
+    return _generate_final_pdf_from_result(result, "complete", append_philosophy=True)
 
 
 def generate_blocks_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
@@ -219,15 +251,7 @@ def generate_blocks_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
     if not result.get("found"):
         raise ValueError(result.get("message", f"No se encontró el estudiante {student_id}"))
 
-    if result["cycle"] != "Primer_Ciclo":
-        raise ValueError("El boletín por bloques solo está disponible para estudiantes de Primer Ciclo.")
-
-    html = _build_blocks_bulletin_html(result)
-    bulletin_pdf_bytes = _generate_bulletin_pdf_bytes(html)
-    final_pdf_bytes = _append_philosophy_pdf(bulletin_pdf_bytes)
-    filename = _build_blocks_pdf_filename(result)
-
-    return final_pdf_bytes, filename
+    return _generate_final_pdf_from_result(result, "blocks", append_philosophy=True)
 
 
 def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = "complete") -> tuple[bytes, str]:
@@ -247,8 +271,8 @@ def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = 
     if "CURSO" not in df.columns:
         raise ValueError("No existe la columna CURSO en la fuente de datos.")
 
-    requested_course_normalized = _normalize_text(course)
-    course_students = df[df["CURSO"].apply(_normalize_text) == requested_course_normalized]
+    requested_course_normalized = _normalize_course_name(course)
+    course_students = df[df["CURSO"].apply(_normalize_course_name) == requested_course_normalized]
 
     if course_students.empty:
         available_courses = sorted(
@@ -264,26 +288,45 @@ def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = 
             f"Cursos detectados: {available_preview}"
         )
 
+    total_students = len(course_students)
+    print(
+        f"[ZIP] Iniciando generación masiva | curso={course} | ciclo={normalized_cycle} | "
+        f"tipo={bulletin_type} | estudiantes={total_students}",
+        flush=True
+    )
+
     zip_buffer = BytesIO()
     used_names: set[str] = set()
 
     with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
-        for _, row in course_students.iterrows():
-            student_id = normalize_student_id(row.get("ID_ESTUDIANTE"))
+        for index, (_, row) in enumerate(course_students.iterrows(), start=1):
+            result = build_student_result_from_row(row, normalized_cycle)
+            student_name = safe_value(result["student"].get("nombre_estudiante"))
+            student_id = safe_value(result["student"].get("id_estudiante"))
 
-            if not student_id:
-                continue
+            print(
+                f"[ZIP] Generando {index}/{total_students} | {student_name} | ID={student_id}",
+                flush=True
+            )
 
-            if bulletin_type == "blocks":
-                pdf_bytes, filename = generate_blocks_bulletin_pdf(student_id)
-            else:
-                pdf_bytes, filename = generate_complete_bulletin_pdf(student_id)
+            pdf_bytes, filename = _generate_final_pdf_from_result(
+                result,
+                bulletin_type,
+                append_philosophy=False
+            )
 
             final_name = _unique_filename(filename, used_names)
             zip_file.writestr(final_name, pdf_bytes)
 
+        philosophy_path = _get_philosophy_pdf_path()
+        philosophy_filename = _unique_filename("Filosofia Institucional.pdf", used_names)
+        print("[ZIP] Agregando PDF de filosofía una sola vez al ZIP", flush=True)
+        zip_file.write(philosophy_path, arcname=philosophy_filename)
+
     zip_buffer.seek(0)
     zip_filename = _build_course_zip_filename(course, normalized_cycle, bulletin_type)
+
+    print(f"[ZIP] ZIP completado: {zip_filename}", flush=True)
 
     return zip_buffer.getvalue(), zip_filename
 

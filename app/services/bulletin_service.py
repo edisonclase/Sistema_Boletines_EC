@@ -21,21 +21,8 @@ def normalize_student_number(value) -> str:
     return text
 
 
-def find_student_by_id(student_id: str) -> dict:
-    student_id = normalize_student_id(student_id)
-
-    primer = load_primer_ciclo().copy()
-    segundo = load_segundo_ciclo().copy()
-
-    if "ID_ESTUDIANTE" in primer.columns:
-        primer["ID_ESTUDIANTE"] = primer["ID_ESTUDIANTE"].apply(normalize_student_id)
-
-    if "ID_ESTUDIANTE" in segundo.columns:
-        segundo["ID_ESTUDIANTE"] = segundo["ID_ESTUDIANTE"].apply(normalize_student_id)
-
-    student_primer = primer[primer["ID_ESTUDIANTE"] == student_id]
-    if not student_primer.empty:
-        row = student_primer.iloc[0]
+def build_student_result_from_row(row, cycle: str) -> dict:
+    if cycle == "Primer_Ciclo":
         return {
             "found": True,
             "cycle": "Primer_Ciclo",
@@ -54,9 +41,7 @@ def find_student_by_id(student_id: str) -> dict:
             }
         }
 
-    student_segundo = segundo[segundo["ID_ESTUDIANTE"] == student_id]
-    if not student_segundo.empty:
-        row = student_segundo.iloc[0]
+    if cycle == "Segundo_Ciclo":
         return {
             "found": True,
             "cycle": "Segundo_Ciclo",
@@ -73,6 +58,31 @@ def find_student_by_id(student_id: str) -> dict:
                 "modules": build_modules(row)
             }
         }
+
+    raise ValueError("Ciclo no válido. Debe ser 'Primer_Ciclo' o 'Segundo_Ciclo'.")
+
+
+def find_student_by_id(student_id: str) -> dict:
+    student_id = normalize_student_id(student_id)
+
+    primer = load_primer_ciclo().copy()
+    segundo = load_segundo_ciclo().copy()
+
+    if "ID_ESTUDIANTE" in primer.columns:
+        primer["ID_ESTUDIANTE"] = primer["ID_ESTUDIANTE"].apply(normalize_student_id)
+
+    if "ID_ESTUDIANTE" in segundo.columns:
+        segundo["ID_ESTUDIANTE"] = segundo["ID_ESTUDIANTE"].apply(normalize_student_id)
+
+    student_primer = primer[primer["ID_ESTUDIANTE"] == student_id]
+    if not student_primer.empty:
+        row = student_primer.iloc[0]
+        return build_student_result_from_row(row, "Primer_Ciclo")
+
+    student_segundo = segundo[segundo["ID_ESTUDIANTE"] == student_id]
+    if not student_segundo.empty:
+        row = student_segundo.iloc[0]
+        return build_student_result_from_row(row, "Segundo_Ciclo")
 
     return {
         "found": False,
