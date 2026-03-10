@@ -2,14 +2,17 @@ from __future__ import annotations
 
 import re
 import unicodedata
+import zipfile
 from io import BytesIO
 from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
 
 from app.core.settings import settings
-from app.services.bulletin_service import find_student_by_id
+from app.data.fetchers.google_sheets import load_primer_ciclo, load_segundo_ciclo
+from app.services.bulletin_service import find_student_by_id, normalize_student_id
 from app.services.html_service import render_template
+from app.utils.helpers import safe_value
 
 
 def _project_root() -> Path:
@@ -55,6 +58,17 @@ def _build_blocks_pdf_filename(result: dict) -> str:
     school_year = _sanitize_filename(settings.school_year)
 
     return f"{nombre} - {student_id} - {curso} - {school_year} - bloques.pdf"
+
+
+def _build_course_zip_filename(course: str, cycle: str, bulletin_type: str) -> str:
+    safe_course = _sanitize_filename(course)
+    safe_cycle = _sanitize_filename(cycle)
+    safe_school_year = _sanitize_filename(settings.school_year)
+
+    if bulletin_type == "blocks":
+        return f"{safe_course} - {safe_cycle} - {safe_school_year} - boletines_bloques.zip"
+
+    return f"{safe_course} - {safe_cycle} - {safe_school_year} - boletines_completos.zip"
 
 
 def _build_bulletin_html(result: dict) -> str:
@@ -132,6 +146,39 @@ def _append_philosophy_pdf(bulletin_pdf_bytes: bytes) -> bytes:
     return output.getvalue()
 
 
+def _load_cycle_dataframe(cycle: str):
+    if cycle == "Primer_Ciclo":
+        df = load_primer_ciclo().copy()
+    elif cycle == "Segundo_Ciclo":
+        df = load_segundo_ciclo().copy()
+    else:
+        raise ValueError("El ciclo debe ser 'Primer_Ciclo' o 'Segundo_Ciclo'.")
+
+    if "ID_ESTUDIANTE" in df.columns:
+        df["ID_ESTUDIANTE"] = df["ID_ESTUDIANTE"].apply(normalize_student_id)
+
+    if "CURSO" in df.columns:
+        df["CURSO"] = df["CURSO"].apply(safe_value)
+
+    return df
+
+
+def _unique_filename(filename: str, used_names: set[str]) -> str:
+    if filename not in used_names:
+        used_names.add(filename)
+        return filename
+
+    stem, suffix = filename.rsplit(".", 1)
+    counter = 2
+
+    while True:
+        candidate = f"{stem} ({counter}).{suffix}"
+        if candidate not in used_names:
+            used_names.add(candidate)
+            return candidate
+        counter += 1
+
+
 def generate_complete_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
     result = find_student_by_id(student_id)
 
@@ -161,3 +208,58 @@ def generate_blocks_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
     filename = _build_blocks_pdf_filename(result)
 
     return final_pdf_bytes, filename
+
+
+def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = "complete") -> tuple[bytes, str]:
+    course = safe_value(course)
+    cycle = safe_value(cycle)
+
+    if not course:
+        raise ValueError("Debes indicar el curso.")
+
+    if bulletin_type not in {"complete", "blocks"}:
+        raise ValueError("El tipo de boletín debe ser 'complete' o 'blocks'.")
+
+    if bulletin_type == "blocks" and cycle != "Primer_Ciclo":
+        raise ValueError("El boletín por bloques masivo solo está disponible para Primer Ciclo.")
+
+    df = _load_cycle_dataframe(cycle)
+
+    if "CURSO" not in df.columns:
+        raise ValueError("No existe la columna CURSO en la fuente de datos.")
+
+    course_students = df[df["CURSO"] == course]
+
+    if course_students.empty:
+        raise ValueError(f"No se encontraron estudiantes para el curso '{course}' en {cycle}.")
+
+    zip_buffer = BytesIO()
+    used_names: set[str] = set()
+
+    with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
+        for _, row in course_students.iterrows():
+            student_id = normalize_student_id(row.get("ID_ESTUDIANTE"))
+
+            if not student_id:
+                continue
+
+            if bulletin_type == "blocks":
+                pdf_bytes, filename = generate_blocks_bulletin_pdf(student_id)
+            else:
+                pdf_bytes, filename = generate_complete_bulletin_pdf(student_id)
+
+            final_name = _unique_filename(filename, used_names)
+            zip_file.writestr(final_name, pdf_bytes)
+
+    zip_buffer.seek(0)
+    zip_filename = _build_course_zip_filename(course, cycle, bulletin_type)
+
+    return zip_buffer.getvalue(), zip_filename
+
+
+def generate_course_complete_bulletins_zip(course: str, cycle: str) -> tuple[bytes, str]:
+    return generate_course_bulletins_zip(course=course, cycle=cycle, bulletin_type="complete")
+
+
+def generate_course_blocks_bulletins_zip(course: str) -> tuple[bytes, str]:
+    return generate_course_bulletins_zip(course=course, cycle="Primer_Ciclo", bulletin_type="blocks")
