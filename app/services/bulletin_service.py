@@ -12,6 +12,15 @@ def normalize_student_id(value) -> str:
     return text
 
 
+def normalize_student_number(value) -> str:
+    text = safe_value(value)
+
+    if text.endswith(".0"):
+        text = text[:-2]
+
+    return text
+
+
 def find_student_by_id(student_id: str) -> dict:
     student_id = normalize_student_id(student_id)
 
@@ -33,7 +42,7 @@ def find_student_by_id(student_id: str) -> dict:
             "student": {
                 "id_estudiante": safe_value(row.get("ID_ESTUDIANTE")),
                 "nombre_estudiante": safe_value(row.get("NOMBRE_ESTUDIANTE")),
-                "numero": safe_value(row.get("NUMERO")),
+                "numero": normalize_student_number(row.get("NUMERO")),
                 "curso": safe_value(row.get("CURSO")),
                 "prof_titular": safe_value(row.get("PROF_TITULAR")),
                 "asistencia_anual_pct": safe_value(row.get("ASIST_ANUAL_PCT")),
@@ -54,7 +63,7 @@ def find_student_by_id(student_id: str) -> dict:
             "student": {
                 "id_estudiante": safe_value(row.get("ID_ESTUDIANTE")),
                 "nombre_estudiante": safe_value(row.get("NOMBRE_ESTUDIANTE")),
-                "numero": safe_value(row.get("NUMERO")),
+                "numero": normalize_student_number(row.get("NUMERO")),
                 "curso": safe_value(row.get("CURSO")),
                 "prof_titular": safe_value(row.get("PROF_TITULAR")),
                 "situacion_promovido": safe_value(row.get("SITUACION_PROMOVIDO")),
