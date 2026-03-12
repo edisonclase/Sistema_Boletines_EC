@@ -65,18 +65,22 @@
         }
 
         .page-wrap {
-            overflow: auto;
-            padding: 10px;
+            overflow-x: auto;
+            overflow-y: auto;
+            padding: 10px 10px 4px 10px;
+            width: 100%;
         }
 
         .zoom-container {
-            transform-origin: top center;
-            transition: transform 0.18s ease;
+            width: max-content;
+            min-width: 100%;
+            transform-origin: top left;
+            transition: none;
         }
 
         .page {
             width: 1760px;
-            margin: 0 auto;
+            margin: 0;
             background: #fff;
             padding: 10px 12px 8px 12px;
             border: 2px solid #66BB6A;
@@ -370,17 +374,14 @@
                 width: 100%;
                 padding: 0;
                 overflow: visible;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                display: block;
             }
 
             .zoom-container {
                 transform: none !important;
+                zoom: 1 !important;
                 width: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                min-width: 100%;
             }
 
             .page {
@@ -393,20 +394,25 @@
     </style>
 </head>
 <body>
-    {% macro decimal_grade(value) %}
-        {% if value is none or value == "" %}
-            {{ "" }}
-        {% else %}
-            {{ "%.1f"|format(value|float) }}
-        {% endif %}
-    {% endmacro %}
+    {% macro format_grade(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- else -%}
+            {%- set text = (value|string).strip() -%}
+            {%- if text in ("", "0", "0.0", "0.00") -%}
+                {{- "" -}}
+            {%- else -%}
+                {{- "%.1f"|format(value|float) -}}
+            {%- endif -%}
+        {%- endif -%}
+    {%- endmacro %}
 
-    {% macro block_cell_class(value) %}
-        {% if value is not none and value != "" and (value|float) < 70 %}
+    {% macro block_cell_class(value) -%}
+        {%- set visible = format_grade(value)|trim -%}
+        {%- if visible != "" and (value|float) >= 1 and (value|float) < 70 -%}
             low-grade
-        {% else %}
-        {% endif %}
-    {% endmacro %}
+        {%- endif -%}
+    {%- endmacro %}
 
     {% set generated_at = generated_at if generated_at is defined else "" %}
     {% set generated_by = generated_by if generated_by is defined else settings.bulletin_generated_by %}
@@ -423,7 +429,7 @@
         </div>
     </div>
 
-    <div class="page-wrap">
+    <div class="page-wrap" id="pageWrap">
         <div class="zoom-container" id="zoomContainer">
             <div class="page">
                 <div class="header">
@@ -538,25 +544,25 @@
                         <tr>
                             <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
 
-                            <td class="{{ block_cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ decimal_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ format_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ format_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ format_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ format_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
 
-                            <td class="{{ block_cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ decimal_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ decimal_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ decimal_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ decimal_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ format_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ format_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ format_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ format_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
 
-                            <td class="{{ block_cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ decimal_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ decimal_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ decimal_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ decimal_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ format_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ format_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ format_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ format_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
 
-                            <td class="{{ block_cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ decimal_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ decimal_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
-                            <td class="{{ block_cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ format_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ format_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ format_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+                            <td class="{{ block_cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ format_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -625,7 +631,8 @@
         function updateZoom() {
             const container = document.getElementById("zoomContainer");
             const label = document.getElementById("zoomLabel");
-            container.style.transform = `scale(${currentZoom})`;
+
+            container.style.zoom = currentZoom;
             label.textContent = `${Math.round(currentZoom * 100)}%`;
         }
 
