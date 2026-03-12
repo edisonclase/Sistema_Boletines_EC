@@ -8,6 +8,7 @@ from app.services.bulletin_service import find_student_by_id
 from app.services.html_service import (
     render_template,
     render_second_cycle_modules_only,
+    render_second_cycle_blocks_and_modules,
 )
 from app.services.pdf_service import (
     generate_blocks_bulletin_pdf,
@@ -88,6 +89,32 @@ def get_student_bulletin_blocks_html(student_id: str):
             "school_year": settings.school_year,
         }
     )
+
+    return HTMLResponse(content=html)
+
+
+# -----------------------------
+# NUEVO: SEGUNDO CICLO BLOQUES + MÓDULOS (HTML)
+# -----------------------------
+
+
+@router.get("/{student_id}/second-cycle-blocks-html", response_class=HTMLResponse)
+def get_student_second_cycle_blocks_html(student_id: str):
+    result = find_student_by_id(student_id)
+
+    if not result.get("found"):
+        return HTMLResponse(
+            content=f"<h1>No se encontró ningún estudiante con el ID {student_id}</h1>",
+            status_code=404
+        )
+
+    if result["cycle"] != "Segundo_Ciclo":
+        return HTMLResponse(
+            content="<h1>El boletín por bloques y módulos solo está disponible para Segundo Ciclo.</h1>",
+            status_code=400
+        )
+
+    html = render_second_cycle_blocks_and_modules(result["student"])
 
     return HTMLResponse(content=html)
 
