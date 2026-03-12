@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte por Bloques y Módulos - Segundo Ciclo</title>
+    <style>
+        @page {
+            size: Letter landscape;
+            margin: 0.16in;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111;
+            margin: 0;
+            padding: 0;
+            font-size: 10px;
+            background: #f4f7f4;
+        }
+
+        .screen-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background: #ffffff;
+            border-bottom: 1px solid #d7e8d8;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar-left {
+            font-size: 12px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .zoom-btn {
+            border: 1px solid #bdd8c0;
+            background: #fff;
+            border-radius: 6px;
+            padding: 5px 9px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .zoom-label {
+            font-size: 12px;
+            min-width: 52px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .page-wrap {
+            overflow: auto;
+            padding: 10px;
+        }
+
+        .zoom-container {
+            transform-origin: top center;
+            transition: transform 0.18s ease;
+        }
+
+        .page {
+            width: 1760px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 10px 12px 8px 12px;
+            border: 2px solid #66BB6A;
+            border-radius: 10px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            width: 100%;
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+        }
+
+        .logo-cell {
+            width: 95px;
+            text-align: center;
+        }
+
+        .header-logo {
+            width: 82px;
+            height: 82px;
+            object-fit: contain;
+            display: inline-block;
+        }
+
+        .title-cell {
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .institution-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1.05;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .institution-motto {
+            margin-top: 2px;
+            font-size: 8px;
+            font-style: italic;
+            color: #4b4b4b;
+        }
+
+        .institution-contact {
+            margin-top: 3px;
+            font-size: 7.4px;
+            line-height: 1.15;
+            color: #333;
+        }
+
+        .department-title {
+            margin-top: 4px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .bulletin-title {
+            margin-top: 2px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .meta-line {
+            margin-top: 3px;
+            font-size: 7px;
+            color: #444;
+        }
+
+        .info-box {
+            margin-bottom: 10px;
+            border: 1.5px solid #66BB6A;
+            border-radius: 8px;
+            overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table th,
+        .info-table td {
+            border: 1px solid #94c79a;
+            padding: 3px 6px;
+            font-size: 7.8px;
+            height: 20px;
+        }
+
+        .info-table th {
+            width: 180px;
+            text-align: left;
+            background: #E8F5E9;
+            color: #111;
+        }
+
+        .info-table td {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .section-title {
+            margin: 4px 0 0 0;
+            padding: 3px 6px;
+            background: #E8F5E9;
+            border: 1.5px solid #66BB6A;
+            border-bottom: 0;
+            border-radius: 8px 8px 0 0;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #111;
+            page-break-after: avoid;
+        }
+
+        .academic-table,
+        .modules-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 10px;
+            border: 1.5px solid #66BB6A;
+        }
+
+        .academic-table {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .academic-table col.subject-col-width {
+            width: 150px;
+        }
+
+        .academic-table col.grade-col-width {
+            width: 36px;
+        }
+
+        .academic-table th,
+        .academic-table td,
+        .modules-table th,
+        .modules-table td {
+            border: 1px solid #94c79a;
+            padding: 4px 3px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .academic-table thead th,
+        .modules-table thead th {
+            background: #E8F5E9;
+            color: #111;
+            font-size: 7px;
+            text-transform: uppercase;
+        }
+
+        .academic-table thead .period-row th {
+            background: #C8E6C9;
+            font-weight: bold;
+        }
+
+        .subject-name,
+        .module-name {
+            text-align: left !important;
+            font-weight: bold;
+            color: #111;
+        }
+
+        .low-grade {
+            background: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};
+            font-weight: bold;
+        }
+
+        .ra-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .ra-chip {
+            border: 1px solid #94c79a;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 7px;
+            background: #f4ffef;
+            white-space: nowrap;
+        }
+
+        .comment-box {
+            width: 100%;
+            border: 1.5px solid #66BB6A;
+            border-radius: 8px;
+            padding: 4px 8px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            background: #fcfffc;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .comment-title {
+            font-weight: bold;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            color: #111;
+            font-size: 7.6px;
+        }
+
+        .muted {
+            color: #555;
+            font-size: 6.9px;
+            line-height: 1.18;
+        }
+
+        .signatures {
+            width: 100%;
+            margin-top: 14px;
+            margin-bottom: 8px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .signatures-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signatures-table td {
+            width: 50%;
+            text-align: center;
+            padding: 0 22px;
+            vertical-align: top;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            margin: 24px auto 4px auto;
+            width: 68%;
+        }
+
+        .signature-name {
+            font-weight: bold;
+            font-size: 7.5px;
+        }
+
+        .signature-role {
+            font-size: 6.7px;
+        }
+
+        .footer {
+            margin-top: 4px;
+            border-top: 1px solid #b8d8ba;
+            padding-top: 3px;
+            font-size: 6px;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .footer-left,
+        .footer-right {
+            width: 50%;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        @media print {
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+
+            body {
+                display: block;
+            }
+
+            .screen-toolbar {
+                display: none !important;
+            }
+
+            .page-wrap {
+                width: 100%;
+                padding: 0;
+                overflow: visible;
+            }
+
+            .zoom-container {
+                transform: none !important;
+                width: 100%;
+            }
+
+            .page {
+                width: 100%;
+                margin: 0 auto;
+                box-shadow: none;
+                border-radius: 0;
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+{% macro format_grade(value) -%}
+    {%- if value is not defined or value is none -%}
+        {{- "" -}}
+    {%- else -%}
+        {%- set text = (value|string).strip() -%}
+        {%- if text in ("", "0", "0.0", "0.00") -%}
+            {{- "" -}}
+        {%- else -%}
+            {{- text -}}
+        {%- endif -%}
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro low_class(value) -%}
+    {%- set visible = format_grade(value)|trim -%}
+    {%- if visible != "" and (value|float) < 70 -%}
+        low-grade
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro grade_cell(value) -%}
+    {%- set visible = format_grade(value)|trim -%}
+    <td class="{{ low_class(value) if visible else '' }}">{{ visible }}</td>
+{%- endmacro %}
+
+{% set generated_at = generated_at if generated_at is defined else "" %}
+{% set generated_by = generated_by if generated_by is defined else "Sistema de Boletines" %}
+{% set generated_role = generated_role if generated_role is defined else "" %}
+{% set director_name = director_name if director_name is defined else "" %}
+{% set school_year = school_year if school_year is defined else "" %}
+{% set institution_logo_src = institution_logo_src if institution_logo_src is defined else "" %}
+{% set minerd_logo_src = minerd_logo_src if minerd_logo_src is defined else "" %}
+{% set modules_list = student.modules_with_ras if student.modules_with_ras else student.modules %}
+
+<div class="screen-toolbar">
+    <div class="toolbar-left">Vista previa del boletín por bloques y módulos</div>
+    <div class="toolbar-right">
+        <button class="zoom-btn" type="button" onclick="changeZoom(-0.1)">−</button>
+        <div class="zoom-label" id="zoomLabel">100%</div>
+        <button class="zoom-btn" type="button" onclick="changeZoom(0.1)">+</button>
+        <button class="zoom-btn" type="button" onclick="resetZoom()">Restablecer</button>
+    </div>
+</div>
+
+<div class="page-wrap">
+    <div class="zoom-container" id="zoomContainer">
+        <div class="page">
+            <div class="header">
+                <table class="header-table">
+                    <tr>
+                        <td class="logo-cell">
+                            {% if institution_logo_src %}
+                                <img src="{{ institution_logo_src }}" alt="Logo institucional" class="header-logo">
+                            {% endif %}
+                        </td>
+                        <td class="title-cell">
+                            <div class="institution-name">{{ settings.institution_name }}</div>
+                            <div class="institution-motto">
+                                Politécnico Profesor José Mercedes Alvino
+                            </div>
+                            <div class="institution-contact">
+                                Código del centro: {{ settings.institution_code }}
+                                {% if school_year %} · Año escolar: {{ school_year }}{% endif %}
+                            </div>
+                            <div class="department-title">Registro y Control Académico</div>
+                            <div class="bulletin-title">Reporte por bloques de competencias y módulos · Segundo ciclo</div>
+                            {% if generated_at or generated_by or generated_role %}
+                                <div class="meta-line">
+                                    {% if generated_at %}Generado: {{ generated_at }}{% endif %}
+                                    {% if generated_by %} · Por: {{ generated_by }}{% endif %}
+                                    {% if generated_role %} · Rol: {{ generated_role }}{% endif %}
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="logo-cell">
+                            {% if minerd_logo_src %}
+                                <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="header-logo">
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="info-box">
+                <table class="info-table">
+                    <tr>
+                        <th>Nombre del estudiante</th>
+                        <td>{{ student.nombre_estudiante or "" }}</td>
+                        <th>ID del estudiante</th>
+                        <td>{{ student.id_estudiante or "" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Curso</th>
+                        <td>{{ student.curso or "" }}</td>
+                        <th>Número</th>
+                        <td>{{ student.numero or "" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Profesor(a) titular</th>
+                        <td>{{ student.prof_titular or "" }}</td>
+                        <th>Ciclo</th>
+                        <td>Segundo Ciclo</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section-title">Asignaturas por bloques de competencias</div>
+            <table class="academic-table">
+                <colgroup>
+                    <col class="subject-col-width">
+                    {% for _ in range(16) %}
+                        <col class="grade-col-width">
+                    {% endfor %}
+                </colgroup>
+                <thead>
+                    <tr class="period-row">
+                        <th rowspan="2">Asignatura</th>
+                        <th colspan="4">Período 1</th>
+                        <th colspan="4">Período 2</th>
+                        <th colspan="4">Período 3</th>
+                        <th colspan="4">Período 4</th>
+                    </tr>
+                    <tr>
+                        <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
+                        <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
+                        <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
+                        <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject in student.subjects %}
+                        <tr>
+                            <td class="subject-name">{{ subject.asignatura or subject.subject or "" }}</td>
+                            {{ grade_cell(subject.p1_c1) }}
+                            {{ grade_cell(subject.p1_c2) }}
+                            {{ grade_cell(subject.p1_c3) }}
+                            {{ grade_cell(subject.p1_c4) }}
+                            {{ grade_cell(subject.p2_c1) }}
+                            {{ grade_cell(subject.p2_c2) }}
+                            {{ grade_cell(subject.p2_c3) }}
+                            {{ grade_cell(subject.p2_c4) }}
+                            {{ grade_cell(subject.p3_c1) }}
+                            {{ grade_cell(subject.p3_c2) }}
+                            {{ grade_cell(subject.p3_c3) }}
+                            {{ grade_cell(subject.p3_c4) }}
+                            {{ grade_cell(subject.p4_c1) }}
+                            {{ grade_cell(subject.p4_c2) }}
+                            {{ grade_cell(subject.p4_c3) }}
+                            {{ grade_cell(subject.p4_c4) }}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="section-title">Módulos y resultados de aprendizaje</div>
+            <table class="modules-table">
+                <colgroup>
+                    <col style="width: 210px;">
+                    <col style="width: auto;">
+                    <col style="width: 55px;">
+                    <col style="width: 65px;">
+                    <col style="width: 65px;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Módulo</th>
+                        <th>Resultados de aprendizaje</th>
+                        <th>CF</th>
+                        <th>Situ_A</th>
+                        <th>Situ_R</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for module in modules_list %}
+                        <tr>
+                            <td class="module-name">{{ module.modulo or "" }}</td>
+                            <td>
+                                <div class="ra-list">
+                                    {% if module.ras_visibles %}
+                                        {% for ra in module.ras_visibles %}
+                                            {% set ra_visible = format_grade(ra.value)|trim %}
+                                            <span class="ra-chip {{ low_class(ra.value) if ra_visible else '' }}">
+                                                {{ ra.label }}{% if ra_visible %}: {{ ra_visible }}{% endif %}
+                                            </span>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for idx in range(1, 11) %}
+                                            {% set key = 'ra' ~ idx %}
+                                            {% if module[key] is defined %}
+                                                {% set ra_visible = format_grade(module[key])|trim %}
+                                                {% if ra_visible %}
+                                                    <span class="ra-chip {{ low_class(module[key]) }}">{{ 'RA' ~ idx }}: {{ ra_visible }}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </td>
+                            {{ grade_cell(module.cf) }}
+                            <td>{{ module.situ_a or "" }}</td>
+                            <td>{{ module.situ_r or "" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if student.comentario_final %}
+                <div class="comment-box">
+                    <div class="comment-title">Observaciones</div>
+                    <div class="muted">{{ student.comentario_final }}</div>
+                </div>
+            {% endif %}
+
+            <div class="signatures">
+                <table class="signatures-table">
+                    <tr>
+                        <td>
+                            <div class="signature-line"></div>
+                            <div class="signature-name">{{ director_name }}</div>
+                            <div class="signature-role">Director(a)</div>
+                        </td>
+                        <td>
+                            <div class="signature-line"></div>
+                            <div class="signature-name">{{ student.prof_titular or "" }}</div>
+                            <div class="signature-role">Profesor(a) Titular</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="footer">
+                <div class="footer-left">
+                    {{ settings.app_name }} · Desarrollado por Edison Clase
+                </div>
+                <div class="footer-right">
+                    {% if generated_at %}{{ generated_at }}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentZoom = 1;
+
+    function applyZoom() {
+        const container = document.getElementById("zoomContainer");
+        const label = document.getElementById("zoomLabel");
+        if (container) {
+            container.style.transform = `scale(${currentZoom})`;
+        }
+        if (label) {
+            label.textContent = `${Math.round(currentZoom * 100)}%`;
+        }
+    }
+
+    function changeZoom(delta) {
+        currentZoom = Math.max(0.5, Math.min(1.5, currentZoom + delta));
+        applyZoom();
+    }
+
+    function resetZoom() {
+        currentZoom = 1;
+        applyZoom();
+    }
+
+    applyZoom();
+</script>
+</body>
+</html>
