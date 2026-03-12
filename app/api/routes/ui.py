@@ -53,7 +53,7 @@ def home():
 
             .shell {
                 width: 100%;
-                max-width: 1180px;
+                max-width: 1280px;
             }
 
             .hero {
@@ -82,7 +82,7 @@ def home():
 
             .hero-subtitle {
                 margin: 10px auto 0 auto;
-                max-width: 760px;
+                max-width: 820px;
                 font-size: 16px;
                 color: var(--muted);
                 line-height: 1.55;
@@ -90,7 +90,7 @@ def home():
 
             .grid {
                 display: grid;
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1.15fr 1fr;
                 gap: 22px;
             }
 
@@ -143,6 +143,27 @@ def home():
                 color: var(--accent);
             }
 
+            .subsection {
+                margin-top: 16px;
+                padding-top: 14px;
+                border-top: 1px dashed var(--line-strong);
+            }
+
+            .subsection:first-of-type {
+                margin-top: 8px;
+                padding-top: 0;
+                border-top: none;
+            }
+
+            .subsection-title {
+                margin: 0 0 10px 0;
+                font-size: 13px;
+                font-weight: bold;
+                color: var(--primary);
+                text-transform: uppercase;
+                letter-spacing: 0.4px;
+            }
+
             .form-group {
                 margin-bottom: 15px;
             }
@@ -180,6 +201,10 @@ def home():
                 margin-top: 8px;
             }
 
+            .buttons-grid.three {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
             button {
                 border: none;
                 border-radius: 12px;
@@ -188,6 +213,8 @@ def home():
                 font-weight: bold;
                 cursor: pointer;
                 transition: transform 0.08s ease, opacity 0.08s ease, box-shadow 0.12s ease;
+                min-height: 58px;
+                line-height: 1.2;
             }
 
             button:hover {
@@ -226,6 +253,22 @@ def home():
                 border: 1px solid var(--line-strong);
             }
 
+            .btn-success {
+                background: #0f766e;
+                color: white;
+            }
+
+            .btn-violet {
+                background: #5b21b6;
+                color: white;
+            }
+
+            .btn-gray {
+                background: #eef2f7;
+                color: #24324a;
+                border: 1px solid #d2dceb;
+            }
+
             .help-box {
                 margin-top: 18px;
                 padding: 14px 15px;
@@ -241,6 +284,17 @@ def home():
                 color: var(--accent);
             }
 
+            .status-box {
+                margin-top: 14px;
+                padding: 12px 14px;
+                border-radius: 12px;
+                background: #eef6ff;
+                border: 1px solid #cfe0fb;
+                font-size: 13px;
+                color: #35517d;
+                line-height: 1.5;
+            }
+
             .footer {
                 margin-top: 18px;
                 text-align: center;
@@ -252,13 +306,13 @@ def home():
                 color: var(--accent);
             }
 
-            @media (max-width: 980px) {
+            @media (max-width: 1100px) {
                 .grid {
                     grid-template-columns: 1fr;
                 }
             }
 
-            @media (max-width: 640px) {
+            @media (max-width: 700px) {
                 .wrapper {
                     padding: 16px;
                 }
@@ -271,7 +325,8 @@ def home():
                     font-size: 30px;
                 }
 
-                .buttons-grid {
+                .buttons-grid,
+                .buttons-grid.three {
                     grid-template-columns: 1fr;
                 }
             }
@@ -285,7 +340,8 @@ def home():
                     <h1 class="hero-title">Sistema Automatizado de Boletines Académicos</h1>
                     <p class="hero-subtitle">
                         Genera boletines individuales y masivos desde una interfaz simple.
-                        Esta versión ya permite trabajar por estudiante y por curso.
+                        Esta versión permite trabajar con boletín completo, por bloques,
+                        por módulos y por bloques + módulos según el ciclo.
                     </p>
                 </div>
 
@@ -313,30 +369,58 @@ def home():
                                 />
                             </div>
 
-                            <div class="buttons-grid">
-                                <button class="btn-primary" onclick="openRoute('/students/' + getStudentId() + '/bulletin-html')">
-                                    Ver boletín completo (HTML)
-                                </button>
+                            <div class="subsection">
+                                <h4 class="subsection-title">Boletín general</h4>
+                                <div class="buttons-grid">
+                                    <button class="btn-primary" onclick="openRoute('/students/' + getStudentId() + '/bulletin-html')">
+                                        Ver boletín completo (HTML)
+                                    </button>
 
-                                <button class="btn-secondary" onclick="openRoute('/students/' + getStudentId() + '/bulletin-pdf')">
-                                    Descargar boletín completo (PDF)
-                                </button>
+                                    <button class="btn-secondary" onclick="openRoute('/students/' + getStudentId() + '/bulletin-pdf')">
+                                        Descargar boletín completo (PDF)
+                                    </button>
+                                </div>
+                            </div>
 
-                                <button class="btn-soft" onclick="openRoute('/students/' + getStudentId() + '/bulletin-blocks-html')">
-                                    Ver boletín por bloques (HTML)
-                                </button>
+                            <div class="subsection">
+                                <h4 class="subsection-title">Primer ciclo</h4>
+                                <div class="buttons-grid">
+                                    <button class="btn-soft" onclick="openRoute('/students/' + getStudentId() + '/bulletin-blocks-html')">
+                                        Ver boletín por bloques (HTML)
+                                    </button>
 
-                                <button class="btn-dark" onclick="openRoute('/students/' + getStudentId() + '/bulletin-blocks-pdf')">
-                                    Descargar boletín por bloques (PDF)
-                                </button>
+                                    <button class="btn-dark" onclick="openRoute('/students/' + getStudentId() + '/bulletin-blocks-pdf')">
+                                        Descargar boletín por bloques (PDF)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="subsection">
+                                <h4 class="subsection-title">Segundo ciclo</h4>
+                                <div class="buttons-grid">
+                                    <button class="btn-success" onclick="openRoute('/students/' + getStudentId() + '/second-cycle-blocks-html')">
+                                        Ver bloques + módulos (HTML)
+                                    </button>
+
+                                    <button class="btn-violet" onclick="openRoute('/students/' + getStudentId() + '/second-cycle-blocks-pdf')">
+                                        Descargar bloques + módulos (PDF)
+                                    </button>
+
+                                    <button class="btn-gray" onclick="openRoute('/students/' + getStudentId() + '/modules-only-html')">
+                                        Ver boletín de módulos (HTML)
+                                    </button>
+
+                                    <button class="btn-outline" onclick="openRoute('/students/' + getStudentId() + '/modules-only-pdf')">
+                                        Descargar boletín de módulos (PDF)
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
                         <div class="help-box">
-                            <strong>Nota:</strong> el boletín por bloques está disponible actualmente
-                            para <strong>Primer Ciclo</strong>. La versión por bloques de
-                            <strong>Segundo Ciclo</strong> está en desarrollo. El boletín completo
-                            funciona según el ciclo del estudiante.
+                            <strong>Disponible en la plataforma:</strong>
+                            <br>• <strong>Primer Ciclo:</strong> boletín completo y boletín por bloques.
+                            <br>• <strong>Segundo Ciclo:</strong> boletín completo, boletín de módulos y boletín por bloques + módulos.
                         </div>
                     </div>
 
@@ -355,7 +439,7 @@ def home():
 
                             <div class="form-group">
                                 <label for="cycle">Ciclo</label>
-                                <select id="cycle">
+                                <select id="cycle" onchange="updateMassiveHelp()">
                                     <option value="Primer_Ciclo">Primer Ciclo</option>
                                     <option value="Segundo_Ciclo">Segundo Ciclo</option>
                                 </select>
@@ -366,7 +450,7 @@ def home():
                                 <input
                                     type="text"
                                     id="course"
-                                    placeholder="Ejemplo: 2do A"
+                                    placeholder="Ejemplo: 2do A o 6to A"
                                 />
                             </div>
 
@@ -378,13 +462,25 @@ def home():
                                 <button class="btn-outline" onclick="openBlocksZip()">
                                     Descargar ZIP por bloques
                                 </button>
+
+                                <button class="btn-dark" onclick="openSecondCycleModulesZip()">
+                                    Descargar ZIP solo módulos
+                                </button>
+
+                                <button class="btn-violet" onclick="openSecondCycleBlocksAndModulesZip()">
+                                    Descargar ZIP bloques + módulos
+                                </button>
+                            </div>
+
+                            <div class="status-box" id="massiveStatus">
+                                Para <strong>Primer Ciclo</strong> están disponibles el ZIP completo y el ZIP por bloques.
                             </div>
                         </div>
 
                         <div class="help-box">
-                            <strong>Nota:</strong> el ZIP por bloques se genera solo para
-                            <strong>Primer Ciclo</strong>. Para <strong>Segundo Ciclo</strong>,
-                            utiliza por ahora el ZIP completo mientras finaliza la versión por bloques.
+                            <strong>Comportamiento por ciclo:</strong>
+                            <br>• <strong>Primer Ciclo:</strong> ZIP completo + ZIP por bloques.
+                            <br>• <strong>Segundo Ciclo:</strong> ZIP completo + ZIP solo módulos + ZIP bloques + módulos.
                         </div>
                     </div>
                 </div>
@@ -444,6 +540,41 @@ def home():
                 openRoute('/students/course/Primer_Ciclo/' + course + '/bulletins-blocks-zip');
             }
 
+            function openSecondCycleModulesZip() {
+                const cycle = getCycle();
+
+                if (cycle !== 'Segundo_Ciclo') {
+                    alert('El ZIP solo de módulos está disponible para Segundo Ciclo.');
+                    return;
+                }
+
+                const course = getCourse();
+                openRoute('/students/course/Segundo_Ciclo/' + course + '/bulletins-modules-zip');
+            }
+
+            function openSecondCycleBlocksAndModulesZip() {
+                const cycle = getCycle();
+
+                if (cycle !== 'Segundo_Ciclo') {
+                    alert('El ZIP de bloques + módulos está disponible para Segundo Ciclo.');
+                    return;
+                }
+
+                const course = getCourse();
+                openRoute('/students/course/Segundo_Ciclo/' + course + '/bulletins-blocks-and-modules-zip');
+            }
+
+            function updateMassiveHelp() {
+                const cycle = getCycle();
+                const status = document.getElementById("massiveStatus");
+
+                if (cycle === "Primer_Ciclo") {
+                    status.innerHTML = 'Para <strong>Primer Ciclo</strong> están disponibles el ZIP completo y el ZIP por bloques.';
+                } else {
+                    status.innerHTML = 'Para <strong>Segundo Ciclo</strong> están disponibles el ZIP completo, el ZIP solo módulos y el ZIP bloques + módulos.';
+                }
+            }
+
             document.getElementById("studentId").addEventListener("keydown", function(event) {
                 if (event.key === "Enter") {
                     openRoute('/students/' + getStudentId() + '/bulletin-pdf');
@@ -455,6 +586,8 @@ def home():
                     openCompleteZip();
                 }
             });
+
+            updateMassiveHelp();
         </script>
     </body>
     </html>
