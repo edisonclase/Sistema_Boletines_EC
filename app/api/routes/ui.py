@@ -592,6 +592,11 @@ def home():
             let lastIndividualQuery = null;
             let lastMassiveQuery = null;
 
+            const STORAGE_KEYS = {
+                lastIndividualQuery: "clase_edutech_last_individual_query",
+                lastMassiveQuery: "clase_edutech_last_massive_query"
+            };
+
             function openRoute(url) {
                 window.open(url, "_blank");
             }
@@ -633,6 +638,35 @@ def home():
                     return "";
                 }
                 return select.options[select.selectedIndex]?.textContent || "";
+            }
+
+            function persistToStorage(key, value) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                } catch (error) {
+                    console.warn("No se pudo guardar en localStorage:", error);
+                }
+            }
+
+            function loadFromStorage(key) {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (!raw) {
+                        return null;
+                    }
+                    return JSON.parse(raw);
+                } catch (error) {
+                    console.warn("No se pudo leer desde localStorage:", error);
+                    return null;
+                }
+            }
+
+            function removeFromStorage(key) {
+                try {
+                    localStorage.removeItem(key);
+                } catch (error) {
+                    console.warn("No se pudo limpiar localStorage:", error);
+                }
             }
 
             async function fetchJson(url) {
@@ -715,6 +749,7 @@ def home():
 
             function saveLastQuery(data) {
                 lastIndividualQuery = data;
+                persistToStorage(STORAGE_KEYS.lastIndividualQuery, data);
                 document.getElementById("lastQueryCycle").textContent = getCycleLabel(data.cycle);
                 document.getElementById("lastQueryCourse").textContent = data.course || "-";
                 document.getElementById("lastQueryStudent").textContent = data.studentLabel || data.studentId || "-";
@@ -723,10 +758,23 @@ def home():
 
             function clearLastQuery() {
                 lastIndividualQuery = null;
+                removeFromStorage(STORAGE_KEYS.lastIndividualQuery);
                 document.getElementById("lastQueryBox").style.display = "none";
                 document.getElementById("lastQueryCycle").textContent = "-";
                 document.getElementById("lastQueryCourse").textContent = "-";
                 document.getElementById("lastQueryStudent").textContent = "-";
+            }
+
+            function restoreLastQuery() {
+                const saved = loadFromStorage(STORAGE_KEYS.lastIndividualQuery);
+                if (!saved || !saved.url) {
+                    return;
+                }
+                lastIndividualQuery = saved;
+                document.getElementById("lastQueryCycle").textContent = getCycleLabel(saved.cycle);
+                document.getElementById("lastQueryCourse").textContent = saved.course || "-";
+                document.getElementById("lastQueryStudent").textContent = saved.studentLabel || saved.studentId || "-";
+                document.getElementById("lastQueryBox").style.display = "block";
             }
 
             function repeatLastQuery() {
@@ -738,6 +786,7 @@ def home():
 
             function saveLastMassiveQuery(data) {
                 lastMassiveQuery = data;
+                persistToStorage(STORAGE_KEYS.lastMassiveQuery, data);
                 document.getElementById("lastMassiveCycle").textContent = getCycleLabel(data.cycle);
                 document.getElementById("lastMassiveCourse").textContent = data.course || "-";
                 document.getElementById("lastMassiveType").textContent = data.typeLabel || "-";
@@ -746,11 +795,24 @@ def home():
 
             function clearLastMassiveQuery() {
                 lastMassiveQuery = null;
+                removeFromStorage(STORAGE_KEYS.lastMassiveQuery);
                 document.getElementById("lastMassiveQueryBox").style.display = "none";
                 document.getElementById("lastMassiveCycle").textContent = "-";
                 document.getElementById("lastMassiveCourse").textContent = "-";
                 document.getElementById("lastMassiveType").textContent = "-";
                 updateMassiveButtons();
+            }
+
+            function restoreLastMassiveQuery() {
+                const saved = loadFromStorage(STORAGE_KEYS.lastMassiveQuery);
+                if (!saved || !saved.url) {
+                    return;
+                }
+                lastMassiveQuery = saved;
+                document.getElementById("lastMassiveCycle").textContent = getCycleLabel(saved.cycle);
+                document.getElementById("lastMassiveCourse").textContent = saved.course || "-";
+                document.getElementById("lastMassiveType").textContent = saved.typeLabel || "-";
+                document.getElementById("lastMassiveQueryBox").style.display = "block";
             }
 
             function repeatLastMassiveQuery() {
@@ -1005,6 +1067,8 @@ def home():
                 updateMassiveButtons();
                 clearLastQuery();
                 clearLastMassiveQuery();
+                restoreLastQuery();
+                restoreLastMassiveQuery();
             }
 
             initializeUI();
