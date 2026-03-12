@@ -12,7 +12,7 @@ def home():
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Sistema de Boletines Automatizados EC</title>
+        <title>Sistema Automatizado de Boletines Académicos</title>
         <style>
             * {
                 box-sizing: border-box;
@@ -282,7 +282,7 @@ def home():
             <div class="shell">
                 <div class="hero">
                     <div class="hero-badge">Plataforma de generación académica</div>
-                    <h1 class="hero-title">Sistema de Boletines Automatizados EC</h1>
+                    <h1 class="hero-title">Sistema Automatizado de Boletines Académicos</h1>
                     <p class="hero-subtitle">
                         Genera boletines individuales y masivos desde una interfaz simple.
                         Esta versión ya permite trabajar por estudiante y por curso.
@@ -334,8 +334,9 @@ def home():
 
                         <div class="help-box">
                             <strong>Nota:</strong> el boletín por bloques está disponible actualmente
-                            para <strong>Primer Ciclo</strong>. El boletín completo funciona según el
-                            ciclo del estudiante.
+                            para <strong>Primer Ciclo</strong>. La versión por bloques de
+                            <strong>Segundo Ciclo</strong> está en desarrollo. El boletín completo
+                            funciona según el ciclo del estudiante.
                         </div>
                     </div>
 
@@ -382,8 +383,8 @@ def home():
 
                         <div class="help-box">
                             <strong>Nota:</strong> el ZIP por bloques se genera solo para
-                            <strong>Primer Ciclo</strong>. Si seleccionas Segundo Ciclo,
-                            usa el ZIP completo.
+                            <strong>Primer Ciclo</strong>. Para <strong>Segundo Ciclo</strong>,
+                            utiliza por ahora el ZIP completo mientras finaliza la versión por bloques.
                         </div>
                     </div>
                 </div>
