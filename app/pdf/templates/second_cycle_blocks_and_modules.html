@@ -284,7 +284,6 @@
             padding-right: 4px !important;
         }
 
-        .subject-name,
         .module-name {
             text-align: left !important;
             font-weight: bold;
@@ -304,6 +303,7 @@
             font-weight: bold;
         }
 
+        .legend-box,
         .comment-box {
             width: 100%;
             border: 1.5px solid #66BB6A;
@@ -316,6 +316,7 @@
             break-inside: avoid;
         }
 
+        .legend-title,
         .comment-title {
             font-weight: bold;
             margin-bottom: 3px;
@@ -324,6 +325,13 @@
             font-size: 7.6px;
         }
 
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 12px;
+        }
+
+        .legend-item,
         .muted {
             color: #555;
             font-size: 6.9px;
@@ -534,7 +542,6 @@
             <table class="academic-table">
                 <colgroup>
                     <col class="subject-col-width">
-
                     <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
                     <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
                     <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
@@ -543,7 +550,6 @@
                 <thead>
                     <tr class="group-row">
                         <th class="subject-col" rowspan="2">ASIGNATURA</th>
-
                         <th colspan="4">COMUNICATIVA</th>
                         <th colspan="4">PENSAMIENTO LÓGICO,<br>CREATIVO Y CRÍTICO</th>
                         <th colspan="4">CIENTÍFICA Y TÉCNICA,<br>AMBIENTAL Y SALUD</th>
@@ -654,12 +660,22 @@
                 </tbody>
             </table>
 
-            {% if student.comentario_final %}
-                <div class="comment-box">
-                    <div class="comment-title">Observaciones</div>
-                    <div class="muted">{{ student.comentario_final }}</div>
+            <div class="legend-box">
+                <div class="legend-title">Leyenda de competencias</div>
+                <div class="legend-grid">
+                    <div class="legend-item"><strong>C1:</strong> Comunicativa</div>
+                    <div class="legend-item"><strong>C2:</strong> Pensamiento lógico, creativo y crítico</div>
+                    <div class="legend-item"><strong>C3:</strong> Científica y técnica, ambiental y salud</div>
+                    <div class="legend-item"><strong>C4:</strong> Ética y ciudadana, desarrollo personal y espiritual</div>
                 </div>
-            {% endif %}
+            </div>
+
+            <div class="comment-box">
+                <div class="comment-title">Comentario / Observaciones</div>
+                <div class="muted">
+                    {{ student.comentario_final if student.comentario_final else "&nbsp;" }}
+                </div>
+            </div>
 
             <div class="signatures">
                 <table class="signatures-table">

@@ -16,6 +16,7 @@ from app.services.bulletin_service import (
     normalize_student_id,
 )
 from app.services.html_service import (
+    render_second_cycle_blocks_and_modules,
     render_second_cycle_modules_only,
     render_template,
 )
@@ -105,6 +106,17 @@ def _build_modules_only_pdf_filename(result: dict) -> str:
     return f"{nombre} - {student_id} - {curso} - {school_year} - modulos.pdf"
 
 
+def _build_blocks_and_modules_pdf_filename(result: dict) -> str:
+    student = result.get("student", {})
+
+    nombre = _sanitize_filename(student.get("nombre_estudiante", "Estudiante"))
+    student_id = _sanitize_filename(student.get("id_estudiante", "sin_id"))
+    curso = _sanitize_filename(student.get("curso", "sin_curso"))
+    school_year = _sanitize_filename(settings.school_year)
+
+    return f"{nombre} - {student_id} - {curso} - {school_year} - bloques_y_modulos.pdf"
+
+
 def _build_course_zip_filename(course: str, cycle: str, bulletin_type: str) -> str:
     safe_course = _sanitize_filename(course)
     safe_cycle = _sanitize_filename(cycle)
@@ -115,6 +127,9 @@ def _build_course_zip_filename(course: str, cycle: str, bulletin_type: str) -> s
 
     if bulletin_type == "modules_only":
         return f"{safe_course} - {safe_cycle} - {safe_school_year} - boletines_modulos.zip"
+
+    if bulletin_type == "blocks_and_modules":
+        return f"{safe_course} - {safe_cycle} - {safe_school_year} - boletines_bloques_y_modulos.zip"
 
     return f"{safe_course} - {safe_cycle} - {safe_school_year} - boletines_completos.zip"
 
@@ -159,6 +174,21 @@ def _build_modules_only_bulletin_html(result: dict) -> str:
         raise ValueError("El boletín solo de módulos solo está disponible para Segundo Ciclo.")
 
     return render_second_cycle_modules_only(
+        result["student"],
+        {
+            "institution_name": settings.institution_name,
+            "cycle": result["cycle"],
+            "logo_path": settings.institution_logo,
+            "school_year": settings.school_year,
+        }
+    )
+
+
+def _build_blocks_and_modules_bulletin_html(result: dict) -> str:
+    if result["cycle"] != "Segundo_Ciclo":
+        raise ValueError("El boletín por bloques y módulos solo está disponible para Segundo Ciclo.")
+
+    return render_second_cycle_blocks_and_modules(
         result["student"],
         {
             "institution_name": settings.institution_name,
@@ -225,6 +255,12 @@ def _generate_final_pdf_from_result(
             raise ValueError("El boletín solo de módulos solo está disponible para estudiantes de Segundo Ciclo.")
         html = _build_modules_only_bulletin_html(result)
         filename = _build_modules_only_pdf_filename(result)
+
+    elif bulletin_type == "blocks_and_modules":
+        if result["cycle"] != "Segundo_Ciclo":
+            raise ValueError("El boletín por bloques y módulos solo está disponible para estudiantes de Segundo Ciclo.")
+        html = _build_blocks_and_modules_bulletin_html(result)
+        filename = _build_blocks_and_modules_pdf_filename(result)
 
     else:
         html = _build_bulletin_html(result)
@@ -305,22 +341,34 @@ def generate_modules_only_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
     return _generate_final_pdf_from_result(result, "modules_only", append_philosophy=True)
 
 
+def generate_blocks_and_modules_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
+    result = find_student_by_id(student_id)
+
+    if not result.get("found"):
+        raise ValueError(result.get("message", f"No se encontró el estudiante {student_id}"))
+
+    if result.get("cycle") != "Segundo_Ciclo":
+        raise ValueError("El boletín por bloques y módulos solo está disponible para estudiantes de Segundo Ciclo.")
+
+    return _generate_final_pdf_from_result(result, "blocks_and_modules", append_philosophy=True)
+
+
 def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = "complete") -> tuple[bytes, str]:
     course = safe_value(course)
 
     if not course:
         raise ValueError("Debes indicar el curso.")
 
-    if bulletin_type not in {"complete", "blocks", "modules_only"}:
-        raise ValueError("El tipo de boletín debe ser 'complete', 'blocks' o 'modules_only'.")
+    if bulletin_type not in {"complete", "blocks", "modules_only", "blocks_and_modules"}:
+        raise ValueError("El tipo de boletín debe ser 'complete', 'blocks', 'modules_only' o 'blocks_and_modules'.")
 
     df, normalized_cycle = _load_cycle_dataframe(cycle)
 
     if bulletin_type == "blocks" and normalized_cycle != "Primer_Ciclo":
         raise ValueError("El boletín por bloques masivo solo está disponible para Primer Ciclo.")
 
-    if bulletin_type == "modules_only" and normalized_cycle != "Segundo_Ciclo":
-        raise ValueError("El boletín solo de módulos masivo solo está disponible para Segundo Ciclo.")
+    if bulletin_type in {"modules_only", "blocks_and_modules"} and normalized_cycle != "Segundo_Ciclo":
+        raise ValueError("Este tipo de boletín masivo solo está disponible para Segundo Ciclo.")
 
     if "CURSO" not in df.columns:
         raise ValueError("No existe la columna CURSO en la fuente de datos.")
@@ -395,3 +443,7 @@ def generate_course_blocks_bulletins_zip(course: str) -> tuple[bytes, str]:
 
 def generate_course_modules_only_bulletins_zip(course: str) -> tuple[bytes, str]:
     return generate_course_bulletins_zip(course=course, cycle="Segundo_Ciclo", bulletin_type="modules_only")
+
+
+def generate_course_blocks_and_modules_bulletins_zip(course: str) -> tuple[bytes, str]:
+    return generate_course_bulletins_zip(course=course, cycle="Segundo_Ciclo", bulletin_type="blocks_and_modules")
