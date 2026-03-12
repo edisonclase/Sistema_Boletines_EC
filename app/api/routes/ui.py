@@ -352,6 +352,7 @@ def home():
                             <div class="form-group">
                                 <label for="studentCycle">Ciclo</label>
                                 <select id="studentCycle" onchange="loadStudentCourses()">
+                                    <option value="">Seleccione un ciclo</option>
                                     <option value="Primer_Ciclo">Primer Ciclo</option>
                                     <option value="Segundo_Ciclo">Segundo Ciclo</option>
                                 </select>
@@ -360,14 +361,14 @@ def home():
                             <div class="form-group">
                                 <label for="studentCourse">Curso</label>
                                 <select id="studentCourse" onchange="loadStudents()">
-                                    <option value="">Cargando cursos...</option>
+                                    <option value="">Seleccione un ciclo primero</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
                                 <label for="studentSelect">Estudiante</label>
                                 <select id="studentSelect" onchange="updateStudentButtons()">
-                                    <option value="">Selecciona un curso primero</option>
+                                    <option value="">Seleccione un curso primero</option>
                                 </select>
                             </div>
 
@@ -407,7 +408,7 @@ def home():
                         </div>
 
                         <div class="help-box" id="individualHelp">
-                            <strong>Primer Ciclo:</strong> boletín completo y boletín por bloques.
+                            <strong>Selecciona un ciclo:</strong> luego podrás elegir el curso y el estudiante.
                         </div>
                     </div>
 
@@ -427,6 +428,7 @@ def home():
                             <div class="form-group">
                                 <label for="massiveCycle">Ciclo</label>
                                 <select id="massiveCycle" onchange="loadMassiveCourses()">
+                                    <option value="">Seleccione un ciclo</option>
                                     <option value="Primer_Ciclo">Primer Ciclo</option>
                                     <option value="Segundo_Ciclo">Segundo Ciclo</option>
                                 </select>
@@ -435,7 +437,7 @@ def home():
                             <div class="form-group">
                                 <label for="massiveCourse">Curso</label>
                                 <select id="massiveCourse" onchange="updateMassiveButtons()">
-                                    <option value="">Cargando cursos...</option>
+                                    <option value="">Seleccione un ciclo primero</option>
                                 </select>
                             </div>
 
@@ -458,7 +460,7 @@ def home():
                             </div>
 
                             <div class="status-box" id="massiveStatus">
-                                Cargando configuración del ciclo...
+                                Selecciona un ciclo para continuar.
                             </div>
                         </div>
 
@@ -551,7 +553,9 @@ def home():
                 const cycle = getIndividualCycle();
                 const help = document.getElementById("individualHelp");
 
-                if (cycle === "Primer_Ciclo") {
+                if (!cycle) {
+                    help.innerHTML = "<strong>Selecciona un ciclo:</strong> luego podrás elegir el curso y el estudiante.";
+                } else if (cycle === "Primer_Ciclo") {
                     help.innerHTML = "<strong>Primer Ciclo:</strong> boletín completo y boletín por bloques.";
                 } else {
                     help.innerHTML = "<strong>Segundo Ciclo:</strong> boletín completo, boletín de módulos y boletín por bloques + módulos.";
@@ -561,13 +565,19 @@ def home():
             async function loadStudentCourses() {
                 const cycle = getIndividualCycle();
                 setIndividualButtonsDisabled(true);
-                setOptions("studentCourse", [], "Cargando cursos...");
-                setOptions("studentSelect", [], "Selecciona un curso primero");
+                setOptions("studentCourse", [], "Seleccione un ciclo primero");
+                setOptions("studentSelect", [], "Seleccione un curso primero");
                 updateIndividualHelp();
+
+                if (!cycle) {
+                    return;
+                }
+
+                setOptions("studentCourse", [], "Cargando cursos...");
 
                 try {
                     const data = await fetchJson(`/students/options/courses?cycle=${encodeURIComponent(cycle)}`);
-                    setOptions("studentCourse", data.courses || [], "Selecciona un curso");
+                    setOptions("studentCourse", data.courses || [], "Seleccione un curso");
                 } catch (error) {
                     setOptions("studentCourse", [], "No se pudieron cargar los cursos");
                 }
@@ -578,8 +588,14 @@ def home():
                 const course = getIndividualCourse();
                 setIndividualButtonsDisabled(true);
 
+                if (!cycle) {
+                    setOptions("studentCourse", [], "Seleccione un ciclo primero");
+                    setOptions("studentSelect", [], "Seleccione un curso primero");
+                    return;
+                }
+
                 if (!course) {
-                    setOptions("studentSelect", [], "Selecciona un curso primero");
+                    setOptions("studentSelect", [], "Seleccione un curso primero");
                     return;
                 }
 
@@ -588,7 +604,7 @@ def home():
                 try {
                     const data = await fetchJson(`/students/options/students?cycle=${encodeURIComponent(cycle)}&course=${encodeURIComponent(course)}`);
                     individualStudents = data.students || [];
-                    setOptions("studentSelect", individualStudents, "Selecciona un estudiante");
+                    setOptions("studentSelect", individualStudents, "Seleccione un estudiante");
                 } catch (error) {
                     individualStudents = [];
                     setOptions("studentSelect", [], "No se pudieron cargar los estudiantes");
@@ -605,7 +621,7 @@ def home():
                 document.getElementById("btnBlocksHtml").disabled = disabled;
                 document.getElementById("btnBlocksPdf").disabled = disabled;
 
-                if (cycle === "Primer_Ciclo") {
+                if (cycle === "Primer_Ciclo" || !cycle) {
                     document.getElementById("btnModulesHtml").disabled = true;
                     document.getElementById("btnModulesPdf").disabled = true;
                 } else {
@@ -639,11 +655,18 @@ def home():
 
             async function loadMassiveCourses() {
                 const cycle = getMassiveCycle();
+                setOptions("massiveCourse", [], "Seleccione un ciclo primero");
+
+                if (!cycle) {
+                    updateMassiveButtons();
+                    return;
+                }
+
                 setOptions("massiveCourse", [], "Cargando cursos...");
 
                 try {
                     const data = await fetchJson(`/students/options/courses?cycle=${encodeURIComponent(cycle)}`);
-                    setOptions("massiveCourse", data.courses || [], "Selecciona un curso");
+                    setOptions("massiveCourse", data.courses || [], "Seleccione un curso");
                 } catch (error) {
                     setOptions("massiveCourse", [], "No se pudieron cargar los cursos");
                 }
@@ -662,7 +685,9 @@ def home():
                 document.getElementById("btnZipBlocksModules").disabled = !(hasCourse && cycle === "Segundo_Ciclo");
 
                 const status = document.getElementById("massiveStatus");
-                if (cycle === "Primer_Ciclo") {
+                if (!cycle) {
+                    status.innerHTML = "Selecciona un ciclo para continuar.";
+                } else if (cycle === "Primer_Ciclo") {
                     status.innerHTML = "Para <strong>Primer Ciclo</strong> están disponibles el ZIP completo y el ZIP por bloques.";
                 } else {
                     status.innerHTML = "Para <strong>Segundo Ciclo</strong> están disponibles el ZIP completo, el ZIP solo módulos y el ZIP bloques + módulos.";
@@ -714,9 +739,8 @@ def home():
                 openRoute(`/students/course/Segundo_Ciclo/${encodeURIComponent(course)}/bulletins-blocks-and-modules-zip`);
             }
 
-            async function initializeUI() {
-                await loadStudentCourses();
-                await loadMassiveCourses();
+            function initializeUI() {
+                updateIndividualHelp();
                 updateStudentButtons();
                 updateMassiveButtons();
             }
