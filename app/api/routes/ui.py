@@ -32,6 +32,9 @@ def home():
                 --line-strong: #C7D2FE;
                 --shadow: 0 18px 45px rgba(79, 70, 229, 0.12);
                 --radius: 20px;
+                --success-bg: rgba(15, 118, 110, 0.10);
+                --success-border: rgba(15, 118, 110, 0.25);
+                --success-text: #0F766E;
             }
 
             body {
@@ -319,6 +322,13 @@ def home():
                 font-size: 13px;
                 color: var(--hover);
                 line-height: 1.5;
+                transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+            }
+
+            .status-box.success {
+                background: var(--success-bg);
+                border-color: var(--success-border);
+                color: var(--success-text);
             }
 
             .last-query-box {
@@ -664,6 +674,17 @@ def home():
                 document.getElementById("btnModulesPdf").disabled = disabled;
             }
 
+            function setMassiveStatus(message, tone = "info") {
+                const status = document.getElementById("massiveStatus");
+                status.innerHTML = message;
+
+                if (tone === "success") {
+                    status.classList.add("success");
+                } else {
+                    status.classList.remove("success");
+                }
+            }
+
             function updateIndividualHelp() {
                 const cycle = getIndividualCycle();
                 const help = document.getElementById("individualHelp");
@@ -684,6 +705,12 @@ def home():
                 individualStudents = [];
                 setIndividualButtonsDisabled(true);
                 updateIndividualHelp();
+            }
+
+            function resetMassiveSelectors() {
+                document.getElementById("massiveCycle").value = "";
+                setOptions("massiveCourse", [], "Seleccione un ciclo primero");
+                updateMassiveButtons();
             }
 
             function saveLastQuery(data) {
@@ -723,13 +750,19 @@ def home():
                 document.getElementById("lastMassiveCycle").textContent = "-";
                 document.getElementById("lastMassiveCourse").textContent = "-";
                 document.getElementById("lastMassiveType").textContent = "-";
+                updateMassiveButtons();
             }
 
             function repeatLastMassiveQuery() {
                 if (!lastMassiveQuery) {
                     return;
                 }
+
                 openRoute(lastMassiveQuery.url);
+                setMassiveStatus(
+                    "Se volvió a abrir la <strong>última generación masiva</strong> guardada.",
+                    "success"
+                );
             }
 
             async function loadStudentCourses() {
@@ -874,14 +907,23 @@ def home():
                 document.getElementById("btnZipModules").disabled = !(hasCourse && cycle === "Segundo_Ciclo");
                 document.getElementById("btnZipBlocksModules").disabled = !(hasCourse && cycle === "Segundo_Ciclo");
 
-                const status = document.getElementById("massiveStatus");
                 if (!cycle) {
-                    status.innerHTML = "Selecciona un ciclo para continuar.";
+                    setMassiveStatus("Selecciona un ciclo para continuar.");
                 } else if (cycle === "Primer_Ciclo") {
-                    status.innerHTML = "Para <strong>Primer Ciclo</strong> están disponibles el ZIP completo y el ZIP por bloques.";
+                    setMassiveStatus("Para <strong>Primer Ciclo</strong> están disponibles el ZIP completo y el ZIP por bloques.");
                 } else {
-                    status.innerHTML = "Para <strong>Segundo Ciclo</strong> están disponibles el ZIP completo, el ZIP solo módulos y el ZIP bloques + módulos.";
+                    setMassiveStatus("Para <strong>Segundo Ciclo</strong> están disponibles el ZIP completo, el ZIP solo módulos y el ZIP bloques + módulos.");
                 }
+            }
+
+            function finalizeMassiveDownload(data) {
+                saveLastMassiveQuery(data);
+                openRoute(data.url);
+                setMassiveStatus(
+                    `Descarga preparada: <strong>${data.typeLabel}</strong> del curso <strong>${data.course}</strong>. Puedes reabrirla desde la tarjeta de última generación.`,
+                    "success"
+                );
+                resetMassiveSelectors();
             }
 
             function openCompleteZip() {
@@ -895,14 +937,12 @@ def home():
 
                 const url = `/students/course/${encodeURIComponent(cycle)}/${encodeURIComponent(course)}/bulletins-zip`;
 
-                saveLastMassiveQuery({
+                finalizeMassiveDownload({
                     cycle: cycle,
                     course: course,
                     typeLabel: "ZIP completo",
                     url: url
                 });
-
-                openRoute(url);
             }
 
             function openBlocksZip() {
@@ -915,14 +955,12 @@ def home():
 
                 const url = `/students/course/Primer_Ciclo/${encodeURIComponent(course)}/bulletins-blocks-zip`;
 
-                saveLastMassiveQuery({
+                finalizeMassiveDownload({
                     cycle: "Primer_Ciclo",
                     course: course,
                     typeLabel: "ZIP por bloques",
                     url: url
                 });
-
-                openRoute(url);
             }
 
             function openSecondCycleModulesZip() {
@@ -935,14 +973,12 @@ def home():
 
                 const url = `/students/course/Segundo_Ciclo/${encodeURIComponent(course)}/bulletins-modules-zip`;
 
-                saveLastMassiveQuery({
+                finalizeMassiveDownload({
                     cycle: "Segundo_Ciclo",
                     course: course,
                     typeLabel: "ZIP solo módulos",
                     url: url
                 });
-
-                openRoute(url);
             }
 
             function openSecondCycleBlocksAndModulesZip() {
@@ -955,14 +991,12 @@ def home():
 
                 const url = `/students/course/Segundo_Ciclo/${encodeURIComponent(course)}/bulletins-blocks-and-modules-zip`;
 
-                saveLastMassiveQuery({
+                finalizeMassiveDownload({
                     cycle: "Segundo_Ciclo",
                     course: course,
                     typeLabel: "ZIP bloques + módulos",
                     url: url
                 });
-
-                openRoute(url);
             }
 
             function initializeUI() {
