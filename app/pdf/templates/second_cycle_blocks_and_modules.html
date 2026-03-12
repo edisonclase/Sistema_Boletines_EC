@@ -224,11 +224,11 @@
         }
 
         .academic-table col.subject-col-width {
-            width: 120px;
+            width: 140px;
         }
 
         .academic-table col.grade-col-width {
-            width: 29px;
+            width: 27px;
         }
 
         .modules-table col.module-name-col {
@@ -259,14 +259,29 @@
             color: #111;
             font-size: 6.7px;
             text-transform: uppercase;
-            line-height: 1.1;
+            line-height: 1.05;
         }
 
         .academic-table thead .group-row th,
         .modules-table thead .group-row th {
             background: #C8E6C9;
             font-weight: bold;
+            font-size: 6.5px;
+        }
+
+        .academic-table td {
             font-size: 6.6px;
+        }
+
+        .subject-col {
+            text-align: left !important;
+            font-weight: bold;
+            color: #111;
+            font-size: 6.8px;
+            line-height: 1.1;
+            word-break: break-word;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
         }
 
         .subject-name,
@@ -277,6 +292,11 @@
             font-size: 6.8px;
             line-height: 1.15;
             word-break: break-word;
+        }
+
+        .tiny-col {
+            font-size: 6.2px !important;
+            padding: 2px 1px !important;
         }
 
         .low-grade {
@@ -437,7 +457,6 @@
 {% set institution_logo_src = institution_logo_src if institution_logo_src is defined else "" %}
 {% set minerd_logo_src = minerd_logo_src if minerd_logo_src is defined else "" %}
 {% set modules_list = student.modules_with_ras if student.modules_with_ras else student.modules %}
-{% set block_headers = block_headers if block_headers is defined else ["Bloque 1", "Bloque 2", "Bloque 3", "Bloque 4"] %}
 
 <div class="screen-toolbar">
     <div class="toolbar-left">Vista previa del boletín por bloques y módulos</div>
@@ -515,45 +534,68 @@
             <table class="academic-table">
                 <colgroup>
                     <col class="subject-col-width">
-                    {% for _ in range(16) %}
-                        <col class="grade-col-width">
-                    {% endfor %}
+
+                    <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                    <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                    <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                    <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
                 </colgroup>
                 <thead>
                     <tr class="group-row">
-                        <th rowspan="2">Asignatura</th>
-                        {% for header in block_headers %}
-                            <th colspan="4">{{ header }}</th>
-                        {% endfor %}
+                        <th class="subject-col" rowspan="2">ASIGNATURA</th>
+
+                        <th colspan="4">COMUNICATIVA</th>
+                        <th colspan="4">PENSAMIENTO LÓGICO,<br>CREATIVO Y CRÍTICO</th>
+                        <th colspan="4">CIENTÍFICA Y TÉCNICA,<br>AMBIENTAL Y SALUD</th>
+                        <th colspan="4">ÉTICA Y CIUDADANA,<br>DESARROLLO PERSONAL Y ESPIRITUAL</th>
                     </tr>
                     <tr>
-                        <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
-                        <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
-                        <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
-                        <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
+                        <th class="tiny-col">P1</th>
+                        <th class="tiny-col">P2</th>
+                        <th class="tiny-col">P3</th>
+                        <th class="tiny-col">P4</th>
+
+                        <th class="tiny-col">P1</th>
+                        <th class="tiny-col">P2</th>
+                        <th class="tiny-col">P3</th>
+                        <th class="tiny-col">P4</th>
+
+                        <th class="tiny-col">P1</th>
+                        <th class="tiny-col">P2</th>
+                        <th class="tiny-col">P3</th>
+                        <th class="tiny-col">P4</th>
+
+                        <th class="tiny-col">P1</th>
+                        <th class="tiny-col">P2</th>
+                        <th class="tiny-col">P3</th>
+                        <th class="tiny-col">P4</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for subject in student.subjects %}
-                        <tr>
-                            <td class="subject-name">{{ subject.asignatura or subject.subject or "" }}</td>
-                            {{ grade_cell(subject.p1_c1) }}
-                            {{ grade_cell(subject.p1_c2) }}
-                            {{ grade_cell(subject.p1_c3) }}
-                            {{ grade_cell(subject.p1_c4) }}
-                            {{ grade_cell(subject.p2_c1) }}
-                            {{ grade_cell(subject.p2_c2) }}
-                            {{ grade_cell(subject.p2_c3) }}
-                            {{ grade_cell(subject.p2_c4) }}
-                            {{ grade_cell(subject.p3_c1) }}
-                            {{ grade_cell(subject.p3_c2) }}
-                            {{ grade_cell(subject.p3_c3) }}
-                            {{ grade_cell(subject.p3_c4) }}
-                            {{ grade_cell(subject.p4_c1) }}
-                            {{ grade_cell(subject.p4_c2) }}
-                            {{ grade_cell(subject.p4_c3) }}
-                            {{ grade_cell(subject.p4_c4) }}
-                        </tr>
+                    <tr>
+                        <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
+
+                        {{ grade_cell(subject.p1_c1 if subject.p1_c1 is defined else none) }}
+                        {{ grade_cell(subject.p2_c1 if subject.p2_c1 is defined else none) }}
+                        {{ grade_cell(subject.p3_c1 if subject.p3_c1 is defined else none) }}
+                        {{ grade_cell(subject.p4_c1 if subject.p4_c1 is defined else none) }}
+
+                        {{ grade_cell(subject.p1_c2 if subject.p1_c2 is defined else none) }}
+                        {{ grade_cell(subject.p2_c2 if subject.p2_c2 is defined else none) }}
+                        {{ grade_cell(subject.p3_c2 if subject.p3_c2 is defined else none) }}
+                        {{ grade_cell(subject.p4_c2 if subject.p4_c2 is defined else none) }}
+
+                        {{ grade_cell(subject.p1_c3 if subject.p1_c3 is defined else none) }}
+                        {{ grade_cell(subject.p2_c3 if subject.p2_c3 is defined else none) }}
+                        {{ grade_cell(subject.p3_c3 if subject.p3_c3 is defined else none) }}
+                        {{ grade_cell(subject.p4_c3 if subject.p4_c3 is defined else none) }}
+
+                        {{ grade_cell(subject.p1_c4 if subject.p1_c4 is defined else none) }}
+                        {{ grade_cell(subject.p2_c4 if subject.p2_c4 is defined else none) }}
+                        {{ grade_cell(subject.p3_c4 if subject.p3_c4 is defined else none) }}
+                        {{ grade_cell(subject.p4_c4 if subject.p4_c4 is defined else none) }}
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
