@@ -19,28 +19,28 @@ def home():
             }
 
             :root {
-                --bg: #F8FAFC;
+                --bg: #F1F5F9;
                 --panel: #FFFFFF;
-                --panel-soft: #F8FBFF;
-                --text: #334155;
+                --panel-soft: #F8FAFF;
+                --text: #1E293B;
                 --muted: #64748B;
-                --primary: #2563EB;
-                --primary-2: #1E3A8A;
-                --hover: #1D4ED8;
-                --accent: #1E293B;
-                --line: #E2E8F0;
-                --line-strong: #CBD5E1;
-                --shadow: 0 16px 40px rgba(37, 99, 235, 0.08);
-                --radius: 18px;
+                --primary: #6366F1;
+                --primary-2: #818CF8;
+                --hover: #4F46E5;
+                --accent: #0F172A;
+                --line: #D9E2F1;
+                --line-strong: #C7D2FE;
+                --shadow: 0 18px 45px rgba(79, 70, 229, 0.12);
+                --radius: 20px;
             }
 
             body {
                 margin: 0;
                 font-family: Arial, Helvetica, sans-serif;
                 background:
-                    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08) 0%, transparent 32%),
-                    radial-gradient(circle at top right, rgba(30, 58, 138, 0.06) 0%, transparent 28%),
-                    var(--bg);
+                    radial-gradient(circle at top left, rgba(99, 102, 241, 0.16) 0%, transparent 32%),
+                    radial-gradient(circle at top right, rgba(129, 140, 248, 0.16) 0%, transparent 28%),
+                    linear-gradient(180deg, #F8FAFC 0%, var(--bg) 100%);
                 color: var(--text);
             }
 
@@ -59,27 +59,28 @@ def home():
 
             .hero {
                 text-align: center;
-                margin-bottom: 22px;
+                margin-bottom: 24px;
             }
 
             .hero-badge {
                 display: inline-block;
-                padding: 7px 12px;
+                padding: 8px 14px;
                 border-radius: 999px;
-                background: rgba(37, 99, 235, 0.10);
-                color: var(--primary-2);
+                background: rgba(99, 102, 241, 0.12);
+                color: var(--hover);
                 font-size: 12px;
                 font-weight: bold;
                 letter-spacing: 0.3px;
-                margin-bottom: 12px;
-                border: 1px solid rgba(37, 99, 235, 0.12);
+                margin-bottom: 14px;
+                border: 1px solid rgba(99, 102, 241, 0.20);
             }
 
             .hero-title {
                 margin: 0;
-                font-size: 38px;
+                font-size: 40px;
                 font-weight: 800;
                 color: var(--accent);
+                letter-spacing: -0.5px;
             }
 
             .hero-subtitle {
@@ -93,7 +94,7 @@ def home():
             .grid {
                 display: grid;
                 grid-template-columns: 1.1fr 1fr;
-                gap: 22px;
+                gap: 24px;
             }
 
             .card {
@@ -101,7 +102,7 @@ def home():
                 border: 1px solid var(--line);
                 border-radius: var(--radius);
                 box-shadow: var(--shadow);
-                padding: 24px;
+                padding: 26px;
             }
 
             .card-header {
@@ -111,9 +112,9 @@ def home():
             .card-kicker {
                 font-size: 12px;
                 font-weight: bold;
-                color: var(--primary);
+                color: var(--hover);
                 text-transform: uppercase;
-                letter-spacing: 0.6px;
+                letter-spacing: 0.7px;
                 margin-bottom: 6px;
             }
 
@@ -133,8 +134,8 @@ def home():
             .section {
                 border: 1px solid var(--line);
                 background: var(--panel-soft);
-                border-radius: 14px;
-                padding: 16px;
+                border-radius: 16px;
+                padding: 18px;
                 margin-top: 18px;
             }
 
@@ -161,7 +162,7 @@ def home():
                 margin: 0 0 10px 0;
                 font-size: 13px;
                 font-weight: bold;
-                color: var(--primary-2);
+                color: var(--primary);
                 text-transform: uppercase;
                 letter-spacing: 0.4px;
             }
@@ -181,18 +182,18 @@ def home():
             select {
                 width: 100%;
                 padding: 13px 14px;
-                border: 1px solid var(--line-strong);
+                border: 1px solid #CBD5E1;
                 border-radius: 12px;
                 font-size: 15px;
                 outline: none;
                 background: #FFFFFF;
                 color: var(--text);
-                transition: border-color 0.12s ease, box-shadow 0.12s ease;
+                transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
             }
 
             select:focus {
                 border-color: var(--primary);
-                box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+                box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.14);
             }
 
             .buttons-grid {
@@ -204,7 +205,7 @@ def home():
 
             button {
                 border: none;
-                border-radius: 12px;
+                border-radius: 14px;
                 padding: 15px 14px;
                 font-size: 14px;
                 font-weight: bold;
@@ -215,8 +216,8 @@ def home():
             }
 
             button:hover {
-                opacity: 0.98;
-                box-shadow: 0 10px 18px rgba(37, 99, 235, 0.12);
+                opacity: 0.99;
+                box-shadow: 0 12px 22px rgba(79, 70, 229, 0.16);
             }
 
             button:active {
@@ -244,17 +245,17 @@ def home():
             }
 
             .btn-secondary:hover {
-                background: #17327A;
+                background: #6D78F7;
             }
 
             .btn-soft {
-                background: rgba(37, 99, 235, 0.10);
-                color: var(--primary);
-                border: 1px solid rgba(37, 99, 235, 0.18);
+                background: rgba(99, 102, 241, 0.10);
+                color: var(--hover);
+                border: 1px solid rgba(99, 102, 241, 0.22);
             }
 
             .btn-soft:hover {
-                background: rgba(37, 99, 235, 0.16);
+                background: rgba(99, 102, 241, 0.16);
             }
 
             .btn-dark {
@@ -272,22 +273,22 @@ def home():
             }
 
             .btn-success:hover {
-                background: #0D5F59;
+                background: #0B5E58;
             }
 
             .btn-violet {
-                background: #6366F1;
+                background: #7C3AED;
                 color: white;
             }
 
             .btn-violet:hover {
-                background: #4F46E5;
+                background: #6D28D9;
             }
 
             .btn-outline {
                 background: #FFFFFF;
                 color: var(--accent);
-                border: 1px solid var(--line-strong);
+                border: 1px solid #CBD5E1;
             }
 
             .btn-outline:hover {
@@ -297,7 +298,7 @@ def home():
             .help-box {
                 margin-top: 18px;
                 padding: 14px 15px;
-                border-radius: 12px;
+                border-radius: 14px;
                 background: #F8FAFC;
                 border: 1px solid var(--line);
                 font-size: 13px;
@@ -312,11 +313,11 @@ def home():
             .status-box {
                 margin-top: 14px;
                 padding: 12px 14px;
-                border-radius: 12px;
-                background: rgba(37, 99, 235, 0.08);
-                border: 1px solid rgba(37, 99, 235, 0.16);
+                border-radius: 14px;
+                background: rgba(99, 102, 241, 0.10);
+                border: 1px solid rgba(99, 102, 241, 0.18);
                 font-size: 13px;
-                color: var(--primary-2);
+                color: var(--hover);
                 line-height: 1.5;
             }
 
