@@ -321,6 +321,40 @@ def home():
                 line-height: 1.5;
             }
 
+            .last-query-box {
+                margin-top: 18px;
+                padding: 16px;
+                border-radius: 16px;
+                background: #FFFFFF;
+                border: 1px solid var(--line);
+                box-shadow: 0 10px 24px rgba(79, 70, 229, 0.08);
+                display: none;
+            }
+
+            .last-query-title {
+                margin: 0 0 10px 0;
+                font-size: 14px;
+                font-weight: bold;
+                color: var(--accent);
+            }
+
+            .last-query-meta {
+                margin: 4px 0;
+                font-size: 14px;
+                color: var(--muted);
+            }
+
+            .last-query-meta strong {
+                color: var(--text);
+            }
+
+            .last-query-actions {
+                margin-top: 14px;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
             .footer {
                 margin-top: 18px;
                 text-align: center;
@@ -351,7 +385,8 @@ def home():
                     font-size: 30px;
                 }
 
-                .buttons-grid {
+                .buttons-grid,
+                .last-query-actions {
                     grid-template-columns: 1fr;
                 }
             }
@@ -442,6 +477,22 @@ def home():
                         <div class="help-box" id="individualHelp">
                             <strong>Selecciona un ciclo:</strong> luego podrás elegir el curso y el estudiante.
                         </div>
+
+                        <div class="last-query-box" id="lastQueryBox">
+                            <h4 class="last-query-title">Última consulta realizada</h4>
+                            <p class="last-query-meta"><strong>Ciclo:</strong> <span id="lastQueryCycle">-</span></p>
+                            <p class="last-query-meta"><strong>Curso:</strong> <span id="lastQueryCourse">-</span></p>
+                            <p class="last-query-meta"><strong>Estudiante:</strong> <span id="lastQueryStudent">-</span></p>
+
+                            <div class="last-query-actions">
+                                <button id="btnRepeatLastQuery" class="btn-primary" onclick="repeatLastQuery()">
+                                    Abrir nuevamente
+                                </button>
+                                <button class="btn-outline" onclick="clearLastQuery()">
+                                    Limpiar última consulta
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="card">
@@ -512,6 +563,7 @@ def home():
 
         <script>
             let individualStudents = [];
+            let lastIndividualQuery = null;
 
             function openRoute(url) {
                 window.open(url, "_blank");
@@ -540,6 +592,20 @@ def home():
 
             function getMassiveCourse() {
                 return document.getElementById("massiveCourse").value;
+            }
+
+            function getCycleLabel(cycle) {
+                if (cycle === "Primer_Ciclo") return "Primer Ciclo";
+                if (cycle === "Segundo_Ciclo") return "Segundo Ciclo";
+                return cycle || "-";
+            }
+
+            function getSelectedStudentLabel() {
+                const select = document.getElementById("studentSelect");
+                if (!select.value) {
+                    return "";
+                }
+                return select.options[select.selectedIndex]?.textContent || "";
             }
 
             async function fetchJson(url) {
@@ -592,6 +658,38 @@ def home():
                 } else {
                     help.innerHTML = "<strong>Segundo Ciclo:</strong> boletín completo, boletín de módulos y boletín por bloques + módulos.";
                 }
+            }
+
+            function resetIndividualSelectors() {
+                document.getElementById("studentCycle").value = "";
+                setOptions("studentCourse", [], "Seleccione un ciclo primero");
+                setOptions("studentSelect", [], "Seleccione un curso primero");
+                individualStudents = [];
+                setIndividualButtonsDisabled(true);
+                updateIndividualHelp();
+            }
+
+            function saveLastQuery(data) {
+                lastIndividualQuery = data;
+                document.getElementById("lastQueryCycle").textContent = getCycleLabel(data.cycle);
+                document.getElementById("lastQueryCourse").textContent = data.course || "-";
+                document.getElementById("lastQueryStudent").textContent = data.studentLabel || data.studentId || "-";
+                document.getElementById("lastQueryBox").style.display = "block";
+            }
+
+            function clearLastQuery() {
+                lastIndividualQuery = null;
+                document.getElementById("lastQueryBox").style.display = "none";
+                document.getElementById("lastQueryCycle").textContent = "-";
+                document.getElementById("lastQueryCourse").textContent = "-";
+                document.getElementById("lastQueryStudent").textContent = "-";
+            }
+
+            function repeatLastQuery() {
+                if (!lastIndividualQuery) {
+                    return;
+                }
+                openRoute(lastIndividualQuery.url);
             }
 
             async function loadStudentCourses() {
@@ -662,9 +760,29 @@ def home():
                 }
             }
 
-            function openStudentRoute(routeSuffix) {
+            function buildStudentRoute(routeSuffix) {
                 const studentId = getSelectedStudentId();
-                openRoute(`/students/${studentId}/${routeSuffix}`);
+                return `/students/${studentId}/${routeSuffix}`;
+            }
+
+            function openStudentRoute(routeSuffix) {
+                const cycle = getIndividualCycle();
+                const course = getIndividualCourse();
+                const studentId = document.getElementById("studentSelect").value;
+                const studentLabel = getSelectedStudentLabel();
+                const url = buildStudentRoute(routeSuffix);
+
+                saveLastQuery({
+                    cycle: cycle,
+                    course: course,
+                    studentId: studentId,
+                    studentLabel: studentLabel,
+                    routeSuffix: routeSuffix,
+                    url: url
+                });
+
+                openRoute(url);
+                resetIndividualSelectors();
             }
 
             function openCycleSpecificHtml() {
@@ -775,6 +893,7 @@ def home():
                 updateIndividualHelp();
                 updateStudentButtons();
                 updateMassiveButtons();
+                clearLastQuery();
             }
 
             initializeUI();
