@@ -1,12 +1,84 @@
+from __future__ import annotations
+
+import html
+import json
+from pathlib import Path
+
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
 router = APIRouter(tags=["ui"])
 
 
+def _project_root() -> Path:
+    return Path(__file__).resolve().parents[3]
+
+
+def _audit_file_path() -> Path:
+    return _project_root() / "logs" / "bulletin_audit.jsonl"
+
+
+def _safe_text(value) -> str:
+    if value is None:
+        return "-"
+    text = str(value).strip()
+    return html.escape(text) if text else "-"
+
+
+def _format_bulletin_type(value: str) -> str:
+    mapping = {
+        "complete": "Completo",
+        "blocks": "Bloques",
+        "modules_only": "Solo módulos",
+        "blocks_and_modules": "Bloques + módulos",
+    }
+    return mapping.get(str(value or "").strip(), _safe_text(value))
+
+
+def _format_output_format(value: str) -> str:
+    mapping = {
+        "html": "HTML",
+        "pdf": "PDF",
+        "zip": "ZIP",
+    }
+    return mapping.get(str(value or "").strip().lower(), _safe_text(value))
+
+
+def _format_event_type(value: str) -> str:
+    mapping = {
+        "student_bulletin": "Boletín individual",
+        "course_zip": "Generación masiva",
+    }
+    return mapping.get(str(value or "").strip(), _safe_text(value))
+
+
+def _read_audit_events(limit: int = 100) -> list[dict]:
+    audit_path = _audit_file_path()
+
+    if not audit_path.exists():
+        return []
+
+    events: list[dict] = []
+
+    try:
+        with audit_path.open("r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    events.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
+    except OSError:
+        return []
+
+    return list(reversed(events[-limit:]))
+
+
 @router.get("/", response_class=HTMLResponse)
 def home():
-    html = """
+    html_content = """
     <!DOCTYPE html>
     <html lang="es">
     <head>
@@ -92,6 +164,51 @@ def home():
                 font-size: 16px;
                 color: var(--muted);
                 line-height: 1.55;
+            }
+
+            .hero-actions {
+                margin-top: 18px;
+                display: flex;
+                justify-content: center;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .hero-link {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 220px;
+                padding: 13px 18px;
+                border-radius: 14px;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: bold;
+                transition: transform 0.08s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+            }
+
+            .hero-link:hover {
+                opacity: 0.98;
+                box-shadow: 0 12px 22px rgba(79, 70, 229, 0.16);
+            }
+
+            .hero-link-primary {
+                background: var(--primary);
+                color: white;
+            }
+
+            .hero-link-primary:hover {
+                background: var(--hover);
+            }
+
+            .hero-link-outline {
+                background: white;
+                color: var(--accent);
+                border: 1px solid #CBD5E1;
+            }
+
+            .hero-link-outline:hover {
+                background: #F8FAFC;
             }
 
             .grid {
@@ -399,6 +516,15 @@ def home():
                 .last-query-actions {
                     grid-template-columns: 1fr;
                 }
+
+                .hero-actions {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+
+                .hero-link {
+                    min-width: 100%;
+                }
             }
         </style>
     </head>
@@ -411,6 +537,12 @@ def home():
                     <p class="hero-subtitle">
                         Sistema de Generación de Boletines.
                     </p>
+
+                    <div class="hero-actions">
+                        <a class="hero-link hero-link-primary" href="/audit" target="_blank">
+                            Ver auditoría de generación
+                        </a>
+                    </div>
                 </div>
 
                 <div class="grid">
@@ -1076,4 +1208,292 @@ def home():
     </body>
     </html>
     """
-    return HTMLResponse(content=html)
+    return HTMLResponse(content=html_content)
+
+
+@router.get("/audit", response_class=HTMLResponse)
+def audit_view():
+    events = _read_audit_events(limit=100)
+
+    if events:
+        rows_html = []
+        for event in events:
+            event_type = _format_event_type(event.get("event_type"))
+            output_format = _format_output_format(event.get("output_format"))
+            bulletin_type = _format_bulletin_type(event.get("bulletin_type"))
+
+            student_or_count = "-"
+            if event.get("event_type") == "student_bulletin":
+                student_name = _safe_text(event.get("student_name"))
+                student_id = _safe_text(event.get("student_id"))
+                student_or_count = f"{student_name}<br><span class='muted-inline'>ID: {student_id}</span>"
+            elif event.get("event_type") == "course_zip":
+                student_or_count = f"{_safe_text(event.get('student_count'))} estudiantes"
+
+            rows_html.append(
+                f'''
+                <tr>
+                    <td>{_safe_text(event.get("timestamp"))}</td>
+                    <td>{event_type}</td>
+                    <td>{output_format}</td>
+                    <td>{bulletin_type}</td>
+                    <td>{_safe_text(event.get("cycle"))}</td>
+                    <td>{_safe_text(event.get("course"))}</td>
+                    <td>{student_or_count}</td>
+                    <td>{_safe_text(event.get("generated_by"))}<br><span class="muted-inline">{_safe_text(event.get("generated_role"))}</span></td>
+                    <td>{_safe_text(event.get("filename"))}</td>
+                </tr>
+                '''
+            )
+        table_body = "".join(rows_html)
+    else:
+        table_body = """
+        <tr>
+            <td colspan="9" class="empty-state">
+                Aún no hay registros de auditoría disponibles.
+            </td>
+        </tr>
+        """
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Auditoría · CLASE EducTech</title>
+        <style>
+            * {{
+                box-sizing: border-box;
+            }}
+
+            :root {{
+                --bg: #F1F5F9;
+                --panel: #FFFFFF;
+                --text: #1E293B;
+                --muted: #64748B;
+                --primary: #6366F1;
+                --hover: #4F46E5;
+                --accent: #0F172A;
+                --line: #D9E2F1;
+                --shadow: 0 18px 45px rgba(79, 70, 229, 0.12);
+                --radius: 20px;
+            }}
+
+            body {{
+                margin: 0;
+                font-family: Arial, Helvetica, sans-serif;
+                background:
+                    radial-gradient(circle at top left, rgba(99, 102, 241, 0.14) 0%, transparent 30%),
+                    linear-gradient(180deg, #F8FAFC 0%, var(--bg) 100%);
+                color: var(--text);
+            }}
+
+            .wrapper {{
+                min-height: 100vh;
+                padding: 28px;
+            }}
+
+            .shell {{
+                max-width: 1400px;
+                margin: 0 auto;
+            }}
+
+            .topbar {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 16px;
+                margin-bottom: 22px;
+                flex-wrap: wrap;
+            }}
+
+            .title-box h1 {{
+                margin: 0;
+                font-size: 34px;
+                color: var(--accent);
+            }}
+
+            .title-box p {{
+                margin: 8px 0 0 0;
+                color: var(--muted);
+                font-size: 15px;
+            }}
+
+            .top-actions {{
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }}
+
+            .link-btn {{
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 12px 16px;
+                border-radius: 14px;
+                text-decoration: none;
+                font-weight: bold;
+                font-size: 14px;
+                transition: box-shadow 0.12s ease, opacity 0.12s ease;
+            }}
+
+            .link-btn:hover {{
+                opacity: 0.98;
+                box-shadow: 0 12px 22px rgba(79, 70, 229, 0.16);
+            }}
+
+            .link-primary {{
+                background: var(--primary);
+                color: white;
+            }}
+
+            .link-primary:hover {{
+                background: var(--hover);
+            }}
+
+            .link-outline {{
+                background: white;
+                color: var(--accent);
+                border: 1px solid #CBD5E1;
+            }}
+
+            .panel {{
+                background: var(--panel);
+                border: 1px solid var(--line);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                overflow: hidden;
+            }}
+
+            .panel-header {{
+                padding: 22px 22px 12px 22px;
+                border-bottom: 1px solid var(--line);
+            }}
+
+            .panel-header h2 {{
+                margin: 0;
+                font-size: 20px;
+                color: var(--accent);
+            }}
+
+            .panel-header p {{
+                margin: 8px 0 0 0;
+                color: var(--muted);
+                font-size: 14px;
+            }}
+
+            .table-wrap {{
+                width: 100%;
+                overflow-x: auto;
+            }}
+
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                min-width: 1200px;
+            }}
+
+            thead th {{
+                background: #F8FAFF;
+                color: var(--accent);
+                font-size: 13px;
+                text-align: left;
+                padding: 14px 16px;
+                border-bottom: 1px solid var(--line);
+                white-space: nowrap;
+            }}
+
+            tbody td {{
+                padding: 14px 16px;
+                border-bottom: 1px solid #EEF2F7;
+                font-size: 14px;
+                color: var(--text);
+                vertical-align: top;
+                line-height: 1.45;
+            }}
+
+            tbody tr:hover {{
+                background: #FAFBFF;
+            }}
+
+            .muted-inline {{
+                color: var(--muted);
+                font-size: 12px;
+            }}
+
+            .empty-state {{
+                text-align: center;
+                color: var(--muted);
+                padding: 30px 16px;
+            }}
+
+            .footer-note {{
+                margin-top: 14px;
+                color: var(--muted);
+                font-size: 13px;
+            }}
+
+            @media (max-width: 700px) {{
+                .wrapper {{
+                    padding: 16px;
+                }}
+
+                .title-box h1 {{
+                    font-size: 28px;
+                }}
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="shell">
+                <div class="topbar">
+                    <div class="title-box">
+                        <h1>Auditoría de generación</h1>
+                        <p>Últimos 100 eventos registrados por el sistema.</p>
+                    </div>
+
+                    <div class="top-actions">
+                        <a class="link-btn link-outline" href="/" target="_self">Volver al panel</a>
+                        <a class="link-btn link-primary" href="/audit" target="_self">Actualizar vista</a>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Historial reciente</h2>
+                        <p>Consulta quién generó boletines o ZIPs, cuándo se generaron y qué archivo salió.</p>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha y hora</th>
+                                    <th>Evento</th>
+                                    <th>Salida</th>
+                                    <th>Tipo</th>
+                                    <th>Ciclo</th>
+                                    <th>Curso</th>
+                                    <th>Estudiante / Cantidad</th>
+                                    <th>Generado por</th>
+                                    <th>Archivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {table_body}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="footer-note">
+                    Esta vista lee los eventos desde <strong>logs/bulletin_audit.jsonl</strong>.
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
