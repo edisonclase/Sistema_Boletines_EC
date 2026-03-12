@@ -1,3 +1,5 @@
+# app/services/html_service.py
+
 import base64
 import mimetypes
 from datetime import datetime
@@ -19,6 +21,10 @@ env = Environment(
 env.globals["is_low_grade"] = is_low_grade
 env.globals["helpers"] = SimpleNamespace(is_low_grade=is_low_grade)
 env.globals["settings"] = settings
+
+
+def _get_setting(name: str, default=""):
+    return getattr(settings, name, default)
 
 
 def build_image_data_uri(image_path: str) -> str:
@@ -57,22 +63,26 @@ def build_base_context(context: dict | None = None) -> dict:
         safe_context["generated_at"] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
 
     if "generated_by" not in safe_context:
-        safe_context["generated_by"] = settings.bulletin_generated_by
+        safe_context["generated_by"] = _get_setting("bulletin_generated_by", "Sistema de Boletines")
 
     if "generated_role" not in safe_context:
-        safe_context["generated_role"] = settings.bulletin_generated_role
+        safe_context["generated_role"] = _get_setting("bulletin_generated_role", "")
 
     if "director_name" not in safe_context:
-        safe_context["director_name"] = settings.institution_director
+        safe_context["director_name"] = _get_setting("institution_director", "")
 
     if "school_year" not in safe_context:
-        safe_context["school_year"] = "2025-2026"
+        safe_context["school_year"] = _get_setting("school_year", "2025-2026")
 
     if "institution_logo_src" not in safe_context:
-        safe_context["institution_logo_src"] = build_image_data_uri(settings.institution_logo)
+        safe_context["institution_logo_src"] = build_image_data_uri(
+            _get_setting("institution_logo", "")
+        )
 
     if "minerd_logo_src" not in safe_context:
-        safe_context["minerd_logo_src"] = build_image_data_uri(settings.institution_minerd_logo)
+        safe_context["minerd_logo_src"] = build_image_data_uri(
+            _get_setting("institution_minerd_logo", "")
+        )
 
     return safe_context
 
