@@ -40,7 +40,7 @@ def _sanitize_filename(value: str) -> str:
 
     value = str(value).strip()
     value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
-    value = re.sub(r'[<>:"/\\|?*]', "", value)
+    value = re.sub(r'[<>:"/\\\\|?*]', "", value)
     value = re.sub(r"\s+", " ", value).strip()
 
     return value or "sin_valor"
@@ -78,6 +78,83 @@ def _truncate_name(value: str, max_len: int = 48) -> str:
     return value[:max_len].strip() if len(value) > max_len else value
 
 
+def _normalize_ascii_text(value: str) -> str:
+    value = safe_value(value).strip()
+    value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+    value = re.sub(r"\s+", " ", value).strip()
+    return value
+
+
+def _extract_course_level_token(course: str) -> str:
+    normalized = _normalize_ascii_text(course)
+    match = re.search(r"\b(\d+)\s*(do|to|ro|mo|vo|no|er|o)\b", normalized, flags=re.IGNORECASE)
+    if match:
+        return f"{match.group(1)}{match.group(2).lower()}"
+
+    fallback = re.search(r"\b(\d+)\b", normalized)
+    if fallback:
+        return fallback.group(1)
+
+    return ""
+
+
+def _abbreviate_second_cycle_course(course: str) -> str:
+    """
+    Convierte nombres largos de cursos de segundo ciclo en una forma corta
+    apta para nombres de ZIP. Ejemplos:
+    - 6to Administracion y Desarrollo de Aplicaciones -> 6to_ADA
+    - 5to Desarrollo y Administracion de Aplicaciones Informaticas -> 5to_DAAI
+    - 4to Informatica -> 4to_INF
+    """
+    original = safe_value(course)
+    if not original:
+        return "Segundo_Ciclo"
+
+    normalized = _normalize_ascii_text(original)
+    level_token = _extract_course_level_token(normalized)
+
+    text_without_level = normalized
+    if level_token:
+        text_without_level = re.sub(
+            r"^\s*" + re.escape(level_token) + r"\b",
+            "",
+            text_without_level,
+            flags=re.IGNORECASE,
+        ).strip()
+
+    words = re.findall(r"[A-Za-z0-9]+", text_without_level)
+
+    stopwords = {
+        "y", "de", "del", "la", "las", "el", "los", "en", "para", "con", "e",
+        "da", "do", "al"
+    }
+
+    significant_words = [word for word in words if word.casefold() not in stopwords]
+
+    if not significant_words:
+        abbreviated_body = _sanitize_filename(normalized.replace(" ", "_"))
+        return abbreviated_body or "Segundo_Ciclo"
+
+    if len(significant_words) == 1:
+        word = significant_words[0][:4].upper()
+        abbreviated_body = word
+    else:
+        abbreviated_body = "".join(word[0].upper() for word in significant_words)
+
+    if level_token:
+        return f"{level_token}_{abbreviated_body}"
+
+    return abbreviated_body
+
+
+def _build_zip_course_label(course: str, cycle: str) -> str:
+    safe_course = _sanitize_filename(course)
+    if cycle == "Segundo_Ciclo":
+        abbreviated = _abbreviate_second_cycle_course(course)
+        return _sanitize_filename(abbreviated)
+    return safe_course
+
+
 def _build_pdf_filename(result: dict) -> str:
     student = result.get("student", {})
     nombre = _truncate_name(student.get("nombre_estudiante", "Estudiante"))
@@ -107,7 +184,7 @@ def _build_blocks_and_modules_pdf_filename(result: dict) -> str:
 
 
 def _build_course_zip_filename(course: str, cycle: str, bulletin_type: str) -> str:
-    safe_course = _sanitize_filename(course)
+    safe_course = _build_zip_course_label(course, cycle)
     safe_cycle = _sanitize_filename(cycle)
 
     if bulletin_type == "blocks":
