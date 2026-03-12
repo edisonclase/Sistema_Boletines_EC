@@ -329,8 +329,8 @@ def home():
         <div class="wrapper">
             <div class="shell">
                 <div class="hero">
-                    <div class="hero-badge">Plataforma de generación académica</div>
-                    <h1 class="hero-title">Sistema Automatizado de Boletines Académicos</h1>
+                    <div class="hero-badge">Plataforma de Seguimiento Académico.</div>
+                    <h1 class="hero-title">CLASE EducTech</h1>
                     <p class="hero-subtitle">
                         Genera boletines individuales y masivos desde una interfaz simple.
                         Esta versión trabaja con selección guiada por ciclo, curso y estudiante.
