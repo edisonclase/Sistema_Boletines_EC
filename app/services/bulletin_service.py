@@ -65,10 +65,6 @@ def get_first_existing_value(data: dict, keys: list[str], default=None):
 
 
 def build_visible_module_ras(module: dict) -> list[dict]:
-    """
-    Construye una lista dinámica de RA visibles para un módulo.
-    Solo incluye los RA que realmente tengan nota.
-    """
     ras = []
 
     for i in range(1, 11):
@@ -91,12 +87,6 @@ def build_visible_module_ras(module: dict) -> list[dict]:
 
 
 def enrich_module(module: dict) -> dict:
-    """
-    Enriquece cada módulo con:
-    - ras_visibles
-    - valores normalizados de CF y situación
-    - nombre de módulo consistente
-    """
     module_name = get_first_existing_value(
         module,
         ["modulo", "MODULO", "nombre_modulo", "NOMBRE_MODULO"],
@@ -133,11 +123,6 @@ def enrich_modules_for_second_cycle(modules: list[dict]) -> list[dict]:
 
 
 def filter_modules_with_visible_ras(modules: list[dict]) -> list[dict]:
-    """
-    Conserva solo los módulos que tengan al menos un RA con nota.
-    Esta lista será útil para el boletín 'solo módulos'
-    y también para el boletín mixto.
-    """
     return [module for module in modules if module.get("ras_visibles")]
 
 
@@ -203,13 +188,13 @@ def _prepare_cycle_dataframe(cycle: str):
     if "CURSO" in df.columns:
         df["CURSO"] = df["CURSO"].apply(normalize_course_name)
 
+    if "NOMBRE_ESTUDIANTE" in df.columns:
+        df["NOMBRE_ESTUDIANTE"] = df["NOMBRE_ESTUDIANTE"].apply(safe_value)
+
     return df
 
 
 def get_available_courses(cycle: str) -> list[str]:
-    """
-    Devuelve la lista única y ordenada de cursos disponibles para un ciclo.
-    """
     df = _prepare_cycle_dataframe(cycle)
 
     if "CURSO" not in df.columns:
@@ -227,19 +212,48 @@ def get_available_courses(cycle: str) -> list[str]:
 
 
 def get_available_courses_by_cycle() -> dict:
-    """
-    Devuelve cursos separados por ciclo.
-    """
     return {
         "Primer_Ciclo": get_available_courses("Primer_Ciclo"),
         "Segundo_Ciclo": get_available_courses("Segundo_Ciclo"),
     }
 
 
+def get_available_students(cycle: str, course: str) -> list[dict]:
+    df = _prepare_cycle_dataframe(cycle)
+    normalized_course = normalize_course_name(course)
+
+    if "CURSO" not in df.columns:
+        return []
+
+    course_students = df[df["CURSO"] == normalized_course].copy()
+
+    if course_students.empty:
+        return []
+
+    students = []
+    seen_ids = set()
+
+    for _, row in course_students.iterrows():
+        student_id = normalize_student_id(row.get("ID_ESTUDIANTE"))
+        student_name = safe_value(row.get("NOMBRE_ESTUDIANTE"))
+        student_course = safe_value(row.get("CURSO"))
+
+        if not student_id or student_id in seen_ids:
+            continue
+
+        seen_ids.add(student_id)
+        students.append({
+            "id_estudiante": student_id,
+            "nombre_estudiante": student_name,
+            "curso": student_course,
+            "label": f"{student_name} - {student_id}"
+        })
+
+    students.sort(key=lambda item: item["nombre_estudiante"].casefold())
+    return students
+
+
 def get_student_cycle_by_id(student_id: str) -> dict:
-    """
-    Permite detectar el ciclo del estudiante sin devolver todavía el boletín completo.
-    """
     result = find_student_by_id(student_id)
 
     if not result.get("found"):

@@ -73,65 +73,53 @@ def _normalize_cycle_name(value: str) -> str:
     return safe_value(value)
 
 
+def _truncate_name(value: str, max_len: int = 48) -> str:
+    value = _sanitize_filename(value)
+    return value[:max_len].strip() if len(value) > max_len else value
+
+
 def _build_pdf_filename(result: dict) -> str:
     student = result.get("student", {})
-
-    nombre = _sanitize_filename(student.get("nombre_estudiante", "Estudiante"))
+    nombre = _truncate_name(student.get("nombre_estudiante", "Estudiante"))
     student_id = _sanitize_filename(student.get("id_estudiante", "sin_id"))
-    curso = _sanitize_filename(student.get("curso", "sin_curso"))
-    school_year = _sanitize_filename(settings.school_year)
-
-    return f"{nombre} - {student_id} - {curso} - {school_year}.pdf"
+    return f"{student_id} - {nombre}.pdf"
 
 
 def _build_blocks_pdf_filename(result: dict) -> str:
     student = result.get("student", {})
-
-    nombre = _sanitize_filename(student.get("nombre_estudiante", "Estudiante"))
+    nombre = _truncate_name(student.get("nombre_estudiante", "Estudiante"))
     student_id = _sanitize_filename(student.get("id_estudiante", "sin_id"))
-    curso = _sanitize_filename(student.get("curso", "sin_curso"))
-    school_year = _sanitize_filename(settings.school_year)
-
-    return f"{nombre} - {student_id} - {curso} - {school_year} - bloques.pdf"
+    return f"{student_id} - {nombre} - bloques.pdf"
 
 
 def _build_modules_only_pdf_filename(result: dict) -> str:
     student = result.get("student", {})
-
-    nombre = _sanitize_filename(student.get("nombre_estudiante", "Estudiante"))
+    nombre = _truncate_name(student.get("nombre_estudiante", "Estudiante"))
     student_id = _sanitize_filename(student.get("id_estudiante", "sin_id"))
-    curso = _sanitize_filename(student.get("curso", "sin_curso"))
-    school_year = _sanitize_filename(settings.school_year)
-
-    return f"{nombre} - {student_id} - {curso} - {school_year} - modulos.pdf"
+    return f"{student_id} - {nombre} - modulos.pdf"
 
 
 def _build_blocks_and_modules_pdf_filename(result: dict) -> str:
     student = result.get("student", {})
-
-    nombre = _sanitize_filename(student.get("nombre_estudiante", "Estudiante"))
+    nombre = _truncate_name(student.get("nombre_estudiante", "Estudiante"))
     student_id = _sanitize_filename(student.get("id_estudiante", "sin_id"))
-    curso = _sanitize_filename(student.get("curso", "sin_curso"))
-    school_year = _sanitize_filename(settings.school_year)
-
-    return f"{nombre} - {student_id} - {curso} - {school_year} - bloques_y_modulos.pdf"
+    return f"{student_id} - {nombre} - bloques_modulos.pdf"
 
 
 def _build_course_zip_filename(course: str, cycle: str, bulletin_type: str) -> str:
     safe_course = _sanitize_filename(course)
     safe_cycle = _sanitize_filename(cycle)
-    safe_school_year = _sanitize_filename(settings.school_year)
 
     if bulletin_type == "blocks":
-        return f"{safe_course} - {safe_cycle} - {safe_school_year} - boletines_bloques.zip"
+        return f"{safe_cycle} - {safe_course} - bloques.zip"
 
     if bulletin_type == "modules_only":
-        return f"{safe_course} - {safe_cycle} - {safe_school_year} - boletines_modulos.zip"
+        return f"{safe_cycle} - {safe_course} - modulos.zip"
 
     if bulletin_type == "blocks_and_modules":
-        return f"{safe_course} - {safe_cycle} - {safe_school_year} - boletines_bloques_y_modulos.zip"
+        return f"{safe_cycle} - {safe_course} - bloques_modulos.zip"
 
-    return f"{safe_course} - {safe_cycle} - {safe_school_year} - boletines_completos.zip"
+    return f"{safe_cycle} - {safe_course} - completos.zip"
 
 
 def _build_bulletin_html(result: dict) -> str:

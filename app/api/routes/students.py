@@ -1,10 +1,14 @@
 from datetime import datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from fastapi.responses import HTMLResponse, Response
 
 from app.core.settings import settings
-from app.services.bulletin_service import find_student_by_id
+from app.services.bulletin_service import (
+    find_student_by_id,
+    get_available_courses,
+    get_available_students,
+)
 from app.services.html_service import (
     render_template,
     render_second_cycle_modules_only,
@@ -17,11 +21,31 @@ from app.services.pdf_service import (
     generate_course_blocks_and_modules_bulletins_zip,
     generate_course_blocks_bulletins_zip,
     generate_course_complete_bulletins_zip,
-    generate_modules_only_bulletin_pdf,
     generate_course_modules_only_bulletins_zip,
+    generate_modules_only_bulletin_pdf,
 )
 
 router = APIRouter(prefix="/students", tags=["students"])
+
+
+@router.get("/options/courses")
+def get_courses_options(cycle: str = Query(...)):
+    return {
+        "cycle": cycle,
+        "courses": get_available_courses(cycle)
+    }
+
+
+@router.get("/options/students")
+def get_students_options(
+    cycle: str = Query(...),
+    course: str = Query(...)
+):
+    return {
+        "cycle": cycle,
+        "course": course,
+        "students": get_available_students(cycle, course)
+    }
 
 
 @router.get("/{student_id}")
@@ -158,9 +182,7 @@ def get_student_modules_only_pdf(student_id: str):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        }
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
 
@@ -185,9 +207,7 @@ def get_student_second_cycle_blocks_pdf(student_id: str):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        }
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
 
@@ -206,9 +226,7 @@ def get_student_bulletin_pdf(student_id: str):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        }
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
 
@@ -233,9 +251,7 @@ def get_student_bulletin_blocks_pdf(student_id: str):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        }
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
 
@@ -251,9 +267,7 @@ def get_course_complete_bulletins_zip(cycle: str, course: str):
     return Response(
         content=zip_bytes,
         media_type="application/zip",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        }
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
 
@@ -269,9 +283,7 @@ def get_course_blocks_bulletins_zip(course: str):
     return Response(
         content=zip_bytes,
         media_type="application/zip",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        }
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
 
@@ -287,9 +299,7 @@ def get_course_modules_only_bulletins_zip(course: str):
     return Response(
         content=zip_bytes,
         media_type="application/zip",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        }
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
 
 
@@ -305,7 +315,5 @@ def get_course_blocks_and_modules_bulletins_zip(course: str):
     return Response(
         content=zip_bytes,
         media_type="application/zip",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        }
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )

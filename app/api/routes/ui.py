@@ -53,7 +53,7 @@ def home():
 
             .shell {
                 width: 100%;
-                max-width: 1280px;
+                max-width: 1320px;
             }
 
             .hero {
@@ -82,7 +82,7 @@ def home():
 
             .hero-subtitle {
                 margin: 10px auto 0 auto;
-                max-width: 820px;
+                max-width: 860px;
                 font-size: 16px;
                 color: var(--muted);
                 line-height: 1.55;
@@ -90,7 +90,7 @@ def home():
 
             .grid {
                 display: grid;
-                grid-template-columns: 1.15fr 1fr;
+                grid-template-columns: 1.1fr 1fr;
                 gap: 22px;
             }
 
@@ -176,19 +176,17 @@ def home():
                 color: var(--text);
             }
 
-            input[type="text"],
             select {
                 width: 100%;
                 padding: 13px 14px;
                 border: 1px solid var(--line-strong);
                 border-radius: 12px;
-                font-size: 16px;
+                font-size: 15px;
                 outline: none;
                 background: #fff;
                 color: var(--text);
             }
 
-            input[type="text"]:focus,
             select:focus {
                 border-color: var(--primary-2);
                 box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
@@ -199,10 +197,6 @@ def home():
                 grid-template-columns: repeat(2, 1fr);
                 gap: 12px;
                 margin-top: 8px;
-            }
-
-            .buttons-grid.three {
-                grid-template-columns: repeat(3, 1fr);
             }
 
             button {
@@ -226,6 +220,12 @@ def home():
                 transform: scale(0.99);
             }
 
+            button:disabled {
+                opacity: 0.55;
+                cursor: not-allowed;
+                box-shadow: none;
+            }
+
             .btn-primary {
                 background: var(--primary);
                 color: white;
@@ -247,12 +247,6 @@ def home():
                 color: white;
             }
 
-            .btn-outline {
-                background: #ffffff;
-                color: var(--accent);
-                border: 1px solid var(--line-strong);
-            }
-
             .btn-success {
                 background: #0f766e;
                 color: white;
@@ -263,10 +257,10 @@ def home():
                 color: white;
             }
 
-            .btn-gray {
-                background: #eef2f7;
-                color: #24324a;
-                border: 1px solid #d2dceb;
+            .btn-outline {
+                background: #ffffff;
+                color: var(--accent);
+                border: 1px solid var(--line-strong);
             }
 
             .help-box {
@@ -325,8 +319,7 @@ def home():
                     font-size: 30px;
                 }
 
-                .buttons-grid,
-                .buttons-grid.three {
+                .buttons-grid {
                     grid-template-columns: 1fr;
                 }
             }
@@ -340,8 +333,7 @@ def home():
                     <h1 class="hero-title">Sistema Automatizado de Boletines Académicos</h1>
                     <p class="hero-subtitle">
                         Genera boletines individuales y masivos desde una interfaz simple.
-                        Esta versión permite trabajar con boletín completo, por bloques,
-                        por módulos y por bloques + módulos según el ciclo.
+                        Esta versión trabaja con selección guiada por ciclo, curso y estudiante.
                     </p>
                 </div>
 
@@ -351,76 +343,72 @@ def home():
                             <div class="card-kicker">Modo individual</div>
                             <h2 class="card-title">Boletines por estudiante</h2>
                             <p class="card-subtitle">
-                                Introduce el ID del estudiante para visualizar o descargar
-                                sus boletines en HTML o PDF.
+                                Selecciona el ciclo, el curso y el estudiante. El sistema evita que tengas que escribir manualmente.
                             </p>
                         </div>
 
                         <div class="section">
-                            <h3 class="section-title">Consulta individual</h3>
+                            <h3 class="section-title">Consulta individual guiada</h3>
 
                             <div class="form-group">
-                                <label for="studentId">ID del estudiante</label>
-                                <input
-                                    type="text"
-                                    id="studentId"
-                                    placeholder="Ejemplo: 32387390"
-                                    autofocus
-                                />
+                                <label for="studentCycle">Ciclo</label>
+                                <select id="studentCycle" onchange="loadStudentCourses()">
+                                    <option value="Primer_Ciclo">Primer Ciclo</option>
+                                    <option value="Segundo_Ciclo">Segundo Ciclo</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="studentCourse">Curso</label>
+                                <select id="studentCourse" onchange="loadStudents()">
+                                    <option value="">Cargando cursos...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="studentSelect">Estudiante</label>
+                                <select id="studentSelect" onchange="updateStudentButtons()">
+                                    <option value="">Selecciona un curso primero</option>
+                                </select>
                             </div>
 
                             <div class="subsection">
                                 <h4 class="subsection-title">Boletín general</h4>
                                 <div class="buttons-grid">
-                                    <button class="btn-primary" onclick="openRoute('/students/' + getStudentId() + '/bulletin-html')">
+                                    <button id="btnBulletinHtml" class="btn-primary" onclick="openStudentRoute('bulletin-html')" disabled>
                                         Ver boletín completo (HTML)
                                     </button>
 
-                                    <button class="btn-secondary" onclick="openRoute('/students/' + getStudentId() + '/bulletin-pdf')">
+                                    <button id="btnBulletinPdf" class="btn-secondary" onclick="openStudentRoute('bulletin-pdf')" disabled>
                                         Descargar boletín completo (PDF)
                                     </button>
                                 </div>
                             </div>
 
                             <div class="subsection">
-                                <h4 class="subsection-title">Primer ciclo</h4>
+                                <h4 class="subsection-title">Boletín por bloques / módulos</h4>
                                 <div class="buttons-grid">
-                                    <button class="btn-soft" onclick="openRoute('/students/' + getStudentId() + '/bulletin-blocks-html')">
+                                    <button id="btnBlocksHtml" class="btn-soft" onclick="openCycleSpecificHtml()" disabled>
                                         Ver boletín por bloques (HTML)
                                     </button>
 
-                                    <button class="btn-dark" onclick="openRoute('/students/' + getStudentId() + '/bulletin-blocks-pdf')">
+                                    <button id="btnBlocksPdf" class="btn-dark" onclick="openCycleSpecificPdf()" disabled>
                                         Descargar boletín por bloques (PDF)
                                     </button>
-                                </div>
-                            </div>
 
-                            <div class="subsection">
-                                <h4 class="subsection-title">Segundo ciclo</h4>
-                                <div class="buttons-grid">
-                                    <button class="btn-success" onclick="openRoute('/students/' + getStudentId() + '/second-cycle-blocks-html')">
-                                        Ver bloques + módulos (HTML)
-                                    </button>
-
-                                    <button class="btn-violet" onclick="openRoute('/students/' + getStudentId() + '/second-cycle-blocks-pdf')">
-                                        Descargar bloques + módulos (PDF)
-                                    </button>
-
-                                    <button class="btn-gray" onclick="openRoute('/students/' + getStudentId() + '/modules-only-html')">
+                                    <button id="btnModulesHtml" class="btn-success" onclick="openStudentRoute('modules-only-html')" disabled>
                                         Ver boletín de módulos (HTML)
                                     </button>
 
-                                    <button class="btn-outline" onclick="openRoute('/students/' + getStudentId() + '/modules-only-pdf')">
+                                    <button id="btnModulesPdf" class="btn-violet" onclick="openStudentRoute('modules-only-pdf')" disabled>
                                         Descargar boletín de módulos (PDF)
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="help-box">
-                            <strong>Disponible en la plataforma:</strong>
-                            <br>• <strong>Primer Ciclo:</strong> boletín completo y boletín por bloques.
-                            <br>• <strong>Segundo Ciclo:</strong> boletín completo, boletín de módulos y boletín por bloques + módulos.
+                        <div class="help-box" id="individualHelp">
+                            <strong>Primer Ciclo:</strong> boletín completo y boletín por bloques.
                         </div>
                     </div>
 
@@ -429,8 +417,8 @@ def home():
                             <div class="card-kicker">Modo masivo</div>
                             <h2 class="card-title">Boletines por curso</h2>
                             <p class="card-subtitle">
-                                Genera un ZIP con todos los boletines de un curso. En la descarga masiva,
-                                la filosofía institucional se agrega una sola vez dentro del ZIP.
+                                Genera un ZIP con todos los boletines del curso seleccionado.
+                                La filosofía institucional se agrega una sola vez al ZIP.
                             </p>
                         </div>
 
@@ -438,42 +426,40 @@ def home():
                             <h3 class="section-title">Generación masiva</h3>
 
                             <div class="form-group">
-                                <label for="cycle">Ciclo</label>
-                                <select id="cycle" onchange="updateMassiveHelp()">
+                                <label for="massiveCycle">Ciclo</label>
+                                <select id="massiveCycle" onchange="loadMassiveCourses()">
                                     <option value="Primer_Ciclo">Primer Ciclo</option>
                                     <option value="Segundo_Ciclo">Segundo Ciclo</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
-                                <label for="course">Curso</label>
-                                <input
-                                    type="text"
-                                    id="course"
-                                    placeholder="Ejemplo: 2do A o 6to A"
-                                />
+                                <label for="massiveCourse">Curso</label>
+                                <select id="massiveCourse" onchange="updateMassiveButtons()">
+                                    <option value="">Cargando cursos...</option>
+                                </select>
                             </div>
 
                             <div class="buttons-grid">
-                                <button class="btn-primary" onclick="openCompleteZip()">
+                                <button id="btnZipComplete" class="btn-primary" onclick="openCompleteZip()" disabled>
                                     Descargar ZIP completo
                                 </button>
 
-                                <button class="btn-outline" onclick="openBlocksZip()">
+                                <button id="btnZipBlocks" class="btn-outline" onclick="openBlocksZip()" disabled>
                                     Descargar ZIP por bloques
                                 </button>
 
-                                <button class="btn-dark" onclick="openSecondCycleModulesZip()">
+                                <button id="btnZipModules" class="btn-dark" onclick="openSecondCycleModulesZip()" disabled>
                                     Descargar ZIP solo módulos
                                 </button>
 
-                                <button class="btn-violet" onclick="openSecondCycleBlocksAndModulesZip()">
+                                <button id="btnZipBlocksModules" class="btn-violet" onclick="openSecondCycleBlocksAndModulesZip()" disabled>
                                     Descargar ZIP bloques + módulos
                                 </button>
                             </div>
 
                             <div class="status-box" id="massiveStatus">
-                                Para <strong>Primer Ciclo</strong> están disponibles el ZIP completo y el ZIP por bloques.
+                                Cargando configuración del ciclo...
                             </div>
                         </div>
 
@@ -492,102 +478,251 @@ def home():
         </div>
 
         <script>
-            function getStudentId() {
-                const value = document.getElementById("studentId").value.trim();
-
-                if (!value) {
-                    alert("Debes escribir el ID del estudiante.");
-                    throw new Error("ID vacío");
-                }
-
-                return encodeURIComponent(value);
-            }
-
-            function getCourse() {
-                const value = document.getElementById("course").value.trim();
-
-                if (!value) {
-                    alert("Debes escribir el curso.");
-                    throw new Error("Curso vacío");
-                }
-
-                return encodeURIComponent(value);
-            }
-
-            function getCycle() {
-                return document.getElementById("cycle").value;
-            }
+            let individualStudents = [];
 
             function openRoute(url) {
                 window.open(url, "_blank");
             }
 
+            function getSelectedStudentId() {
+                const value = document.getElementById("studentSelect").value;
+                if (!value) {
+                    alert("Debes seleccionar un estudiante.");
+                    throw new Error("Estudiante no seleccionado");
+                }
+                return encodeURIComponent(value);
+            }
+
+            function getIndividualCycle() {
+                return document.getElementById("studentCycle").value;
+            }
+
+            function getIndividualCourse() {
+                return document.getElementById("studentCourse").value;
+            }
+
+            function getMassiveCycle() {
+                return document.getElementById("massiveCycle").value;
+            }
+
+            function getMassiveCourse() {
+                return document.getElementById("massiveCourse").value;
+            }
+
+            async function fetchJson(url) {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error("No se pudo cargar la información.");
+                }
+                return await response.json();
+            }
+
+            function setOptions(selectId, items, placeholder) {
+                const select = document.getElementById(selectId);
+                select.innerHTML = "";
+
+                const firstOption = document.createElement("option");
+                firstOption.value = "";
+                firstOption.textContent = placeholder;
+                select.appendChild(firstOption);
+
+                for (const item of items) {
+                    const option = document.createElement("option");
+                    if (typeof item === "string") {
+                        option.value = item;
+                        option.textContent = item;
+                    } else {
+                        option.value = item.id_estudiante;
+                        option.textContent = item.label;
+                    }
+                    select.appendChild(option);
+                }
+            }
+
+            function setIndividualButtonsDisabled(disabled) {
+                document.getElementById("btnBulletinHtml").disabled = disabled;
+                document.getElementById("btnBulletinPdf").disabled = disabled;
+                document.getElementById("btnBlocksHtml").disabled = disabled;
+                document.getElementById("btnBlocksPdf").disabled = disabled;
+                document.getElementById("btnModulesHtml").disabled = disabled;
+                document.getElementById("btnModulesPdf").disabled = disabled;
+            }
+
+            function updateIndividualHelp() {
+                const cycle = getIndividualCycle();
+                const help = document.getElementById("individualHelp");
+
+                if (cycle === "Primer_Ciclo") {
+                    help.innerHTML = "<strong>Primer Ciclo:</strong> boletín completo y boletín por bloques.";
+                } else {
+                    help.innerHTML = "<strong>Segundo Ciclo:</strong> boletín completo, boletín de módulos y boletín por bloques + módulos.";
+                }
+            }
+
+            async function loadStudentCourses() {
+                const cycle = getIndividualCycle();
+                setIndividualButtonsDisabled(true);
+                setOptions("studentCourse", [], "Cargando cursos...");
+                setOptions("studentSelect", [], "Selecciona un curso primero");
+                updateIndividualHelp();
+
+                try {
+                    const data = await fetchJson(`/students/options/courses?cycle=${encodeURIComponent(cycle)}`);
+                    setOptions("studentCourse", data.courses || [], "Selecciona un curso");
+                } catch (error) {
+                    setOptions("studentCourse", [], "No se pudieron cargar los cursos");
+                }
+            }
+
+            async function loadStudents() {
+                const cycle = getIndividualCycle();
+                const course = getIndividualCourse();
+                setIndividualButtonsDisabled(true);
+
+                if (!course) {
+                    setOptions("studentSelect", [], "Selecciona un curso primero");
+                    return;
+                }
+
+                setOptions("studentSelect", [], "Cargando estudiantes...");
+
+                try {
+                    const data = await fetchJson(`/students/options/students?cycle=${encodeURIComponent(cycle)}&course=${encodeURIComponent(course)}`);
+                    individualStudents = data.students || [];
+                    setOptions("studentSelect", individualStudents, "Selecciona un estudiante");
+                } catch (error) {
+                    individualStudents = [];
+                    setOptions("studentSelect", [], "No se pudieron cargar los estudiantes");
+                }
+            }
+
+            function updateStudentButtons() {
+                const cycle = getIndividualCycle();
+                const studentId = document.getElementById("studentSelect").value;
+                const disabled = !studentId;
+
+                document.getElementById("btnBulletinHtml").disabled = disabled;
+                document.getElementById("btnBulletinPdf").disabled = disabled;
+                document.getElementById("btnBlocksHtml").disabled = disabled;
+                document.getElementById("btnBlocksPdf").disabled = disabled;
+
+                if (cycle === "Primer_Ciclo") {
+                    document.getElementById("btnModulesHtml").disabled = true;
+                    document.getElementById("btnModulesPdf").disabled = true;
+                } else {
+                    document.getElementById("btnModulesHtml").disabled = disabled;
+                    document.getElementById("btnModulesPdf").disabled = disabled;
+                }
+            }
+
+            function openStudentRoute(routeSuffix) {
+                const studentId = getSelectedStudentId();
+                openRoute(`/students/${studentId}/${routeSuffix}`);
+            }
+
+            function openCycleSpecificHtml() {
+                const cycle = getIndividualCycle();
+                if (cycle === "Primer_Ciclo") {
+                    openStudentRoute("bulletin-blocks-html");
+                } else {
+                    openStudentRoute("second-cycle-blocks-html");
+                }
+            }
+
+            function openCycleSpecificPdf() {
+                const cycle = getIndividualCycle();
+                if (cycle === "Primer_Ciclo") {
+                    openStudentRoute("bulletin-blocks-pdf");
+                } else {
+                    openStudentRoute("second-cycle-blocks-pdf");
+                }
+            }
+
+            async function loadMassiveCourses() {
+                const cycle = getMassiveCycle();
+                setOptions("massiveCourse", [], "Cargando cursos...");
+
+                try {
+                    const data = await fetchJson(`/students/options/courses?cycle=${encodeURIComponent(cycle)}`);
+                    setOptions("massiveCourse", data.courses || [], "Selecciona un curso");
+                } catch (error) {
+                    setOptions("massiveCourse", [], "No se pudieron cargar los cursos");
+                }
+
+                updateMassiveButtons();
+            }
+
+            function updateMassiveButtons() {
+                const cycle = getMassiveCycle();
+                const course = getMassiveCourse();
+                const hasCourse = !!course;
+
+                document.getElementById("btnZipComplete").disabled = !hasCourse;
+                document.getElementById("btnZipBlocks").disabled = !(hasCourse && cycle === "Primer_Ciclo");
+                document.getElementById("btnZipModules").disabled = !(hasCourse && cycle === "Segundo_Ciclo");
+                document.getElementById("btnZipBlocksModules").disabled = !(hasCourse && cycle === "Segundo_Ciclo");
+
+                const status = document.getElementById("massiveStatus");
+                if (cycle === "Primer_Ciclo") {
+                    status.innerHTML = "Para <strong>Primer Ciclo</strong> están disponibles el ZIP completo y el ZIP por bloques.";
+                } else {
+                    status.innerHTML = "Para <strong>Segundo Ciclo</strong> están disponibles el ZIP completo, el ZIP solo módulos y el ZIP bloques + módulos.";
+                }
+            }
+
             function openCompleteZip() {
-                const cycle = getCycle();
-                const course = getCourse();
-                openRoute('/students/course/' + cycle + '/' + course + '/bulletins-zip');
+                const cycle = getMassiveCycle();
+                const course = getMassiveCourse();
+
+                if (!course) {
+                    alert("Debes seleccionar un curso.");
+                    return;
+                }
+
+                openRoute(`/students/course/${encodeURIComponent(cycle)}/${encodeURIComponent(course)}/bulletins-zip`);
             }
 
             function openBlocksZip() {
-                const cycle = getCycle();
+                const course = getMassiveCourse();
 
-                if (cycle !== 'Primer_Ciclo') {
-                    alert('El ZIP por bloques solo está disponible para Primer Ciclo.');
+                if (!course) {
+                    alert("Debes seleccionar un curso.");
                     return;
                 }
 
-                const course = getCourse();
-                openRoute('/students/course/Primer_Ciclo/' + course + '/bulletins-blocks-zip');
+                openRoute(`/students/course/Primer_Ciclo/${encodeURIComponent(course)}/bulletins-blocks-zip`);
             }
 
             function openSecondCycleModulesZip() {
-                const cycle = getCycle();
+                const course = getMassiveCourse();
 
-                if (cycle !== 'Segundo_Ciclo') {
-                    alert('El ZIP solo de módulos está disponible para Segundo Ciclo.');
+                if (!course) {
+                    alert("Debes seleccionar un curso.");
                     return;
                 }
 
-                const course = getCourse();
-                openRoute('/students/course/Segundo_Ciclo/' + course + '/bulletins-modules-zip');
+                openRoute(`/students/course/Segundo_Ciclo/${encodeURIComponent(course)}/bulletins-modules-zip`);
             }
 
             function openSecondCycleBlocksAndModulesZip() {
-                const cycle = getCycle();
+                const course = getMassiveCourse();
 
-                if (cycle !== 'Segundo_Ciclo') {
-                    alert('El ZIP de bloques + módulos está disponible para Segundo Ciclo.');
+                if (!course) {
+                    alert("Debes seleccionar un curso.");
                     return;
                 }
 
-                const course = getCourse();
-                openRoute('/students/course/Segundo_Ciclo/' + course + '/bulletins-blocks-and-modules-zip');
+                openRoute(`/students/course/Segundo_Ciclo/${encodeURIComponent(course)}/bulletins-blocks-and-modules-zip`);
             }
 
-            function updateMassiveHelp() {
-                const cycle = getCycle();
-                const status = document.getElementById("massiveStatus");
-
-                if (cycle === "Primer_Ciclo") {
-                    status.innerHTML = 'Para <strong>Primer Ciclo</strong> están disponibles el ZIP completo y el ZIP por bloques.';
-                } else {
-                    status.innerHTML = 'Para <strong>Segundo Ciclo</strong> están disponibles el ZIP completo, el ZIP solo módulos y el ZIP bloques + módulos.';
-                }
+            async function initializeUI() {
+                await loadStudentCourses();
+                await loadMassiveCourses();
+                updateStudentButtons();
+                updateMassiveButtons();
             }
 
-            document.getElementById("studentId").addEventListener("keydown", function(event) {
-                if (event.key === "Enter") {
-                    openRoute('/students/' + getStudentId() + '/bulletin-pdf');
-                }
-            });
-
-            document.getElementById("course").addEventListener("keydown", function(event) {
-                if (event.key === "Enter") {
-                    openCompleteZip();
-                }
-            });
-
-            updateMassiveHelp();
+            initializeUI();
         </script>
     </body>
     </html>
