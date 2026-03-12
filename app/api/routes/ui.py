@@ -19,17 +19,18 @@ def home():
             }
 
             :root {
-                --bg: #f4f7fb;
-                --panel: #ffffff;
-                --panel-soft: #f8fbff;
-                --text: #172033;
-                --muted: #5f6b85;
-                --primary: #1e3a8a;
-                --primary-2: #2563eb;
-                --accent: #0f172a;
-                --line: #d8e2f0;
-                --line-strong: #bfd1ea;
-                --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+                --bg: #F8FAFC;
+                --panel: #FFFFFF;
+                --panel-soft: #F8FBFF;
+                --text: #334155;
+                --muted: #64748B;
+                --primary: #2563EB;
+                --primary-2: #1E3A8A;
+                --hover: #1D4ED8;
+                --accent: #1E293B;
+                --line: #E2E8F0;
+                --line-strong: #CBD5E1;
+                --shadow: 0 16px 40px rgba(37, 99, 235, 0.08);
                 --radius: 18px;
             }
 
@@ -37,8 +38,8 @@ def home():
                 margin: 0;
                 font-family: Arial, Helvetica, sans-serif;
                 background:
-                    radial-gradient(circle at top left, #eaf2ff 0%, transparent 32%),
-                    radial-gradient(circle at top right, #eef4ff 0%, transparent 28%),
+                    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08) 0%, transparent 32%),
+                    radial-gradient(circle at top right, rgba(30, 58, 138, 0.06) 0%, transparent 28%),
                     var(--bg);
                 color: var(--text);
             }
@@ -65,12 +66,13 @@ def home():
                 display: inline-block;
                 padding: 7px 12px;
                 border-radius: 999px;
-                background: #e8f0ff;
-                color: var(--primary);
+                background: rgba(37, 99, 235, 0.10);
+                color: var(--primary-2);
                 font-size: 12px;
                 font-weight: bold;
                 letter-spacing: 0.3px;
                 margin-bottom: 12px;
+                border: 1px solid rgba(37, 99, 235, 0.12);
             }
 
             .hero-title {
@@ -109,7 +111,7 @@ def home():
             .card-kicker {
                 font-size: 12px;
                 font-weight: bold;
-                color: var(--primary-2);
+                color: var(--primary);
                 text-transform: uppercase;
                 letter-spacing: 0.6px;
                 margin-bottom: 6px;
@@ -159,7 +161,7 @@ def home():
                 margin: 0 0 10px 0;
                 font-size: 13px;
                 font-weight: bold;
-                color: var(--primary);
+                color: var(--primary-2);
                 text-transform: uppercase;
                 letter-spacing: 0.4px;
             }
@@ -183,12 +185,13 @@ def home():
                 border-radius: 12px;
                 font-size: 15px;
                 outline: none;
-                background: #fff;
+                background: #FFFFFF;
                 color: var(--text);
+                transition: border-color 0.12s ease, box-shadow 0.12s ease;
             }
 
             select:focus {
-                border-color: var(--primary-2);
+                border-color: var(--primary);
                 box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
             }
 
@@ -206,14 +209,14 @@ def home():
                 font-size: 14px;
                 font-weight: bold;
                 cursor: pointer;
-                transition: transform 0.08s ease, opacity 0.08s ease, box-shadow 0.12s ease;
+                transition: transform 0.08s ease, opacity 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
                 min-height: 58px;
                 line-height: 1.2;
             }
 
             button:hover {
-                opacity: 0.97;
-                box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+                opacity: 0.98;
+                box-shadow: 0 10px 18px rgba(37, 99, 235, 0.12);
             }
 
             button:active {
@@ -231,43 +234,71 @@ def home():
                 color: white;
             }
 
+            .btn-primary:hover {
+                background: var(--hover);
+            }
+
             .btn-secondary {
                 background: var(--primary-2);
                 color: white;
             }
 
+            .btn-secondary:hover {
+                background: #17327A;
+            }
+
             .btn-soft {
-                background: #e8f0ff;
+                background: rgba(37, 99, 235, 0.10);
                 color: var(--primary);
-                border: 1px solid #c8d8fb;
+                border: 1px solid rgba(37, 99, 235, 0.18);
+            }
+
+            .btn-soft:hover {
+                background: rgba(37, 99, 235, 0.16);
             }
 
             .btn-dark {
-                background: #0f172a;
+                background: #1E293B;
                 color: white;
+            }
+
+            .btn-dark:hover {
+                background: #0F172A;
             }
 
             .btn-success {
-                background: #0f766e;
+                background: #0F766E;
                 color: white;
+            }
+
+            .btn-success:hover {
+                background: #0D5F59;
             }
 
             .btn-violet {
-                background: #5b21b6;
+                background: #6366F1;
                 color: white;
             }
 
+            .btn-violet:hover {
+                background: #4F46E5;
+            }
+
             .btn-outline {
-                background: #ffffff;
+                background: #FFFFFF;
                 color: var(--accent);
                 border: 1px solid var(--line-strong);
+            }
+
+            .btn-outline:hover {
+                background: #F8FAFC;
             }
 
             .help-box {
                 margin-top: 18px;
                 padding: 14px 15px;
                 border-radius: 12px;
-                background: #f9fbff;
+                background: #F8FAFC;
                 border: 1px solid var(--line);
                 font-size: 13px;
                 color: var(--muted);
@@ -282,10 +313,10 @@ def home():
                 margin-top: 14px;
                 padding: 12px 14px;
                 border-radius: 12px;
-                background: #eef6ff;
-                border: 1px solid #cfe0fb;
+                background: rgba(37, 99, 235, 0.08);
+                border: 1px solid rgba(37, 99, 235, 0.16);
                 font-size: 13px;
-                color: #35517d;
+                color: var(--primary-2);
                 line-height: 1.5;
             }
 
