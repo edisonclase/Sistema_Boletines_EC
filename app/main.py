@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.api.routes.data_sources import router as data_sources_router
 from app.api.routes.students import router as students_router
@@ -11,6 +12,8 @@ app = FastAPI(
     version="0.1.0",
     description="Sistema modular para boletines, consulta académica y estadísticas."
 )
+
+app.mount("/assets", StaticFiles(directory="app/pdf/assets"), name="assets")
 
 app.include_router(ui_router)
 app.include_router(students_router)
