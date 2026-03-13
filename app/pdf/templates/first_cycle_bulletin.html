@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Evaluaciones - Segundo Ciclo del Nivel Secundario</title>
+    <title>Reporte de Evaluaciones - Primer Ciclo del Nivel Secundario</title>
     <style>
         @page {
             size: Letter landscape;
@@ -731,8 +731,8 @@
                 <div class="comment-box">
                     <div class="comment-title">Comentario del profesor titular</div>
                     <div class="muted">
-                        {% if student.teacher_comment is defined and student.teacher_comment %}
-                            {{ student.teacher_comment }}
+                        {% if student.comentario_final is defined and student.comentario_final %}
+                            {{ student.comentario_final }}
                         {% else %}
                             ________________________________________________
                         {% endif %}

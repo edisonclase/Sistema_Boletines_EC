@@ -459,7 +459,7 @@
 
 {% macro low_class(value) -%}
     {%- set visible = format_grade(value)|trim -%}
-    {%- if visible != "" and (value|float) < 70 -%}
+    {%- if visible != "" and (value|float) >= 1 and (value|float) < 70 -%}
         low-grade
     {%- endif -%}
 {%- endmacro %}
@@ -467,6 +467,11 @@
 {% macro grade_cell(value) -%}
     {%- set visible = format_grade(value)|trim -%}
     <td class="{{ low_class(value) if visible else '' }}">{{ visible }}</td>
+{%- endmacro %}
+
+{% macro ra_cell(value) -%}
+    {%- set visible = format_grade(value)|trim -%}
+    <td>{{ visible }}</td>
 {%- endmacro %}
 
 {% set generated_at = generated_at if generated_at is defined else "" %}
@@ -647,16 +652,16 @@
                     {% for module in modules_list %}
                         <tr>
                             <td class="module-name">{{ module.modulo or "" }}</td>
-                            {{ grade_cell(module.ra1) }}
-                            {{ grade_cell(module.ra2) }}
-                            {{ grade_cell(module.ra3) }}
-                            {{ grade_cell(module.ra4) }}
-                            {{ grade_cell(module.ra5) }}
-                            {{ grade_cell(module.ra6) }}
-                            {{ grade_cell(module.ra7) }}
-                            {{ grade_cell(module.ra8) }}
-                            {{ grade_cell(module.ra9) }}
-                            {{ grade_cell(module.ra10) }}
+                            {{ ra_cell(module.ra1) }}
+                            {{ ra_cell(module.ra2) }}
+                            {{ ra_cell(module.ra3) }}
+                            {{ ra_cell(module.ra4) }}
+                            {{ ra_cell(module.ra5) }}
+                            {{ ra_cell(module.ra6) }}
+                            {{ ra_cell(module.ra7) }}
+                            {{ ra_cell(module.ra8) }}
+                            {{ ra_cell(module.ra9) }}
+                            {{ ra_cell(module.ra10) }}
                             {{ grade_cell(module.cf) }}
                             <td>{{ module.situ_a or "" }}</td>
                             <td>{{ module.situ_r or "" }}</td>
