@@ -13,6 +13,11 @@ from app.utils.helpers import is_low_grade
 
 TEMPLATES_DIR = Path("app/pdf/templates")
 
+
+def _project_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
 env = Environment(
     loader=FileSystemLoader(TEMPLATES_DIR),
     autoescape=select_autoescape(["html", "xml"])
@@ -35,9 +40,10 @@ def build_image_data_uri(image_path: str) -> str:
         file_path = Path(image_path)
 
         if not file_path.is_absolute():
-            file_path = Path.cwd() / file_path
+            file_path = _project_root() / file_path
 
         if not file_path.exists():
+            print(f"[HTML] No se encontró la imagen: {file_path}", flush=True)
             return ""
 
         mime_type, _ = mimetypes.guess_type(str(file_path))
@@ -46,7 +52,8 @@ def build_image_data_uri(image_path: str) -> str:
 
         encoded = base64.b64encode(file_path.read_bytes()).decode("utf-8")
         return f"data:{mime_type};base64,{encoded}"
-    except Exception:
+    except Exception as exc:
+        print(f"[HTML] No se pudo convertir la imagen a data URI ({image_path}): {exc}", flush=True)
         return ""
 
 
