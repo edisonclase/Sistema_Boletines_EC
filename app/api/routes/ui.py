@@ -1243,9 +1243,16 @@ def home():
                 if (!lastIndividualQuery) {
                     return;
                 }
+
                 showProgressModal("bulletin-html");
-                openRoute(lastIndividualQuery.url);
-                completeProgressModal("La última consulta se abrió nuevamente.");
+
+                setTimeout(() => {
+                    openRoute(lastIndividualQuery.url);
+
+                    setTimeout(() => {
+                        completeProgressModal("La última consulta se abrió nuevamente.");
+                    }, 900);
+                }, 250);
             }
 
             function saveLastMassiveQuery(data) {
@@ -1285,12 +1292,19 @@ def home():
                 }
 
                 showProgressModal("zip-complete");
-                openRoute(lastMassiveQuery.url);
-                setMassiveStatus(
-                    "Se volvió a abrir la <strong>última generación masiva</strong> guardada.",
-                    "success"
-                );
-                completeProgressModal("La última generación masiva se abrió nuevamente.");
+
+                setTimeout(() => {
+                    openRoute(lastMassiveQuery.url);
+
+                    setMassiveStatus(
+                        "Se volvió a abrir la <strong>última generación masiva</strong> guardada.",
+                        "success"
+                    );
+
+                    setTimeout(() => {
+                        completeProgressModal("La última generación masiva se abrió nuevamente.");
+                    }, 1200);
+                }, 300);
             }
 
             async function loadStudentCourses() {
@@ -1400,9 +1414,14 @@ def home():
                         url: url
                     });
 
-                    openRoute(url);
-                    completeProgressModal("La operación fue enviada al navegador correctamente.");
-                    resetIndividualSelectors();
+                    setTimeout(() => {
+                        openRoute(url);
+
+                        setTimeout(() => {
+                            completeProgressModal("La operación fue enviada al navegador correctamente.");
+                            resetIndividualSelectors();
+                        }, 900);
+                    }, 250);
                 } catch (error) {
                     failProgressModal(error.message || "No se pudo iniciar la operación.");
                 }
@@ -1470,13 +1489,20 @@ def home():
                 try {
                     showProgressModal(presetKey);
                     saveLastMassiveQuery(data);
-                    openRoute(data.url);
-                    setMassiveStatus(
-                        `Descarga preparada: <strong>${data.typeLabel}</strong> del curso <strong>${data.course}</strong>. Puedes reabrirla desde la tarjeta de última generación.`,
-                        "success"
-                    );
-                    completeProgressModal(`La generación ${data.typeLabel.toLowerCase()} fue enviada al navegador.`);
-                    resetMassiveSelectors();
+
+                    setTimeout(() => {
+                        openRoute(data.url);
+
+                        setMassiveStatus(
+                            `Descarga preparada: <strong>${data.typeLabel}</strong> del curso <strong>${data.course}</strong>. Puedes reabrirla desde la tarjeta de última generación.`,
+                            "success"
+                        );
+
+                        setTimeout(() => {
+                            completeProgressModal(`La generación ${data.typeLabel.toLowerCase()} fue enviada al navegador.`);
+                            resetMassiveSelectors();
+                        }, 1200);
+                    }, 300);
                 } catch (error) {
                     failProgressModal(error.message || "No se pudo iniciar la generación masiva.");
                 }
