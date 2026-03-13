@@ -13,6 +13,18 @@ def home():
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>CLASE EducTech</title>
+        <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <defs>
+                <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="%236366F1"/>
+                    <stop offset="100%" stop-color="%23818CF8"/>
+                </linearGradient>
+            </defs>
+            <rect x="4" y="4" width="56" height="56" rx="14" fill="url(%23g)"/>
+            <text x="50%" y="54%" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+                  font-size="24" font-weight="700" fill="white">CE</text>
+        </svg>' />
         <style>
             * {
                 box-sizing: border-box;
