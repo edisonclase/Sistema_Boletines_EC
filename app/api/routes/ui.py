@@ -36,6 +36,9 @@ def home():
                 --success-bg: rgba(15, 118, 110, 0.10);
                 --success-border: rgba(15, 118, 110, 0.25);
                 --success-text: #0F766E;
+                --danger-bg: rgba(220, 38, 38, 0.10);
+                --danger-border: rgba(220, 38, 38, 0.20);
+                --danger-text: #B91C1C;
             }
 
             body {
@@ -46,6 +49,10 @@ def home():
                     radial-gradient(circle at top right, rgba(129, 140, 248, 0.16) 0%, transparent 28%),
                     linear-gradient(180deg, #F8FAFC 0%, var(--bg) 100%);
                 color: var(--text);
+            }
+
+            body.progress-lock {
+                overflow: hidden;
             }
 
             .wrapper {
@@ -377,6 +384,146 @@ def home():
                 color: var(--accent);
             }
 
+            .progress-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 23, 42, 0.48);
+                backdrop-filter: blur(6px);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                padding: 18px;
+            }
+
+            .progress-overlay.show {
+                display: flex;
+            }
+
+            .progress-modal {
+                width: 100%;
+                max-width: 520px;
+                background: rgba(255, 255, 255, 0.96);
+                border: 1px solid rgba(99, 102, 241, 0.18);
+                border-radius: 24px;
+                box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+                padding: 26px 24px 22px 24px;
+            }
+
+            .progress-top {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                margin-bottom: 16px;
+            }
+
+            .progress-spinner {
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                border: 4px solid rgba(99, 102, 241, 0.16);
+                border-top-color: var(--primary);
+                animation: spin 0.9s linear infinite;
+                flex-shrink: 0;
+            }
+
+            .progress-title {
+                margin: 0;
+                font-size: 19px;
+                font-weight: 800;
+                color: var(--accent);
+            }
+
+            .progress-subtitle {
+                margin: 4px 0 0 0;
+                font-size: 13px;
+                color: var(--muted);
+                line-height: 1.5;
+            }
+
+            .progress-track {
+                width: 100%;
+                height: 14px;
+                border-radius: 999px;
+                background: #E5E7EB;
+                overflow: hidden;
+                position: relative;
+                margin-top: 14px;
+            }
+
+            .progress-bar {
+                height: 100%;
+                width: 0%;
+                border-radius: 999px;
+                background: linear-gradient(90deg, var(--primary) 0%, var(--primary-2) 55%, #A78BFA 100%);
+                box-shadow: 0 6px 20px rgba(99, 102, 241, 0.28);
+                transition: width 0.35s ease;
+            }
+
+            .progress-meta {
+                margin-top: 12px;
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                align-items: center;
+            }
+
+            .progress-step {
+                font-size: 13px;
+                color: var(--muted);
+            }
+
+            .progress-percent {
+                font-size: 14px;
+                font-weight: bold;
+                color: var(--accent);
+            }
+
+            .progress-note {
+                margin-top: 14px;
+                padding: 12px 14px;
+                border-radius: 14px;
+                background: rgba(99, 102, 241, 0.08);
+                border: 1px solid rgba(99, 102, 241, 0.14);
+                font-size: 12px;
+                color: var(--hover);
+                line-height: 1.45;
+            }
+
+            .progress-note.error {
+                background: var(--danger-bg);
+                border-color: var(--danger-border);
+                color: var(--danger-text);
+            }
+
+            .progress-actions {
+                margin-top: 16px;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .progress-close {
+                display: none;
+                border: none;
+                border-radius: 12px;
+                padding: 10px 14px;
+                font-size: 13px;
+                font-weight: bold;
+                background: #E2E8F0;
+                color: #0F172A;
+                cursor: pointer;
+            }
+
+            .progress-close.show {
+                display: inline-block;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
             @media (max-width: 1100px) {
                 .grid {
                     grid-template-columns: 1fr;
@@ -399,6 +546,15 @@ def home():
                 .buttons-grid,
                 .last-query-actions {
                     grid-template-columns: 1fr;
+                }
+
+                .progress-modal {
+                    padding: 20px 18px;
+                    border-radius: 20px;
+                }
+
+                .progress-top {
+                    align-items: flex-start;
                 }
             }
         </style>
@@ -588,14 +744,180 @@ def home():
             </div>
         </div>
 
+        <div class="progress-overlay" id="progressOverlay" aria-hidden="true">
+            <div class="progress-modal" role="dialog" aria-modal="true" aria-labelledby="progressTitle">
+                <div class="progress-top">
+                    <div class="progress-spinner" id="progressSpinner"></div>
+                    <div>
+                        <h3 class="progress-title" id="progressTitle">Preparando descarga</h3>
+                        <p class="progress-subtitle" id="progressSubtitle">
+                            El sistema está procesando tu solicitud.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="progress-track">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+
+                <div class="progress-meta">
+                    <div class="progress-step" id="progressStep">Inicializando proceso...</div>
+                    <div class="progress-percent" id="progressPercent">0%</div>
+                </div>
+
+                <div class="progress-note" id="progressNote">
+                    Este indicador es visual y acompaña la generación del archivo mientras el navegador abre la descarga.
+                </div>
+
+                <div class="progress-actions">
+                    <button type="button" class="progress-close" id="progressCloseBtn" onclick="closeProgressModal()">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <script>
             let individualStudents = [];
             let lastIndividualQuery = null;
             let lastMassiveQuery = null;
 
+            let progressInterval = null;
+            let progressValue = 0;
+            let progressTarget = 0;
+            let progressLocked = false;
+            let progressCompletionTimeout = null;
+
             const STORAGE_KEYS = {
                 lastIndividualQuery: "clase_edutech_last_individual_query",
                 lastMassiveQuery: "clase_edutech_last_massive_query"
+            };
+
+            const progressPresets = {
+                "bulletin-html": {
+                    title: "Abriendo boletín completo",
+                    subtitle: "Estamos preparando la vista HTML del estudiante seleccionado.",
+                    steps: [
+                        { percent: 18, label: "Validando selección del estudiante..." },
+                        { percent: 42, label: "Consultando información académica..." },
+                        { percent: 72, label: "Renderizando vista HTML..." },
+                        { percent: 92, label: "Abriendo boletín en una nueva pestaña..." }
+                    ]
+                },
+                "bulletin-pdf": {
+                    title: "Generando boletín completo",
+                    subtitle: "Estamos preparando el PDF individual con los datos académicos.",
+                    steps: [
+                        { percent: 16, label: "Validando datos del estudiante..." },
+                        { percent: 39, label: "Construyendo contenido del boletín..." },
+                        { percent: 67, label: "Generando PDF..." },
+                        { percent: 91, label: "Iniciando descarga..." }
+                    ]
+                },
+                "bulletin-blocks-html": {
+                    title: "Abriendo boletín por bloques",
+                    subtitle: "Se está preparando la vista por bloques del estudiante.",
+                    steps: [
+                        { percent: 18, label: "Verificando ciclo académico..." },
+                        { percent: 44, label: "Consultando bloques de competencias..." },
+                        { percent: 74, label: "Renderizando boletín por bloques..." },
+                        { percent: 92, label: "Abriendo vista HTML..." }
+                    ]
+                },
+                "bulletin-blocks-pdf": {
+                    title: "Generando PDF por bloques",
+                    subtitle: "Se está preparando el PDF del boletín por bloques.",
+                    steps: [
+                        { percent: 18, label: "Verificando ciclo académico..." },
+                        { percent: 41, label: "Armando estructura del boletín..." },
+                        { percent: 68, label: "Convirtiendo a PDF..." },
+                        { percent: 92, label: "Iniciando descarga..." }
+                    ]
+                },
+                "second-cycle-blocks-html": {
+                    title: "Abriendo bloques y módulos",
+                    subtitle: "Se está preparando la vista combinada de bloques y módulos.",
+                    steps: [
+                        { percent: 18, label: "Verificando datos del segundo ciclo..." },
+                        { percent: 45, label: "Consultando bloques y módulos..." },
+                        { percent: 74, label: "Renderizando boletín combinado..." },
+                        { percent: 92, label: "Abriendo vista HTML..." }
+                    ]
+                },
+                "second-cycle-blocks-pdf": {
+                    title: "Generando PDF de bloques y módulos",
+                    subtitle: "Se está preparando el PDF combinado del segundo ciclo.",
+                    steps: [
+                        { percent: 16, label: "Validando perfil académico..." },
+                        { percent: 43, label: "Armando contenido combinado..." },
+                        { percent: 70, label: "Generando PDF..." },
+                        { percent: 92, label: "Iniciando descarga..." }
+                    ]
+                },
+                "modules-only-html": {
+                    title: "Abriendo boletín de módulos",
+                    subtitle: "Estamos preparando la vista HTML de módulos técnicos.",
+                    steps: [
+                        { percent: 18, label: "Verificando estudiante del segundo ciclo..." },
+                        { percent: 46, label: "Consultando módulos técnicos..." },
+                        { percent: 74, label: "Renderizando boletín de módulos..." },
+                        { percent: 92, label: "Abriendo vista HTML..." }
+                    ]
+                },
+                "modules-only-pdf": {
+                    title: "Generando PDF de módulos",
+                    subtitle: "Estamos preparando el PDF de módulos técnicos.",
+                    steps: [
+                        { percent: 16, label: "Verificando estudiante del segundo ciclo..." },
+                        { percent: 42, label: "Preparando datos de módulos..." },
+                        { percent: 69, label: "Generando PDF..." },
+                        { percent: 92, label: "Iniciando descarga..." }
+                    ]
+                },
+                "zip-complete": {
+                    title: "Generando ZIP completo",
+                    subtitle: "Estamos preparando todos los boletines completos del curso seleccionado.",
+                    steps: [
+                        { percent: 12, label: "Validando curso y ciclo..." },
+                        { percent: 31, label: "Consultando estudiantes del curso..." },
+                        { percent: 58, label: "Generando boletines PDF..." },
+                        { percent: 84, label: "Comprimiendo archivos en ZIP..." },
+                        { percent: 94, label: "Iniciando descarga del ZIP..." }
+                    ]
+                },
+                "zip-blocks": {
+                    title: "Generando ZIP por bloques",
+                    subtitle: "Estamos preparando todos los boletines por bloques del curso.",
+                    steps: [
+                        { percent: 12, label: "Validando curso de Primer Ciclo..." },
+                        { percent: 31, label: "Consultando estudiantes..." },
+                        { percent: 58, label: "Generando PDFs por bloques..." },
+                        { percent: 84, label: "Comprimiendo archivos en ZIP..." },
+                        { percent: 94, label: "Iniciando descarga del ZIP..." }
+                    ]
+                },
+                "zip-modules": {
+                    title: "Generando ZIP de módulos",
+                    subtitle: "Estamos preparando los boletines de módulos del curso seleccionado.",
+                    steps: [
+                        { percent: 12, label: "Validando curso de Segundo Ciclo..." },
+                        { percent: 31, label: "Consultando estudiantes..." },
+                        { percent: 58, label: "Generando PDFs de módulos..." },
+                        { percent: 84, label: "Comprimiendo archivos en ZIP..." },
+                        { percent: 94, label: "Iniciando descarga del ZIP..." }
+                    ]
+                },
+                "zip-blocks-modules": {
+                    title: "Generando ZIP bloques + módulos",
+                    subtitle: "Estamos preparando la generación masiva combinada del segundo ciclo.",
+                    steps: [
+                        { percent: 12, label: "Validando curso de Segundo Ciclo..." },
+                        { percent: 31, label: "Consultando estudiantes..." },
+                        { percent: 58, label: "Generando PDFs combinados..." },
+                        { percent: 84, label: "Comprimiendo archivos en ZIP..." },
+                        { percent: 94, label: "Iniciando descarga del ZIP..." }
+                    ]
+                }
             };
 
             function openRoute(url) {
@@ -668,6 +990,145 @@ def home():
                 } catch (error) {
                     console.warn("No se pudo limpiar localStorage:", error);
                 }
+            }
+
+            function getProgressElements() {
+                return {
+                    overlay: document.getElementById("progressOverlay"),
+                    title: document.getElementById("progressTitle"),
+                    subtitle: document.getElementById("progressSubtitle"),
+                    bar: document.getElementById("progressBar"),
+                    percent: document.getElementById("progressPercent"),
+                    step: document.getElementById("progressStep"),
+                    note: document.getElementById("progressNote"),
+                    closeBtn: document.getElementById("progressCloseBtn"),
+                    spinner: document.getElementById("progressSpinner")
+                };
+            }
+
+            function updateProgressUI(stepLabel = "") {
+                const elements = getProgressElements();
+                elements.bar.style.width = `${progressValue}%`;
+                elements.percent.textContent = `${Math.round(progressValue)}%`;
+                if (stepLabel) {
+                    elements.step.textContent = stepLabel;
+                }
+            }
+
+            function stopProgressAnimation() {
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
+            }
+
+            function showProgressModal(presetKey) {
+                const preset = progressPresets[presetKey] || progressPresets["zip-complete"];
+                const elements = getProgressElements();
+
+                stopProgressAnimation();
+                if (progressCompletionTimeout) {
+                    clearTimeout(progressCompletionTimeout);
+                    progressCompletionTimeout = null;
+                }
+
+                progressLocked = true;
+                progressValue = 4;
+                progressTarget = 8;
+
+                document.body.classList.add("progress-lock");
+                elements.overlay.classList.add("show");
+                elements.overlay.setAttribute("aria-hidden", "false");
+                elements.title.textContent = preset.title;
+                elements.subtitle.textContent = preset.subtitle;
+                elements.note.classList.remove("error");
+                elements.note.textContent = "Este indicador acompaña el proceso mientras el sistema prepara la apertura o descarga.";
+                elements.closeBtn.classList.remove("show");
+                elements.spinner.style.display = "block";
+
+                updateProgressUI("Inicializando proceso...");
+
+                const steps = preset.steps || [];
+                let currentStepIndex = 0;
+                let nextAutomaticLabel = steps.length ? steps[0].label : "Procesando solicitud...";
+
+                progressInterval = setInterval(() => {
+                    if (!progressLocked) {
+                        stopProgressAnimation();
+                        return;
+                    }
+
+                    if (currentStepIndex < steps.length && progressValue >= steps[currentStepIndex].percent - 2) {
+                        progressTarget = steps[currentStepIndex].percent;
+                        nextAutomaticLabel = steps[currentStepIndex].label;
+                        currentStepIndex += 1;
+                    }
+
+                    if (progressValue < progressTarget) {
+                        progressValue = Math.min(progressValue + 2, progressTarget);
+                        updateProgressUI(nextAutomaticLabel);
+                        return;
+                    }
+
+                    const lastSafeCap = 95;
+                    if (progressValue < lastSafeCap) {
+                        progressTarget = Math.min(progressValue + 4, lastSafeCap);
+                        progressValue = Math.min(progressValue + 1, progressTarget);
+                        updateProgressUI(nextAutomaticLabel);
+                    }
+                }, 220);
+            }
+
+            function completeProgressModal(successMessage = "La solicitud fue enviada al navegador.") {
+                const elements = getProgressElements();
+                progressLocked = false;
+                stopProgressAnimation();
+
+                progressValue = 100;
+                updateProgressUI("Proceso completado.");
+                elements.note.classList.remove("error");
+                elements.note.textContent = successMessage;
+                elements.closeBtn.classList.add("show");
+                elements.spinner.style.display = "none";
+
+                progressCompletionTimeout = setTimeout(() => {
+                    closeProgressModal();
+                }, 1100);
+            }
+
+            function failProgressModal(errorMessage = "No se pudo completar la operación.") {
+                const elements = getProgressElements();
+                progressLocked = false;
+                stopProgressAnimation();
+
+                elements.note.classList.add("error");
+                elements.note.textContent = errorMessage;
+                elements.step.textContent = "Ocurrió un problema.";
+                elements.closeBtn.classList.add("show");
+                elements.spinner.style.display = "none";
+            }
+
+            function closeProgressModal() {
+                const elements = getProgressElements();
+                stopProgressAnimation();
+
+                if (progressCompletionTimeout) {
+                    clearTimeout(progressCompletionTimeout);
+                    progressCompletionTimeout = null;
+                }
+
+                progressLocked = false;
+                progressValue = 0;
+                progressTarget = 0;
+                elements.overlay.classList.remove("show");
+                elements.overlay.setAttribute("aria-hidden", "true");
+                elements.bar.style.width = "0%";
+                elements.percent.textContent = "0%";
+                elements.step.textContent = "Inicializando proceso...";
+                elements.note.classList.remove("error");
+                elements.closeBtn.classList.remove("show");
+                elements.spinner.style.display = "block";
+                document.body.classList.remove("progress-lock");
             }
 
             async function fetchJson(url) {
@@ -782,7 +1243,9 @@ def home():
                 if (!lastIndividualQuery) {
                     return;
                 }
+                showProgressModal("bulletin-html");
                 openRoute(lastIndividualQuery.url);
+                completeProgressModal("La última consulta se abrió nuevamente.");
             }
 
             function saveLastMassiveQuery(data) {
@@ -821,11 +1284,13 @@ def home():
                     return;
                 }
 
+                showProgressModal("zip-complete");
                 openRoute(lastMassiveQuery.url);
                 setMassiveStatus(
                     "Se volvió a abrir la <strong>última generación masiva</strong> guardada.",
                     "success"
                 );
+                completeProgressModal("La última generación masiva se abrió nuevamente.");
             }
 
             async function loadStudentCourses() {
@@ -901,24 +1366,46 @@ def home():
                 return `/students/${studentId}/${routeSuffix}`;
             }
 
+            function getPresetKeyForStudentRoute(routeSuffix) {
+                const map = {
+                    "bulletin-html": "bulletin-html",
+                    "bulletin-pdf": "bulletin-pdf",
+                    "bulletin-blocks-html": "bulletin-blocks-html",
+                    "bulletin-blocks-pdf": "bulletin-blocks-pdf",
+                    "second-cycle-blocks-html": "second-cycle-blocks-html",
+                    "second-cycle-blocks-pdf": "second-cycle-blocks-pdf",
+                    "modules-only-html": "modules-only-html",
+                    "modules-only-pdf": "modules-only-pdf"
+                };
+                return map[routeSuffix] || "bulletin-pdf";
+            }
+
             function openStudentRoute(routeSuffix) {
-                const cycle = getIndividualCycle();
-                const course = getIndividualCourse();
-                const studentId = document.getElementById("studentSelect").value;
-                const studentLabel = getSelectedStudentLabel();
-                const url = buildStudentRoute(routeSuffix);
+                try {
+                    const cycle = getIndividualCycle();
+                    const course = getIndividualCourse();
+                    const studentId = document.getElementById("studentSelect").value;
+                    const studentLabel = getSelectedStudentLabel();
+                    const url = buildStudentRoute(routeSuffix);
+                    const presetKey = getPresetKeyForStudentRoute(routeSuffix);
 
-                saveLastQuery({
-                    cycle: cycle,
-                    course: course,
-                    studentId: studentId,
-                    studentLabel: studentLabel,
-                    routeSuffix: routeSuffix,
-                    url: url
-                });
+                    showProgressModal(presetKey);
 
-                openRoute(url);
-                resetIndividualSelectors();
+                    saveLastQuery({
+                        cycle: cycle,
+                        course: course,
+                        studentId: studentId,
+                        studentLabel: studentLabel,
+                        routeSuffix: routeSuffix,
+                        url: url
+                    });
+
+                    openRoute(url);
+                    completeProgressModal("La operación fue enviada al navegador correctamente.");
+                    resetIndividualSelectors();
+                } catch (error) {
+                    failProgressModal(error.message || "No se pudo iniciar la operación.");
+                }
             }
 
             function openCycleSpecificHtml() {
@@ -979,14 +1466,20 @@ def home():
                 }
             }
 
-            function finalizeMassiveDownload(data) {
-                saveLastMassiveQuery(data);
-                openRoute(data.url);
-                setMassiveStatus(
-                    `Descarga preparada: <strong>${data.typeLabel}</strong> del curso <strong>${data.course}</strong>. Puedes reabrirla desde la tarjeta de última generación.`,
-                    "success"
-                );
-                resetMassiveSelectors();
+            function finalizeMassiveDownload(data, presetKey) {
+                try {
+                    showProgressModal(presetKey);
+                    saveLastMassiveQuery(data);
+                    openRoute(data.url);
+                    setMassiveStatus(
+                        `Descarga preparada: <strong>${data.typeLabel}</strong> del curso <strong>${data.course}</strong>. Puedes reabrirla desde la tarjeta de última generación.`,
+                        "success"
+                    );
+                    completeProgressModal(`La generación ${data.typeLabel.toLowerCase()} fue enviada al navegador.`);
+                    resetMassiveSelectors();
+                } catch (error) {
+                    failProgressModal(error.message || "No se pudo iniciar la generación masiva.");
+                }
             }
 
             function openCompleteZip() {
@@ -1005,7 +1498,7 @@ def home():
                     course: course,
                     typeLabel: "ZIP completo",
                     url: url
-                });
+                }, "zip-complete");
             }
 
             function openBlocksZip() {
@@ -1023,7 +1516,7 @@ def home():
                     course: course,
                     typeLabel: "ZIP por bloques",
                     url: url
-                });
+                }, "zip-blocks");
             }
 
             function openSecondCycleModulesZip() {
@@ -1041,7 +1534,7 @@ def home():
                     course: course,
                     typeLabel: "ZIP solo módulos",
                     url: url
-                });
+                }, "zip-modules");
             }
 
             function openSecondCycleBlocksAndModulesZip() {
@@ -1059,7 +1552,7 @@ def home():
                     course: course,
                     typeLabel: "ZIP bloques + módulos",
                     url: url
-                });
+                }, "zip-blocks-modules");
             }
 
             function initializeUI() {
