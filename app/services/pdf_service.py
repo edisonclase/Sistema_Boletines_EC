@@ -19,7 +19,8 @@ from app.services.html_service import (
     render_second_cycle_blocks_and_modules,
     render_second_cycle_modules_only,
     render_template,
-)from __future__ import annotations
+)
+from app.utils.helpers import safe_value
 
 import re
 import unicodedata
