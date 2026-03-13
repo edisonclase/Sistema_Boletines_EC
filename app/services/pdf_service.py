@@ -19,6 +19,27 @@ from app.services.html_service import (
     render_second_cycle_blocks_and_modules,
     render_second_cycle_modules_only,
     render_template,
+)from __future__ import annotations
+
+import re
+import unicodedata
+import zipfile
+from io import BytesIO
+from pathlib import Path
+
+from pypdf import PdfReader, PdfWriter
+
+from app.core.settings import settings
+from app.data.fetchers.google_sheets import load_primer_ciclo, load_segundo_ciclo
+from app.services.bulletin_service import (
+    build_student_result_from_row,
+    find_student_by_id,
+    normalize_student_id,
+)
+from app.services.html_service import (
+    render_second_cycle_blocks_and_modules,
+    render_second_cycle_modules_only,
+    render_template,
 )
 from app.utils.helpers import safe_value
 
@@ -479,16 +500,11 @@ def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = 
             pdf_bytes, filename = _generate_final_pdf_from_result(
                 result,
                 bulletin_type,
-                append_philosophy=False
+                append_philosophy=True
             )
 
             final_name = _unique_filename(filename, used_names)
             zip_file.writestr(final_name, pdf_bytes)
-
-        philosophy_path = _get_philosophy_pdf_path()
-        philosophy_filename = _unique_filename("Filosofia Institucional.pdf", used_names)
-        print("[ZIP] Agregando PDF de filosofía una sola vez al ZIP", flush=True)
-        zip_file.write(philosophy_path, arcname=philosophy_filename)
 
     zip_buffer.seek(0)
     zip_filename = _build_course_zip_filename(course, normalized_cycle, bulletin_type)
