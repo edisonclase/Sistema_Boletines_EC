@@ -204,6 +204,37 @@ function setLoginStatus(message, tone = "info") {
     if (tone === "error") box.classList.add("error");
 }
 
+function showForgotPasswordMessage() {
+    setLoginStatus(
+        "Para restablecer tu contraseña, contacta al administrador del sistema.",
+        "info"
+    );
+}
+
+async function parseResponseSafely(response) {
+    const contentType = response.headers.get("content-type") || "";
+    const text = await response.text();
+
+    if (contentType.includes("application/json")) {
+        try {
+            return {
+                data: JSON.parse(text),
+                rawText: text
+            };
+        } catch (error) {
+            return {
+                data: null,
+                rawText: text
+            };
+        }
+    }
+
+    return {
+        data: null,
+        rawText: text
+    };
+}
+
 async function authFetch(url, options = {}) {
     const token = getToken();
     if (!token) {
@@ -260,10 +291,23 @@ async function loginAndGoToPanel() {
             body
         });
 
-        const data = await response.json();
+        const parsed = await parseResponseSafely(response);
+        const data = parsed.data;
 
         if (!response.ok) {
-            throw new Error(data.detail || "No se pudo iniciar sesión.");
+            if (data && data.detail) {
+                throw new Error(data.detail);
+            }
+
+            if (parsed.rawText && parsed.rawText.includes("Internal Server Error")) {
+                throw new Error("El servidor presentó un error interno al iniciar sesión.");
+            }
+
+            throw new Error(parsed.rawText || "No se pudo iniciar sesión.");
+        }
+
+        if (!data || !data.access_token || !data.user) {
+            throw new Error("La respuesta del servidor no tiene el formato esperado.");
         }
 
         setToken(data.access_token);
@@ -1038,3 +1082,4 @@ document.addEventListener("DOMContentLoaded", () => {
         initializePanelPage();
     }
 });
+
