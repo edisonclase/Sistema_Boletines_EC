@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -16,6 +18,19 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
+    )
+    to_encode.update({"exp": expire})
+    return jwt.encode(
+        to_encode,
+        settings.secret_key,
+        algorithm=settings.algorithm,
+    )
 
 
 def decode_access_token(token: str) -> dict:
@@ -71,5 +86,5 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Usuario inactivo.",
         )
-
     return current_user
+

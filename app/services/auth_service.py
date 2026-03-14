@@ -138,11 +138,14 @@ def authenticate_user(db: Session, email: str, password: str) -> dict:
     user.locked_until = None
     user.last_login_at = now
 
+    role_name = user.role.name if user.role else ""
+
     access_token = create_access_token(
         {
-            "sub": user.email,
+            "sub": normalized_email,
             "uid": str(user.id),
-            "role": user.role.name if user.role else "",
+            "role": role_name,
+            "full_name": user.full_name,
         }
     )
 
