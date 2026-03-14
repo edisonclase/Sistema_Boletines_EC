@@ -1,14 +1,17 @@
 import json
 import os
-from fastapi import APIRouter
+
+from fastapi import APIRouter, Depends
 from fastapi.responses import HTMLResponse
+
+from app.security.auth_dependencies import require_admin_only
 
 router = APIRouter(tags=["audit"])
 
 AUDIT_FILE = "logs/bulletin_audit.jsonl"
 
 
-def load_audit_events(limit=100):
+def load_audit_events(limit: int = 100):
     if not os.path.exists(AUDIT_FILE):
         return []
 
@@ -18,15 +21,14 @@ def load_audit_events(limit=100):
         for line in f:
             try:
                 events.append(json.loads(line))
-            except:
+            except Exception:
                 pass
 
     events.reverse()
-
     return events[:limit]
 
 
-@router.get("/audit", response_class=HTMLResponse)
+@router.get("/audit", response_class=HTMLResponse, dependencies=[Depends(require_admin_only())])
 def view_audit():
     events = load_audit_events()
 
@@ -35,14 +37,14 @@ def view_audit():
     for e in events:
         rows += f"""
         <tr>
-            <td>{e.get("timestamp","")}</td>
-            <td>{e.get("generated_by","")}</td>
-            <td>{e.get("generated_role","")}</td>
-            <td>{e.get("event_type","")}</td>
-            <td>{e.get("cycle","")}</td>
-            <td>{e.get("course","")}</td>
-            <td>{e.get("student_name","")}</td>
-            <td>{e.get("filename","")}</td>
+            <td>{e.get("timestamp", "")}</td>
+            <td>{e.get("generated_by", "")}</td>
+            <td>{e.get("generated_role", "")}</td>
+            <td>{e.get("event_type", "")}</td>
+            <td>{e.get("cycle", "")}</td>
+            <td>{e.get("course", "")}</td>
+            <td>{e.get("student_name", "")}</td>
+            <td>{e.get("filename", "")}</td>
         </tr>
         """
 
@@ -54,28 +56,28 @@ def view_audit():
         body {{
             font-family: Arial;
             padding: 40px;
-            background:#F8FAFC;
+            background: #F8FAFC;
         }}
 
         table {{
             border-collapse: collapse;
-            width:100%;
-            background:white;
+            width: 100%;
+            background: white;
         }}
 
         th, td {{
-            border:1px solid #ddd;
-            padding:8px;
-            font-size:13px;
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-size: 13px;
         }}
 
         th {{
-            background:#6366F1;
-            color:white;
+            background: #6366F1;
+            color: white;
         }}
 
         h1 {{
-            margin-bottom:20px;
+            margin-bottom: 20px;
         }}
         </style>
     </head>

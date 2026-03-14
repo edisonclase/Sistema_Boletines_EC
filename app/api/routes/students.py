@@ -1,9 +1,14 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import HTMLResponse, Response
 
 from app.core.settings import settings
+from app.security.auth_dependencies import (
+    require_admin_or_registro,
+    require_all_operational_roles,
+    require_read_only_roles,
+)
 from app.services.audit_service import (
     log_course_zip_event,
     log_student_bulletin_event,
@@ -15,12 +20,12 @@ from app.services.bulletin_service import (
 )
 from app.services.html_service import (
     render_template,
-    render_second_cycle_modules_only,
     render_second_cycle_blocks_and_modules,
+    render_second_cycle_modules_only,
 )
 from app.services.pdf_service import (
-    generate_blocks_bulletin_pdf,
     generate_blocks_and_modules_bulletin_pdf,
+    generate_blocks_bulletin_pdf,
     generate_complete_bulletin_pdf,
     generate_course_blocks_and_modules_bulletins_zip,
     generate_course_blocks_bulletins_zip,
@@ -40,39 +45,43 @@ def _generated_role() -> str:
     return settings.bulletin_generated_role
 
 
-@router.get("/options/courses")
+@router.get("/options/courses", dependencies=[Depends(require_all_operational_roles())])
 def get_courses_options(cycle: str = Query(...)):
     return {
         "cycle": cycle,
-        "courses": get_available_courses(cycle)
+        "courses": get_available_courses(cycle),
     }
 
 
-@router.get("/options/students")
+@router.get("/options/students", dependencies=[Depends(require_all_operational_roles())])
 def get_students_options(
     cycle: str = Query(...),
-    course: str = Query(...)
+    course: str = Query(...),
 ):
     return {
         "cycle": cycle,
         "course": course,
-        "students": get_available_students(cycle, course)
+        "students": get_available_students(cycle, course),
     }
 
 
-@router.get("/{student_id}")
+@router.get("/{student_id}", dependencies=[Depends(require_read_only_roles())])
 def get_student(student_id: str):
     return find_student_by_id(student_id)
 
 
-@router.get("/{student_id}/bulletin-html", response_class=HTMLResponse)
+@router.get(
+    "/{student_id}/bulletin-html",
+    response_class=HTMLResponse,
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_student_bulletin_html(student_id: str):
     result = find_student_by_id(student_id)
 
     if not result.get("found"):
         return HTMLResponse(
             content=f"<h1>No se encontró ningún estudiante con el ID {student_id}</h1>",
-            status_code=404
+            status_code=404,
         )
 
     template_name = (
@@ -91,7 +100,7 @@ def get_student_bulletin_html(student_id: str):
             "generated_at": datetime.now().strftime("%d/%m/%Y %H:%M"),
             "generated_by": _generated_by(),
             "school_year": settings.school_year,
-        }
+        },
     )
 
     log_student_bulletin_event(
@@ -106,20 +115,24 @@ def get_student_bulletin_html(student_id: str):
     return HTMLResponse(content=html)
 
 
-@router.get("/{student_id}/bulletin-blocks-html", response_class=HTMLResponse)
+@router.get(
+    "/{student_id}/bulletin-blocks-html",
+    response_class=HTMLResponse,
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_student_bulletin_blocks_html(student_id: str):
     result = find_student_by_id(student_id)
 
     if not result.get("found"):
         return HTMLResponse(
             content=f"<h1>No se encontró ningún estudiante con el ID {student_id}</h1>",
-            status_code=404
+            status_code=404,
         )
 
     if result["cycle"] != "Primer_Ciclo":
         return HTMLResponse(
             content="<h1>El boletín por bloques actualmente solo está disponible para Primer Ciclo.</h1>",
-            status_code=400
+            status_code=400,
         )
 
     html = render_template(
@@ -134,7 +147,7 @@ def get_student_bulletin_blocks_html(student_id: str):
             "generated_role": _generated_role(),
             "director_name": settings.institution_director,
             "school_year": settings.school_year,
-        }
+        },
     )
 
     log_student_bulletin_event(
@@ -149,20 +162,24 @@ def get_student_bulletin_blocks_html(student_id: str):
     return HTMLResponse(content=html)
 
 
-@router.get("/{student_id}/second-cycle-blocks-html", response_class=HTMLResponse)
+@router.get(
+    "/{student_id}/second-cycle-blocks-html",
+    response_class=HTMLResponse,
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_student_second_cycle_blocks_html(student_id: str):
     result = find_student_by_id(student_id)
 
     if not result.get("found"):
         return HTMLResponse(
             content=f"<h1>No se encontró ningún estudiante con el ID {student_id}</h1>",
-            status_code=404
+            status_code=404,
         )
 
     if result["cycle"] != "Segundo_Ciclo":
         return HTMLResponse(
             content="<h1>El boletín por bloques y módulos solo está disponible para Segundo Ciclo.</h1>",
-            status_code=400
+            status_code=400,
         )
 
     html = render_second_cycle_blocks_and_modules(result["student"])
@@ -179,20 +196,24 @@ def get_student_second_cycle_blocks_html(student_id: str):
     return HTMLResponse(content=html)
 
 
-@router.get("/{student_id}/modules-only-html", response_class=HTMLResponse)
+@router.get(
+    "/{student_id}/modules-only-html",
+    response_class=HTMLResponse,
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_student_modules_only_html(student_id: str):
     result = find_student_by_id(student_id)
 
     if not result.get("found"):
         return HTMLResponse(
             content=f"<h1>No se encontró ningún estudiante con el ID {student_id}</h1>",
-            status_code=404
+            status_code=404,
         )
 
     if result["cycle"] != "Segundo_Ciclo":
         return HTMLResponse(
             content="<h1>El boletín de módulos solo está disponible para Segundo Ciclo.</h1>",
-            status_code=400
+            status_code=400,
         )
 
     html = render_second_cycle_modules_only(result["student"])
@@ -209,20 +230,23 @@ def get_student_modules_only_html(student_id: str):
     return HTMLResponse(content=html)
 
 
-@router.get("/{student_id}/modules-only-pdf")
+@router.get(
+    "/{student_id}/modules-only-pdf",
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_student_modules_only_pdf(student_id: str):
     result = find_student_by_id(student_id)
 
     if not result.get("found"):
         return HTMLResponse(
             content=f"<h1>No se encontró ningún estudiante con el ID {student_id}</h1>",
-            status_code=404
+            status_code=404,
         )
 
     if result["cycle"] != "Segundo_Ciclo":
         return HTMLResponse(
             content="<h1>El boletín de módulos solo está disponible para Segundo Ciclo.</h1>",
-            status_code=400
+            status_code=400,
         )
 
     pdf_bytes, filename = generate_modules_only_bulletin_pdf(student_id)
@@ -239,24 +263,27 @@ def get_student_modules_only_pdf(student_id: str):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
-@router.get("/{student_id}/second-cycle-blocks-pdf")
+@router.get(
+    "/{student_id}/second-cycle-blocks-pdf",
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_student_second_cycle_blocks_pdf(student_id: str):
     result = find_student_by_id(student_id)
 
     if not result.get("found"):
         return HTMLResponse(
             content=f"<h1>No se encontró ningún estudiante con el ID {student_id}</h1>",
-            status_code=404
+            status_code=404,
         )
 
     if result["cycle"] != "Segundo_Ciclo":
         return HTMLResponse(
             content="<h1>El boletín por bloques y módulos solo está disponible para Segundo Ciclo.</h1>",
-            status_code=400
+            status_code=400,
         )
 
     pdf_bytes, filename = generate_blocks_and_modules_bulletin_pdf(student_id)
@@ -273,18 +300,21 @@ def get_student_second_cycle_blocks_pdf(student_id: str):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
-@router.get("/{student_id}/bulletin-pdf")
+@router.get(
+    "/{student_id}/bulletin-pdf",
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_student_bulletin_pdf(student_id: str):
     result = find_student_by_id(student_id)
 
     if not result.get("found"):
         return HTMLResponse(
             content=f"<h1>No se encontró ningún estudiante con el ID {student_id}</h1>",
-            status_code=404
+            status_code=404,
         )
 
     pdf_bytes, filename = generate_complete_bulletin_pdf(student_id)
@@ -301,24 +331,27 @@ def get_student_bulletin_pdf(student_id: str):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
-@router.get("/{student_id}/bulletin-blocks-pdf")
+@router.get(
+    "/{student_id}/bulletin-blocks-pdf",
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_student_bulletin_blocks_pdf(student_id: str):
     result = find_student_by_id(student_id)
 
     if not result.get("found"):
         return HTMLResponse(
             content=f"<h1>No se encontró ningún estudiante con el ID {student_id}</h1>",
-            status_code=404
+            status_code=404,
         )
 
     if result["cycle"] != "Primer_Ciclo":
         return HTMLResponse(
             content="<h1>El boletín por bloques actualmente solo está disponible para Primer Ciclo.</h1>",
-            status_code=400
+            status_code=400,
         )
 
     pdf_bytes, filename = generate_blocks_bulletin_pdf(student_id)
@@ -335,11 +368,14 @@ def get_student_bulletin_blocks_pdf(student_id: str):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
-@router.get("/course/{cycle}/{course}/bulletins-zip")
+@router.get(
+    "/course/{cycle}/{course}/bulletins-zip",
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_course_complete_bulletins_zip(cycle: str, course: str):
     try:
         zip_bytes, filename = generate_course_complete_bulletins_zip(course=course, cycle=cycle)
@@ -362,11 +398,14 @@ def get_course_complete_bulletins_zip(cycle: str, course: str):
     return Response(
         content=zip_bytes,
         media_type="application/zip",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
-@router.get("/course/Primer_Ciclo/{course}/bulletins-blocks-zip")
+@router.get(
+    "/course/Primer_Ciclo/{course}/bulletins-blocks-zip",
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_course_blocks_bulletins_zip(course: str):
     try:
         zip_bytes, filename = generate_course_blocks_bulletins_zip(course=course)
@@ -389,11 +428,14 @@ def get_course_blocks_bulletins_zip(course: str):
     return Response(
         content=zip_bytes,
         media_type="application/zip",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
-@router.get("/course/Segundo_Ciclo/{course}/bulletins-modules-zip")
+@router.get(
+    "/course/Segundo_Ciclo/{course}/bulletins-modules-zip",
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_course_modules_only_bulletins_zip(course: str):
     try:
         zip_bytes, filename = generate_course_modules_only_bulletins_zip(course=course)
@@ -416,11 +458,14 @@ def get_course_modules_only_bulletins_zip(course: str):
     return Response(
         content=zip_bytes,
         media_type="application/zip",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
-@router.get("/course/Segundo_Ciclo/{course}/bulletins-blocks-and-modules-zip")
+@router.get(
+    "/course/Segundo_Ciclo/{course}/bulletins-blocks-and-modules-zip",
+    dependencies=[Depends(require_admin_or_registro())],
+)
 def get_course_blocks_and_modules_bulletins_zip(course: str):
     try:
         zip_bytes, filename = generate_course_blocks_and_modules_bulletins_zip(course=course)
@@ -443,5 +488,5 @@ def get_course_blocks_and_modules_bulletins_zip(course: str):
     return Response(
         content=zip_bytes,
         media_type="application/zip",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
