@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CLASE EducTech</title>
+    <link rel="icon" type="image/png" href="/assets/interface_logo.png" />
+    <link rel="stylesheet" href="/ui/styles.css" />
+</head>
+<body>
+    <div class="wrapper">
+        <div class="shell">
+            <div class="top-brand">
+                <div class="brand-card brand-card-full">
+                    <img
+                        src="/assets/interface_logo.png"
+                        alt="Logo CLASE EducTech"
+                        class="brand-logo"
+                    />
+                    <div class="brand-copy">
+                        <div class="brand-eyebrow">Software privado de gestión escolar</div>
+                        <h1 class="brand-title">CLASE EducTech</h1>
+                        <p class="brand-subtitle">
+                            Plataforma moderna, institucional y segura para la generación de boletines académicos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="login-panel">
+                <div class="login-panel-header">
+                    <div>
+                        <div class="login-kicker">Acceso seguro</div>
+                        <h2 class="login-title">Iniciar sesión</h2>
+                        <p class="login-subtitle">
+                            Accede con tu correo institucional para utilizar el sistema según tu rol.
+                        </p>
+                    </div>
+                    <div class="session-pill" id="sessionPill">Sesión no iniciada</div>
+                </div>
+
+                <div class="login-grid">
+                    <div class="form-group">
+                        <label for="loginEmail">Correo</label>
+                        <input type="email" id="loginEmail" placeholder="usuario@centro.edu.do" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Contraseña</label>
+                        <input type="password" id="loginPassword" placeholder="••••••••" />
+                    </div>
+                </div>
+
+                <div class="login-actions">
+                    <button class="btn-primary" id="btnLogin" onclick="login()">Iniciar sesión</button>
+                    <button class="btn-outline" id="btnLogout" onclick="logout()" disabled>Cerrar sesión</button>
+                </div>
+
+                <div class="login-status" id="loginStatus">
+                    Debes iniciar sesión para consultar cursos, estudiantes y generar boletines.
+                </div>
+
+                <div class="session-summary" id="sessionSummary" style="display:none;">
+                    <div><strong>Usuario:</strong> <span id="sessionUserName">-</span></div>
+                    <div><strong>Correo:</strong> <span id="sessionUserEmail">-</span></div>
+                    <div><strong>Rol:</strong> <span id="sessionUserRole">-</span></div>
+                </div>
+            </div>
+
+            <div class="hero">
+                <h2 class="hero-title">Panel de Boletines</h2>
+                <p class="hero-subtitle">
+                    Selecciona estudiantes o cursos para generar boletines individuales o masivos.
+                </p>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-kicker">Modo individual</div>
+                        <h3 class="card-title">Boletines por estudiante</h3>
+                        <p class="card-subtitle">
+                            Selecciona el ciclo, el curso y el estudiante.
+                        </p>
+                    </div>
+
+                    <div class="section">
+                        <h4 class="section-title">Consulta Individual</h4>
+
+                        <div class="form-group">
+                            <label for="studentCycle">Ciclo</label>
+                            <select id="studentCycle" onchange="loadStudentCourses()" disabled>
+                                <option value="">Seleccione un ciclo</option>
+                                <option value="Primer_Ciclo">Primer Ciclo</option>
+                                <option value="Segundo_Ciclo">Segundo Ciclo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="studentCourse">Curso</label>
+                            <select id="studentCourse" onchange="loadStudents()" disabled>
+                                <option value="">Inicia sesión primero</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="studentSelect">Estudiante</label>
+                            <select id="studentSelect" onchange="updateStudentButtons()" disabled>
+                                <option value="">Inicia sesión primero</option>
+                            </select>
+                        </div>
+
+                        <div class="subsection">
+                            <h5 class="subsection-title">Boletín general</h5>
+                            <div class="buttons-grid">
+                                <button id="btnBulletinHtml" class="btn-primary" onclick="openStudentRoute('bulletin-html')" disabled>
+                                    Ver boletín completo (HTML)
+                                </button>
+
+                                <button id="btnBulletinPdf" class="btn-secondary" onclick="openStudentRoute('bulletin-pdf')" disabled>
+                                    Descargar boletín completo (PDF)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="subsection">
+                            <h5 class="subsection-title">Boletín por bloques / módulos</h5>
+                            <div class="buttons-grid">
+                                <button id="btnBlocksHtml" class="btn-soft" onclick="openCycleSpecificHtml()" disabled>
+                                    Ver boletín por bloques (HTML)
+                                </button>
+
+                                <button id="btnBlocksPdf" class="btn-dark" onclick="openCycleSpecificPdf()" disabled>
+                                    Descargar boletín por bloques (PDF)
+                                </button>
+
+                                <button id="btnModulesHtml" class="btn-success" onclick="openStudentRoute('modules-only-html')" disabled>
+                                    Ver boletín de módulos (HTML)
+                                </button>
+
+                                <button id="btnModulesPdf" class="btn-violet" onclick="openStudentRoute('modules-only-pdf')" disabled>
+                                    Descargar boletín de módulos (PDF)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-box" id="individualHelp">
+                        <strong>Inicia sesión:</strong> luego podrás elegir el ciclo, el curso y el estudiante.
+                    </div>
+
+                    <div class="last-query-box" id="lastQueryBox">
+                        <h4 class="last-query-title">Última consulta realizada</h4>
+                        <p class="last-query-meta"><strong>Ciclo:</strong> <span id="lastQueryCycle">-</span></p>
+                        <p class="last-query-meta"><strong>Curso:</strong> <span id="lastQueryCourse">-</span></p>
+                        <p class="last-query-meta"><strong>Estudiante:</strong> <span id="lastQueryStudent">-</span></p>
+
+                        <div class="last-query-actions">
+                            <button id="btnRepeatLastQuery" class="btn-primary" onclick="repeatLastQuery()">
+                                Abrir nuevamente
+                            </button>
+                            <button class="btn-outline" onclick="clearLastQuery()">
+                                Limpiar última consulta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-kicker">Modo masivo</div>
+                        <h3 class="card-title">Boletines por curso</h3>
+                        <p class="card-subtitle">
+                            Genera un ZIP con todos los boletines del curso seleccionado.
+                            La filosofía institucional se agrega una sola vez al ZIP.
+                        </p>
+                    </div>
+
+                    <div class="section">
+                        <h4 class="section-title">Generación masiva</h4>
+
+                        <div class="form-group">
+                            <label for="massiveCycle">Ciclo</label>
+                            <select id="massiveCycle" onchange="loadMassiveCourses()" disabled>
+                                <option value="">Seleccione un ciclo</option>
+                                <option value="Primer_Ciclo">Primer Ciclo</option>
+                                <option value="Segundo_Ciclo">Segundo Ciclo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="massiveCourse">Curso</label>
+                            <select id="massiveCourse" onchange="updateMassiveButtons()" disabled>
+                                <option value="">Inicia sesión primero</option>
+                            </select>
+                        </div>
+
+                        <div class="buttons-grid">
+                            <button id="btnZipComplete" class="btn-primary" onclick="openCompleteZip()" disabled>
+                                Descargar ZIP completo
+                            </button>
+
+                            <button id="btnZipBlocks" class="btn-outline" onclick="openBlocksZip()" disabled>
+                                Descargar ZIP por bloques
+                            </button>
+
+                            <button id="btnZipModules" class="btn-dark" onclick="openSecondCycleModulesZip()" disabled>
+                                Descargar ZIP solo módulos
+                            </button>
+
+                            <button id="btnZipBlocksModules" class="btn-violet" onclick="openSecondCycleBlocksAndModulesZip()" disabled>
+                                Descargar ZIP bloques + módulos
+                            </button>
+                        </div>
+
+                        <div class="status-box" id="massiveStatus">
+                            Inicia sesión para habilitar la generación masiva.
+                        </div>
+                    </div>
+
+                    <div class="help-box">
+                        <strong>Comportamiento por ciclo:</strong>
+                        <br>• <strong>Primer Ciclo:</strong> ZIP completo + ZIP por bloques.
+                        <br>• <strong>Segundo Ciclo:</strong> ZIP completo + ZIP solo módulos + ZIP bloques + módulos.
+                    </div>
+
+                    <div class="last-query-box" id="lastMassiveQueryBox">
+                        <h4 class="last-query-title">Última generación masiva</h4>
+                        <p class="last-query-meta"><strong>Ciclo:</strong> <span id="lastMassiveCycle">-</span></p>
+                        <p class="last-query-meta"><strong>Curso:</strong> <span id="lastMassiveCourse">-</span></p>
+                        <p class="last-query-meta"><strong>Tipo:</strong> <span id="lastMassiveType">-</span></p>
+
+                        <div class="last-query-actions">
+                            <button id="btnRepeatLastMassiveQuery" class="btn-primary" onclick="repeatLastMassiveQuery()">
+                                Abrir nuevamente
+                            </button>
+                            <button class="btn-outline" onclick="clearLastMassiveQuery()">
+                                Limpiar última generación
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                Plataforma privada · preparada para autenticación, roles y trazabilidad institucional
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-overlay" id="progressOverlay" aria-hidden="true">
+        <div class="progress-modal" role="dialog" aria-modal="true" aria-labelledby="progressTitle">
+            <div class="progress-top">
+                <div class="progress-spinner" id="progressSpinner"></div>
+                <div>
+                    <h3 class="progress-title" id="progressTitle">Preparando descarga</h3>
+                    <p class="progress-subtitle" id="progressSubtitle">
+                        El sistema está procesando tu solicitud.
+                    </p>
+                </div>
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="progress-meta">
+                <div class="progress-step" id="progressStep">Inicializando proceso...</div>
+                <div class="progress-percent" id="progressPercent">0%</div>
+            </div>
+
+            <div class="progress-note" id="progressNote">
+                Este indicador es visual y acompaña la generación del archivo mientras el navegador procesa la solicitud.
+            </div>
+
+            <div class="progress-actions">
+                <button type="button" class="progress-close" id="progressCloseBtn" onclick="closeProgressModal()">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/ui/app.js"></script>
+</body>
+</html>
