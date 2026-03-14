@@ -37,24 +37,40 @@
                     </p>
                 </div>
 
-                <div class="form-group">
-                    <label for="loginEmail">Correo</label>
-                    <input type="email" id="loginEmail" placeholder="usuario@centro.edu.do" />
-                </div>
+                <form id="loginForm" onsubmit="submitLoginForm(event)">
+                    <div class="form-group">
+                        <label for="loginEmail">Correo</label>
+                        <input
+                            type="email"
+                            id="loginEmail"
+                            placeholder="usuario@centro.edu.do"
+                            autocomplete="username"
+                        />
+                    </div>
 
-                <div class="form-group">
-                    <label for="loginPassword">Contraseña</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" />
-                </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Contraseña</label>
+                        <input
+                            type="password"
+                            id="loginPassword"
+                            placeholder="••••••••"
+                            autocomplete="current-password"
+                        />
+                    </div>
 
-                <div class="login-card-actions login-card-actions-centered">
-                    <button class="btn-brand btn-login-main" id="btnLogin" onclick="loginAndGoToPanel()">
-                        Acceder a la plataforma
-                    </button>
-                </div>
+                    <div class="login-card-actions login-card-actions-centered">
+                        <button type="submit" class="btn-brand btn-login-main" id="btnLogin">
+                            Acceder a la plataforma
+                        </button>
+                    </div>
+                </form>
 
                 <div class="login-links">
-                    <button type="button" class="login-link-button" onclick="showForgotPasswordMessage()">
+                    <button
+                        type="button"
+                        class="login-link-button"
+                        onclick="showForgotPasswordMessage()"
+                    >
                         ¿Olvidaste tu contraseña?
                     </button>
                 </div>
@@ -69,3 +85,4 @@
     <script src="/ui/app.js"></script>
 </body>
 </html>
+

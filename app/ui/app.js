@@ -211,6 +211,11 @@ function showForgotPasswordMessage() {
     );
 }
 
+function submitLoginForm(event) {
+    event.preventDefault();
+    loginAndGoToPanel();
+}
+
 async function parseResponseSafely(response) {
     const contentType = response.headers.get("content-type") || "";
     const text = await response.text();
@@ -691,7 +696,10 @@ function restoreLastQuery() {
 async function repeatLastQuery() {
     if (!lastIndividualQuery) return;
     try {
-        await executeProtectedRoute(lastIndividualQuery.url, getPresetKeyForStudentRoute(lastIndividualQuery.routeSuffix));
+        await executeProtectedRoute(
+            lastIndividualQuery.url,
+            getPresetKeyForStudentRoute(lastIndividualQuery.routeSuffix)
+        );
     } catch (_) {}
 }
 
@@ -730,7 +738,10 @@ function restoreLastMassiveQuery() {
 async function repeatLastMassiveQuery() {
     if (!lastMassiveQuery) return;
     try {
-        await executeProtectedRoute(lastMassiveQuery.url, getPresetKeyForMassiveType(lastMassiveQuery.typeLabel));
+        await executeProtectedRoute(
+            lastMassiveQuery.url,
+            getPresetKeyForMassiveType(lastMassiveQuery.typeLabel)
+        );
         setMassiveStatus(
             "Se volvió a abrir la <strong>última generación masiva</strong> guardada.",
             "success"
@@ -776,7 +787,9 @@ async function loadStudents() {
     setOptions("studentSelect", [], "Cargando estudiantes...");
 
     try {
-        const data = await fetchJson(`/students/options/students?cycle=${encodeURIComponent(cycle)}&course=${encodeURIComponent(course)}`);
+        const data = await fetchJson(
+            `/students/options/students?cycle=${encodeURIComponent(cycle)}&course=${encodeURIComponent(course)}`
+        );
         individualStudents = data.students || [];
         setOptions("studentSelect", individualStudents, "Seleccione un estudiante");
     } catch (error) {
@@ -1082,4 +1095,3 @@ document.addEventListener("DOMContentLoaded", () => {
         initializePanelPage();
     }
 });
-
