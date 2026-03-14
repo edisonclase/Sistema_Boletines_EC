@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.api.routes.audit import router as audit_router
 from app.api.routes.data_sources import router as data_sources_router
 from app.api.routes.students import router as students_router
 from app.api.routes.ui import router as ui_router
-from app.api.routes.audit import router as audit_router
+from app.models import AuditLog, Role, SystemSetting, User  # noqa: F401
 
 
 app = FastAPI(
