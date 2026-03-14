@@ -4,7 +4,7 @@ import os
 from fastapi import APIRouter, Depends
 from fastapi.responses import HTMLResponse
 
-from app.security.auth_dependencies import require_admin_only
+from app.security.dependencies import require_admin_only
 
 router = APIRouter(tags=["audit"])
 
@@ -107,3 +107,4 @@ def view_audit():
     """
 
     return HTMLResponse(content=html)
+

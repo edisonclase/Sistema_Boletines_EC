@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import HTMLResponse, Response
 
 from app.core.settings import settings
-from app.security.auth_dependencies import (
+from app.security.dependencies import (
     require_admin_or_registro,
     require_all_operational_roles,
     require_read_only_roles,
@@ -490,3 +490,4 @@ def get_course_blocks_and_modules_bulletins_zip(course: str):
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+

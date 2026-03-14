@@ -76,3 +76,20 @@ def require_roles(*allowed_roles: str):
         return current_user
 
     return dependency
+
+
+def require_admin_only():
+    return require_roles("admin")
+
+
+def require_admin_or_registro():
+    return require_roles("admin", "registro")
+
+
+def require_read_only_roles():
+    return require_roles("admin", "registro", "consulta")
+
+
+def require_all_operational_roles():
+    return require_roles("admin", "registro", "consulta", "digitador")
+
