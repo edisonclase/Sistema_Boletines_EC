@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CLASE EducTech · Acceso</title>
+    <link rel="icon" type="image/png" href="/assets/interface_logo.png" />
+    <link rel="stylesheet" href="/ui/styles.css" />
+</head>
+<body class="login-body">
+    <div class="login-shell">
+        <div class="login-brand-band">
+            <div class="login-brand-card">
+                <img
+                    src="/assets/interface_logo.png"
+                    alt="Logo CLASE EducTech"
+                    class="login-brand-logo"
+                />
+                <div class="login-brand-copy">
+                    <div class="login-brand-eyebrow">Software privado de gestión escolar.</div>
+                    <h1 class="login-brand-title">CLASE EducTech</h1>
+                    <p class="login-brand-subtitle">
+                        Plataforma segura para la gestión institucional.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-center">
+            <div class="login-card">
+                <div class="login-card-header">
+                    <div class="login-card-kicker">Acceso a la plataforma</div>
+                    <h2 class="login-card-title">Iniciar sesión</h2>
+                    <p class="login-card-subtitle">
+                        Ingresa con tu correo institucional para acceder según tu rol.
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginEmail">Correo</label>
+                    <input type="email" id="loginEmail" placeholder="usuario@centro.edu.do" />
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" />
+                </div>
+
+                <div class="login-card-actions">
+                    <button class="btn-brand" id="btnLogin" onclick="loginAndGoToPanel()">
+                        Entrar al sistema
+                    </button>
+                </div>
+
+                <div class="login-status" id="loginStatus">
+                    Accede con una cuenta autorizada para entrar al panel institucional.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/ui/app.js"></script>
+</body>
+</html>

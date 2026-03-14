@@ -3,71 +3,40 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CLASE EducTech</title>
+    <title>CLASE EducTech · Panel</title>
     <link rel="icon" type="image/png" href="/assets/interface_logo.png" />
     <link rel="stylesheet" href="/ui/styles.css" />
 </head>
-<body>
+<body class="panel-body">
     <div class="wrapper">
         <div class="shell">
-            <div class="top-brand">
-                <div class="brand-card brand-card-full">
+            <div class="panel-topbar">
+                <div class="panel-brand">
                     <img
                         src="/assets/interface_logo.png"
                         alt="Logo CLASE EducTech"
-                        class="brand-logo"
+                        class="panel-brand-logo"
                     />
-                    <div class="brand-copy">
-                        <div class="brand-eyebrow">Software privado de gestión escolar</div>
-                        <h1 class="brand-title">CLASE EducTech</h1>
-                        <p class="brand-subtitle">
-                            Plataforma moderna, institucional y segura para la generación de boletines académicos.
-                        </p>
+                    <div class="panel-brand-copy">
+                        <div class="panel-brand-kicker">Plataforma privada</div>
+                        <h1 class="panel-brand-title">CLASE EducTech</h1>
+                        <p class="panel-brand-subtitle">Panel institucional de boletines</p>
                     </div>
+                </div>
+
+                <div class="panel-userbox">
+                    <div class="panel-user-meta">
+                        <div class="panel-user-name" id="sessionUserName">-</div>
+                        <div class="panel-user-role" id="sessionUserRole">-</div>
+                        <div class="panel-user-email" id="sessionUserEmail">-</div>
+                    </div>
+                    <button class="btn-outline btn-logout" onclick="logoutToLogin()">
+                        Cerrar sesión
+                    </button>
                 </div>
             </div>
 
-            <div class="login-panel">
-                <div class="login-panel-header">
-                    <div>
-                        <div class="login-kicker">Acceso seguro</div>
-                        <h2 class="login-title">Iniciar sesión</h2>
-                        <p class="login-subtitle">
-                            Accede con tu correo institucional para utilizar el sistema según tu rol.
-                        </p>
-                    </div>
-                    <div class="session-pill" id="sessionPill">Sesión no iniciada</div>
-                </div>
-
-                <div class="login-grid">
-                    <div class="form-group">
-                        <label for="loginEmail">Correo</label>
-                        <input type="email" id="loginEmail" placeholder="usuario@centro.edu.do" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="loginPassword">Contraseña</label>
-                        <input type="password" id="loginPassword" placeholder="••••••••" />
-                    </div>
-                </div>
-
-                <div class="login-actions">
-                    <button class="btn-primary" id="btnLogin" onclick="login()">Iniciar sesión</button>
-                    <button class="btn-outline" id="btnLogout" onclick="logout()" disabled>Cerrar sesión</button>
-                </div>
-
-                <div class="login-status" id="loginStatus">
-                    Debes iniciar sesión para consultar cursos, estudiantes y generar boletines.
-                </div>
-
-                <div class="session-summary" id="sessionSummary" style="display:none;">
-                    <div><strong>Usuario:</strong> <span id="sessionUserName">-</span></div>
-                    <div><strong>Correo:</strong> <span id="sessionUserEmail">-</span></div>
-                    <div><strong>Rol:</strong> <span id="sessionUserRole">-</span></div>
-                </div>
-            </div>
-
-            <div class="hero">
+            <div class="hero panel-hero">
                 <h2 class="hero-title">Panel de Boletines</h2>
                 <p class="hero-subtitle">
                     Selecciona estudiantes o cursos para generar boletines individuales o masivos.
@@ -75,7 +44,7 @@
             </div>
 
             <div class="grid">
-                <div class="card">
+                <div class="card card-brand">
                     <div class="card-header">
                         <div class="card-kicker">Modo individual</div>
                         <h3 class="card-title">Boletines por estudiante</h3>
@@ -89,7 +58,7 @@
 
                         <div class="form-group">
                             <label for="studentCycle">Ciclo</label>
-                            <select id="studentCycle" onchange="loadStudentCourses()" disabled>
+                            <select id="studentCycle" onchange="loadStudentCourses()">
                                 <option value="">Seleccione un ciclo</option>
                                 <option value="Primer_Ciclo">Primer Ciclo</option>
                                 <option value="Segundo_Ciclo">Segundo Ciclo</option>
@@ -98,26 +67,26 @@
 
                         <div class="form-group">
                             <label for="studentCourse">Curso</label>
-                            <select id="studentCourse" onchange="loadStudents()" disabled>
-                                <option value="">Inicia sesión primero</option>
+                            <select id="studentCourse" onchange="loadStudents()">
+                                <option value="">Seleccione un ciclo primero</option>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label for="studentSelect">Estudiante</label>
-                            <select id="studentSelect" onchange="updateStudentButtons()" disabled>
-                                <option value="">Inicia sesión primero</option>
+                            <select id="studentSelect" onchange="updateStudentButtons()">
+                                <option value="">Seleccione un curso primero</option>
                             </select>
                         </div>
 
                         <div class="subsection">
                             <h5 class="subsection-title">Boletín general</h5>
                             <div class="buttons-grid">
-                                <button id="btnBulletinHtml" class="btn-primary" onclick="openStudentRoute('bulletin-html')" disabled>
+                                <button id="btnBulletinHtml" class="btn-brand" onclick="openStudentRoute('bulletin-html')" disabled>
                                     Ver boletín completo (HTML)
                                 </button>
 
-                                <button id="btnBulletinPdf" class="btn-secondary" onclick="openStudentRoute('bulletin-pdf')" disabled>
+                                <button id="btnBulletinPdf" class="btn-brand-soft" onclick="openStudentRoute('bulletin-pdf')" disabled>
                                     Descargar boletín completo (PDF)
                                 </button>
                             </div>
@@ -146,7 +115,7 @@
                     </div>
 
                     <div class="help-box" id="individualHelp">
-                        <strong>Inicia sesión:</strong> luego podrás elegir el ciclo, el curso y el estudiante.
+                        <strong>Selecciona un ciclo:</strong> luego podrás elegir el curso y el estudiante.
                     </div>
 
                     <div class="last-query-box" id="lastQueryBox">
@@ -156,7 +125,7 @@
                         <p class="last-query-meta"><strong>Estudiante:</strong> <span id="lastQueryStudent">-</span></p>
 
                         <div class="last-query-actions">
-                            <button id="btnRepeatLastQuery" class="btn-primary" onclick="repeatLastQuery()">
+                            <button id="btnRepeatLastQuery" class="btn-brand" onclick="repeatLastQuery()">
                                 Abrir nuevamente
                             </button>
                             <button class="btn-outline" onclick="clearLastQuery()">
@@ -166,7 +135,7 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card card-brand-soft">
                     <div class="card-header">
                         <div class="card-kicker">Modo masivo</div>
                         <h3 class="card-title">Boletines por curso</h3>
@@ -181,7 +150,7 @@
 
                         <div class="form-group">
                             <label for="massiveCycle">Ciclo</label>
-                            <select id="massiveCycle" onchange="loadMassiveCourses()" disabled>
+                            <select id="massiveCycle" onchange="loadMassiveCourses()">
                                 <option value="">Seleccione un ciclo</option>
                                 <option value="Primer_Ciclo">Primer Ciclo</option>
                                 <option value="Segundo_Ciclo">Segundo Ciclo</option>
@@ -190,13 +159,13 @@
 
                         <div class="form-group">
                             <label for="massiveCourse">Curso</label>
-                            <select id="massiveCourse" onchange="updateMassiveButtons()" disabled>
-                                <option value="">Inicia sesión primero</option>
+                            <select id="massiveCourse" onchange="updateMassiveButtons()">
+                                <option value="">Seleccione un ciclo primero</option>
                             </select>
                         </div>
 
                         <div class="buttons-grid">
-                            <button id="btnZipComplete" class="btn-primary" onclick="openCompleteZip()" disabled>
+                            <button id="btnZipComplete" class="btn-brand" onclick="openCompleteZip()" disabled>
                                 Descargar ZIP completo
                             </button>
 
@@ -214,7 +183,7 @@
                         </div>
 
                         <div class="status-box" id="massiveStatus">
-                            Inicia sesión para habilitar la generación masiva.
+                            Selecciona un ciclo para continuar.
                         </div>
                     </div>
 
@@ -231,7 +200,7 @@
                         <p class="last-query-meta"><strong>Tipo:</strong> <span id="lastMassiveType">-</span></p>
 
                         <div class="last-query-actions">
-                            <button id="btnRepeatLastMassiveQuery" class="btn-primary" onclick="repeatLastMassiveQuery()">
+                            <button id="btnRepeatLastMassiveQuery" class="btn-brand" onclick="repeatLastMassiveQuery()">
                                 Abrir nuevamente
                             </button>
                             <button class="btn-outline" onclick="clearLastMassiveQuery()">

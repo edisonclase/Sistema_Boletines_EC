@@ -197,75 +197,11 @@ function clearAuthUser() {
 
 function setLoginStatus(message, tone = "info") {
     const box = document.getElementById("loginStatus");
+    if (!box) return;
     box.textContent = message;
     box.classList.remove("success", "error");
     if (tone === "success") box.classList.add("success");
     if (tone === "error") box.classList.add("error");
-}
-
-function updateSessionUI(user) {
-    const pill = document.getElementById("sessionPill");
-    const summary = document.getElementById("sessionSummary");
-    const btnLogout = document.getElementById("btnLogout");
-
-    if (user) {
-        pill.textContent = "Sesión iniciada";
-        pill.classList.add("active");
-        summary.style.display = "grid";
-        btnLogout.disabled = false;
-
-        document.getElementById("sessionUserName").textContent = user.full_name || "-";
-        document.getElementById("sessionUserEmail").textContent = user.email || "-";
-        document.getElementById("sessionUserRole").textContent = user.role || "-";
-    } else {
-        pill.textContent = "Sesión no iniciada";
-        pill.classList.remove("active");
-        summary.style.display = "none";
-        btnLogout.disabled = true;
-
-        document.getElementById("sessionUserName").textContent = "-";
-        document.getElementById("sessionUserEmail").textContent = "-";
-        document.getElementById("sessionUserRole").textContent = "-";
-    }
-}
-
-function setOperationalControlsEnabled(enabled) {
-    document.getElementById("studentCycle").disabled = !enabled;
-    document.getElementById("studentCourse").disabled = !enabled;
-    document.getElementById("studentSelect").disabled = !enabled;
-    document.getElementById("massiveCycle").disabled = !enabled;
-    document.getElementById("massiveCourse").disabled = !enabled;
-
-    if (!enabled) {
-        setOptions("studentCourse", [], "Inicia sesión primero");
-        setOptions("studentSelect", [], "Inicia sesión primero");
-        setOptions("massiveCourse", [], "Inicia sesión primero");
-        setIndividualButtonsDisabled(true);
-        updateMassiveButtons();
-    }
-}
-
-function applyRoleVisibility() {
-    const user = getAuthUser();
-    const role = (user?.role || "").toLowerCase();
-
-    const canGenerate = ["admin", "registro"].includes(role);
-    const canRead = ["admin", "registro", "consulta"].includes(role);
-
-    document.getElementById("btnBulletinHtml").disabled = !canGenerate;
-    document.getElementById("btnBulletinPdf").disabled = !canGenerate;
-    document.getElementById("btnBlocksHtml").disabled = !canGenerate;
-    document.getElementById("btnBlocksPdf").disabled = !canGenerate;
-    document.getElementById("btnModulesHtml").disabled = !canGenerate;
-    document.getElementById("btnModulesPdf").disabled = !canGenerate;
-    document.getElementById("btnZipComplete").disabled = !canGenerate;
-    document.getElementById("btnZipBlocks").disabled = !canGenerate;
-    document.getElementById("btnZipModules").disabled = !canGenerate;
-    document.getElementById("btnZipBlocksModules").disabled = !canGenerate;
-
-    if (!canRead) {
-        setOperationalControlsEnabled(false);
-    }
 }
 
 async function authFetch(url, options = {}) {
@@ -298,9 +234,9 @@ async function fetchJson(url) {
     return await response.json();
 }
 
-async function login() {
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value;
+async function loginAndGoToPanel() {
+    const email = document.getElementById("loginEmail")?.value.trim() || "";
+    const password = document.getElementById("loginPassword")?.value || "";
 
     if (!email || !password) {
         setLoginStatus("Debes escribir el correo y la contraseña.", "error");
@@ -312,7 +248,7 @@ async function login() {
     body.append("password", password);
 
     const btn = document.getElementById("btnLogin");
-    btn.disabled = true;
+    if (btn) btn.disabled = true;
     setLoginStatus("Validando credenciales...");
 
     try {
@@ -332,66 +268,71 @@ async function login() {
 
         setToken(data.access_token);
         setAuthUser(data.user);
-        updateSessionUI(data.user);
-        setOperationalControlsEnabled(true);
         setLoginStatus(`Sesión iniciada correctamente como ${data.user.role}.`, "success");
-        applyRoleVisibility();
-        updateIndividualHelp();
-        updateMassiveButtons();
+
+        setTimeout(() => {
+            window.location.href = "/panel";
+        }, 350);
     } catch (error) {
         clearToken();
         clearAuthUser();
-        updateSessionUI(null);
-        setOperationalControlsEnabled(false);
         setLoginStatus(error.message || "No se pudo iniciar sesión.", "error");
     } finally {
-        btn.disabled = false;
+        if (btn) btn.disabled = false;
     }
 }
 
-function logout(showMessage = true) {
+function updatePanelUserUI(user) {
+    const nameEl = document.getElementById("sessionUserName");
+    const roleEl = document.getElementById("sessionUserRole");
+    const emailEl = document.getElementById("sessionUserEmail");
+
+    if (nameEl) nameEl.textContent = user?.full_name || "-";
+    if (roleEl) roleEl.textContent = user?.role || "-";
+    if (emailEl) emailEl.textContent = user?.email || "-";
+}
+
+function logout(redirect = true) {
     clearToken();
     clearAuthUser();
-    updateSessionUI(null);
-    setOperationalControlsEnabled(false);
-    resetIndividualSelectors();
-    resetMassiveSelectors();
-    if (showMessage) {
-        setLoginStatus("La sesión fue cerrada correctamente.");
-    } else {
-        setLoginStatus("Debes iniciar sesión para continuar.");
+    if (redirect) {
+        window.location.href = "/";
     }
 }
 
-async function restoreSession() {
+function logoutToLogin() {
+    logout(true);
+}
+
+async function requirePanelSession() {
     const token = getToken();
     const user = getAuthUser();
 
     if (!token || !user) {
-        updateSessionUI(null);
-        setOperationalControlsEnabled(false);
-        return;
+        window.location.href = "/";
+        return false;
     }
 
     try {
         const response = await authFetch("/auth/me");
         if (!response.ok) {
-            throw new Error("No se pudo restaurar la sesión.");
+            throw new Error("No se pudo validar la sesión.");
         }
 
         const me = await response.json();
         setAuthUser(me);
-        updateSessionUI(me);
-        setOperationalControlsEnabled(true);
-        setLoginStatus(`Sesión restaurada como ${me.role}.`, "success");
-        applyRoleVisibility();
+        updatePanelUserUI(me);
+        return true;
     } catch (error) {
-        logout(false);
+        logout(true);
+        return false;
     }
 }
 
 function setOptions(selectId, items, placeholder) {
     const select = document.getElementById(selectId);
+    if (!select) return;
+
     select.innerHTML = "";
 
     const firstOption = document.createElement("option");
@@ -428,6 +369,7 @@ function getProgressElements() {
 
 function updateProgressUI(stepLabel = "") {
     const elements = getProgressElements();
+    if (!elements.bar) return;
     elements.bar.style.width = `${progressValue}%`;
     elements.percent.textContent = `${Math.round(progressValue)}%`;
     if (stepLabel) {
@@ -445,6 +387,7 @@ function stopProgressAnimation() {
 function showProgressModal(presetKey) {
     const preset = progressPresets[presetKey] || progressPresets["zip-complete"];
     const elements = getProgressElements();
+    if (!elements.overlay) return;
 
     stopProgressAnimation();
     if (progressCompletionTimeout) {
@@ -501,6 +444,8 @@ function showProgressModal(presetKey) {
 
 function completeProgressModal(successMessage = "La solicitud fue enviada al navegador.") {
     const elements = getProgressElements();
+    if (!elements.overlay) return;
+
     progressLocked = false;
     stopProgressAnimation();
 
@@ -518,6 +463,8 @@ function completeProgressModal(successMessage = "La solicitud fue enviada al nav
 
 function failProgressModal(errorMessage = "No se pudo completar la operación.") {
     const elements = getProgressElements();
+    if (!elements.overlay) return;
+
     progressLocked = false;
     stopProgressAnimation();
 
@@ -530,6 +477,8 @@ function failProgressModal(errorMessage = "No se pudo completar la operación.")
 
 function closeProgressModal() {
     const elements = getProgressElements();
+    if (!elements.overlay) return;
+
     stopProgressAnimation();
 
     if (progressCompletionTimeout) {
@@ -610,7 +559,7 @@ function getCycleLabel(cycle) {
 
 function getSelectedStudentLabel() {
     const select = document.getElementById("studentSelect");
-    if (!select.value) return "";
+    if (!select || !select.value) return "";
     return select.options[select.selectedIndex]?.textContent || "";
 }
 
@@ -625,6 +574,7 @@ function setIndividualButtonsDisabled(disabled) {
 
 function setMassiveStatus(message, tone = "info") {
     const status = document.getElementById("massiveStatus");
+    if (!status) return;
     status.innerHTML = message;
     status.classList.remove("success");
     if (tone === "success") {
@@ -635,11 +585,9 @@ function setMassiveStatus(message, tone = "info") {
 function updateIndividualHelp() {
     const cycle = getIndividualCycle();
     const help = document.getElementById("individualHelp");
-    const user = getAuthUser();
+    if (!help) return;
 
-    if (!user) {
-        help.innerHTML = "<strong>Inicia sesión:</strong> luego podrás elegir el ciclo, el curso y el estudiante.";
-    } else if (!cycle) {
+    if (!cycle) {
         help.innerHTML = "<strong>Selecciona un ciclo:</strong> luego podrás elegir el curso y el estudiante.";
     } else if (cycle === "Primer_Ciclo") {
         help.innerHTML = "<strong>Primer Ciclo:</strong> boletín completo y boletín por bloques.";
@@ -649,23 +597,26 @@ function updateIndividualHelp() {
 }
 
 function resetIndividualSelectors() {
-    document.getElementById("studentCycle").value = "";
-    setOptions("studentCourse", [], getToken() ? "Seleccione un ciclo primero" : "Inicia sesión primero");
-    setOptions("studentSelect", [], getToken() ? "Seleccione un curso primero" : "Inicia sesión primero");
+    const cycle = document.getElementById("studentCycle");
+    if (cycle) cycle.value = "";
+    setOptions("studentCourse", [], "Seleccione un ciclo primero");
+    setOptions("studentSelect", [], "Seleccione un curso primero");
     individualStudents = [];
     setIndividualButtonsDisabled(true);
     updateIndividualHelp();
 }
 
 function resetMassiveSelectors() {
-    document.getElementById("massiveCycle").value = "";
-    setOptions("massiveCourse", [], getToken() ? "Seleccione un ciclo primero" : "Inicia sesión primero");
+    const cycle = document.getElementById("massiveCycle");
+    if (cycle) cycle.value = "";
+    setOptions("massiveCourse", [], "Seleccione un ciclo primero");
     updateMassiveButtons();
 }
 
 function saveLastQuery(data) {
     lastIndividualQuery = data;
     persistToStorage(STORAGE_KEYS.lastIndividualQuery, data);
+
     document.getElementById("lastQueryCycle").textContent = getCycleLabel(data.cycle);
     document.getElementById("lastQueryCourse").textContent = data.course || "-";
     document.getElementById("lastQueryStudent").textContent = data.studentLabel || data.studentId || "-";
@@ -675,6 +626,7 @@ function saveLastQuery(data) {
 function clearLastQuery() {
     lastIndividualQuery = null;
     removeFromStorage(STORAGE_KEYS.lastIndividualQuery);
+
     document.getElementById("lastQueryBox").style.display = "none";
     document.getElementById("lastQueryCycle").textContent = "-";
     document.getElementById("lastQueryCourse").textContent = "-";
@@ -684,6 +636,7 @@ function clearLastQuery() {
 function restoreLastQuery() {
     const saved = loadFromStorage(STORAGE_KEYS.lastIndividualQuery);
     if (!saved) return;
+
     lastIndividualQuery = saved;
     document.getElementById("lastQueryCycle").textContent = getCycleLabel(saved.cycle);
     document.getElementById("lastQueryCourse").textContent = saved.course || "-";
@@ -695,14 +648,13 @@ async function repeatLastQuery() {
     if (!lastIndividualQuery) return;
     try {
         await executeProtectedRoute(lastIndividualQuery.url, getPresetKeyForStudentRoute(lastIndividualQuery.routeSuffix));
-    } catch (error) {
-        failProgressModal(error.message || "No se pudo repetir la consulta.");
-    }
+    } catch (_) {}
 }
 
 function saveLastMassiveQuery(data) {
     lastMassiveQuery = data;
     persistToStorage(STORAGE_KEYS.lastMassiveQuery, data);
+
     document.getElementById("lastMassiveCycle").textContent = getCycleLabel(data.cycle);
     document.getElementById("lastMassiveCourse").textContent = data.course || "-";
     document.getElementById("lastMassiveType").textContent = data.typeLabel || "-";
@@ -712,6 +664,7 @@ function saveLastMassiveQuery(data) {
 function clearLastMassiveQuery() {
     lastMassiveQuery = null;
     removeFromStorage(STORAGE_KEYS.lastMassiveQuery);
+
     document.getElementById("lastMassiveQueryBox").style.display = "none";
     document.getElementById("lastMassiveCycle").textContent = "-";
     document.getElementById("lastMassiveCourse").textContent = "-";
@@ -722,6 +675,7 @@ function clearLastMassiveQuery() {
 function restoreLastMassiveQuery() {
     const saved = loadFromStorage(STORAGE_KEYS.lastMassiveQuery);
     if (!saved) return;
+
     lastMassiveQuery = saved;
     document.getElementById("lastMassiveCycle").textContent = getCycleLabel(saved.cycle);
     document.getElementById("lastMassiveCourse").textContent = saved.course || "-";
@@ -737,9 +691,7 @@ async function repeatLastMassiveQuery() {
             "Se volvió a abrir la <strong>última generación masiva</strong> guardada.",
             "success"
         );
-    } catch (error) {
-        failProgressModal(error.message || "No se pudo repetir la generación masiva.");
-    }
+    } catch (_) {}
 }
 
 async function loadStudentCourses() {
@@ -758,7 +710,6 @@ async function loadStudentCourses() {
         setOptions("studentCourse", data.courses || [], "Seleccione un curso");
     } catch (error) {
         setOptions("studentCourse", [], "No se pudieron cargar los cursos");
-        setLoginStatus(error.message || "No se pudieron cargar los cursos.", "error");
     }
 }
 
@@ -787,7 +738,6 @@ async function loadStudents() {
     } catch (error) {
         individualStudents = [];
         setOptions("studentSelect", [], "No se pudieron cargar los estudiantes");
-        setLoginStatus(error.message || "No se pudieron cargar los estudiantes.", "error");
     }
 }
 
@@ -948,7 +898,6 @@ async function loadMassiveCourses() {
         setOptions("massiveCourse", data.courses || [], "Seleccione un curso");
     } catch (error) {
         setOptions("massiveCourse", [], "No se pudieron cargar los cursos");
-        setLoginStatus(error.message || "No se pudieron cargar los cursos.", "error");
     }
 
     updateMassiveButtons();
@@ -966,9 +915,7 @@ function updateMassiveButtons() {
     document.getElementById("btnZipModules").disabled = !(hasCourse && cycle === "Segundo_Ciclo");
     document.getElementById("btnZipBlocksModules").disabled = !(hasCourse && cycle === "Segundo_Ciclo");
 
-    if (!getToken()) {
-        setMassiveStatus("Inicia sesión para habilitar la generación masiva.");
-    } else if (!cycle) {
+    if (!cycle) {
         setMassiveStatus("Selecciona un ciclo para continuar.");
     } else if (cycle === "Primer_Ciclo") {
         setMassiveStatus("Para <strong>Primer Ciclo</strong> están disponibles el ZIP completo y el ZIP por bloques.");
@@ -1064,12 +1011,30 @@ function openSecondCycleBlocksAndModulesZip() {
     }, "zip-blocks-modules");
 }
 
-function initializeUI() {
+function initializeLoginPage() {
+    const token = getToken();
+    const user = getAuthUser();
+    if (token && user) {
+        window.location.href = "/panel";
+    }
+}
+
+async function initializePanelPage() {
+    const ok = await requirePanelSession();
+    if (!ok) return;
+
     restoreLastQuery();
     restoreLastMassiveQuery();
     updateIndividualHelp();
     updateMassiveButtons();
-    restoreSession();
 }
 
-document.addEventListener("DOMContentLoaded", initializeUI);
+document.addEventListener("DOMContentLoaded", () => {
+    if (document.getElementById("btnLogin")) {
+        initializeLoginPage();
+    }
+
+    if (document.getElementById("studentCycle")) {
+        initializePanelPage();
+    }
+});

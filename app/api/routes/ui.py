@@ -9,8 +9,13 @@ UI_DIR = Path(__file__).resolve().parents[2] / "ui"
 
 
 @router.get("/", response_class=FileResponse)
-def home():
-    return FileResponse(UI_DIR / "index.html")
+def login_page():
+    return FileResponse(UI_DIR / "login.html")
+
+
+@router.get("/panel", response_class=FileResponse)
+def panel_page():
+    return FileResponse(UI_DIR / "panel.html")
 
 
 @router.get("/ui/styles.css", response_class=FileResponse)
