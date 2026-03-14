@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes.audit import router as audit_router
+from app.api.routes.auth import router as auth_router
 from app.api.routes.data_sources import router as data_sources_router
 from app.api.routes.students import router as students_router
 from app.api.routes.ui import router as ui_router
@@ -17,6 +18,7 @@ app = FastAPI(
 app.mount("/assets", StaticFiles(directory="app/pdf/assets"), name="assets")
 
 app.include_router(ui_router)
+app.include_router(auth_router)
 app.include_router(students_router)
 app.include_router(data_sources_router)
 app.include_router(audit_router)
