@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     secret_key: str = "CHANGE_THIS_SECRET_KEY"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
+    access_token_expire_minutes: int = 30
 
     url_primer_ciclo: str = ""
     url_segundo_ciclo: str = ""
@@ -36,6 +36,14 @@ class Settings(BaseSettings):
 
     philosophy_pdf_path: str = "app/pdf/assets/filosofia.pdf"
     school_year: str = "2025-2026"
+
+    database_url: str = ""
+    db_echo: bool = False
+
+    security_password_min_length: int = 15
+    security_max_login_attempts: int = 3
+    security_account_lockout_minutes: int = 15
+    security_password_reset_token_expire_minutes: int = 15
 
     model_config = SettingsConfigDict(
         env_file=".env",
