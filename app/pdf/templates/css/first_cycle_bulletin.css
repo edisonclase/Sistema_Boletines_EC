@@ -1,0 +1,187 @@
+.cover-page .page-inner {
+    min-height: 1040px;
+}
+
+.cover-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    min-height: 980px;
+}
+
+.cover-panel {
+    border: 1.5px solid #66BB6A;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #fcfffc;
+    display: flex;
+    flex-direction: column;
+}
+
+.cover-panel .letterhead {
+    margin-bottom: 10px;
+}
+
+.cover-panel-title {
+    font-size: 10.6px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #111;
+    margin: 2px 0 8px 0;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid #b8d8ba;
+    padding-bottom: 5px;
+}
+
+.cover-student-box {
+    margin-top: 4px;
+}
+
+.cover-student-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cover-student-table th,
+.cover-student-table td {
+    border: 1px solid #94c79a;
+    padding: 7px 8px;
+    font-size: 9.6px;
+}
+
+.cover-student-table th {
+    width: 35%;
+    background: #E8F5E9;
+    text-align: left;
+    color: #111;
+    font-weight: 700;
+}
+
+.cover-student-table td {
+    background: #fff;
+    font-weight: 700;
+    color: #111;
+}
+
+.cover-note {
+    margin-top: 10px;
+    font-size: 8.1px;
+    line-height: 1.35;
+    color: #4a4a4a;
+}
+
+.cover-philosophy-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.cover-philosophy-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #111;
+    margin: 2px 0 10px 0;
+    letter-spacing: 0.3px;
+}
+
+.cover-philosophy-text {
+    font-size: 9.2px;
+    line-height: 1.6;
+    text-align: justify;
+    color: #222;
+    white-space: pre-line;
+    flex: 1;
+}
+
+.report-page .page-inner {
+    min-height: 1040px;
+}
+
+.academic-table,
+.modules-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 1.5px solid #66BB6A;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.academic-table {
+    margin-bottom: 8px;
+}
+
+.modules-table {
+    margin-bottom: 8px;
+}
+
+.academic-table th,
+.academic-table td,
+.modules-table th,
+.modules-table td {
+    border: 1px solid #9fbe9f;
+    padding: 2px 1px;
+    text-align: center;
+    font-size: 7.35px;
+    line-height: 1.08;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    vertical-align: middle;
+}
+
+.academic-table thead th,
+.modules-table thead th {
+    background: #E8F5E9;
+    font-weight: 700;
+    color: #111;
+}
+
+.subject-col {
+    width: 92px;
+    text-align: left !important;
+    font-weight: 700;
+    padding-left: 3px !important;
+    font-size: 7.6px !important;
+}
+
+.module-col {
+    width: 140px;
+    text-align: left !important;
+    font-weight: 700;
+    padding-left: 3px !important;
+    font-size: 7.6px !important;
+}
+
+.tiny-col {
+    width: 23px;
+}
+
+.small-col {
+    width: 31px;
+}
+
+.situation-col {
+    width: 20px;
+}
+
+.low-grade {
+    background-color: #FFF59D;
+    font-weight: 700;
+}
+
+.report-page .comment-box .muted,
+.report-page .summary-box .muted {
+    font-size: 7.2px;
+}
+
+.report-page .legend-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 14px;
+    font-size: 7.3px;
+    align-items: start;
+}
+
+.report-page .legend-item {
+    line-height: 1.25;
+}
