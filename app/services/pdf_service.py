@@ -22,28 +22,6 @@ from app.services.html_service import (
 )
 from app.utils.helpers import safe_value
 
-import re
-import unicodedata
-import zipfile
-from io import BytesIO
-from pathlib import Path
-
-from pypdf import PdfReader, PdfWriter
-
-from app.core.settings import settings
-from app.data.fetchers.google_sheets import load_primer_ciclo, load_segundo_ciclo
-from app.services.bulletin_service import (
-    build_student_result_from_row,
-    find_student_by_id,
-    normalize_student_id,
-)
-from app.services.html_service import (
-    render_second_cycle_blocks_and_modules,
-    render_second_cycle_modules_only,
-    render_template,
-)
-from app.utils.helpers import safe_value
-
 
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
@@ -326,11 +304,24 @@ def _append_philosophy_pdf(bulletin_pdf_bytes: bytes) -> bytes:
     return output.getvalue()
 
 
+def _should_append_philosophy(bulletin_type: str) -> bool:
+    """
+    Los boletines completos ya incluyen la filosofía en HTML dentro de la portada.
+    Los formatos especiales todavía pueden seguir anexando el PDF de filosofía.
+    """
+    if bulletin_type == "complete":
+        return False
+    return True
+
+
 def _generate_final_pdf_from_result(
     result: dict,
     bulletin_type: str,
-    append_philosophy: bool = True
+    append_philosophy: bool | None = None
 ) -> tuple[bytes, str]:
+    if append_philosophy is None:
+        append_philosophy = _should_append_philosophy(bulletin_type)
+
     if bulletin_type == "blocks":
         if result["cycle"] != "Primer_Ciclo":
             raise ValueError("El boletín por bloques solo está disponible para estudiantes de Primer Ciclo.")
@@ -404,7 +395,7 @@ def generate_complete_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
     if not result.get("found"):
         raise ValueError(result.get("message", f"No se encontró el estudiante {student_id}"))
 
-    return _generate_final_pdf_from_result(result, "complete", append_philosophy=True)
+    return _generate_final_pdf_from_result(result, "complete", append_philosophy=False)
 
 
 def generate_blocks_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
@@ -486,6 +477,7 @@ def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = 
 
     zip_buffer = BytesIO()
     used_names: set[str] = set()
+    append_philosophy = _should_append_philosophy(bulletin_type)
 
     with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
         for index, (_, row) in enumerate(course_students.iterrows(), start=1):
@@ -501,7 +493,7 @@ def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = 
             pdf_bytes, filename = _generate_final_pdf_from_result(
                 result,
                 bulletin_type,
-                append_philosophy=True
+                append_philosophy=append_philosophy
             )
 
             final_name = _unique_filename(filename, used_names)
