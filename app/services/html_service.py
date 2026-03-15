@@ -91,6 +91,11 @@ def build_base_context(context: dict | None = None) -> dict:
             _get_setting("institution_minerd_logo", "")
         )
 
+    if "letterhead_src" not in safe_context:
+        safe_context["letterhead_src"] = build_image_data_uri(
+            _get_setting("institution_letterhead", "")
+        )
+
     return safe_context
 
 
@@ -121,4 +126,4 @@ def render_second_cycle_full(student: dict, extra_context: dict | None = None) -
         "student": student,
         **(extra_context or {})
     }
-    return render_template("second_cycle_full.html", context)
+    return render_template("second_cycle_bulletin.html", context)
