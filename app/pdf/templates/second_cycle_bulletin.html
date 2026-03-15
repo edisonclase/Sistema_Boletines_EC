@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Reporte de Evaluaciones - Segundo Ciclo del Nivel Secundario</title>
-    <link rel="stylesheet" href="app/pdf/templates/css/bulletin_base.css">
-    <link rel="stylesheet" href="app/pdf/templates/css/second_cycle_bulletin.css">
+    <style>
+        {{ bulletin_base_css | safe }}
+    </style>
+    <style>
+        {{ bulletin_specific_css | safe }}
+    </style>
 </head>
 <body style="--low-grade-color: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};">
     {% macro format_decimal_grade(value) -%}

@@ -12,6 +12,7 @@ from app.core.settings import settings
 from app.utils.helpers import is_low_grade
 
 TEMPLATES_DIR = Path("app/pdf/templates")
+CSS_DIR = TEMPLATES_DIR / "css"
 
 
 def _project_root() -> Path:
@@ -57,6 +58,24 @@ def build_image_data_uri(image_path: str) -> str:
         return ""
 
 
+def load_css_text(css_filename: str) -> str:
+    if not css_filename:
+        return ""
+
+    try:
+        css_path = CSS_DIR / css_filename
+        css_path = (_project_root() / css_path).resolve()
+
+        if not css_path.exists():
+            print(f"[HTML] No se encontró el CSS: {css_path}", flush=True)
+            return ""
+
+        return css_path.read_text(encoding="utf-8")
+    except Exception as exc:
+        print(f"[HTML] No se pudo leer el CSS ({css_filename}): {exc}", flush=True)
+        return ""
+
+
 def build_base_context(context: dict | None = None) -> dict:
     safe_context = dict(context or {})
 
@@ -95,6 +114,12 @@ def build_base_context(context: dict | None = None) -> dict:
         safe_context["letterhead_src"] = build_image_data_uri(
             _get_setting("institution_letterhead", "")
         )
+
+    if "bulletin_base_css" not in safe_context:
+        safe_context["bulletin_base_css"] = load_css_text("bulletin_base.css")
+
+    if "bulletin_specific_css" not in safe_context:
+        safe_context["bulletin_specific_css"] = ""
 
     return safe_context
 

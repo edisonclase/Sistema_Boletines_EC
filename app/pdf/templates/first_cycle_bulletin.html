@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Reporte de Evaluaciones - Primer Ciclo del Nivel Secundario</title>
-    <link rel="stylesheet" href="app/pdf/templates/css/bulletin_base.css">
-    <link rel="stylesheet" href="app/pdf/templates/css/first_cycle_bulletin.css">
+    <style>
+        {{ bulletin_base_css | safe }}
+    </style>
+    <style>
+        {{ bulletin_specific_css | safe }}
+    </style>
 </head>
 <body>
     {% macro format_decimal_grade(value) -%}
