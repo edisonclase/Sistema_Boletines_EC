@@ -6,20 +6,25 @@
     <style>
         @page {
             size: Letter landscape;
-            margin: 0.10in;
+            margin: 0.35cm;
         }
 
         * {
             box-sizing: border-box;
         }
 
+        html,
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            color: #111;
             margin: 0;
             padding: 0;
-            font-size: 10px;
             background: #f4f7f4;
+            color: #111;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+        }
+
+        body {
+            line-height: 1.3;
         }
 
         .screen-toolbar {
@@ -37,7 +42,7 @@
 
         .toolbar-left {
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 700;
             color: #2E7D32;
         }
 
@@ -54,14 +59,16 @@
             padding: 5px 9px;
             cursor: pointer;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 700;
+            color: #1f2937;
         }
 
         .zoom-label {
             font-size: 12px;
             min-width: 52px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 700;
+            color: #1f2937;
         }
 
         .page-wrap {
@@ -82,15 +89,23 @@
             width: 1760px;
             margin: 0;
             background: #fff;
-            padding: 14px 16px 14px 16px;
+            padding: 8px;
+            border: 2px solid #66BB6A;
+            border-radius: 10px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .page-inner {
+            width: 100%;
             border: 2px solid #66BB6A;
             border-radius: 8px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+            padding: 10px 12px 8px 12px;
+            background: #fff;
         }
 
         .header {
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             page-break-after: avoid;
         }
 
@@ -122,23 +137,24 @@
 
         .institution-name {
             font-size: 18px;
-            font-weight: bold;
+            font-weight: 700;
             margin: 0;
-            line-height: 1.05;
+            line-height: 1.06;
             text-transform: uppercase;
             color: #111;
+            letter-spacing: 0.2px;
         }
 
         .institution-motto {
             margin-top: 2px;
-            font-size: 8px;
+            font-size: 8.2px;
             font-style: italic;
             color: #4b4b4b;
         }
 
         .institution-contact {
             margin-top: 3px;
-            font-size: 7.4px;
+            font-size: 7.6px;
             line-height: 1.15;
             color: #333;
         }
@@ -146,21 +162,23 @@
         .department-title {
             margin-top: 4px;
             font-size: 9px;
-            font-weight: bold;
+            font-weight: 700;
             text-transform: uppercase;
             color: #111;
+            letter-spacing: 0.2px;
         }
 
         .bulletin-title {
             margin-top: 2px;
             font-size: 9px;
-            font-weight: bold;
+            font-weight: 700;
             text-transform: uppercase;
             color: #111;
+            letter-spacing: 0.2px;
         }
 
         .info-box {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border: 1.5px solid #66BB6A;
             border-radius: 8px;
             overflow: hidden;
@@ -176,9 +194,9 @@
         .info-table th,
         .info-table td {
             border: 1px solid #94c79a;
-            padding: 3px 6px;
-            font-size: 7.8px;
-            height: 20px;
+            padding: 4px 6px;
+            font-size: 8px;
+            height: 22px;
         }
 
         .info-table th {
@@ -186,25 +204,27 @@
             text-align: left;
             background: #E8F5E9;
             color: #111;
+            font-weight: 700;
         }
 
         .info-table td {
             text-align: center;
-            font-weight: bold;
+            font-weight: 700;
         }
 
         .section-title {
             margin: 4px 0 0 0;
-            padding: 3px 6px;
+            padding: 4px 7px;
             background: #E8F5E9;
             border: 1.5px solid #66BB6A;
             border-bottom: 0;
             border-radius: 8px 8px 0 0;
-            font-size: 8px;
-            font-weight: bold;
+            font-size: 8.1px;
+            font-weight: 700;
             text-transform: uppercase;
             color: #111;
             page-break-after: avoid;
+            letter-spacing: 0.2px;
         }
 
         .academic-table,
@@ -212,7 +232,7 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border: 1.5px solid #66BB6A;
         }
 
@@ -255,27 +275,51 @@
         .modules-table thead th {
             background: #E8F5E9;
             color: #111;
-            font-size: 6.7px;
             text-transform: uppercase;
-            line-height: 1.05;
         }
 
         .academic-table thead .group-row th,
         .modules-table thead .group-row th {
             background: #C8E6C9;
-            font-weight: bold;
+            font-weight: 700;
+        }
+
+        .academic-table thead tr.group-row th {
+            font-size: 6.1px;
+            line-height: 1.1;
+            padding: 4px 2px;
+            height: 46px;
+        }
+
+        .academic-table thead tr:nth-child(2) th {
+            font-size: 6.7px;
+            height: 22px;
+        }
+
+        .modules-table thead .group-row th {
+            font-size: 6.6px;
+            line-height: 1.08;
+        }
+
+        .modules-table thead tr:nth-child(2) th {
             font-size: 6.5px;
         }
 
         .academic-table td {
-            font-size: 6.6px;
+            font-size: 6.7px;
+            line-height: 1.08;
+        }
+
+        .modules-table td {
+            font-size: 6.7px;
+            line-height: 1.1;
         }
 
         .subject-col {
             text-align: left !important;
-            font-weight: bold;
+            font-weight: 700;
             color: #111;
-            font-size: 6.8px;
+            font-size: 6.9px;
             line-height: 1.1;
             word-break: break-word;
             padding-left: 4px !important;
@@ -284,11 +328,13 @@
 
         .module-name {
             text-align: left !important;
-            font-weight: bold;
+            font-weight: 700;
             color: #111;
-            font-size: 6.8px;
-            line-height: 1.15;
+            font-size: 6.9px;
+            line-height: 1.12;
             word-break: break-word;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
         }
 
         .tiny-col {
@@ -298,7 +344,7 @@
 
         .low-grade {
             background: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};
-            font-weight: bold;
+            font-weight: 700;
         }
 
         .legend-box,
@@ -306,9 +352,9 @@
             width: 100%;
             border: 1.5px solid #66BB6A;
             border-radius: 8px;
-            padding: 4px 8px;
-            margin-top: 8px;
-            margin-bottom: 8px;
+            padding: 5px 8px;
+            margin-top: 6px;
+            margin-bottom: 6px;
             background: #fcfffc;
             page-break-inside: avoid;
             break-inside: avoid;
@@ -316,11 +362,12 @@
 
         .legend-title,
         .comment-title {
-            font-weight: bold;
+            font-weight: 700;
             margin-bottom: 3px;
             text-transform: uppercase;
             color: #111;
-            font-size: 7.6px;
+            font-size: 7.8px;
+            letter-spacing: 0.2px;
         }
 
         .legend-grid {
@@ -332,14 +379,14 @@
         .legend-item,
         .muted {
             color: #555;
-            font-size: 6.9px;
+            font-size: 7px;
             line-height: 1.18;
         }
 
         .signatures {
             width: 100%;
-            margin-top: 10px;
-            margin-bottom: 8px;
+            margin-top: 8px;
+            margin-bottom: 6px;
             page-break-inside: avoid;
             break-inside: avoid;
         }
@@ -358,24 +405,24 @@
 
         .signature-line {
             border-top: 1px solid #000;
-            margin: 22px auto 4px auto;
+            margin: 18px auto 4px auto;
             width: 68%;
         }
 
         .signature-name {
-            font-weight: bold;
-            font-size: 7.5px;
+            font-weight: 700;
+            font-size: 7.6px;
         }
 
         .signature-role {
-            font-size: 6.7px;
+            font-size: 6.9px;
         }
 
         .footer {
             margin-top: 4px;
             border-top: 1px solid #b8d8ba;
             padding-top: 4px;
-            font-size: 6px;
+            font-size: 6.2px;
             color: #444;
         }
 
@@ -436,9 +483,11 @@
                 width: 100%;
                 margin: 0 auto;
                 box-shadow: none;
-                border-radius: 6px;
-                border: 2px solid #66BB6A;
-                padding: 14px 16px 14px 16px;
+                border-radius: 0;
+            }
+
+            .page-inner {
+                border-radius: 0;
             }
         }
     </style>
@@ -481,7 +530,12 @@
 {% set school_year = school_year if school_year is defined else "" %}
 {% set institution_logo_src = institution_logo_src if institution_logo_src is defined else "" %}
 {% set minerd_logo_src = minerd_logo_src if minerd_logo_src is defined else "" %}
-{% set modules_list = student.modules_with_ras if student.modules_with_ras else student.modules %}
+
+{% if student.modules_with_ras is defined and student.modules_with_ras %}
+    {% set modules_list = student.modules_with_ras %}
+{% else %}
+    {% set modules_list = student.modules %}
+{% endif %}
 
 <div class="screen-toolbar">
     <div class="toolbar-left">Vista previa del boletín por bloques y módulos</div>
@@ -496,224 +550,242 @@
 <div class="page-wrap" id="pageWrap">
     <div class="zoom-container" id="zoomContainer">
         <div class="page">
-            <div class="header">
-                <table class="header-table">
-                    <tr>
-                        <td class="logo-cell">
-                            {% if institution_logo_src %}
-                                <img src="{{ institution_logo_src }}" alt="Logo institucional" class="header-logo">
-                            {% endif %}
-                        </td>
-                        <td class="title-cell">
-                            <div class="institution-name">{{ settings.institution_name }}</div>
-                            {% if settings.institution_motto %}
-                                <div class="institution-motto">{{ settings.institution_motto }}</div>
-                            {% endif %}
-                            <div class="institution-contact">
-                                Código del centro: {{ settings.institution_code }}
-                                {% if school_year %} · Año escolar: {{ school_year }}{% endif %}
-                            </div>
-                            <div class="department-title">Registro y Control Académico</div>
-                            <div class="bulletin-title">Reporte por bloques de competencias y módulos · Segundo ciclo</div>
-                        </td>
-                        <td class="logo-cell">
-                            {% if minerd_logo_src %}
-                                <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="header-logo">
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="info-box">
-                <table class="info-table">
-                    <tr>
-                        <th>Nombre del estudiante</th>
-                        <td>{{ student.nombre_estudiante or "" }}</td>
-                        <th>ID del estudiante</th>
-                        <td>{{ student.id_estudiante or "" }}</td>
-                    </tr>
-                    <tr>
-                        <th>Curso</th>
-                        <td>{{ student.curso or "" }}</td>
-                        <th>Número</th>
-                        <td>{{ student.numero or "" }}</td>
-                    </tr>
-                    <tr>
-                        <th>Profesor(a) titular</th>
-                        <td>{{ student.prof_titular or "" }}</td>
-                        <th>Ciclo</th>
-                        <td>Segundo Ciclo</td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="section-title">Asignaturas por bloques de competencias</div>
-            <table class="academic-table">
-                <colgroup>
-                    <col class="subject-col-width">
-                    <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
-                    <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
-                    <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
-                    <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
-                </colgroup>
-                <thead>
-                    <tr class="group-row">
-                        <th class="subject-col" rowspan="2">ASIGNATURA</th>
-                        <th colspan="4">COMUNICATIVA</th>
-                        <th colspan="4">PENSAMIENTO LÓGICO,<br>CREATIVO Y CRÍTICO</th>
-                        <th colspan="4">CIENTÍFICA Y TÉCNICA,<br>AMBIENTAL Y SALUD</th>
-                        <th colspan="4">ÉTICA Y CIUDADANA,<br>DESARROLLO PERSONAL Y ESPIRITUAL</th>
-                    </tr>
-                    <tr>
-                        <th class="tiny-col">P1</th>
-                        <th class="tiny-col">P2</th>
-                        <th class="tiny-col">P3</th>
-                        <th class="tiny-col">P4</th>
-
-                        <th class="tiny-col">P1</th>
-                        <th class="tiny-col">P2</th>
-                        <th class="tiny-col">P3</th>
-                        <th class="tiny-col">P4</th>
-
-                        <th class="tiny-col">P1</th>
-                        <th class="tiny-col">P2</th>
-                        <th class="tiny-col">P3</th>
-                        <th class="tiny-col">P4</th>
-
-                        <th class="tiny-col">P1</th>
-                        <th class="tiny-col">P2</th>
-                        <th class="tiny-col">P3</th>
-                        <th class="tiny-col">P4</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for subject in student.subjects %}
-                    <tr>
-                        <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
-
-                        {{ grade_cell(subject.p1_c1 if subject.p1_c1 is defined else none) }}
-                        {{ grade_cell(subject.p2_c1 if subject.p2_c1 is defined else none) }}
-                        {{ grade_cell(subject.p3_c1 if subject.p3_c1 is defined else none) }}
-                        {{ grade_cell(subject.p4_c1 if subject.p4_c1 is defined else none) }}
-
-                        {{ grade_cell(subject.p1_c2 if subject.p1_c2 is defined else none) }}
-                        {{ grade_cell(subject.p2_c2 if subject.p2_c2 is defined else none) }}
-                        {{ grade_cell(subject.p3_c2 if subject.p3_c2 is defined else none) }}
-                        {{ grade_cell(subject.p4_c2 if subject.p4_c2 is defined else none) }}
-
-                        {{ grade_cell(subject.p1_c3 if subject.p1_c3 is defined else none) }}
-                        {{ grade_cell(subject.p2_c3 if subject.p2_c3 is defined else none) }}
-                        {{ grade_cell(subject.p3_c3 if subject.p3_c3 is defined else none) }}
-                        {{ grade_cell(subject.p4_c3 if subject.p4_c3 is defined else none) }}
-
-                        {{ grade_cell(subject.p1_c4 if subject.p1_c4 is defined else none) }}
-                        {{ grade_cell(subject.p2_c4 if subject.p2_c4 is defined else none) }}
-                        {{ grade_cell(subject.p3_c4 if subject.p3_c4 is defined else none) }}
-                        {{ grade_cell(subject.p4_c4 if subject.p4_c4 is defined else none) }}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <div class="section-title">Módulos y resultados de aprendizaje</div>
-            <table class="modules-table">
-                <colgroup>
-                    <col class="module-name-col">
-                    {% for _ in range(10) %}
-                        <col class="ra-col">
-                    {% endfor %}
-                    <col class="final-col">
-                    <col class="final-col">
-                    <col class="final-col">
-                </colgroup>
-                <thead>
-                    <tr class="group-row">
-                        <th rowspan="2">Módulo</th>
-                        <th colspan="10">Resultados de aprendizaje</th>
-                        <th rowspan="2">CF</th>
-                        <th rowspan="2">Situ_A</th>
-                        <th rowspan="2">Situ_R</th>
-                    </tr>
-                    <tr>
-                        <th>RA1</th>
-                        <th>RA2</th>
-                        <th>RA3</th>
-                        <th>RA4</th>
-                        <th>RA5</th>
-                        <th>RA6</th>
-                        <th>RA7</th>
-                        <th>RA8</th>
-                        <th>RA9</th>
-                        <th>RA10</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for module in modules_list %}
+            <div class="page-inner">
+                <div class="header">
+                    <table class="header-table">
                         <tr>
-                            <td class="module-name">{{ module.modulo or "" }}</td>
-                            {{ ra_cell(module.ra1) }}
-                            {{ ra_cell(module.ra2) }}
-                            {{ ra_cell(module.ra3) }}
-                            {{ ra_cell(module.ra4) }}
-                            {{ ra_cell(module.ra5) }}
-                            {{ ra_cell(module.ra6) }}
-                            {{ ra_cell(module.ra7) }}
-                            {{ ra_cell(module.ra8) }}
-                            {{ ra_cell(module.ra9) }}
-                            {{ ra_cell(module.ra10) }}
-                            {{ grade_cell(module.cf) }}
-                            <td>{{ module.situ_a or "" }}</td>
-                            <td>{{ module.situ_r or "" }}</td>
+                            <td class="logo-cell">
+                                {% if institution_logo_src %}
+                                    <img src="{{ institution_logo_src }}" alt="Logo institucional" class="header-logo">
+                                {% endif %}
+                            </td>
+                            <td class="title-cell">
+                                <div class="institution-name">{{ settings.institution_name }}</div>
+                                {% if settings.institution_motto %}
+                                    <div class="institution-motto">{{ settings.institution_motto }}</div>
+                                {% endif %}
+                                <div class="institution-contact">
+                                    Código del centro: {{ settings.institution_code }}
+                                    {% if school_year %}
+                                        · Año escolar: {{ school_year }}
+                                    {% endif %}
+                                </div>
+                                <div class="department-title">Registro y Control Académico</div>
+                                <div class="bulletin-title">Reporte por bloques de competencias y módulos · Segundo ciclo</div>
+                            </td>
+                            <td class="logo-cell">
+                                {% if minerd_logo_src %}
+                                    <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="header-logo">
+                                {% endif %}
+                            </td>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <div class="legend-box">
-                <div class="legend-title">Leyenda de competencias</div>
-                <div class="legend-grid">
-                    <div class="legend-item"><strong>C1:</strong> Comunicativa</div>
-                    <div class="legend-item"><strong>C2:</strong> Pensamiento lógico, creativo y crítico</div>
-                    <div class="legend-item"><strong>C3:</strong> Científica y técnica, ambiental y salud</div>
-                    <div class="legend-item"><strong>C4:</strong> Ética y ciudadana, desarrollo personal y espiritual</div>
+                    </table>
                 </div>
-            </div>
 
-            <div class="comment-box">
-                <div class="comment-title">Comentario / Observaciones</div>
-                <div class="muted">
-                    {{ student.comentario_final if student.comentario_final else "&nbsp;" }}
+                <div class="info-box">
+                    <table class="info-table">
+                        <tr>
+                            <th>Nombre del estudiante</th>
+                            <td>{{ student.nombre_estudiante or "" }}</td>
+                            <th>ID del estudiante</th>
+                            <td>{{ student.id_estudiante or "" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Curso</th>
+                            <td>{{ student.curso or "" }}</td>
+                            <th>Número</th>
+                            <td>{{ student.numero or "" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Profesor(a) titular</th>
+                            <td>{{ student.prof_titular or "" }}</td>
+                            <th>Ciclo</th>
+                            <td>Segundo Ciclo</td>
+                        </tr>
+                    </table>
                 </div>
-            </div>
 
-            <div class="signatures">
-                <table class="signatures-table">
-                    <tr>
-                        <td>
-                            <div class="signature-line"></div>
-                            <div class="signature-name">{{ director_name }}</div>
-                            <div class="signature-role">Director(a)</div>
-                        </td>
-                        <td>
-                            <div class="signature-line"></div>
-                            <div class="signature-name">{{ student.prof_titular or "" }}</div>
-                            <div class="signature-role">Profesor(a) Titular</div>
-                        </td>
-                    </tr>
+                <div class="section-title">Asignaturas por bloques de competencias</div>
+                <table class="academic-table">
+                    <colgroup>
+                        <col class="subject-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                    </colgroup>
+                    <thead>
+                        <tr class="group-row">
+                            <th class="subject-col" rowspan="2">ASIGNATURA</th>
+                            <th colspan="4">COMUNICATIVA</th>
+                            <th colspan="4">PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO / RESOLUCIÓN DE PROBLEMAS</th>
+                            <th colspan="4">CIENTÍFICA Y TECNOLÓGICA / AMBIENTAL Y DE LA SALUD</th>
+                            <th colspan="4">ÉTICA Y CIUDADANA / DESARROLLO PERSONAL Y ESPIRITUAL</th>
+                        </tr>
+                        <tr>
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject in student.subjects %}
+                        <tr>
+                            <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
+
+                            {{ grade_cell(subject.p1_c1 if subject.p1_c1 is defined else none) }}
+                            {{ grade_cell(subject.p2_c1 if subject.p2_c1 is defined else none) }}
+                            {{ grade_cell(subject.p3_c1 if subject.p3_c1 is defined else none) }}
+                            {{ grade_cell(subject.p4_c1 if subject.p4_c1 is defined else none) }}
+
+                            {{ grade_cell(subject.p1_c2 if subject.p1_c2 is defined else none) }}
+                            {{ grade_cell(subject.p2_c2 if subject.p2_c2 is defined else none) }}
+                            {{ grade_cell(subject.p3_c2 if subject.p3_c2 is defined else none) }}
+                            {{ grade_cell(subject.p4_c2 if subject.p4_c2 is defined else none) }}
+
+                            {{ grade_cell(subject.p1_c3 if subject.p1_c3 is defined else none) }}
+                            {{ grade_cell(subject.p2_c3 if subject.p2_c3 is defined else none) }}
+                            {{ grade_cell(subject.p3_c3 if subject.p3_c3 is defined else none) }}
+                            {{ grade_cell(subject.p4_c3 if subject.p4_c3 is defined else none) }}
+
+                            {{ grade_cell(subject.p1_c4 if subject.p1_c4 is defined else none) }}
+                            {{ grade_cell(subject.p2_c4 if subject.p2_c4 is defined else none) }}
+                            {{ grade_cell(subject.p3_c4 if subject.p3_c4 is defined else none) }}
+                            {{ grade_cell(subject.p4_c4 if subject.p4_c4 is defined else none) }}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
-            </div>
 
-            <div class="footer">
-                <div class="footer-meta">
-                    {% if generated_at %}Generado: {{ generated_at }}{% endif %}{% if generated_by %} · Por: {{ generated_by }}{% endif %}{% if generated_role %} · Rol: {{ generated_role }}{% endif %}
-                </div>
-                <div class="footer-main">
-                    <div class="footer-left">
-                        {{ settings.app_name }} · Desarrollado por Edison Clase
+                <div class="section-title">Módulos y resultados de aprendizaje</div>
+                <table class="modules-table">
+                    <colgroup>
+                        <col class="module-name-col">
+                        {% for _ in range(10) %}
+                            <col class="ra-col">
+                        {% endfor %}
+                        <col class="final-col">
+                        <col class="final-col">
+                        <col class="final-col">
+                    </colgroup>
+                    <thead>
+                        <tr class="group-row">
+                            <th rowspan="2">Módulo</th>
+                            <th colspan="10">Resultados de aprendizaje</th>
+                            <th rowspan="2">CF</th>
+                            <th rowspan="2">Situ_A</th>
+                            <th rowspan="2">Situ_R</th>
+                        </tr>
+                        <tr>
+                            <th>RA1</th>
+                            <th>RA2</th>
+                            <th>RA3</th>
+                            <th>RA4</th>
+                            <th>RA5</th>
+                            <th>RA6</th>
+                            <th>RA7</th>
+                            <th>RA8</th>
+                            <th>RA9</th>
+                            <th>RA10</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for module in modules_list %}
+                            <tr>
+                                <td class="module-name">{{ module.modulo or "" }}</td>
+                                {{ ra_cell(module.ra1) }}
+                                {{ ra_cell(module.ra2) }}
+                                {{ ra_cell(module.ra3) }}
+                                {{ ra_cell(module.ra4) }}
+                                {{ ra_cell(module.ra5) }}
+                                {{ ra_cell(module.ra6) }}
+                                {{ ra_cell(module.ra7) }}
+                                {{ ra_cell(module.ra8) }}
+                                {{ ra_cell(module.ra9) }}
+                                {{ ra_cell(module.ra10) }}
+                                {{ grade_cell(module.cf) }}
+                                <td>{{ module.situ_a or "" }}</td>
+                                <td>{{ module.situ_r or "" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="legend-box">
+                    <div class="legend-title">Bloques de competencias</div>
+                    <div class="legend-grid">
+                        <div class="legend-item"><strong>Comunicativa</strong></div>
+                        <div class="legend-item"><strong>Pensamiento Lógico, Creativo y Crítico / Resolución de Problemas</strong></div>
+                        <div class="legend-item"><strong>Científica y Tecnológica / Ambiental y de la Salud</strong></div>
+                        <div class="legend-item"><strong>Ética y Ciudadana / Desarrollo Personal y Espiritual</strong></div>
                     </div>
-                    <div class="footer-right">
-                        {% if generated_at %}{{ generated_at }}{% endif %}
+                </div>
+
+                <div class="comment-box">
+                    <div class="comment-title">Comentario / Observaciones</div>
+                    <div class="muted">
+                        {% if student.comentario_final %}
+                            {{ student.comentario_final }}
+                        {% else %}
+                            &nbsp;
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="signatures">
+                    <table class="signatures-table">
+                        <tr>
+                            <td>
+                                <div class="signature-line"></div>
+                                <div class="signature-name">{{ director_name }}</div>
+                                <div class="signature-role">Director(a)</div>
+                            </td>
+                            <td>
+                                <div class="signature-line"></div>
+                                <div class="signature-name">{{ student.prof_titular or "" }}</div>
+                                <div class="signature-role">Profesor(a) Titular</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-meta">
+                        {% if generated_at %}
+                            Generado: {{ generated_at }}
+                        {% endif %}
+                        {% if generated_by %}
+                            · Por: {{ generated_by }}
+                        {% endif %}
+                        {% if generated_role %}
+                            · Rol: {{ generated_role }}
+                        {% endif %}
+                    </div>
+                    <div class="footer-main">
+                        <div class="footer-left">
+                            {{ settings.app_name }} · Desarrollado por Edison Clase
+                        </div>
+                        <div class="footer-right">
+                            {% if generated_at %}
+                                {{ generated_at }}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
