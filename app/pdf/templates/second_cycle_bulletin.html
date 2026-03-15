@@ -76,6 +76,164 @@
             margin: 0;
         }
 
+        .section-title {
+            margin: 8px 0 0 0;
+            padding: 6px 10px;
+            background: #E8F5E9;
+            border: 2px solid #66BB6A;
+            border-bottom: 0;
+            border-radius: 8px 8px 0 0;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* =========================
+           TABLA ACADÉMICA
+        ========================= */
+
+        .academic-table {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            overflow: hidden;
+        }
+
+        .academic-table {
+            border: 2px solid #66BB6A;
+        }
+
+        .academic-table thead tr:first-child th {
+            border-bottom: 2px solid #66BB6A !important;
+        }
+
+        .academic-table th,
+        .academic-table td {
+            border: 1px solid #a5c9a7;
+        }
+
+        .academic-table tbody td:nth-child(1),
+        .academic-table thead tr:nth-child(2) th:nth-child(1) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        /* Fin de bloque 1 */
+        .academic-table tbody td:nth-child(5),
+        .academic-table thead tr:nth-child(2) th:nth-child(4) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        /* Fin de bloque 2 */
+        .academic-table tbody td:nth-child(9),
+        .academic-table thead tr:nth-child(2) th:nth-child(8) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        /* Fin de bloque 3 */
+        .academic-table tbody td:nth-child(13),
+        .academic-table thead tr:nth-child(2) th:nth-child(12) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        /* Fin de bloque 4 */
+        .academic-table tbody td:nth-child(17),
+        .academic-table thead tr:nth-child(2) th:nth-child(16) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        /* Fin PC */
+        .academic-table tbody td:nth-child(21),
+        .academic-table thead tr:nth-child(2) th:nth-child(20) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        /* CF */
+        .academic-table tbody td:nth-child(22) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        /* Fin COMP */
+        .academic-table tbody td:nth-child(26),
+        .academic-table thead tr:nth-child(2) th:nth-child(24) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        /* Fin EXT */
+        .academic-table tbody td:nth-child(30),
+        .academic-table thead tr:nth-child(2) th:nth-child(28) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        /* ESP */
+        .academic-table tbody td:nth-child(31),
+        .academic-table thead tr:nth-child(2) th:nth-child(29) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        /* ASIS */
+        .academic-table tbody td:nth-child(32) {
+            border-right: 2px solid #66BB6A !important;
+        }
+
+        .academic-table tbody tr:nth-child(even) td {
+            background: #fcfffc;
+        }
+
+        /* =========================
+           TABLA DE MÓDULOS
+           Igual a second_cycle_modules.html
+        ========================= */
+
+        .modules-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 2px solid #66BB6A;
+            font-size: 10px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            overflow: hidden;
+        }
+
+        .modules-table th,
+        .modules-table td {
+            border: 1px solid #a5c9a7;
+            padding: 5px 4px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+
+        .modules-table th {
+            background: #E8F5E9;
+            font-weight: 700;
+        }
+
+        .modules-table tbody tr:nth-child(even) td {
+            background: #fcfffc;
+        }
+
+        .module-col {
+            width: 26%;
+            text-align: left !important;
+            font-weight: 700;
+            padding-left: 6px !important;
+        }
+
+        .ra-col {
+            width: 5.2%;
+        }
+
+        .cf-col {
+            width: 6%;
+        }
+
+        .situ-col {
+            width: 8%;
+        }
+
+        .ra-cell {
+            font-size: 9px;
+        }
+
         @media print {
             .screen-toolbar {
                 display: none !important;
@@ -343,19 +501,19 @@
                     <table class="modules-table">
                         <thead>
                             <tr>
-                                <th class="module-col">MÓDULO</th>
-                                <th class="tiny-col">RA1</th>
-                                <th class="tiny-col">RA2</th>
-                                <th class="tiny-col">RA3</th>
-                                <th class="tiny-col">RA4</th>
-                                <th class="tiny-col">RA5</th>
-                                <th class="tiny-col">RA6</th>
-                                <th class="tiny-col">RA7</th>
-                                <th class="tiny-col">RA8</th>
-                                <th class="tiny-col">RA9</th>
-                                <th class="tiny-col">RA10</th>
-                                <th class="small-col">CF</th>
-                                <th class="small-col">A</th>
+                                <th class="module-col">Módulo</th>
+                                <th class="ra-col">RA1</th>
+                                <th class="ra-col">RA2</th>
+                                <th class="ra-col">RA3</th>
+                                <th class="ra-col">RA4</th>
+                                <th class="ra-col">RA5</th>
+                                <th class="ra-col">RA6</th>
+                                <th class="ra-col">RA7</th>
+                                <th class="ra-col">RA8</th>
+                                <th class="ra-col">RA9</th>
+                                <th class="ra-col">RA10</th>
+                                <th class="cf-col">CF</th>
+                                <th class="situ-col">Situación</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -372,8 +530,18 @@
                                 <td class="ra-cell">{{ text_value(module.ra8 if module.ra8 is defined else none) }}</td>
                                 <td class="ra-cell">{{ text_value(module.ra9 if module.ra9 is defined else none) }}</td>
                                 <td class="ra-cell">{{ text_value(module.ra10 if module.ra10 is defined else none) }}</td>
-                                <td>{{ format_integer_grade(module.cf if module.cf is defined else none) }}</td>
-                                <td>{% if module.situ_a is defined and module.situ_a %}{{ module.situ_a }}{% else %}-{% endif %}</td>
+                                <td class="{% if module.cf is not none and (module.cf|string).strip() not in ['0', '0.0', '0.00'] and (module.cf|float) >= 1 and (module.cf|float) < 70 %}low-grade{% endif %}">
+                                    {{ format_integer_grade(module.cf if module.cf is defined else none) }}
+                                </td>
+                                <td>
+                                    {% if module.situ_a is defined and module.situ_a %}
+                                        {{ module.situ_a }}
+                                    {% elif module.situ_r is defined and module.situ_r %}
+                                        {{ module.situ_r }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
