@@ -3,474 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Reporte de Evaluaciones - Segundo Ciclo del Nivel Secundario</title>
-    <style>
-        @page {
-            size: Letter landscape;
-            margin: 0.35cm;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            background: #fafafa;
-            color: #111;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 9px;
-        }
-
-        body {
-            line-height: 1.3;
-        }
-
-        .screen-toolbar {
-            position: sticky;
-            top: 0;
-            z-index: 999;
-            background: #ffffff;
-            border-bottom: 1px solid #d7e8d8;
-            padding: 8px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .toolbar-left {
-            font-size: 12px;
-            font-weight: 700;
-            color: #2E7D32;
-        }
-
-        .toolbar-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .zoom-btn {
-            border: 1px solid #bdd8c0;
-            background: #fff;
-            border-radius: 6px;
-            padding: 5px 9px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 700;
-            color: #1f2937;
-        }
-
-        .zoom-label {
-            font-size: 12px;
-            min-width: 52px;
-            text-align: center;
-            font-weight: 700;
-            color: #1f2937;
-        }
-
-        .page-wrap {
-            overflow-x: auto;
-            overflow-y: auto;
-            padding: 8px 8px 4px 8px;
-            width: 100%;
-        }
-
-        .zoom-container {
-            width: max-content;
-            min-width: 100%;
-            transform-origin: top left;
-            transition: none;
-        }
-
-        .page {
-            width: 1760px;
-            margin: 0;
-            background: #fff;
-            padding: 8px;
-            border: 2px solid #66BB6A;
-            border-radius: 10px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-        }
-
-        .page-inner {
-            width: 100%;
-            border: 2px solid #66BB6A;
-            border-radius: 8px;
-            padding: 10px 12px 8px 12px;
-            background: #fff;
-        }
-
-        .header {
-            width: 100%;
-            margin-bottom: 6px;
-            page-break-after: avoid;
-        }
-
-        .header-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .header-table td {
-            vertical-align: middle;
-        }
-
-        .logo-cell {
-            width: 80px;
-            text-align: center;
-        }
-
-        .header-logo {
-            width: 68px;
-            height: 68px;
-            object-fit: contain;
-            display: inline-block;
-        }
-
-        .title-cell {
-            text-align: center;
-            padding: 0 4px;
-        }
-
-        .institution-name {
-            font-size: 16px;
-            font-weight: 700;
-            margin: 0;
-            line-height: 1.05;
-            text-transform: uppercase;
-            color: #111;
-            letter-spacing: 0.2px;
-        }
-
-        .institution-motto {
-            margin-top: 2px;
-            font-size: 7.9px;
-            font-style: italic;
-            color: #4b4b4b;
-        }
-
-        .institution-contact {
-            margin-top: 2px;
-            font-size: 7.4px;
-            line-height: 1.12;
-            color: #333;
-        }
-
-        .department-title {
-            margin-top: 3px;
-            font-size: 8.4px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #111;
-            letter-spacing: 0.2px;
-        }
-
-        .bulletin-title {
-            margin-top: 1px;
-            font-size: 8.7px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #111;
-            letter-spacing: 0.2px;
-        }
-
-        .info-box {
-            margin-bottom: 6px;
-            border: 1.5px solid #66BB6A;
-            border-radius: 8px;
-            overflow: hidden;
-            page-break-inside: avoid;
-            break-inside: avoid;
-        }
-
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .info-table th,
-        .info-table td {
-            border: 1px solid #94c79a;
-            padding: 4px 6px;
-            font-size: 8px;
-        }
-
-        .info-table th {
-            width: 155px;
-            text-align: left;
-            background: #E8F5E9;
-            color: #111;
-            font-weight: 700;
-        }
-
-        .info-table td {
-            text-align: center;
-            font-weight: 700;
-        }
-
-        .section-title {
-            margin: 4px 0 0 0;
-            padding: 4px 7px;
-            background: #E8F5E9;
-            border: 1.5px solid #66BB6A;
-            border-bottom: 0;
-            border-radius: 8px 8px 0 0;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #111;
-            font-size: 8.1px;
-            page-break-after: avoid;
-            letter-spacing: 0.2px;
-        }
-
-        .academic-table,
-        .modules-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            border: 1.5px solid #66BB6A;
-            page-break-inside: avoid;
-            break-inside: avoid;
-            margin-top: 0;
-        }
-
-        .academic-table {
-            margin-bottom: 5px;
-        }
-
-        .modules-table {
-            margin-bottom: 5px;
-        }
-
-        .academic-table th,
-        .academic-table td,
-        .modules-table th,
-        .modules-table td {
-            border: 1px solid #9fbe9f;
-            padding: 2px 1px;
-            text-align: center;
-            font-size: 6.7px;
-            line-height: 1.06;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            vertical-align: middle;
-        }
-
-        .academic-table thead th,
-        .modules-table thead th {
-            background: #E8F5E9;
-            font-weight: 700;
-            color: #111;
-        }
-
-        .academic-table thead tr:first-child th {
-            font-size: 6px;
-            line-height: 1.1;
-            padding: 4px 2px;
-            height: 46px;
-        }
-
-        .academic-table thead tr:nth-child(2) th {
-            font-size: 6.8px;
-            height: 22px;
-        }
-
-        .subject-col {
-            width: 88px;
-            text-align: left !important;
-            font-weight: 700;
-            padding-left: 3px !important;
-            font-size: 7px !important;
-        }
-
-        .module-col {
-            width: 135px;
-            text-align: left !important;
-            font-weight: 700;
-            padding-left: 3px !important;
-            font-size: 7px !important;
-        }
-
-        .tiny-col {
-            width: 21px;
-        }
-
-        .small-col {
-            width: 28px;
-        }
-
-        .situation-col {
-            width: 18px;
-        }
-
-        .low-grade {
-            background-color: #FFF59D;
-            font-weight: 700;
-        }
-
-        .ra-cell {
-            background-color: transparent !important;
-        }
-
-        .legend-box,
-        .comment-box,
-        .summary-box {
-            width: 100%;
-            border: 1.5px solid #66BB6A;
-            border-radius: 8px;
-            padding: 5px 7px;
-            margin-top: 5px;
-            margin-bottom: 5px;
-            background: #fcfffc;
-            page-break-inside: avoid;
-            break-inside: avoid;
-        }
-
-        .legend-title,
-        .comment-title,
-        .summary-title {
-            font-weight: 700;
-            margin-bottom: 3px;
-            text-transform: uppercase;
-            color: #111;
-            font-size: 7.8px;
-            letter-spacing: 0.2px;
-        }
-
-        .muted {
-            color: #555;
-            font-size: 6.9px;
-            line-height: 1.16;
-        }
-
-        .legend-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 3px 10px;
-            font-size: 6.9px;
-            color: #333;
-            align-items: start;
-        }
-
-        .legend-item {
-            line-height: 1.2;
-        }
-
-        .legend-item strong {
-            color: #111;
-        }
-
-        .signatures {
-            width: 100%;
-            margin-top: 6px;
-            margin-bottom: 4px;
-            page-break-inside: avoid;
-            break-inside: avoid;
-        }
-
-        .signatures-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .signatures-table td {
-            width: 50%;
-            text-align: center;
-            padding: 0 18px;
-            vertical-align: top;
-        }
-
-        .signature-line {
-            border-top: 1px solid #000;
-            margin: 16px auto 3px auto;
-            width: 62%;
-        }
-
-        .signature-name {
-            font-weight: 700;
-            font-size: 7.5px;
-        }
-
-        .signature-role {
-            font-size: 6.8px;
-        }
-
-        .footer {
-            margin-top: 3px;
-            border-top: 1px solid #b8d8ba;
-            padding-top: 3px;
-            font-size: 6.2px;
-            color: #444;
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            page-break-inside: avoid;
-            break-inside: avoid;
-        }
-
-        .footer-left,
-        .footer-right {
-            width: 50%;
-        }
-
-        .footer-right {
-            text-align: right;
-        }
-
-        tr {
-            page-break-inside: avoid;
-            break-inside: avoid;
-        }
-
-        @media print {
-            html,
-            body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                background: #fff;
-            }
-
-            body {
-                display: block;
-            }
-
-            .screen-toolbar {
-                display: none !important;
-            }
-
-            .page-wrap {
-                width: 100%;
-                padding: 0;
-                overflow: visible;
-                display: block;
-            }
-
-            .zoom-container {
-                transform: none !important;
-                zoom: 1 !important;
-                width: 100%;
-                min-width: 100%;
-            }
-
-            .page {
-                width: 100%;
-                margin: 0 auto;
-                box-shadow: none;
-                border-radius: 0;
-            }
-
-            .page-inner {
-                border-radius: 0;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="app/pdf/templates/css/bulletin_base.css">
+    <link rel="stylesheet" href="app/pdf/templates/css/second_cycle_bulletin.css">
 </head>
-<body>
+<body style="--low-grade-color: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};">
     {% macro format_decimal_grade(value) -%}
         {%- if value is none -%}
             {{- "" -}}
@@ -520,6 +56,8 @@
     {% set generated_by = generated_by if generated_by is defined else settings.bulletin_generated_by %}
     {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
     {% set director_name = director_name if director_name is defined else settings.institution_director %}
+    {% set philosophy_title = settings.institution_philosophy_title if settings.institution_philosophy_title is defined else "Filosofía Institucional" %}
+    {% set philosophy_text = settings.institution_philosophy_text if settings.institution_philosophy_text is defined else "" %}
 
     <div class="screen-toolbar">
         <div class="toolbar-left">Vista previa del boletín</div>
@@ -533,7 +71,81 @@
 
     <div class="page-wrap" id="pageWrap">
         <div class="zoom-container" id="zoomContainer">
-            <div class="page">
+
+            <!-- HOJA 1 -->
+            <div class="page cover-page">
+                <div class="page-inner">
+                    <div class="cover-layout">
+                        <div class="cover-panel">
+                            {% if letterhead_src %}
+                                <div class="letterhead">
+                                    <img src="{{ letterhead_src }}" alt="Membrete institucional">
+                                </div>
+                            {% endif %}
+
+                            <div class="cover-panel-title">Datos del estudiante</div>
+
+                            <div class="cover-student-box">
+                                <table class="cover-student-table">
+                                    <tr>
+                                        <th>Año escolar</th>
+                                        <td>{{ school_year if school_year is defined else "2025-2026" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Nombre completo</th>
+                                        <td>{{ student.nombre_estudiante }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Número</th>
+                                        <td>{{ student.numero if student.numero is defined and student.numero else "1" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Matrícula / ID</th>
+                                        <td>{{ student.id_estudiante }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Curso</th>
+                                        <td>{{ student.curso }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Profesor titular</th>
+                                        <td>{{ student.prof_titular }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Centro educativo</th>
+                                        <td>{{ settings.institution_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Departamento</th>
+                                        <td>{{ settings.institution_academic_department }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="cover-note">
+                                Este documento reúne la información académica y técnico-profesional del estudiante
+                                para fines de consulta institucional, seguimiento pedagógico e impresión formal.
+                            </div>
+                        </div>
+
+                        <div class="cover-panel">
+                            {% if letterhead_src %}
+                                <div class="letterhead">
+                                    <img src="{{ letterhead_src }}" alt="Membrete institucional">
+                                </div>
+                            {% endif %}
+
+                            <div class="cover-philosophy-box">
+                                <div class="cover-philosophy-title">{{ philosophy_title }}</div>
+                                <div class="cover-philosophy-text">{{ philosophy_text }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HOJA 2 -->
+            <div class="page report-page">
                 <div class="page-inner">
                     <div class="header">
                         <table class="header-table">
@@ -573,36 +185,22 @@
                         </table>
                     </div>
 
-                    <div class="info-box">
-                        <table class="info-table">
+                    <div class="student-strip">
+                        <table class="student-strip-table">
                             <tr>
-                                <th>AÑO ESCOLAR</th>
-                                <td>{{ school_year if school_year is defined else "2025-2026" }}</td>
-                            </tr>
-                            <tr>
-                                <th>Nombre (s) y apellido (s)</th>
+                                <th>Nombre</th>
                                 <td>{{ student.nombre_estudiante }}</td>
-                            </tr>
-                            <tr>
                                 <th>Número</th>
                                 <td>{{ student.numero if student.numero is defined and student.numero else "1" }}</td>
-                            </tr>
-                            <tr>
-                                <th>Matrícula / ID</th>
+                                <th>ID</th>
                                 <td>{{ student.id_estudiante }}</td>
-                            </tr>
-                            <tr>
                                 <th>Curso</th>
                                 <td>{{ student.curso }}</td>
-                            </tr>
-                            <tr>
-                                <th>Profesor titular</th>
-                                <td>{{ student.prof_titular }}</td>
                             </tr>
                         </table>
                     </div>
 
-                    <div class="section-title">ÁREAS ACADÉMICAS</div>
+                    <div class="section-title">Áreas académicas</div>
                     <table class="academic-table">
                         <thead>
                             <tr>
@@ -731,7 +329,7 @@
                     </div>
 
                     {% if student.modules is defined and student.modules %}
-                    <div class="section-title">MÓDULOS TÉCNICOS</div>
+                    <div class="section-title">Módulos técnicos</div>
                     <table class="modules-table">
                         <thead>
                             <tr>
@@ -817,6 +415,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
