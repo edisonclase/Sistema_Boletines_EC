@@ -9,6 +9,94 @@
     <style>
         {{ bulletin_specific_css | safe }}
     </style>
+    <style>
+        .screen-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #ffffff;
+            border-bottom: 1px solid #d7e8d8;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toolbar-left {
+            font-size: 12px;
+            font-weight: 700;
+            color: #2E7D32;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .zoom-btn {
+            border: 1px solid #bdd8c0;
+            background: #fff;
+            border-radius: 6px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .zoom-label {
+            font-size: 12px;
+            min-width: 52px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .zoom-slider {
+            width: 140px;
+            accent-color: #2E7D32;
+            cursor: pointer;
+        }
+
+        .page-wrap {
+            overflow: auto;
+            padding: 8px 8px 4px 8px;
+            width: 100%;
+        }
+
+        .zoom-container {
+            width: max-content;
+            min-width: 100%;
+            transform-origin: top left;
+        }
+
+        .page {
+            width: 1760px;
+            margin: 0;
+        }
+
+        @media print {
+            .screen-toolbar {
+                display: none !important;
+            }
+
+            .page-wrap {
+                padding: 0;
+                overflow: visible;
+            }
+
+            .zoom-container {
+                transform: none !important;
+                width: 100%;
+                min-width: 100%;
+            }
+
+            .page {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body style="--low-grade-color: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};">
     {% macro format_decimal_grade(value) -%}
@@ -60,96 +148,22 @@
     {% set generated_by = generated_by if generated_by is defined else settings.bulletin_generated_by %}
     {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
     {% set director_name = director_name if director_name is defined else settings.institution_director %}
-    {% set philosophy_title = settings.institution_philosophy_title if settings.institution_philosophy_title is defined else "Filosofía Institucional" %}
-    {% set philosophy_text = settings.institution_philosophy_text if settings.institution_philosophy_text is defined else "" %}
 
     <div class="screen-toolbar">
         <div class="toolbar-left">Vista previa del boletín</div>
         <div class="toolbar-right">
             <button class="zoom-btn" type="button" onclick="changeZoom(-0.1)">−</button>
+            <input class="zoom-slider" id="zoomSlider" type="range" min="60" max="160" step="5" value="100" oninput="setZoomFromSlider(this.value)">
             <div class="zoom-label" id="zoomLabel">100%</div>
             <button class="zoom-btn" type="button" onclick="changeZoom(0.1)">+</button>
-            <button class="zoom-btn" type="button" onclick="resetZoom()">Restablecer</button>
+            <button class="zoom-btn" type="button" onclick="fitToScreen()">Ajustar</button>
+            <button class="zoom-btn" type="button" onclick="resetZoom()">100%</button>
         </div>
     </div>
 
     <div class="page-wrap" id="pageWrap">
         <div class="zoom-container" id="zoomContainer">
-
-            <!-- HOJA 1 -->
-            <div class="page cover-page">
-                <div class="page-inner">
-                    <div class="cover-layout">
-                        <div class="cover-panel">
-                            {% if letterhead_src %}
-                                <div class="letterhead">
-                                    <img src="{{ letterhead_src }}" alt="Membrete institucional">
-                                </div>
-                            {% endif %}
-
-                            <div class="cover-panel-title">Datos del estudiante</div>
-
-                            <div class="cover-student-box">
-                                <table class="cover-student-table">
-                                    <tr>
-                                        <th>Año escolar</th>
-                                        <td>{{ school_year if school_year is defined else "2025-2026" }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Nombre completo</th>
-                                        <td>{{ student.nombre_estudiante }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Número</th>
-                                        <td>{{ student.numero if student.numero is defined and student.numero else "1" }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Matrícula / ID</th>
-                                        <td>{{ student.id_estudiante }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Curso</th>
-                                        <td>{{ student.curso }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Profesor titular</th>
-                                        <td>{{ student.prof_titular }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Centro educativo</th>
-                                        <td>{{ settings.institution_name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Departamento</th>
-                                        <td>{{ settings.institution_academic_department }}</td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            <div class="cover-note">
-                                Este documento reúne la información académica y técnico-profesional del estudiante
-                                para fines de consulta institucional, seguimiento pedagógico e impresión formal.
-                            </div>
-                        </div>
-
-                        <div class="cover-panel">
-                            {% if letterhead_src %}
-                                <div class="letterhead">
-                                    <img src="{{ letterhead_src }}" alt="Membrete institucional">
-                                </div>
-                            {% endif %}
-
-                            <div class="cover-philosophy-box">
-                                <div class="cover-philosophy-title">{{ philosophy_title }}</div>
-                                <div class="cover-philosophy-text">{{ philosophy_text }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- HOJA 2 -->
-            <div class="page report-page">
+            <div class="page">
                 <div class="page-inner">
                     <div class="header">
                         <table class="header-table">
@@ -192,14 +206,20 @@
                     <div class="student-strip">
                         <table class="student-strip-table">
                             <tr>
+                                <th>Año escolar</th>
+                                <td>{{ school_year if school_year is defined else "2025-2026" }}</td>
                                 <th>Nombre</th>
                                 <td>{{ student.nombre_estudiante }}</td>
                                 <th>Número</th>
                                 <td>{{ student.numero if student.numero is defined and student.numero else "1" }}</td>
+                            </tr>
+                            <tr>
                                 <th>ID</th>
                                 <td>{{ student.id_estudiante }}</td>
                                 <th>Curso</th>
                                 <td>{{ student.curso }}</td>
+                                <th>Profesor titular</th>
+                                <td>{{ student.prof_titular }}</td>
                             </tr>
                         </table>
                     </div>
@@ -318,20 +338,6 @@
                         </tbody>
                     </table>
 
-                    <div class="legend-box">
-                        <div class="legend-title">Leyenda de abreviaturas</div>
-                        <div class="legend-grid">
-                            <div class="legend-item"><strong>PC</strong> = Promedio de competencias</div>
-                            <div class="legend-item"><strong>CF</strong> = Calificación final</div>
-                            <div class="legend-item"><strong>COMP</strong> = Completivo</div>
-                            <div class="legend-item"><strong>EXT</strong> = Extraordinario</div>
-                            <div class="legend-item"><strong>ESP</strong> = Evaluación especial</div>
-                            <div class="legend-item"><strong>ASIS</strong> = Asistencia</div>
-                            <div class="legend-item"><strong>SIT</strong> = Situación final</div>
-                            <div class="legend-item"><strong>A / R</strong> = Aprobado / Reprobado</div>
-                        </div>
-                    </div>
-
                     {% if student.modules is defined and student.modules %}
                     <div class="section-title">Módulos técnicos</div>
                     <table class="modules-table">
@@ -374,6 +380,20 @@
                     </table>
                     {% endif %}
 
+                    <div class="legend-box">
+                        <div class="legend-title">Leyenda de abreviaturas</div>
+                        <div class="legend-grid">
+                            <div class="legend-item"><strong>PC</strong> = Promedio de competencias</div>
+                            <div class="legend-item"><strong>CF</strong> = Calificación final</div>
+                            <div class="legend-item"><strong>COMP</strong> = Completivo</div>
+                            <div class="legend-item"><strong>EXT</strong> = Extraordinario</div>
+                            <div class="legend-item"><strong>ESP</strong> = Evaluación especial</div>
+                            <div class="legend-item"><strong>ASIS</strong> = Asistencia</div>
+                            <div class="legend-item"><strong>SIT</strong> = Situación final</div>
+                            <div class="legend-item"><strong>A / R</strong> = Aprobado / Reprobado</div>
+                        </div>
+                    </div>
+
                     <div class="comment-box">
                         <div class="comment-title">Comentario del profesor titular</div>
                         <div class="muted">
@@ -382,13 +402,6 @@
                             {% else %}
                                 ________________________________________________
                             {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="summary-box">
-                        <div class="summary-title">Observaciones generales</div>
-                        <div class="muted">
-                            Esta boleta de calificaciones no es definitiva y puede sufrir modificaciones hasta el cuarto período de evaluación, en caso de que el alumno/a vaya a recuperación pedagógica en algún bloque de competencias.
                         </div>
                     </div>
 
@@ -419,7 +432,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -429,15 +441,22 @@
         function updateZoom() {
             const container = document.getElementById("zoomContainer");
             const label = document.getElementById("zoomLabel");
+            const slider = document.getElementById("zoomSlider");
 
-            container.style.zoom = currentZoom;
+            container.style.transform = `scale(${currentZoom})`;
             label.textContent = `${Math.round(currentZoom * 100)}%`;
+            if (slider) slider.value = Math.round(currentZoom * 100);
+        }
+
+        function setZoomFromSlider(value) {
+            currentZoom = Number(value) / 100;
+            updateZoom();
         }
 
         function changeZoom(step) {
             currentZoom += step;
-            if (currentZoom < 0.5) currentZoom = 0.5;
-            if (currentZoom > 1.8) currentZoom = 1.8;
+            if (currentZoom < 0.6) currentZoom = 0.6;
+            if (currentZoom > 1.6) currentZoom = 1.6;
             updateZoom();
         }
 
@@ -446,7 +465,20 @@
             updateZoom();
         }
 
-        updateZoom();
+        function fitToScreen() {
+            const wrap = document.getElementById("pageWrap");
+            const page = document.querySelector(".page");
+            if (!wrap || !page) return;
+
+            const available = wrap.clientWidth - 24;
+            const scale = available / page.offsetWidth;
+
+            currentZoom = Math.max(0.6, Math.min(1.2, scale));
+            updateZoom();
+        }
+
+        window.addEventListener("load", fitToScreen);
+        window.addEventListener("resize", fitToScreen);
     </script>
 </body>
 </html>

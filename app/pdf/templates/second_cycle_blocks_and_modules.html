@@ -1,529 +1,806 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Boletín Segundo Ciclo</title>
+    <meta charset="UTF-8">
+    <title>Reporte por bloques y módulos - Segundo ciclo</title>
+    <style>
+        @page {
+            size: Letter landscape;
+            margin: 0.35cm;
+        }
 
-<style>
+        * {
+            box-sizing: border-box;
+        }
 
-@page{
-    size: Letter landscape;
-    margin:0.4cm;
-}
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f4f7f4;
+            color: #111;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+        }
 
-*{
-    box-sizing:border-box;
-}
+        .screen-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #ffffff;
+            border-bottom: 1px solid #d7e8d8;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
 
-body{
-    margin:0;
-    padding:0;
-    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-    font-size:10px;
-    background:#fff;
-    color:#111;
-}
+        .toolbar-left {
+            font-size: 12px;
+            font-weight: 700;
+            color: #2E7D32;
+        }
 
-/* BORDE GENERAL */
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
 
-.page{
-    width:100%;
-    border:2px solid #66BB6A;
-    border-radius:8px;
-    padding:10px;
-}
+        .zoom-btn {
+            border: 1px solid #bdd8c0;
+            background: #fff;
+            border-radius: 6px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
 
-.page-inner{
-    border:2px solid #66BB6A;
-    border-radius:6px;
-    padding:10px;
-}
+        .zoom-label {
+            font-size: 12px;
+            min-width: 52px;
+            text-align: center;
+            font-weight: 700;
+        }
 
+        .zoom-slider {
+            width: 140px;
+            accent-color: #2E7D32;
+            cursor: pointer;
+        }
 
-/* HEADER */
+        .page-wrap {
+            overflow: auto;
+            padding: 8px 8px 4px 8px;
+            width: 100%;
+        }
 
-.header{
-    width:100%;
-    margin-bottom:8px;
-}
+        .zoom-container {
+            width: max-content;
+            min-width: 100%;
+            transform-origin: top left;
+        }
 
-.header-table{
-    width:100%;
-    border-collapse:collapse;
-}
+        .page {
+            width: 1760px;
+            margin: 0;
+            background: #fff;
+            padding: 8px;
+            border: 2px solid #66BB6A;
+            border-radius: 10px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        }
 
-.logo-cell{
-    width:90px;
-    text-align:center;
-}
+        .page-inner {
+            width: 100%;
+            border: 2px solid #66BB6A;
+            border-radius: 8px;
+            padding: 10px 12px 8px 12px;
+            background: #fff;
+        }
 
-.header-logo{
-    width:80px;
-    height:80px;
-    object-fit:contain;
-}
+        .header {
+            width: 100%;
+            margin-bottom: 8px;
+        }
 
-.title-cell{
-    text-align:center;
-}
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-.institution-name{
-    font-size:18px;
-    font-weight:700;
-    text-transform:uppercase;
-}
+        .header-table td {
+            vertical-align: middle;
+        }
 
-.institution-contact{
-    font-size:8px;
-}
+        .logo-cell {
+            width: 95px;
+            text-align: center;
+        }
 
-.department-title{
-    font-size:9px;
-    font-weight:700;
-}
+        .header-logo {
+            width: 82px;
+            height: 82px;
+            object-fit: contain;
+            display: inline-block;
+        }
 
-.bulletin-title{
-    font-size:9px;
-    font-weight:700;
-}
+        .title-cell {
+            text-align: center;
+            padding: 0 4px;
+        }
 
+        .institution-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.06;
+            text-transform: uppercase;
+            color: #111;
+        }
 
-/* INFO BOX */
+        .institution-motto {
+            margin-top: 2px;
+            font-size: 8.2px;
+            font-style: italic;
+            color: #4b4b4b;
+        }
 
-.info-box{
-    border:1.5px solid #66BB6A;
-    border-radius:6px;
-    margin-bottom:8px;
-}
+        .institution-contact {
+            margin-top: 3px;
+            font-size: 7.6px;
+            line-height: 1.15;
+            color: #333;
+        }
 
-.info-table{
-    width:100%;
-    border-collapse:collapse;
-}
+        .department-title {
+            margin-top: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #111;
+        }
 
-.info-table th,
-.info-table td{
-    border:1px solid #A5D6A7;
-    padding:4px;
-    font-size:8px;
-}
+        .bulletin-title {
+            margin-top: 2px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #111;
+        }
 
-.info-table th{
-    background:#E8F5E9;
-    text-align:left;
-}
+        .student-strip {
+            margin-bottom: 8px;
+            border: 1.5px solid #66BB6A;
+            border-radius: 8px;
+            overflow: hidden;
+        }
 
+        .student-strip-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-/* TITULOS SECCION */
+        .student-strip-table th,
+        .student-strip-table td {
+            border: 1px solid #94c79a;
+            padding: 5px 6px;
+            font-size: 8px;
+        }
 
-.section-title{
-    background:#E8F5E9;
-    border:1.5px solid #66BB6A;
-    border-bottom:none;
-    padding:4px;
-    font-weight:700;
-    text-transform:uppercase;
-}
+        .student-strip-table th {
+            background: #E8F5E9;
+            text-align: left;
+            width: 12%;
+            font-weight: 700;
+        }
 
+        .student-strip-table td {
+            font-weight: 700;
+        }
 
-/* TABLAS */
+        .section-title {
+            margin: 4px 0 0 0;
+            padding: 4px 7px;
+            background: #E8F5E9;
+            border: 1.5px solid #66BB6A;
+            border-bottom: 0;
+            border-radius: 8px 8px 0 0;
+            font-size: 8.1px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #111;
+        }
 
-.academic-table,
-.modules-table{
-    width:100%;
-    border-collapse:collapse;
-    table-layout:fixed;
-    border:1.5px solid #66BB6A;
-    margin-bottom:8px;
-}
+        .academic-table,
+        .modules-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 8px;
+            border: 1.5px solid #66BB6A;
+        }
 
-.academic-table th,
-.academic-table td,
-.modules-table th,
-.modules-table td{
-    border:1px solid #A5D6A7;
-    text-align:center;
-    padding:2px;
-}
+        .academic-table col.subject-col-width {
+            width: 140px;
+        }
 
-.academic-table thead th,
-.modules-table thead th{
-    background:#E8F5E9;
-    font-size:7px;
-}
+        .academic-table col.grade-col-width {
+            width: 27px;
+        }
 
-.group-row th{
-    background:#C8E6C9;
-    font-size:6px;
-}
+        .modules-table col.module-name-col {
+            width: 240px;
+        }
 
-.subject-col{
-    text-align:left !important;
-    font-weight:700;
-    font-size:7px;
-    padding-left:4px !important;
-}
+        .modules-table col.ra-col {
+            width: 72px;
+        }
 
-.module-name{
-    text-align:left !important;
-    font-weight:700;
-    font-size:7px;
-    padding-left:4px !important;
-}
+        .modules-table col.final-col {
+            width: 42px;
+        }
 
-.tiny-col{
-    font-size:6px;
-}
+        .academic-table th,
+        .academic-table td,
+        .modules-table th,
+        .modules-table td {
+            border: 1px solid #94c79a;
+            padding: 3px 2px;
+            text-align: center;
+            vertical-align: middle;
+        }
 
+        .academic-table thead th,
+        .modules-table thead th {
+            background: #E8F5E9;
+            color: #111;
+            text-transform: uppercase;
+        }
 
-/* NOTAS BAJAS */
+        .academic-table thead .group-row th,
+        .modules-table thead .group-row th {
+            background: #C8E6C9;
+            font-weight: 700;
+        }
 
-.low-grade{
-    background:var(--low-grade-color);
-    font-weight:700;
-}
+        .academic-table thead tr.group-row th {
+            font-size: 6.1px;
+            line-height: 1.1;
+            padding: 4px 2px;
+            height: 46px;
+        }
 
+        .academic-table thead tr:nth-child(2) th {
+            font-size: 6.7px;
+            height: 22px;
+        }
 
-/* LEYENDA */
+        .modules-table thead .group-row th {
+            font-size: 6.6px;
+        }
 
-.legend-box{
-    border:1.5px solid #66BB6A;
-    border-radius:6px;
-    padding:5px;
-    margin-top:6px;
-}
+        .modules-table thead tr:nth-child(2) th {
+            font-size: 6.4px;
+        }
 
-.legend-title{
-    font-weight:700;
-    margin-bottom:3px;
-    text-transform:uppercase;
-}
+        .academic-table td {
+            font-size: 6.7px;
+            line-height: 1.08;
+        }
 
-.legend-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:4px 12px;
-}
+        .modules-table td {
+            font-size: 6.6px;
+            line-height: 1.12;
+        }
 
-.legend-item{
-    font-size:7px;
-}
+        .subject-col {
+            text-align: left !important;
+            font-weight: 700;
+            color: #111;
+            font-size: 6.9px;
+            line-height: 1.1;
+            word-break: break-word;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
+        }
 
+        .module-name {
+            text-align: left !important;
+            font-weight: 700;
+            color: #111;
+            font-size: 6.8px;
+            line-height: 1.12;
+            word-break: break-word;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
+        }
 
-/* COMENTARIOS */
+        .tiny-col {
+            font-size: 6.2px !important;
+            padding: 2px 1px !important;
+        }
 
-.comment-box{
-    border:1.5px solid #66BB6A;
-    border-radius:6px;
-    padding:5px;
-    margin-top:6px;
-}
+        .low-grade {
+            background: var(--low-grade-color);
+            font-weight: 700;
+        }
 
-.comment-title{
-    font-weight:700;
-}
+        .legend-box,
+        .comment-box {
+            width: 100%;
+            border: 1.5px solid #66BB6A;
+            border-radius: 8px;
+            padding: 5px 8px;
+            margin-top: 6px;
+            margin-bottom: 6px;
+            background: #fcfffc;
+        }
 
+        .legend-title,
+        .comment-title {
+            font-weight: 700;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            color: #111;
+            font-size: 7.8px;
+        }
 
-/* FIRMAS */
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 12px;
+        }
 
-.signatures{
-    margin-top:10px;
-}
+        .legend-item,
+        .muted {
+            color: #555;
+            font-size: 7px;
+            line-height: 1.18;
+        }
 
-.signatures-table{
-    width:100%;
-}
+        .signatures {
+            width: 100%;
+            margin-top: 8px;
+            margin-bottom: 6px;
+        }
 
-.signatures-table td{
-    text-align:center;
-}
+        .signatures-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-.signature-line{
-    border-top:1px solid #000;
-    margin:20px auto 4px auto;
-    width:60%;
-}
+        .signatures-table td {
+            width: 50%;
+            text-align: center;
+            padding: 0 22px;
+            vertical-align: top;
+        }
 
-.signature-name{
-    font-weight:700;
-    font-size:8px;
-}
+        .signature-line {
+            border-top: 1px solid #000;
+            margin: 18px auto 4px auto;
+            width: 68%;
+        }
 
-.signature-role{
-    font-size:7px;
-}
+        .signature-name {
+            font-weight: 700;
+            font-size: 7.6px;
+        }
 
+        .signature-role {
+            font-size: 6.9px;
+        }
 
-/* FOOTER */
+        .footer {
+            margin-top: 4px;
+            border-top: 1px solid #b8d8ba;
+            padding-top: 4px;
+            font-size: 6.2px;
+            color: #444;
+        }
 
-.footer{
-    border-top:1px solid #C8E6C9;
-    margin-top:8px;
-    padding-top:4px;
-    font-size:6px;
-}
+        .footer-meta {
+            text-align: left;
+            margin-bottom: 2px;
+            font-size: 6.4px;
+            line-height: 1.2;
+        }
 
-</style>
+        .footer-main {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-end;
+        }
 
+        .footer-left,
+        .footer-right {
+            width: 50%;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        @media print {
+            .screen-toolbar {
+                display: none !important;
+            }
+
+            .page-wrap {
+                padding: 0;
+                overflow: visible;
+            }
+
+            .zoom-container {
+                transform: none !important;
+                width: 100%;
+                min-width: 100%;
+            }
+
+            .page {
+                width: 100%;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .page-inner {
+                border-radius: 0;
+            }
+        }
+    </style>
 </head>
-
-
 <body style="--low-grade-color: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};">
+{% macro format_grade(value) -%}
+    {%- if value is not defined or value is none -%}
+        {{- "" -}}
+    {%- else -%}
+        {%- set text = (value|string).strip() -%}
+        {%- if text in ("", "0", "0.0", "0.00") -%}
+            {{- "" -}}
+        {%- else -%}
+            {{- text -}}
+        {%- endif -%}
+    {%- endif -%}
+{%- endmacro %}
 
-<div class="page">
-<div class="page-inner">
+{% macro low_class(value) -%}
+    {%- set visible = format_grade(value)|trim -%}
+    {%- if visible != "" and (value|float) >= 1 and (value|float) < 70 -%}
+        low-grade
+    {%- endif -%}
+{%- endmacro %}
 
-<div class="header">
+{% macro grade_cell(value) -%}
+    {%- set visible = format_grade(value)|trim -%}
+    <td class="{{ low_class(value) if visible else '' }}">{{ visible }}</td>
+{%- endmacro %}
 
-<table class="header-table">
-<tr>
+{% macro ra_cell(value) -%}
+    {%- set visible = format_grade(value)|trim -%}
+    <td>{{ visible }}</td>
+{%- endmacro %}
 
-<td class="logo-cell">
-{% if institution_logo_src %}
-<img src="{{ institution_logo_src }}" class="header-logo">
+{% set generated_at = generated_at if generated_at is defined else "" %}
+{% set generated_by = generated_by if generated_by is defined else "Sistema de Boletines" %}
+{% set generated_role = generated_role if generated_role is defined else "" %}
+{% set director_name = director_name if director_name is defined else "" %}
+{% set school_year = school_year if school_year is defined else "" %}
+{% set institution_logo_src = institution_logo_src if institution_logo_src is defined else "" %}
+{% set minerd_logo_src = minerd_logo_src if minerd_logo_src is defined else "" %}
+
+{% if student.modules_with_ras is defined and student.modules_with_ras %}
+    {% set modules_list = student.modules_with_ras %}
+{% else %}
+    {% set modules_list = student.modules %}
 {% endif %}
-</td>
 
-<td class="title-cell">
-
-<div class="institution-name">
-{{ settings.institution_name }}
+<div class="screen-toolbar">
+    <div class="toolbar-left">Vista previa del boletín por bloques y módulos</div>
+    <div class="toolbar-right">
+        <button class="zoom-btn" type="button" onclick="changeZoom(-0.1)">−</button>
+        <input class="zoom-slider" id="zoomSlider" type="range" min="60" max="160" step="5" value="100" oninput="setZoomFromSlider(this.value)">
+        <div class="zoom-label" id="zoomLabel">100%</div>
+        <button class="zoom-btn" type="button" onclick="changeZoom(0.1)">+</button>
+        <button class="zoom-btn" type="button" onclick="fitToScreen()">Ajustar</button>
+        <button class="zoom-btn" type="button" onclick="resetZoom()">100%</button>
+    </div>
 </div>
 
-<div class="institution-contact">
-Código del centro: {{ settings.institution_code }} · Año escolar: {{ school_year }}
+<div class="page-wrap" id="pageWrap">
+    <div class="zoom-container" id="zoomContainer">
+        <div class="page">
+            <div class="page-inner">
+                <div class="header">
+                    <table class="header-table">
+                        <tr>
+                            <td class="logo-cell">
+                                {% if institution_logo_src %}
+                                    <img src="{{ institution_logo_src }}" alt="Logo institucional" class="header-logo">
+                                {% endif %}
+                            </td>
+                            <td class="title-cell">
+                                <div class="institution-name">{{ settings.institution_name }}</div>
+                                {% if settings.institution_motto %}
+                                    <div class="institution-motto">{{ settings.institution_motto }}</div>
+                                {% endif %}
+                                <div class="institution-contact">
+                                    Código del centro: {{ settings.institution_code }}
+                                    {% if school_year %}
+                                        · Año escolar: {{ school_year }}
+                                    {% endif %}
+                                </div>
+                                <div class="department-title">Registro y Control Académico</div>
+                                <div class="bulletin-title">Reporte por bloques de competencias y módulos · Segundo ciclo</div>
+                            </td>
+                            <td class="logo-cell">
+                                {% if minerd_logo_src %}
+                                    <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="header-logo">
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="student-strip">
+                    <table class="student-strip-table">
+                        <tr>
+                            <th>Año escolar</th>
+                            <td>{{ school_year }}</td>
+                            <th>Nombre</th>
+                            <td>{{ student.nombre_estudiante or "" }}</td>
+                            <th>ID</th>
+                            <td>{{ student.id_estudiante or "" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Curso</th>
+                            <td>{{ student.curso or "" }}</td>
+                            <th>Número</th>
+                            <td>{{ student.numero or "" }}</td>
+                            <th>Profesor titular</th>
+                            <td>{{ student.prof_titular or "" }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="section-title">Asignaturas por bloques de competencias</div>
+                <table class="academic-table">
+                    <colgroup>
+                        <col class="subject-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                        <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                    </colgroup>
+                    <thead>
+                        <tr class="group-row">
+                            <th class="subject-col" rowspan="2">ASIGNATURA</th>
+                            <th colspan="4">COMUNICATIVA</th>
+                            <th colspan="4">PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO / RESOLUCIÓN DE PROBLEMAS</th>
+                            <th colspan="4">CIENTÍFICA Y TECNOLÓGICA / AMBIENTAL Y DE LA SALUD</th>
+                            <th colspan="4">ÉTICA Y CIUDADANA / DESARROLLO PERSONAL Y ESPIRITUAL</th>
+                        </tr>
+                        <tr>
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+
+                            <th class="tiny-col">P1</th>
+                            <th class="tiny-col">P2</th>
+                            <th class="tiny-col">P3</th>
+                            <th class="tiny-col">P4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject in student.subjects %}
+                        <tr>
+                            <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
+
+                            {{ grade_cell(subject.p1_c1 if subject.p1_c1 is defined else none) }}
+                            {{ grade_cell(subject.p2_c1 if subject.p2_c1 is defined else none) }}
+                            {{ grade_cell(subject.p3_c1 if subject.p3_c1 is defined else none) }}
+                            {{ grade_cell(subject.p4_c1 if subject.p4_c1 is defined else none) }}
+
+                            {{ grade_cell(subject.p1_c2 if subject.p1_c2 is defined else none) }}
+                            {{ grade_cell(subject.p2_c2 if subject.p2_c2 is defined else none) }}
+                            {{ grade_cell(subject.p3_c2 if subject.p3_c2 is defined else none) }}
+                            {{ grade_cell(subject.p4_c2 if subject.p4_c2 is defined else none) }}
+
+                            {{ grade_cell(subject.p1_c3 if subject.p1_c3 is defined else none) }}
+                            {{ grade_cell(subject.p2_c3 if subject.p2_c3 is defined else none) }}
+                            {{ grade_cell(subject.p3_c3 if subject.p3_c3 is defined else none) }}
+                            {{ grade_cell(subject.p4_c3 if subject.p4_c3 is defined else none) }}
+
+                            {{ grade_cell(subject.p1_c4 if subject.p1_c4 is defined else none) }}
+                            {{ grade_cell(subject.p2_c4 if subject.p2_c4 is defined else none) }}
+                            {{ grade_cell(subject.p3_c4 if subject.p3_c4 is defined else none) }}
+                            {{ grade_cell(subject.p4_c4 if subject.p4_c4 is defined else none) }}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if modules_list %}
+                <div class="section-title">Módulos y resultados de aprendizaje</div>
+                <table class="modules-table">
+                    <colgroup>
+                        <col class="module-name-col">
+                        {% for _ in range(10) %}
+                            <col class="ra-col">
+                        {% endfor %}
+                        <col class="final-col">
+                        <col class="final-col">
+                        <col class="final-col">
+                    </colgroup>
+                    <thead>
+                        <tr class="group-row">
+                            <th rowspan="2">Módulo</th>
+                            <th colspan="10">Resultados de aprendizaje</th>
+                            <th rowspan="2">CF</th>
+                            <th rowspan="2">Situ_A</th>
+                            <th rowspan="2">Situ_R</th>
+                        </tr>
+                        <tr>
+                            <th>RA1</th>
+                            <th>RA2</th>
+                            <th>RA3</th>
+                            <th>RA4</th>
+                            <th>RA5</th>
+                            <th>RA6</th>
+                            <th>RA7</th>
+                            <th>RA8</th>
+                            <th>RA9</th>
+                            <th>RA10</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for module in modules_list %}
+                            <tr>
+                                <td class="module-name">{{ module.modulo or "" }}</td>
+                                {{ ra_cell(module.ra1 if module.ra1 is defined else none) }}
+                                {{ ra_cell(module.ra2 if module.ra2 is defined else none) }}
+                                {{ ra_cell(module.ra3 if module.ra3 is defined else none) }}
+                                {{ ra_cell(module.ra4 if module.ra4 is defined else none) }}
+                                {{ ra_cell(module.ra5 if module.ra5 is defined else none) }}
+                                {{ ra_cell(module.ra6 if module.ra6 is defined else none) }}
+                                {{ ra_cell(module.ra7 if module.ra7 is defined else none) }}
+                                {{ ra_cell(module.ra8 if module.ra8 is defined else none) }}
+                                {{ ra_cell(module.ra9 if module.ra9 is defined else none) }}
+                                {{ ra_cell(module.ra10 if module.ra10 is defined else none) }}
+                                {{ grade_cell(module.cf if module.cf is defined else none) }}
+                                <td>{{ module.situ_a or "" }}</td>
+                                <td>{{ module.situ_r or "" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+
+                <div class="legend-box">
+                    <div class="legend-title">Bloques de competencias</div>
+                    <div class="legend-grid">
+                        <div class="legend-item"><strong>Comunicativa</strong></div>
+                        <div class="legend-item"><strong>Pensamiento Lógico, Creativo y Crítico / Resolución de Problemas</strong></div>
+                        <div class="legend-item"><strong>Científica y Tecnológica / Ambiental y de la Salud</strong></div>
+                        <div class="legend-item"><strong>Ética y Ciudadana / Desarrollo Personal y Espiritual</strong></div>
+                    </div>
+                </div>
+
+                <div class="comment-box">
+                    <div class="comment-title">Comentario / Observaciones</div>
+                    <div class="muted">
+                        {% if student.comentario_final %}
+                            {{ student.comentario_final }}
+                        {% else %}
+                            &nbsp;
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="signatures">
+                    <table class="signatures-table">
+                        <tr>
+                            <td>
+                                <div class="signature-line"></div>
+                                <div class="signature-name">{{ director_name }}</div>
+                                <div class="signature-role">Director(a)</div>
+                            </td>
+                            <td>
+                                <div class="signature-line"></div>
+                                <div class="signature-name">{{ student.prof_titular or "" }}</div>
+                                <div class="signature-role">Profesor(a) Titular</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="footer">
+                    <div class="footer-meta">
+                        {% if generated_at %}
+                            Generado: {{ generated_at }}
+                        {% endif %}
+                        {% if generated_by %}
+                            · Por: {{ generated_by }}
+                        {% endif %}
+                        {% if generated_role %}
+                            · Rol: {{ generated_role }}
+                        {% endif %}
+                    </div>
+                    <div class="footer-main">
+                        <div class="footer-left">
+                            {{ settings.app_name }} · Desarrollado por Edison Clase
+                        </div>
+                        <div class="footer-right">
+                            {% if generated_at %}
+                                {{ generated_at }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="department-title">
-Registro y Control Académico
-</div>
-
-<div class="bulletin-title">
-Boletín de Calificaciones – Segundo Ciclo
-</div>
-
-</td>
-
-<td class="logo-cell">
-{% if minerd_logo_src %}
-<img src="{{ minerd_logo_src }}" class="header-logo">
-{% endif %}
-</td>
-
-</tr>
-</table>
-
-</div>
-
-
-
-<div class="info-box">
-<table class="info-table">
-
-<tr>
-<th>Nombre del estudiante</th>
-<td>{{ student.nombre_estudiante }}</td>
-
-<th>ID</th>
-<td>{{ student.id_estudiante }}</td>
-</tr>
-
-<tr>
-<th>Curso</th>
-<td>{{ student.curso }}</td>
-
-<th>Número</th>
-<td>{{ student.numero }}</td>
-</tr>
-
-<tr>
-<th>Profesor titular</th>
-<td>{{ student.prof_titular }}</td>
-
-<th>Ciclo</th>
-<td>Segundo Ciclo</td>
-</tr>
-
-</table>
-</div>
-
-
-
-<div class="section-title">
-Asignaturas por bloques de competencias
-</div>
-
-<table class="academic-table">
-
-<thead>
-
-<tr class="group-row">
-<th rowspan="2">Asignatura</th>
-
-<th colspan="4">
-Comunicativa
-</th>
-
-<th colspan="4">
-Pensamiento Lógico, Creativo y Crítico / Resolución de Problemas
-</th>
-
-<th colspan="4">
-Científica y Tecnológica / Ambiental y de la Salud
-</th>
-
-<th colspan="4">
-Ética y Ciudadana / Desarrollo Personal y Espiritual
-</th>
-
-</tr>
-
-<tr>
-
-<th class="tiny-col">P1</th>
-<th class="tiny-col">P2</th>
-<th class="tiny-col">P3</th>
-<th class="tiny-col">P4</th>
-
-<th class="tiny-col">P1</th>
-<th class="tiny-col">P2</th>
-<th class="tiny-col">P3</th>
-<th class="tiny-col">P4</th>
-
-<th class="tiny-col">P1</th>
-<th class="tiny-col">P2</th>
-<th class="tiny-col">P3</th>
-<th class="tiny-col">P4</th>
-
-<th class="tiny-col">P1</th>
-<th class="tiny-col">P2</th>
-<th class="tiny-col">P3</th>
-<th class="tiny-col">P4</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-{% for subject in student.subjects %}
-
-<tr>
-
-<td class="subject-col">
-{{ subject.asignatura }}
-</td>
-
-<td>{{ subject.p1_c1 }}</td>
-<td>{{ subject.p2_c1 }}</td>
-<td>{{ subject.p3_c1 }}</td>
-<td>{{ subject.p4_c1 }}</td>
-
-<td>{{ subject.p1_c2 }}</td>
-<td>{{ subject.p2_c2 }}</td>
-<td>{{ subject.p3_c2 }}</td>
-<td>{{ subject.p4_c2 }}</td>
-
-<td>{{ subject.p1_c3 }}</td>
-<td>{{ subject.p2_c3 }}</td>
-<td>{{ subject.p3_c3 }}</td>
-<td>{{ subject.p4_c3 }}</td>
-
-<td>{{ subject.p1_c4 }}</td>
-<td>{{ subject.p2_c4 }}</td>
-<td>{{ subject.p3_c4 }}</td>
-<td>{{ subject.p4_c4 }}</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-
-
-<div class="legend-box">
-
-<div class="legend-title">
-Bloques de competencias
-</div>
-
-<div class="legend-grid">
-
-<div class="legend-item">
-<strong>Comunicativa</strong>
-</div>
-
-<div class="legend-item">
-<strong>Pensamiento Lógico, Creativo y Crítico / Resolución de Problemas</strong>
-</div>
-
-<div class="legend-item">
-<strong>Científica y Tecnológica / Ambiental y de la Salud</strong>
-</div>
-
-<div class="legend-item">
-<strong>Ética y Ciudadana / Desarrollo Personal y Espiritual</strong>
-</div>
-
-</div>
-
-</div>
-
-
-
-<div class="comment-box">
-
-<div class="comment-title">
-Comentario / Observaciones
-</div>
-
-<div>
-{{ student.comentario_final }}
-</div>
-
-</div>
-
-
-
-<div class="signatures">
-
-<table class="signatures-table">
-
-<tr>
-
-<td>
-<div class="signature-line"></div>
-<div class="signature-name">{{ director_name }}</div>
-<div class="signature-role">Director</div>
-</td>
-
-<td>
-<div class="signature-line"></div>
-<div class="signature-name">{{ student.prof_titular }}</div>
-<div class="signature-role">Profesor Titular</div>
-</td>
-
-</tr>
-
-</table>
-
-</div>
-
-
-
-<div class="footer">
-
-Generado: {{ generated_at }}  
-· Sistema: {{ settings.app_name }}  
-· Desarrollado por Edison Clase
-
-</div>
-
-</div>
-</div>
-
+<script>
+    let currentZoom = 1.0;
+
+    function updateZoom() {
+        const container = document.getElementById("zoomContainer");
+        const label = document.getElementById("zoomLabel");
+        const slider = document.getElementById("zoomSlider");
+
+        container.style.transform = `scale(${currentZoom})`;
+        label.textContent = `${Math.round(currentZoom * 100)}%`;
+        if (slider) slider.value = Math.round(currentZoom * 100);
+    }
+
+    function setZoomFromSlider(value) {
+        currentZoom = Number(value) / 100;
+        updateZoom();
+    }
+
+    function changeZoom(step) {
+        currentZoom += step;
+        if (currentZoom < 0.6) currentZoom = 0.6;
+        if (currentZoom > 1.6) currentZoom = 1.6;
+        updateZoom();
+    }
+
+    function resetZoom() {
+        currentZoom = 1.0;
+        updateZoom();
+    }
+
+    function fitToScreen() {
+        const wrap = document.getElementById("pageWrap");
+        const page = document.querySelector(".page");
+        if (!wrap || !page) return;
+
+        const available = wrap.clientWidth - 24;
+        const scale = available / page.offsetWidth;
+
+        currentZoom = Math.max(0.6, Math.min(1.2, scale));
+        updateZoom();
+    }
+
+    window.addEventListener("load", fitToScreen);
+    window.addEventListener("resize", fitToScreen);
+</script>
 </body>
 </html>
