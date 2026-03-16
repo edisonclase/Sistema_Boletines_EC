@@ -63,12 +63,14 @@
             overflow: auto;
             padding: 8px 8px 4px 8px;
             width: 100%;
+            height: calc(100vh - 78px);
         }
 
         .zoom-container {
             width: max-content;
             min-width: 100%;
             transform-origin: top left;
+            position: relative;
         }
 
         .page {
@@ -76,9 +78,25 @@
             margin: 0;
         }
 
-        /* divisiones limpias para tabla académica */
+        /* ====== ajustes visuales del boletín completo segundo ciclo ====== */
+
+        .section-title {
+            margin: 8px 0 0 0;
+            padding: 6px 10px;
+            background: #E8F5E9;
+            border: 2px solid #66BB6A;
+            border-bottom: 0;
+            border-radius: 8px 8px 0 0;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* ====== tabla académica ====== */
+
         .academic-table {
-            border-collapse: collapse !important;
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
             border: 1px solid #66BB6A !important;
         }
 
@@ -87,6 +105,9 @@
             border: 0 !important;
             border-right: 1px solid #c7ddc9 !important;
             border-bottom: 1px solid #c7ddc9 !important;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
         }
 
         .academic-table th:last-child,
@@ -94,58 +115,86 @@
             border-right: 0 !important;
         }
 
+        .academic-table tbody tr:last-child td {
+            border-bottom: 0 !important;
+        }
+
         .academic-table thead th {
-            border-bottom: 1px solid #9cc79f !important;
+            background: #E8F5E9;
+            color: #111;
+            font-weight: 700;
         }
 
         .academic-table thead tr:first-child th {
             border-bottom: 1px solid #66BB6A !important;
+            padding: 4px 3px;
+            font-size: 6.3px;
+            line-height: 1.15;
+            height: 44px;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: anywhere;
         }
 
-        .academic-table tbody tr:last-child td {
-            border-bottom: 0 !important;
+        .academic-table thead tr:nth-child(2) th {
+            padding: 3px 0;
+            font-size: 6.6px;
+            line-height: 1;
+            height: 22px;
+            min-width: 28px;
+            border-bottom: 1px solid #9cc79f !important;
+        }
+
+        .academic-table tbody td {
+            height: 24px;
+            padding: 2px 2px;
+            font-size: 7.4px;
+            line-height: 1.05;
+        }
+
+        .academic-table tbody tr:nth-child(even) td {
+            background: #fcfffc;
+        }
+
+        .academic-table .subject-col {
+            width: 150px;
+            min-width: 150px;
+            text-align: left !important;
+            font-weight: 700;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
+            font-size: 7.5px;
+            line-height: 1.1;
+        }
+
+        .academic-table .tiny-col {
+            width: 28px;
+            min-width: 28px;
+        }
+
+        .academic-table .small-col {
+            width: 30px;
+            min-width: 30px;
+        }
+
+        .academic-table .situation-col {
+            width: 22px;
+            min-width: 22px;
         }
 
         .academic-table tbody td:nth-child(1) {
             border-right: 1px solid #66BB6A !important;
         }
 
-        .academic-table tbody td:nth-child(5) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(9) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(13) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(17) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(21) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(22) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(26) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(30) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(31) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
+        .academic-table tbody td:nth-child(5),
+        .academic-table tbody td:nth-child(9),
+        .academic-table tbody td:nth-child(13),
+        .academic-table tbody td:nth-child(17),
+        .academic-table tbody td:nth-child(21),
+        .academic-table tbody td:nth-child(22),
+        .academic-table tbody td:nth-child(26),
+        .academic-table tbody td:nth-child(30),
+        .academic-table tbody td:nth-child(31),
         .academic-table tbody td:nth-child(32) {
             border-right: 1px solid #66BB6A !important;
         }
@@ -161,8 +210,104 @@
             border-right: 1px solid #66BB6A !important;
         }
 
-        .academic-table tbody tr:nth-child(even) td {
+        .academic-table tbody td:not(.subject-col) {
+            width: 28px;
+        }
+
+        /* ====== tabla de módulos adaptada desde modules only ====== */
+
+        .modules-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 2px solid #66BB6A;
+            font-size: 10px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            overflow: hidden;
+        }
+
+        .modules-table th,
+        .modules-table td {
+            border: 1px solid #a5c9a7;
+            padding: 5px 4px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+
+        .modules-table th {
+            background: #E8F5E9;
+            font-weight: 700;
+            font-size: 8px;
+        }
+
+        .modules-table tbody td {
+            font-size: 8px;
+            line-height: 1.1;
+        }
+
+        .modules-table tbody tr:nth-child(even) td {
             background: #fcfffc;
+        }
+
+        .module-col {
+            width: 28%;
+            text-align: left !important;
+            font-weight: 700;
+            padding-left: 6px !important;
+        }
+
+        .ra-cell {
+            font-size: 8px;
+        }
+
+        .modules-table th:nth-child(2),
+        .modules-table th:nth-child(3),
+        .modules-table th:nth-child(4),
+        .modules-table th:nth-child(5),
+        .modules-table th:nth-child(6),
+        .modules-table th:nth-child(7),
+        .modules-table th:nth-child(8),
+        .modules-table th:nth-child(9),
+        .modules-table th:nth-child(10),
+        .modules-table th:nth-child(11),
+        .modules-table td:nth-child(2),
+        .modules-table td:nth-child(3),
+        .modules-table td:nth-child(4),
+        .modules-table td:nth-child(5),
+        .modules-table td:nth-child(6),
+        .modules-table td:nth-child(7),
+        .modules-table td:nth-child(8),
+        .modules-table td:nth-child(9),
+        .modules-table td:nth-child(10),
+        .modules-table td:nth-child(11) {
+            width: 5.2%;
+        }
+
+        .modules-table th:nth-child(12),
+        .modules-table td:nth-child(12) {
+            width: 6%;
+        }
+
+        .modules-table th:nth-child(13),
+        .modules-table td:nth-child(13) {
+            width: 8%;
+        }
+
+        /* ====== reduce espacio en blanco inferior ====== */
+
+        .signatures {
+            margin-bottom: 4px !important;
+        }
+
+        .footer {
+            margin-top: 2px !important;
+            padding-top: 4px !important;
+        }
+
+        .page-inner {
+            padding-bottom: 4px !important;
         }
 
         @media print {
@@ -173,12 +318,14 @@
             .page-wrap {
                 padding: 0;
                 overflow: visible;
+                height: auto;
             }
 
             .zoom-container {
                 transform: none !important;
-                width: 100%;
-                min-width: 100%;
+                width: 100% !important;
+                min-width: 100% !important;
+                height: auto !important;
             }
 
             .page {
@@ -432,19 +579,19 @@
                     <table class="modules-table">
                         <thead>
                             <tr>
-                                <th class="module-col">MÓDULO</th>
-                                <th class="tiny-col">RA1</th>
-                                <th class="tiny-col">RA2</th>
-                                <th class="tiny-col">RA3</th>
-                                <th class="tiny-col">RA4</th>
-                                <th class="tiny-col">RA5</th>
-                                <th class="tiny-col">RA6</th>
-                                <th class="tiny-col">RA7</th>
-                                <th class="tiny-col">RA8</th>
-                                <th class="tiny-col">RA9</th>
-                                <th class="tiny-col">RA10</th>
-                                <th class="small-col">CF</th>
-                                <th class="small-col">A</th>
+                                <th class="module-col">Módulo</th>
+                                <th>RA1</th>
+                                <th>RA2</th>
+                                <th>RA3</th>
+                                <th>RA4</th>
+                                <th>RA5</th>
+                                <th>RA6</th>
+                                <th>RA7</th>
+                                <th>RA8</th>
+                                <th>RA9</th>
+                                <th>RA10</th>
+                                <th>CF</th>
+                                <th>Situación</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -461,8 +608,18 @@
                                 <td class="ra-cell">{{ text_value(module.ra8 if module.ra8 is defined else none) }}</td>
                                 <td class="ra-cell">{{ text_value(module.ra9 if module.ra9 is defined else none) }}</td>
                                 <td class="ra-cell">{{ text_value(module.ra10 if module.ra10 is defined else none) }}</td>
-                                <td>{{ format_integer_grade(module.cf if module.cf is defined else none) }}</td>
-                                <td>{% if module.situ_a is defined and module.situ_a %}{{ module.situ_a }}{% else %}-{% endif %}</td>
+                                <td class="{% if module.cf is not none and (module.cf|string).strip() not in ['0', '0.0', '0.00'] and (module.cf|float) >= 1 and (module.cf|float) < 70 %}low-grade{% endif %}">
+                                    {{ format_integer_grade(module.cf if module.cf is defined else none) }}
+                                </td>
+                                <td>
+                                    {% if module.situ_a is defined and module.situ_a %}
+                                        {{ module.situ_a }}
+                                    {% elif module.situ_r is defined and module.situ_r %}
+                                        {{ module.situ_r }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -528,11 +685,21 @@
         let currentZoom = 1.0;
 
         function updateZoom() {
+            const wrap = document.getElementById("pageWrap");
             const container = document.getElementById("zoomContainer");
+            const page = document.querySelector(".page");
             const label = document.getElementById("zoomLabel");
             const slider = document.getElementById("zoomSlider");
 
+            if (!wrap || !container || !page) return;
+
+            const baseWidth = page.offsetWidth;
+            const baseHeight = page.offsetHeight;
+
             container.style.transform = `scale(${currentZoom})`;
+            container.style.width = `${baseWidth * currentZoom}px`;
+            container.style.height = `${baseHeight * currentZoom}px`;
+
             label.textContent = `${Math.round(currentZoom * 100)}%`;
             if (slider) slider.value = Math.round(currentZoom * 100);
         }
@@ -566,8 +733,15 @@
             updateZoom();
         }
 
-        window.addEventListener("load", fitToScreen);
-        window.addEventListener("resize", fitToScreen);
+        window.addEventListener("load", () => {
+            fitToScreen();
+            setTimeout(updateZoom, 50);
+        });
+
+        window.addEventListener("resize", () => {
+            fitToScreen();
+            setTimeout(updateZoom, 50);
+        });
     </script>
 </body>
 </html>

@@ -63,23 +63,68 @@
             overflow: auto;
             padding: 8px 8px 4px 8px;
             width: 100%;
+            height: calc(100vh - 78px);
         }
 
         .zoom-container {
             width: max-content;
             min-width: 100%;
             transform-origin: top left;
+            position: relative;
         }
 
         .page {
             width: 1760px;
             margin: 0;
+            padding: 4px !important;
         }
 
-        /* divisiones limpias para tabla académica */
+        .page-inner {
+            padding: 8px 10px 4px 10px !important;
+        }
+
+        .header {
+            margin-bottom: 6px !important;
+        }
+
+        .student-strip {
+            margin-bottom: 8px !important;
+        }
+
+        .section-title {
+            margin: 6px 0 0 0;
+            padding: 6px 10px;
+            background: #E8F5E9;
+            border: 2px solid #66BB6A;
+            border-bottom: 0;
+            border-radius: 8px 8px 0 0;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* ===== TABLA ACADÉMICA ===== */
+
         .academic-table {
+            width: 100%;
             border-collapse: collapse !important;
+            table-layout: fixed;
             border: 1px solid #66BB6A !important;
+        }
+
+        .academic-table col.subject-col-width {
+            width: 160px;
+        }
+
+        .academic-table col.grade-col-width {
+            width: 36px;
+        }
+
+        .academic-table col.small-grade-col-width {
+            width: 28px;
+        }
+
+        .academic-table col.situation-col-width {
+            width: 20px;
         }
 
         .academic-table th,
@@ -87,6 +132,9 @@
             border: 0 !important;
             border-right: 1px solid #c7ddc9 !important;
             border-bottom: 1px solid #c7ddc9 !important;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
         }
 
         .academic-table th:last-child,
@@ -95,57 +143,69 @@
         }
 
         .academic-table thead th {
-            border-bottom: 1px solid #9cc79f !important;
+            background: #E8F5E9;
+            color: #111;
+            font-weight: 700;
+            white-space: normal !important;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            text-wrap: balance;
         }
 
         .academic-table thead tr:first-child th {
             border-bottom: 1px solid #66BB6A !important;
+            padding: 4px 4px;
+            font-size: 5.8px !important;
+            line-height: 1.15 !important;
+            height: 38px !important;
+        }
+
+        .academic-table thead tr:nth-child(2) th {
+            border-bottom: 1px solid #9cc79f !important;
+            padding: 3px 0 !important;
+            font-size: 6.6px !important;
+            line-height: 1 !important;
+            height: 20px !important;
+        }
+
+        .academic-table tbody td {
+            height: 22px;
+            padding: 2px 2px !important;
+            font-size: 7.2px !important;
+            line-height: 1.05 !important;
+        }
+
+        .academic-table tbody tr:nth-child(even) td {
+            background: #fcfffc;
         }
 
         .academic-table tbody tr:last-child td {
             border-bottom: 0 !important;
         }
 
+        .academic-table .subject-col {
+            text-align: left !important;
+            font-weight: 700;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
+            font-size: 7.2px !important;
+            line-height: 1.1 !important;
+        }
+
+        /* separaciones verticales limpias */
         .academic-table tbody td:nth-child(1) {
             border-right: 1px solid #66BB6A !important;
         }
 
-        .academic-table tbody td:nth-child(5) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(9) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(13) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(17) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(21) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(22) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(26) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(30) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
-        .academic-table tbody td:nth-child(31) {
-            border-right: 1px solid #66BB6A !important;
-        }
-
+        .academic-table tbody td:nth-child(5),
+        .academic-table tbody td:nth-child(9),
+        .academic-table tbody td:nth-child(13),
+        .academic-table tbody td:nth-child(17),
+        .academic-table tbody td:nth-child(21),
+        .academic-table tbody td:nth-child(22),
+        .academic-table tbody td:nth-child(26),
+        .academic-table tbody td:nth-child(30),
+        .academic-table tbody td:nth-child(31),
         .academic-table tbody td:nth-child(32) {
             border-right: 1px solid #66BB6A !important;
         }
@@ -161,8 +221,18 @@
             border-right: 1px solid #66BB6A !important;
         }
 
-        .academic-table tbody tr:nth-child(even) td {
-            background: #fcfffc;
+        .signatures {
+            margin-top: 10px !important;
+            margin-bottom: 2px !important;
+        }
+
+        .footer {
+            margin-top: 2px !important;
+            padding-top: 4px !important;
+        }
+
+        .page-inner {
+            padding-bottom: 4px !important;
         }
 
         @media print {
@@ -173,16 +243,23 @@
             .page-wrap {
                 padding: 0;
                 overflow: visible;
+                height: auto;
             }
 
             .zoom-container {
                 transform: none !important;
-                width: 100%;
-                min-width: 100%;
+                width: 100% !important;
+                min-width: 100% !important;
+                height: auto !important;
             }
 
             .page {
                 width: 100%;
+                padding: 0 !important;
+            }
+
+            .page-inner {
+                padding: 6px 8px 2px 8px !important;
             }
         }
     </style>
@@ -316,6 +393,20 @@
                     <div class="section-title">Áreas académicas</div>
 
                     <table class="academic-table">
+                        <colgroup>
+                            <col class="subject-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="situation-col-width"><col class="situation-col-width">
+                        </colgroup>
                         <thead>
                             <tr>
                                 <th class="subject-col" rowspan="2">ASIG.</th>
@@ -530,11 +621,21 @@
         let currentZoom = 1.0;
 
         function updateZoom() {
+            const wrap = document.getElementById("pageWrap");
             const container = document.getElementById("zoomContainer");
+            const page = document.querySelector(".page");
             const label = document.getElementById("zoomLabel");
             const slider = document.getElementById("zoomSlider");
 
+            if (!wrap || !container || !page) return;
+
+            const baseWidth = page.offsetWidth;
+            const baseHeight = page.offsetHeight;
+
             container.style.transform = `scale(${currentZoom})`;
+            container.style.width = `${baseWidth * currentZoom}px`;
+            container.style.height = `${baseHeight * currentZoom}px`;
+
             label.textContent = `${Math.round(currentZoom * 100)}%`;
             if (slider) slider.value = Math.round(currentZoom * 100);
         }
@@ -568,8 +669,15 @@
             updateZoom();
         }
 
-        window.addEventListener("load", fitToScreen);
-        window.addEventListener("resize", fitToScreen);
+        window.addEventListener("load", () => {
+            fitToScreen();
+            setTimeout(updateZoom, 50);
+        });
+
+        window.addEventListener("resize", () => {
+            fitToScreen();
+            setTimeout(updateZoom, 50);
+        });
     </script>
 </body>
 </html>
