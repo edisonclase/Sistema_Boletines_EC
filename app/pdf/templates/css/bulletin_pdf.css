@@ -1,6 +1,6 @@
 @page {
     size: Letter landscape;
-    margin: 10mm;
+    margin: 7mm;
 }
 
 * {
@@ -37,17 +37,18 @@ body {
 }
 
 .page-inner {
-    border: 1.5px solid #66BB6A !important;
+    border: 2px solid #66BB6A !important;
     border-radius: 8px !important;
-    padding: 10px 12px 8px 12px !important;
+    padding: 8px 10px 6px 10px !important;
     min-height: 100%;
     background: #fff !important;
 }
 
 /* ===== PORTADA ===== */
 
-.cover-page .page-inner {
-    padding: 10px 12px !important;
+.cover-page-inner {
+    min-height: 100%;
+    padding: 8px 10px !important;
 }
 
 .cover-layout {
@@ -66,60 +67,20 @@ body {
 
 .cover-left {
     padding-right: 10px;
-    border-right: 1.5px solid #66BB6A;
+    border-right: 2px solid #66BB6A;
 }
 
 .cover-right {
     padding-left: 10px;
 }
 
-.cover-block {
-    margin-bottom: 10px;
-}
-
-.cover-title {
-    margin-bottom: 4px;
-    padding: 4px 8px;
-    background: #E8F5E9;
-    border: 1.5px solid #66BB6A;
-    border-radius: 8px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #111;
-    font-size: 9px;
-    letter-spacing: 0.2px;
-}
-
-.cover-text {
-    border: 1.5px solid #66BB6A;
-    border-radius: 8px;
-    background: #fcfffc;
-    padding: 8px 10px;
-    font-size: 8.2px;
-    line-height: 1.4;
-    color: #111;
-    text-align: justify;
-}
-
-.preserve-lines {
-    white-space: pre-line;
-}
-
-.cover-letterhead {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.cover-letterhead img {
-    width: 100%;
-    max-height: 120px;
-    object-fit: contain;
-    display: block;
+.cover-student-side,
+.cover-institution-side {
+    height: 100%;
 }
 
 .cover-student-card {
-    border: 1.5px solid #66BB6A;
+    border: 1.8px solid #66BB6A;
     border-radius: 8px;
     overflow: hidden;
     background: #fcfffc;
@@ -128,7 +89,7 @@ body {
 .cover-student-title {
     padding: 6px 8px;
     background: #E8F5E9;
-    border-bottom: 1.5px solid #66BB6A;
+    border-bottom: 1.8px solid #66BB6A;
     font-weight: 700;
     text-transform: uppercase;
     font-size: 9px;
@@ -143,8 +104,8 @@ body {
 .cover-student-table th,
 .cover-student-table td {
     border: 1px solid #94c79a;
-    padding: 6px 8px;
-    font-size: 8.4px;
+    padding: 7px 8px;
+    font-size: 8.6px;
     vertical-align: top;
 }
 
@@ -161,6 +122,59 @@ body {
     font-weight: 700;
 }
 
+.cover-letterhead {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.cover-letterhead img {
+    width: 100%;
+    max-height: 118px;
+    object-fit: contain;
+    display: block;
+}
+
+.cover-block {
+    margin-bottom: 8px;
+}
+
+.cover-block:last-child {
+    margin-bottom: 0;
+}
+
+.cover-block-main .cover-text {
+    min-height: 118px;
+}
+
+.cover-title {
+    margin-bottom: 3px;
+    padding: 4px 8px;
+    background: #E8F5E9;
+    border: 1.8px solid #66BB6A;
+    border-radius: 6px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #111;
+    font-size: 8.6px;
+    letter-spacing: 0.2px;
+}
+
+.cover-text {
+    border: 1.5px solid #94c79a;
+    border-radius: 6px;
+    background: #fcfffc;
+    padding: 7px 9px;
+    font-size: 7.9px;
+    line-height: 1.34;
+    color: #111;
+    text-align: justify;
+}
+
+.preserve-lines {
+    white-space: pre-line;
+}
+
 /* ===== PÁGINA 2 DEL BOLETÍN ===== */
 
 .bulletin-page .page-inner {
@@ -168,14 +182,20 @@ body {
     padding: 0 !important;
 }
 
+.bulletin-page-inner {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
 .pdf-student-line {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     padding: 5px 8px;
-    border: 1.5px solid #66BB6A;
-    border-radius: 8px;
+    border: 1.8px solid #66BB6A;
+    border-radius: 6px;
     background: #F8FFF8;
-    font-size: 8.4px;
-    line-height: 1.25;
+    font-size: 8.6px;
+    line-height: 1.2;
     font-weight: 700;
     color: #111;
 }
@@ -192,12 +212,84 @@ body {
     display: none !important;
 }
 
-.bulletin-page-inner > .section-title:first-of-type {
-    margin-top: 0 !important;
+/* Mantener identidad visual de los HTML */
+.bulletin-page .section-title {
+    margin-top: 4px !important;
+    margin-bottom: 0 !important;
+    border: 1.8px solid #66BB6A !important;
+    border-bottom: 0 !important;
+    border-radius: 6px 6px 0 0 !important;
+    background: #E8F5E9 !important;
+    padding: 4px 8px !important;
+    font-size: 8.2px !important;
 }
 
-/* ===== TABLAS ===== */
+.bulletin-page .academic-table,
+.bulletin-page .modules-table {
+    border: 1.8px solid #66BB6A !important;
+    margin-bottom: 5px !important;
+}
 
+.bulletin-page .academic-table thead th,
+.bulletin-page .modules-table thead th {
+    background: #E8F5E9 !important;
+}
+
+.bulletin-page .legend-box,
+.bulletin-page .comment-box,
+.bulletin-page .summary-box {
+    border: 1.5px solid #66BB6A !important;
+    border-radius: 6px !important;
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+    padding: 4px 7px !important;
+    background: #fcfffc !important;
+}
+
+.bulletin-page .legend-title,
+.bulletin-page .comment-title,
+.bulletin-page .summary-title {
+    font-size: 7.8px !important;
+    margin-bottom: 2px !important;
+}
+
+.bulletin-page .muted {
+    font-size: 6.9px !important;
+    line-height: 1.16 !important;
+}
+
+.bulletin-page .legend-grid {
+    gap: 2px 10px !important;
+    font-size: 6.8px !important;
+}
+
+/* Aprovechar mejor la altura disponible */
+.bulletin-page .signatures {
+    margin-top: auto !important;
+    margin-bottom: 4px !important;
+}
+
+.bulletin-page .signature-line {
+    margin-top: 14px !important;
+    width: 60% !important;
+}
+
+.bulletin-page .signature-name {
+    font-size: 7.8px !important;
+}
+
+.bulletin-page .signature-role {
+    font-size: 6.8px !important;
+}
+
+.bulletin-page .footer {
+    margin-top: 3px !important;
+    padding-top: 3px !important;
+    font-size: 6.2px !important;
+    border-top: 1px solid #b8d8ba !important;
+}
+
+/* Tablas */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -210,8 +302,12 @@ th {
     break-inside: avoid;
 }
 
-/* ===== IMPRESIÓN ===== */
+/* Quitar exceso visual de espacio muerto */
+.bulletin-page .comment-box {
+    min-height: 38px;
+}
 
+/* Impresión */
 @media print {
     html,
     body {
