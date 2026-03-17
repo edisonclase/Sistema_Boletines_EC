@@ -76,23 +76,10 @@
         .page {
             width: 1760px;
             margin: 0;
-            padding: 4px !important;
-        }
-
-        .page-inner {
-            padding: 8px 10px 4px 10px !important;
-        }
-
-        .header {
-            margin-bottom: 6px !important;
-        }
-
-        .student-strip {
-            margin-bottom: 8px !important;
         }
 
         .section-title {
-            margin: 6px 0 0 0;
+            margin: 8px 0 0 0;
             padding: 6px 10px;
             background: #E8F5E9;
             border: 2px solid #66BB6A;
@@ -102,11 +89,11 @@
             text-transform: uppercase;
         }
 
-        /* ===== TABLA ACADÉMICA ===== */
+        /* ====== tabla académica ====== */
 
         .academic-table {
             width: 100%;
-            border-collapse: collapse !important;
+            border-collapse: collapse;
             table-layout: fixed;
             border: 1px solid #66BB6A !important;
         }
@@ -142,6 +129,10 @@
             border-right: 0 !important;
         }
 
+        .academic-table tbody tr:last-child td {
+            border-bottom: 0 !important;
+        }
+
         .academic-table thead th {
             background: #E8F5E9;
             color: #111;
@@ -155,9 +146,9 @@
         .academic-table thead tr:first-child th {
             border-bottom: 1px solid #66BB6A !important;
             padding: 4px 4px;
-            font-size: 5.8px !important;
+            font-size: 5.9px !important;
             line-height: 1.15 !important;
-            height: 38px !important;
+            height: 40px !important;
         }
 
         .academic-table thead tr:nth-child(2) th {
@@ -179,10 +170,6 @@
             background: #fcfffc;
         }
 
-        .academic-table tbody tr:last-child td {
-            border-bottom: 0 !important;
-        }
-
         .academic-table .subject-col {
             text-align: left !important;
             font-weight: 700;
@@ -192,7 +179,17 @@
             line-height: 1.1 !important;
         }
 
-        /* separaciones verticales limpias */
+        .academic-table .small-col {
+            width: 28px;
+            min-width: 28px;
+        }
+
+        .academic-table .situation-col {
+            width: 20px;
+            min-width: 20px;
+        }
+
+        /* separaciones verticales limpias por bloque */
         .academic-table tbody td:nth-child(1) {
             border-right: 1px solid #66BB6A !important;
         }
@@ -221,18 +218,9 @@
             border-right: 1px solid #66BB6A !important;
         }
 
-        .signatures {
-            margin-top: 10px !important;
-            margin-bottom: 2px !important;
-        }
-
-        .footer {
-            margin-top: 2px !important;
-            padding-top: 4px !important;
-        }
-
-        .page-inner {
-            padding-bottom: 4px !important;
+        /* uniformidad de casillas numéricas */
+        .academic-table tbody td:not(.subject-col) {
+            width: 28px;
         }
 
         @media print {
@@ -255,11 +243,6 @@
 
             .page {
                 width: 100%;
-                padding: 0 !important;
-            }
-
-            .page-inner {
-                padding: 6px 8px 2px 8px !important;
             }
         }
     </style>

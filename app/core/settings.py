@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     url_primer_ciclo: str = ""
     url_segundo_ciclo: str = ""
 
-    pdf_engine: str = "weasyprint"
+    pdf_engine: str = "pdfkit"
     wkhtmltopdf_path: str = ""
 
     institution_name: str = "Politécnico Prof. José Mercedes Alvino - CEJOMA"
@@ -49,6 +49,15 @@ class Settings(BaseSettings):
     científicas, éticas y ciudadanas que permitan a nuestros estudiantes
     integrarse de manera responsable al mundo laboral y continuar su formación
     académica con éxito.
+    """
+    
+    institution_mission_text: str = """
+    Formar técnicos competentes, ciudadanos responsables y personas íntegras,
+    capaces de insertarse en el mundo laboral y contribuir al desarrollo de la sociedad.
+    """
+
+    institution_values_text: str = """
+    Responsabilidad, respeto, honestidad, disciplina, compromiso social y trabajo en equipo.
     """
 
     passing_grade: int = 70
