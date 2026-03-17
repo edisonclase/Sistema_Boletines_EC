@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     url_primer_ciclo: str = ""
     url_segundo_ciclo: str = ""
 
-    pdf_engine: str = "pdfkit"
+    pdf_engine: str = "wkhtmltopdf"
     wkhtmltopdf_path: str = ""
 
     institution_name: str = "Politécnico Prof. José Mercedes Alvino - CEJOMA"
@@ -21,8 +21,6 @@ class Settings(BaseSettings):
 
     institution_logo: str = "app/pdf/assets/logo.png"
     institution_minerd_logo: str = "app/pdf/assets/minerd.png"
-
-    # NUEVO
     institution_letterhead: str = "app/pdf/assets/membrete.png"
 
     institution_motto: str = ""
@@ -32,7 +30,6 @@ class Settings(BaseSettings):
     institution_academic_department: str = "Departamento de Registro y Control Académico"
     institution_director: str = "Zoilo A. Marrero Sirí"
 
-    # FILOSOFIA DEL CENTRO
     institution_philosophy_title: str = "Filosofía Institucional"
 
     institution_philosophy_text: str = """
@@ -50,10 +47,16 @@ class Settings(BaseSettings):
     integrarse de manera responsable al mundo laboral y continuar su formación
     académica con éxito.
     """
-    
+
     institution_mission_text: str = """
     Formar técnicos competentes, ciudadanos responsables y personas íntegras,
     capaces de insertarse en el mundo laboral y contribuir al desarrollo de la sociedad.
+    """
+
+    institution_vision_text: str = """
+    Ser una institución educativa técnico-profesional reconocida por la calidad
+    de su formación integral, la excelencia académica y su aporte al desarrollo
+    de la sociedad.
     """
 
     institution_values_text: str = """

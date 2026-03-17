@@ -1,0 +1,125 @@
+<div class="page cover-page">
+    <div class="page-inner cover-layout">
+        <div class="cover-left">
+            <div class="cover-block">
+                <div class="cover-title">
+                    {{ settings.institution_philosophy_title if settings.institution_philosophy_title else "Filosofía Institucional" }}
+                </div>
+                <div class="cover-text preserve-lines">
+                    {{ settings.institution_philosophy_text }}
+                </div>
+            </div>
+
+            {% if settings.institution_mission_text %}
+            <div class="cover-block">
+                <div class="cover-title">Misión</div>
+                <div class="cover-text preserve-lines">
+                    {{ settings.institution_mission_text }}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if settings.institution_vision_text %}
+            <div class="cover-block">
+                <div class="cover-title">Visión</div>
+                <div class="cover-text preserve-lines">
+                    {{ settings.institution_vision_text }}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if settings.institution_values_text %}
+            <div class="cover-block">
+                <div class="cover-title">Valores</div>
+                <div class="cover-text preserve-lines">
+                    {{ settings.institution_values_text }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="cover-right">
+            {% if letterhead_src %}
+            <div class="cover-letterhead">
+                <img src="{{ letterhead_src }}" alt="Membrete institucional">
+            </div>
+            {% endif %}
+
+            <div class="cover-student-card">
+                <div class="cover-student-title">Datos del estudiante</div>
+
+                <table class="cover-student-table">
+                    <tr>
+                        <th>Nombre completo</th>
+                        <td>{{ student.nombre_estudiante }}</td>
+                    </tr>
+                    <tr>
+                        <th>ID</th>
+                        <td>{{ student.id_estudiante }}</td>
+                    </tr>
+                    <tr>
+                        <th>Número</th>
+                        <td>
+                            {% if student.numero is defined and student.numero %}
+                                {{ student.numero }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Curso</th>
+                        <td>{{ student.curso if student.curso is defined and student.curso else "-" }}</td>
+                    </tr>
+
+                    {% if student.seccion is defined and student.seccion %}
+                    <tr>
+                        <th>Sección</th>
+                        <td>{{ student.seccion }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if student.tanda is defined and student.tanda %}
+                    <tr>
+                        <th>Tanda</th>
+                        <td>{{ student.tanda }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if student.jornada_extendida is defined and student.jornada_extendida %}
+                    <tr>
+                        <th>Jornada extendida</th>
+                        <td>{{ student.jornada_extendida }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if cycle is defined and cycle %}
+                    <tr>
+                        <th>Ciclo</th>
+                        <td>{{ cycle.replace("_", " ") }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if student.especialidad_tecnica is defined and student.especialidad_tecnica %}
+                    <tr>
+                        <th>Especialidad técnica</th>
+                        <td>{{ student.especialidad_tecnica }}</td>
+                    </tr>
+                    {% endif %}
+
+                    <tr>
+                        <th>Año escolar</th>
+                        <td>{{ school_year }}</td>
+                    </tr>
+
+                    {% if student.prof_titular is defined and student.prof_titular %}
+                    <tr>
+                        <th>Profesor titular</th>
+                        <td>{{ student.prof_titular }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

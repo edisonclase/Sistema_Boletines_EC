@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boletín PDF - Segundo Ciclo Solo Módulos</title>
+    <style>
+        {{ bulletin_base_css | safe }}
+    </style>
+    <style>
+        {{ bulletin_pdf_css | safe }}
+    </style>
+</head>
+<body style="--low-grade-color: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};">
+    {% include "bulletin_cover_pdf.html" %}
+
+    <div class="page bulletin-page">
+        <div class="page-inner bulletin-page-inner">
+            <div class="pdf-student-line">
+                <strong>Estudiante:</strong> {{ student.nombre_estudiante }}
+                <span class="pdf-sep">|</span>
+                <strong>No.:</strong>
+                {% if student.numero is defined and student.numero %}{{ student.numero }}{% else %}-{% endif %}
+                <span class="pdf-sep">|</span>
+                <strong>ID:</strong> {{ student.id_estudiante }}
+                <span class="pdf-sep">|</span>
+                <strong>Curso:</strong> {{ student.curso if student.curso is defined and student.curso else "-" }}
+            </div>
+
+            {{ page2_content | safe }}
+        </div>
+    </div>
+</body>
+</html>

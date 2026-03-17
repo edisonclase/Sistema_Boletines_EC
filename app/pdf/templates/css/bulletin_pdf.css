@@ -1,0 +1,230 @@
+@page {
+    size: Letter landscape;
+    margin: 10mm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
+    color: #111;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ===== PÁGINAS ===== */
+
+.page {
+    width: 100%;
+    min-height: 100%;
+    page-break-after: always;
+    break-after: page;
+    margin: 0;
+    background: #fff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+}
+
+.page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+}
+
+.page-inner {
+    border: 1.5px solid #66BB6A !important;
+    border-radius: 8px !important;
+    padding: 10px 12px 8px 12px !important;
+    min-height: 100%;
+    background: #fff !important;
+}
+
+/* ===== PORTADA ===== */
+
+.cover-page .page-inner {
+    padding: 10px 12px !important;
+}
+
+.cover-layout {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    min-height: 100%;
+}
+
+.cover-left,
+.cover-right {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+}
+
+.cover-left {
+    padding-right: 10px;
+    border-right: 1.5px solid #66BB6A;
+}
+
+.cover-right {
+    padding-left: 10px;
+}
+
+.cover-block {
+    margin-bottom: 10px;
+}
+
+.cover-title {
+    margin-bottom: 4px;
+    padding: 4px 8px;
+    background: #E8F5E9;
+    border: 1.5px solid #66BB6A;
+    border-radius: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #111;
+    font-size: 9px;
+    letter-spacing: 0.2px;
+}
+
+.cover-text {
+    border: 1.5px solid #66BB6A;
+    border-radius: 8px;
+    background: #fcfffc;
+    padding: 8px 10px;
+    font-size: 8.2px;
+    line-height: 1.4;
+    color: #111;
+    text-align: justify;
+}
+
+.preserve-lines {
+    white-space: pre-line;
+}
+
+.cover-letterhead {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.cover-letterhead img {
+    width: 100%;
+    max-height: 120px;
+    object-fit: contain;
+    display: block;
+}
+
+.cover-student-card {
+    border: 1.5px solid #66BB6A;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fcfffc;
+}
+
+.cover-student-title {
+    padding: 6px 8px;
+    background: #E8F5E9;
+    border-bottom: 1.5px solid #66BB6A;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 9px;
+    color: #111;
+}
+
+.cover-student-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cover-student-table th,
+.cover-student-table td {
+    border: 1px solid #94c79a;
+    padding: 6px 8px;
+    font-size: 8.4px;
+    vertical-align: top;
+}
+
+.cover-student-table th {
+    width: 34%;
+    text-align: left;
+    background: #F4FBF4;
+    font-weight: 700;
+    color: #111;
+}
+
+.cover-student-table td {
+    text-align: left;
+    font-weight: 700;
+}
+
+/* ===== PÁGINA 2 DEL BOLETÍN ===== */
+
+.bulletin-page .page-inner {
+    border: 0 !important;
+    padding: 0 !important;
+}
+
+.pdf-student-line {
+    margin-bottom: 8px;
+    padding: 5px 8px;
+    border: 1.5px solid #66BB6A;
+    border-radius: 8px;
+    background: #F8FFF8;
+    font-size: 8.4px;
+    line-height: 1.25;
+    font-weight: 700;
+    color: #111;
+}
+
+.pdf-sep {
+    display: inline-block;
+    margin: 0 6px;
+    color: #4b4b4b;
+}
+
+.bulletin-page .header,
+.bulletin-page .student-strip,
+.bulletin-page .screen-toolbar {
+    display: none !important;
+}
+
+.bulletin-page-inner > .section-title:first-of-type {
+    margin-top: 0 !important;
+}
+
+/* ===== TABLAS ===== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+tr,
+td,
+th {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+/* ===== IMPRESIÓN ===== */
+
+@media print {
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    .page {
+        margin: 0 !important;
+    }
+
+    .page-inner {
+        box-shadow: none !important;
+    }
+}

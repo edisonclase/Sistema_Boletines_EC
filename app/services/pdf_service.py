@@ -6,8 +6,6 @@ import zipfile
 from io import BytesIO
 from pathlib import Path
 
-from pypdf import PdfReader, PdfWriter
-
 from app.core.settings import settings
 from app.data.fetchers.google_sheets import load_primer_ciclo, load_segundo_ciclo
 from app.services.bulletin_service import (
@@ -16,8 +14,15 @@ from app.services.bulletin_service import (
     normalize_student_id,
 )
 from app.services.html_service import (
+    extract_page_inner_content,
+    render_first_cycle_blocks_pdf,
+    render_first_cycle_complete_pdf,
     render_second_cycle_blocks_and_modules,
+    render_second_cycle_blocks_and_modules_pdf,
+    render_second_cycle_full,
+    render_second_cycle_complete_pdf,
     render_second_cycle_modules_only,
+    render_second_cycle_modules_only_pdf,
     render_template,
 )
 from app.utils.helpers import safe_value
@@ -205,28 +210,35 @@ def _build_course_zip_filename(course: str, cycle: str, bulletin_type: str) -> s
     return f"{safe_cycle} - {safe_course} - completos.zip"
 
 
-def _build_bulletin_html(result: dict) -> str:
+def _build_preview_complete_html(result: dict) -> str:
     if result["cycle"] == "Primer_Ciclo":
         template_name = "first_cycle_bulletin.html"
         specific_css = _load_css_text("first_cycle_bulletin.css")
-    else:
-        template_name = "second_cycle_bulletin.html"
-        specific_css = _load_css_text("second_cycle_bulletin.css")
+        return render_template(
+            template_name,
+            {
+                "institution_name": settings.institution_name,
+                "student": result["student"],
+                "cycle": result["cycle"],
+                "logo_path": settings.institution_logo,
+                "school_year": settings.school_year,
+                "bulletin_specific_css": specific_css,
+            }
+        )
 
-    return render_template(
-        template_name,
+    return render_second_cycle_full(
+        result["student"],
         {
             "institution_name": settings.institution_name,
-            "student": result["student"],
             "cycle": result["cycle"],
             "logo_path": settings.institution_logo,
             "school_year": settings.school_year,
-            "bulletin_specific_css": specific_css,
+            "bulletin_specific_css": _load_css_text("second_cycle_bulletin.css"),
         }
     )
 
 
-def _build_blocks_bulletin_html(result: dict) -> str:
+def _build_preview_blocks_html(result: dict) -> str:
     if result["cycle"] != "Primer_Ciclo":
         raise ValueError("El boletín por bloques solo está disponible para Primer Ciclo.")
 
@@ -242,7 +254,7 @@ def _build_blocks_bulletin_html(result: dict) -> str:
     )
 
 
-def _build_modules_only_bulletin_html(result: dict) -> str:
+def _build_preview_modules_only_html(result: dict) -> str:
     if result["cycle"] != "Segundo_Ciclo":
         raise ValueError("El boletín solo de módulos solo está disponible para Segundo Ciclo.")
 
@@ -257,7 +269,7 @@ def _build_modules_only_bulletin_html(result: dict) -> str:
     )
 
 
-def _build_blocks_and_modules_bulletin_html(result: dict) -> str:
+def _build_preview_blocks_and_modules_html(result: dict) -> str:
     if result["cycle"] != "Segundo_Ciclo":
         raise ValueError("El boletín por bloques y módulos solo está disponible para Segundo Ciclo.")
 
@@ -269,6 +281,76 @@ def _build_blocks_and_modules_bulletin_html(result: dict) -> str:
             "logo_path": settings.institution_logo,
             "school_year": settings.school_year,
         }
+    )
+
+
+def _build_complete_pdf_html(result: dict) -> str:
+    preview_html = _build_preview_complete_html(result)
+    page2_content = extract_page_inner_content(preview_html)
+
+    extra_context = {
+        "institution_name": settings.institution_name,
+        "school_year": settings.school_year,
+    }
+
+    if result["cycle"] == "Primer_Ciclo":
+        return render_first_cycle_complete_pdf(
+            result["student"],
+            result["cycle"],
+            page2_content,
+            extra_context=extra_context,
+        )
+
+    return render_second_cycle_complete_pdf(
+        result["student"],
+        result["cycle"],
+        page2_content,
+        extra_context=extra_context,
+    )
+
+
+def _build_blocks_pdf_html(result: dict) -> str:
+    preview_html = _build_preview_blocks_html(result)
+    page2_content = extract_page_inner_content(preview_html)
+
+    return render_first_cycle_blocks_pdf(
+        result["student"],
+        result["cycle"],
+        page2_content,
+        extra_context={
+            "institution_name": settings.institution_name,
+            "school_year": settings.school_year,
+        },
+    )
+
+
+def _build_modules_only_pdf_html(result: dict) -> str:
+    preview_html = _build_preview_modules_only_html(result)
+    page2_content = extract_page_inner_content(preview_html)
+
+    return render_second_cycle_modules_only_pdf(
+        result["student"],
+        result["cycle"],
+        page2_content,
+        extra_context={
+            "institution_name": settings.institution_name,
+            "school_year": settings.school_year,
+        },
+    )
+
+
+def _build_blocks_and_modules_pdf_html(result: dict) -> str:
+    preview_html = _build_preview_blocks_and_modules_html(result)
+    page2_content = extract_page_inner_content(preview_html)
+
+    return render_second_cycle_blocks_and_modules_pdf(
+        result["student"],
+        result["cycle"],
+        page2_content,
+        extra_context={
+            "institution_name": settings.institution_name,
+            "school_year": settings.school_year,
+        },
     )
 
 
@@ -297,10 +379,10 @@ def _generate_bulletin_pdf_bytes_pdfkit(html: str) -> bytes:
         "enable-local-file-access": "",
         "page-size": "Letter",
         "orientation": "Landscape",
-        "margin-top": "0.4cm",
-        "margin-right": "0.4cm",
-        "margin-bottom": "0.4cm",
-        "margin-left": "0.4cm",
+        "margin-top": "0.6cm",
+        "margin-right": "0.6cm",
+        "margin-bottom": "0.6cm",
+        "margin-left": "0.6cm",
         "print-media-type": "",
         "disable-smart-shrinking": "",
     }
@@ -325,87 +407,37 @@ def _generate_bulletin_pdf_bytes(html: str) -> bytes:
         return _generate_bulletin_pdf_bytes_weasyprint(html)
 
     try:
-        return _generate_bulletin_pdf_bytes_weasyprint(html)
-    except Exception as exc:
-        print(f"[PDF] WeasyPrint falló, se intentará pdfkit. Error: {exc}", flush=True)
         return _generate_bulletin_pdf_bytes_pdfkit(html)
+    except Exception as exc:
+        print(f"[PDF] pdfkit falló, se intentará WeasyPrint. Error: {exc}", flush=True)
+        return _generate_bulletin_pdf_bytes_weasyprint(html)
 
 
-def _get_philosophy_pdf_path() -> Path:
-    philosophy_path = _resolve_path(settings.philosophy_pdf_path)
-
-    if not philosophy_path.exists():
-        raise FileNotFoundError(
-            f"No se encontró el PDF de filosofía en: {philosophy_path}"
-        )
-
-    return philosophy_path
-
-
-def _append_philosophy_pdf(bulletin_pdf_bytes: bytes) -> bytes:
-    philosophy_path = _get_philosophy_pdf_path()
-
-    writer = PdfWriter()
-
-    bulletin_reader = PdfReader(BytesIO(bulletin_pdf_bytes))
-    for page in bulletin_reader.pages:
-        writer.add_page(page)
-
-    philosophy_reader = PdfReader(str(philosophy_path))
-    for page in philosophy_reader.pages:
-        writer.add_page(page)
-
-    output = BytesIO()
-    writer.write(output)
-    output.seek(0)
-
-    return output.getvalue()
-
-
-def _should_append_philosophy(bulletin_type: str) -> bool:
-    if bulletin_type == "complete":
-        return False
-    return True
-
-
-def _generate_final_pdf_from_result(
-    result: dict,
-    bulletin_type: str,
-    append_philosophy: bool | None = None
-) -> tuple[bytes, str]:
-    if append_philosophy is None:
-        append_philosophy = _should_append_philosophy(bulletin_type)
-
+def _generate_final_pdf_from_result(result: dict, bulletin_type: str) -> tuple[bytes, str]:
     if bulletin_type == "blocks":
         if result["cycle"] != "Primer_Ciclo":
             raise ValueError("El boletín por bloques solo está disponible para estudiantes de Primer Ciclo.")
-        html = _build_blocks_bulletin_html(result)
+        html = _build_blocks_pdf_html(result)
         filename = _build_blocks_pdf_filename(result)
 
     elif bulletin_type == "modules_only":
         if result["cycle"] != "Segundo_Ciclo":
             raise ValueError("El boletín solo de módulos solo está disponible para estudiantes de Segundo Ciclo.")
-        html = _build_modules_only_bulletin_html(result)
+        html = _build_modules_only_pdf_html(result)
         filename = _build_modules_only_pdf_filename(result)
 
     elif bulletin_type == "blocks_and_modules":
         if result["cycle"] != "Segundo_Ciclo":
             raise ValueError("El boletín por bloques y módulos solo está disponible para estudiantes de Segundo Ciclo.")
-        html = _build_blocks_and_modules_bulletin_html(result)
+        html = _build_blocks_and_modules_pdf_html(result)
         filename = _build_blocks_and_modules_pdf_filename(result)
 
     else:
-        html = _build_bulletin_html(result)
+        html = _build_complete_pdf_html(result)
         filename = _build_pdf_filename(result)
 
-    bulletin_pdf_bytes = _generate_bulletin_pdf_bytes(html)
-
-    if append_philosophy:
-        final_pdf_bytes = _append_philosophy_pdf(bulletin_pdf_bytes)
-    else:
-        final_pdf_bytes = bulletin_pdf_bytes
-
-    return final_pdf_bytes, filename
+    pdf_bytes = _generate_bulletin_pdf_bytes(html)
+    return pdf_bytes, filename
 
 
 def _load_cycle_dataframe(cycle: str):
@@ -451,7 +483,7 @@ def generate_complete_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
     if not result.get("found"):
         raise ValueError(result.get("message", f"No se encontró el estudiante {student_id}"))
 
-    return _generate_final_pdf_from_result(result, "complete", append_philosophy=False)
+    return _generate_final_pdf_from_result(result, "complete")
 
 
 def generate_blocks_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
@@ -460,7 +492,7 @@ def generate_blocks_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
     if not result.get("found"):
         raise ValueError(result.get("message", f"No se encontró el estudiante {student_id}"))
 
-    return _generate_final_pdf_from_result(result, "blocks", append_philosophy=True)
+    return _generate_final_pdf_from_result(result, "blocks")
 
 
 def generate_modules_only_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
@@ -472,7 +504,7 @@ def generate_modules_only_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
     if result.get("cycle") != "Segundo_Ciclo":
         raise ValueError("El boletín solo de módulos solo está disponible para estudiantes de Segundo Ciclo.")
 
-    return _generate_final_pdf_from_result(result, "modules_only", append_philosophy=True)
+    return _generate_final_pdf_from_result(result, "modules_only")
 
 
 def generate_blocks_and_modules_bulletin_pdf(student_id: str) -> tuple[bytes, str]:
@@ -484,7 +516,7 @@ def generate_blocks_and_modules_bulletin_pdf(student_id: str) -> tuple[bytes, st
     if result.get("cycle") != "Segundo_Ciclo":
         raise ValueError("El boletín por bloques y módulos solo está disponible para estudiantes de Segundo Ciclo.")
 
-    return _generate_final_pdf_from_result(result, "blocks_and_modules", append_philosophy=True)
+    return _generate_final_pdf_from_result(result, "blocks_and_modules")
 
 
 def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = "complete") -> tuple[bytes, str]:
@@ -536,7 +568,6 @@ def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = 
 
     zip_buffer = BytesIO()
     used_names: set[str] = set()
-    append_philosophy = _should_append_philosophy(bulletin_type)
 
     with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
         for index, (_, row) in enumerate(course_students.iterrows(), start=1):
@@ -553,7 +584,6 @@ def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = 
             pdf_bytes, filename = _generate_final_pdf_from_result(
                 result,
                 bulletin_type,
-                append_philosophy=append_philosophy
             )
 
             final_name = _unique_filename(filename, used_names)

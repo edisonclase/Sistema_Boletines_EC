@@ -2,6 +2,7 @@
 
 import base64
 import mimetypes
+import re
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -121,6 +122,9 @@ def build_base_context(context: dict | None = None) -> dict:
     if "bulletin_specific_css" not in safe_context:
         safe_context["bulletin_specific_css"] = ""
 
+    if "bulletin_pdf_css" not in safe_context:
+        safe_context["bulletin_pdf_css"] = load_css_text("bulletin_pdf.css")
+
     return safe_context
 
 
@@ -152,3 +156,95 @@ def render_second_cycle_full(student: dict, extra_context: dict | None = None) -
         **(extra_context or {})
     }
     return render_template("second_cycle_bulletin.html", context)
+
+
+def extract_page_inner_content(rendered_html: str) -> str:
+    """
+    Extrae el contenido interno de <div class="page-inner">...</div>
+    de los HTML actuales de vista previa para reutilizarlo dentro de los
+    nuevos templates PDF sin toolbar ni script.
+    """
+    if not rendered_html:
+        return ""
+
+    html = re.sub(
+        r"<script\b[^>]*>.*?</script>",
+        "",
+        rendered_html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    match = re.search(
+        r'<div class="page-inner">\s*(.*)\s*</div>\s*</div>\s*</div>\s*</div>',
+        html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if match:
+        return match.group(1).strip()
+
+    body_match = re.search(
+        r"<body[^>]*>(.*)</body>",
+        html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if body_match:
+        body_html = body_match.group(1)
+        body_html = re.sub(
+            r'<div class="screen-toolbar".*?</div>\s*</div>',
+            "",
+            body_html,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        return body_html.strip()
+
+    return rendered_html
+
+
+def render_first_cycle_complete_pdf(student: dict, cycle: str, page2_content: str, extra_context: dict | None = None) -> str:
+    context = {
+        "student": student,
+        "cycle": cycle,
+        "page2_content": page2_content,
+        **(extra_context or {})
+    }
+    return render_template("first_cycle_complete_pdf.html", context)
+
+
+def render_first_cycle_blocks_pdf(student: dict, cycle: str, page2_content: str, extra_context: dict | None = None) -> str:
+    context = {
+        "student": student,
+        "cycle": cycle,
+        "page2_content": page2_content,
+        **(extra_context or {})
+    }
+    return render_template("first_cycle_blocks_pdf.html", context)
+
+
+def render_second_cycle_complete_pdf(student: dict, cycle: str, page2_content: str, extra_context: dict | None = None) -> str:
+    context = {
+        "student": student,
+        "cycle": cycle,
+        "page2_content": page2_content,
+        **(extra_context or {})
+    }
+    return render_template("second_cycle_complete_pdf.html", context)
+
+
+def render_second_cycle_modules_only_pdf(student: dict, cycle: str, page2_content: str, extra_context: dict | None = None) -> str:
+    context = {
+        "student": student,
+        "cycle": cycle,
+        "page2_content": page2_content,
+        **(extra_context or {})
+    }
+    return render_template("second_cycle_modules_only_pdf.html", context)
+
+
+def render_second_cycle_blocks_and_modules_pdf(student: dict, cycle: str, page2_content: str, extra_context: dict | None = None) -> str:
+    context = {
+        "student": student,
+        "cycle": cycle,
+        "page2_content": page2_content,
+        **(extra_context or {})
+    }
+    return render_template("second_cycle_blocks_and_modules_pdf.html", context)
