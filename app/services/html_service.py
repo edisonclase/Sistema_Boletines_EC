@@ -116,11 +116,16 @@ def build_base_context(context: dict | None = None) -> dict:
             _get_setting("institution_letterhead", "")
         )
 
+    # CSS WEB (se mantiene solo para vistas web)
     if "bulletin_base_css" not in safe_context:
         safe_context["bulletin_base_css"] = load_css_text("bulletin_base.css")
 
     if "bulletin_specific_css" not in safe_context:
         safe_context["bulletin_specific_css"] = ""
+
+    # CSS PDF
+    if "bulletin_cover_pdf_css" not in safe_context:
+        safe_context["bulletin_cover_pdf_css"] = load_css_text("bulletin_cover_pdf.css")
 
     if "bulletin_pdf_css" not in safe_context:
         safe_context["bulletin_pdf_css"] = load_css_text("bulletin_pdf.css")
@@ -160,9 +165,8 @@ def render_second_cycle_full(student: dict, extra_context: dict | None = None) -
 
 def extract_page_inner_content(rendered_html: str) -> str:
     """
-    Extrae el contenido interno de <div class="page-inner">...</div>
-    de los HTML actuales de vista previa para reutilizarlo dentro de los
-    nuevos templates PDF sin toolbar ni script.
+    Extrae el contenido útil de los HTML web para reutilizarlo dentro de los
+    templates PDF, sin toolbar ni scripts.
     """
     if not rendered_html:
         return ""
@@ -171,6 +175,14 @@ def extract_page_inner_content(rendered_html: str) -> str:
         r"<script\b[^>]*>.*?</script>",
         "",
         rendered_html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    # elimina toolbar
+    html = re.sub(
+        r'<div class="screen-toolbar".*?</div>',
+        "",
+        html,
         flags=re.IGNORECASE | re.DOTALL,
     )
 
@@ -188,14 +200,7 @@ def extract_page_inner_content(rendered_html: str) -> str:
         flags=re.IGNORECASE | re.DOTALL,
     )
     if body_match:
-        body_html = body_match.group(1)
-        body_html = re.sub(
-            r'<div class="screen-toolbar".*?</div>\s*</div>',
-            "",
-            body_html,
-            flags=re.IGNORECASE | re.DOTALL,
-        )
-        return body_html.strip()
+        return body_match.group(1).strip()
 
     return rendered_html
 

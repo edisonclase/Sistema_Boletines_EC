@@ -19,8 +19,8 @@ from app.services.html_service import (
     render_first_cycle_complete_pdf,
     render_second_cycle_blocks_and_modules,
     render_second_cycle_blocks_and_modules_pdf,
-    render_second_cycle_full,
     render_second_cycle_complete_pdf,
+    render_second_cycle_full,
     render_second_cycle_modules_only,
     render_second_cycle_modules_only_pdf,
     render_template,
@@ -39,16 +39,6 @@ def _resolve_path(path_str: str) -> Path:
     return _project_root() / path
 
 
-def _load_css_text(css_filename: str) -> str:
-    css_path = _project_root() / "app" / "pdf" / "templates" / "css" / css_filename
-
-    if not css_path.exists():
-        print(f"[PDF] No se encontró el CSS: {css_path}", flush=True)
-        return ""
-
-    return css_path.read_text(encoding="utf-8")
-
-
 def _sanitize_filename(value: str) -> str:
     if not value:
         return "sin_valor"
@@ -57,7 +47,6 @@ def _sanitize_filename(value: str) -> str:
     value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
     value = re.sub(r'[<>:"/\\\\|?*]', "", value)
     value = re.sub(r"\s+", " ", value).strip()
-
     return value or "sin_valor"
 
 
@@ -123,7 +112,6 @@ def _abbreviate_second_cycle_course(course: str) -> str:
     level_token = _extract_course_level_token(normalized)
 
     text_without_level = normalized
-
     if level_token:
         text_without_level = re.sub(
             r"^\s*" + re.escape(level_token) + r"\b",
@@ -212,17 +200,15 @@ def _build_course_zip_filename(course: str, cycle: str, bulletin_type: str) -> s
 
 def _build_preview_complete_html(result: dict) -> str:
     if result["cycle"] == "Primer_Ciclo":
-        template_name = "first_cycle_bulletin.html"
-        specific_css = _load_css_text("first_cycle_bulletin.css")
         return render_template(
-            template_name,
+            "first_cycle_bulletin.html",
             {
                 "institution_name": settings.institution_name,
                 "student": result["student"],
                 "cycle": result["cycle"],
                 "logo_path": settings.institution_logo,
                 "school_year": settings.school_year,
-                "bulletin_specific_css": specific_css,
+                "bulletin_specific_css": "",
             }
         )
 
@@ -233,23 +219,7 @@ def _build_preview_complete_html(result: dict) -> str:
             "cycle": result["cycle"],
             "logo_path": settings.institution_logo,
             "school_year": settings.school_year,
-            "bulletin_specific_css": _load_css_text("second_cycle_bulletin.css"),
-        }
-    )
-
-
-def _build_preview_blocks_html(result: dict) -> str:
-    if result["cycle"] != "Primer_Ciclo":
-        raise ValueError("El boletín por bloques solo está disponible para Primer Ciclo.")
-
-    return render_template(
-        "first_cycle_blocks.html",
-        {
-            "institution_name": settings.institution_name,
-            "student": result["student"],
-            "cycle": result["cycle"],
-            "logo_path": settings.institution_logo,
-            "school_year": settings.school_year,
+            "bulletin_specific_css": "",
         }
     )
 
@@ -284,9 +254,63 @@ def _build_preview_blocks_and_modules_html(result: dict) -> str:
     )
 
 
+def _cleanup_pdf_page2_content(page2_content: str, bulletin_type: str) -> str:
+    html = page2_content
+
+    html = re.sub(
+        r'<div class="student-strip">.*?</div>\s*',
+        '',
+        html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    html = re.sub(
+        r'<div class="screen-toolbar">.*?</div>\s*',
+        '',
+        html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    if 'class="legend-grid"' in html:
+        html = html.replace('class="legend-grid"', 'class="legend-grid blocks-legend-horizontal"', 1)
+
+    html = re.sub(
+        r'(<div class="section-title">)(.*?)(</div>)',
+        lambda m: f'{m.group(1)}{m.group(2).strip()}{m.group(3)}',
+        html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    if bulletin_type == "modules_only":
+        student_inline = """
+        <table class="student-inline-table">
+            <tbody>
+                <tr>
+                    <th>No.</th>
+                    <td>{{NUMERO}}</td>
+                    <th>ID Estudiante</th>
+                    <td>{{ID}}</td>
+                    <th>Curso</th>
+                    <td>{{CURSO}}</td>
+                </tr>
+                <tr>
+                    <th>Nombre</th>
+                    <td colspan="3">{{NOMBRE}}</td>
+                    <th>Profesor titular</th>
+                    <td>{{PROF}}</td>
+                </tr>
+            </tbody>
+        </table>
+        """
+        html = student_inline + html
+
+    return html
+
+
 def _build_complete_pdf_html(result: dict) -> str:
     preview_html = _build_preview_complete_html(result)
     page2_content = extract_page_inner_content(preview_html)
+    page2_content = _cleanup_pdf_page2_content(page2_content, "complete")
 
     extra_context = {
         "institution_name": settings.institution_name,
@@ -310,13 +334,13 @@ def _build_complete_pdf_html(result: dict) -> str:
 
 
 def _build_blocks_pdf_html(result: dict) -> str:
-    preview_html = _build_preview_blocks_html(result)
-    page2_content = extract_page_inner_content(preview_html)
+    if result["cycle"] != "Primer_Ciclo":
+        raise ValueError("El boletín por bloques solo está disponible para Primer Ciclo.")
 
     return render_first_cycle_blocks_pdf(
         result["student"],
         result["cycle"],
-        page2_content,
+        page2_content="",
         extra_context={
             "institution_name": settings.institution_name,
             "school_year": settings.school_year,
@@ -327,6 +351,17 @@ def _build_blocks_pdf_html(result: dict) -> str:
 def _build_modules_only_pdf_html(result: dict) -> str:
     preview_html = _build_preview_modules_only_html(result)
     page2_content = extract_page_inner_content(preview_html)
+    page2_content = _cleanup_pdf_page2_content(page2_content, "modules_only")
+
+    student = result["student"]
+    page2_content = (
+        page2_content
+        .replace("{{NUMERO}}", safe_value(student.get("numero")) or "-")
+        .replace("{{ID}}", safe_value(student.get("id_estudiante")) or "-")
+        .replace("{{CURSO}}", safe_value(student.get("curso")) or "-")
+        .replace("{{NOMBRE}}", safe_value(student.get("nombre_estudiante")) or "-")
+        .replace("{{PROF}}", safe_value(student.get("prof_titular")) or "-")
+    )
 
     return render_second_cycle_modules_only_pdf(
         result["student"],
@@ -342,6 +377,7 @@ def _build_modules_only_pdf_html(result: dict) -> str:
 def _build_blocks_and_modules_pdf_html(result: dict) -> str:
     preview_html = _build_preview_blocks_and_modules_html(result)
     page2_content = extract_page_inner_content(preview_html)
+    page2_content = _cleanup_pdf_page2_content(page2_content, "blocks_and_modules")
 
     return render_second_cycle_blocks_and_modules_pdf(
         result["student"],
@@ -352,15 +388,6 @@ def _build_blocks_and_modules_pdf_html(result: dict) -> str:
             "school_year": settings.school_year,
         },
     )
-
-
-def _generate_bulletin_pdf_bytes_weasyprint(html: str) -> bytes:
-    from weasyprint import HTML
-
-    return HTML(
-        string=html,
-        base_url=str(_project_root())
-    ).write_pdf()
 
 
 def _generate_bulletin_pdf_bytes_pdfkit(html: str) -> bytes:
@@ -387,14 +414,17 @@ def _generate_bulletin_pdf_bytes_pdfkit(html: str) -> bytes:
         "disable-smart-shrinking": "",
     }
 
-    pdf_bytes = pdfkit.from_string(
+    return pdfkit.from_string(
         html,
         False,
         options=options,
         configuration=config,
     )
 
-    return pdf_bytes
+
+def _generate_bulletin_pdf_bytes_weasyprint(html: str) -> bytes:
+    from weasyprint import HTML
+    return HTML(string=html, base_url=str(_project_root())).write_pdf()
 
 
 def _generate_bulletin_pdf_bytes(html: str) -> bytes:
@@ -469,11 +499,9 @@ def _unique_filename(filename: str, used_names: set[str]) -> str:
 
     while True:
         candidate = f"{stem} ({counter}).{suffix}"
-
         if candidate not in used_names:
             used_names.add(candidate)
             return candidate
-
         counter += 1
 
 
@@ -559,42 +587,18 @@ def generate_course_bulletins_zip(course: str, cycle: str, bulletin_type: str = 
         )
 
     total_students = len(course_students)
-
-    print(
-        f"[ZIP] Iniciando generación masiva | curso={course} | ciclo={normalized_cycle} | "
-        f"tipo={bulletin_type} | estudiantes={total_students}",
-        flush=True
-    )
-
     zip_buffer = BytesIO()
     used_names: set[str] = set()
 
     with zipfile.ZipFile(zip_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
-        for index, (_, row) in enumerate(course_students.iterrows(), start=1):
+        for _, row in course_students.iterrows():
             result = build_student_result_from_row(row, normalized_cycle)
-
-            student_name = safe_value(result["student"].get("nombre_estudiante"))
-            student_id = safe_value(result["student"].get("id_estudiante"))
-
-            print(
-                f"[ZIP] Generando {index}/{total_students} | {student_name} | ID={student_id}",
-                flush=True
-            )
-
-            pdf_bytes, filename = _generate_final_pdf_from_result(
-                result,
-                bulletin_type,
-            )
-
+            pdf_bytes, filename = _generate_final_pdf_from_result(result, bulletin_type)
             final_name = _unique_filename(filename, used_names)
             zip_file.writestr(final_name, pdf_bytes)
 
     zip_buffer.seek(0)
-
     zip_filename = _build_course_zip_filename(course, normalized_cycle, bulletin_type)
-
-    print(f"[ZIP] ZIP completado: {zip_filename}", flush=True)
-
     return zip_buffer.getvalue(), zip_filename
 
 

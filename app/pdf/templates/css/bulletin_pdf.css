@@ -1,326 +1,183 @@
-@page {
-    size: Letter landscape;
-    margin: 7mm;
-}
+/* =========================
+   TIPOGRAFÍA PROFESIONAL
+========================= */
 
-* {
-    box-sizing: border-box;
-}
-
-html,
 body {
-    margin: 0;
-    padding: 0;
-    background: #fff !important;
-    color: #111;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Times New Roman", Arial, sans-serif;
+    font-size: 12pt;
+    color: #000;
 }
 
-/* ===== PÁGINAS ===== */
+/* =========================
+   ESTRUCTURA GENERAL
+========================= */
 
-.page {
+.pdf-page {
     width: 100%;
-    min-height: 100%;
-    page-break-after: always;
-    break-after: page;
-    margin: 0;
-    background: #fff !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    padding: 0 !important;
-}
-
-.page:last-child {
-    page-break-after: auto;
-    break-after: auto;
-}
-
-.page-inner {
-    border: 2px solid #66BB6A !important;
-    border-radius: 8px !important;
-    padding: 8px 10px 6px 10px !important;
-    min-height: 100%;
-    background: #fff !important;
-}
-
-/* ===== PORTADA ===== */
-
-.cover-page-inner {
-    min-height: 100%;
-    padding: 8px 10px !important;
-}
-
-.cover-layout {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-    min-height: 100%;
-}
-
-.cover-left,
-.cover-right {
-    display: table-cell;
-    width: 50%;
-    vertical-align: top;
-}
-
-.cover-left {
-    padding-right: 10px;
-    border-right: 2px solid #66BB6A;
-}
-
-.cover-right {
-    padding-left: 10px;
-}
-
-.cover-student-side,
-.cover-institution-side {
     height: 100%;
 }
 
-.cover-student-card {
-    border: 1.8px solid #66BB6A;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #fcfffc;
+.pdf-frame {
+    border: 1.5px solid #000;
+    padding: 10px;
 }
 
-.cover-student-title {
-    padding: 6px 8px;
-    background: #E8F5E9;
-    border-bottom: 1.8px solid #66BB6A;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 9px;
-    color: #111;
+/* =========================
+   PORTADA
+========================= */
+
+.cover-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
+.cover-section-title {
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-size: 13pt;
+}
+
+.cover-text {
+    text-align: center;
+    margin-bottom: 12px;
+    font-size: 12pt;
+}
+
+.cover-values {
+    margin-left: 20px;
+    font-size: 12pt;
+}
+
+/* MEMBRETE */
+.cover-header {
+    text-align: center;
+    position: relative;
+}
+
+.cover-logo {
+    width: 60px;
+    position: absolute;
+    left: 0;
+}
+
+.cover-logo-right {
+    width: 60px;
+    position: absolute;
+    right: 0;
+}
+
+.cover-title {
+    font-weight: bold;
+    font-size: 14pt;
+}
+
+.cover-subtitle {
+    font-size: 11pt;
+}
+
+/* SEPARACIÓN GRANDE */
+.cover-separator {
+    height: 120px;
+}
+
+/* TABLA ESTUDIANTE */
 .cover-student-table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 12pt;
 }
 
 .cover-student-table th,
 .cover-student-table td {
-    border: 1px solid #94c79a;
-    padding: 7px 8px;
-    font-size: 8.6px;
-    vertical-align: top;
+    border: 1px solid #000;
+    padding: 6px;
 }
 
-.cover-student-table th {
-    width: 34%;
-    text-align: left;
-    background: #F4FBF4;
-    font-weight: 700;
-    color: #111;
+/* =========================
+   HOJA 2 (ENCABEZADO)
+========================= */
+
+.pdf-header {
+    margin-bottom: 10px;
 }
 
-.cover-student-table td {
-    text-align: left;
-    font-weight: 700;
-}
-
-.cover-letterhead {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 8px;
-}
-
-.cover-letterhead img {
-    width: 100%;
-    max-height: 118px;
-    object-fit: contain;
-    display: block;
-}
-
-.cover-block {
-    margin-bottom: 8px;
-}
-
-.cover-block:last-child {
-    margin-bottom: 0;
-}
-
-.cover-block-main .cover-text {
-    min-height: 118px;
-}
-
-.cover-title {
-    margin-bottom: 3px;
-    padding: 4px 8px;
-    background: #E8F5E9;
-    border: 1.8px solid #66BB6A;
-    border-radius: 6px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #111;
-    font-size: 8.6px;
-    letter-spacing: 0.2px;
-}
-
-.cover-text {
-    border: 1.5px solid #94c79a;
-    border-radius: 6px;
-    background: #fcfffc;
-    padding: 7px 9px;
-    font-size: 7.9px;
-    line-height: 1.34;
-    color: #111;
-    text-align: justify;
-}
-
-.preserve-lines {
-    white-space: pre-line;
-}
-
-/* ===== PÁGINA 2 DEL BOLETÍN ===== */
-
-.bulletin-page .page-inner {
-    border: 0 !important;
-    padding: 0 !important;
-}
-
-.bulletin-page-inner {
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-}
-
-.pdf-student-line {
-    margin-bottom: 6px;
-    padding: 5px 8px;
-    border: 1.8px solid #66BB6A;
-    border-radius: 6px;
-    background: #F8FFF8;
-    font-size: 8.6px;
-    line-height: 1.2;
-    font-weight: 700;
-    color: #111;
-}
-
-.pdf-sep {
-    display: inline-block;
-    margin: 0 6px;
-    color: #4b4b4b;
-}
-
-.bulletin-page .header,
-.bulletin-page .student-strip,
-.bulletin-page .screen-toolbar {
-    display: none !important;
-}
-
-/* Mantener identidad visual de los HTML */
-.bulletin-page .section-title {
-    margin-top: 4px !important;
-    margin-bottom: 0 !important;
-    border: 1.8px solid #66BB6A !important;
-    border-bottom: 0 !important;
-    border-radius: 6px 6px 0 0 !important;
-    background: #E8F5E9 !important;
-    padding: 4px 8px !important;
-    font-size: 8.2px !important;
-}
-
-.bulletin-page .academic-table,
-.bulletin-page .modules-table {
-    border: 1.8px solid #66BB6A !important;
-    margin-bottom: 5px !important;
-}
-
-.bulletin-page .academic-table thead th,
-.bulletin-page .modules-table thead th {
-    background: #E8F5E9 !important;
-}
-
-.bulletin-page .legend-box,
-.bulletin-page .comment-box,
-.bulletin-page .summary-box {
-    border: 1.5px solid #66BB6A !important;
-    border-radius: 6px !important;
-    margin-top: 4px !important;
-    margin-bottom: 4px !important;
-    padding: 4px 7px !important;
-    background: #fcfffc !important;
-}
-
-.bulletin-page .legend-title,
-.bulletin-page .comment-title,
-.bulletin-page .summary-title {
-    font-size: 7.8px !important;
-    margin-bottom: 2px !important;
-}
-
-.bulletin-page .muted {
-    font-size: 6.9px !important;
-    line-height: 1.16 !important;
-}
-
-.bulletin-page .legend-grid {
-    gap: 2px 10px !important;
-    font-size: 6.8px !important;
-}
-
-/* Aprovechar mejor la altura disponible */
-.bulletin-page .signatures {
-    margin-top: auto !important;
-    margin-bottom: 4px !important;
-}
-
-.bulletin-page .signature-line {
-    margin-top: 14px !important;
-    width: 60% !important;
-}
-
-.bulletin-page .signature-name {
-    font-size: 7.8px !important;
-}
-
-.bulletin-page .signature-role {
-    font-size: 6.8px !important;
-}
-
-.bulletin-page .footer {
-    margin-top: 3px !important;
-    padding-top: 3px !important;
-    font-size: 6.2px !important;
-    border-top: 1px solid #b8d8ba !important;
-}
-
-/* Tablas */
-table {
+.pdf-header-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-tr,
-td,
-th {
-    page-break-inside: avoid;
-    break-inside: avoid;
+.pdf-header-logo {
+    width: 50px; /* 🔥 CONTROL TOTAL */
 }
 
-/* Quitar exceso visual de espacio muerto */
-.bulletin-page .comment-box {
-    min-height: 38px;
+.pdf-title-cell {
+    text-align: center;
 }
 
-/* Impresión */
-@media print {
-    html,
-    body {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #fff !important;
-    }
+.pdf-institution-name {
+    font-weight: bold;
+    font-size: 13pt;
+}
 
-    .page {
-        margin: 0 !important;
-    }
+.pdf-report-title {
+    font-weight: bold;
+    font-size: 12pt;
+}
 
-    .page-inner {
-        box-shadow: none !important;
-    }
+/* =========================
+   TABLAS
+========================= */
+
+.academic-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11pt;
+}
+
+.academic-table th,
+.academic-table td {
+    border: 1px solid #000;
+    padding: 5px;
+    text-align: center;
+}
+
+.subject-col {
+    text-align: left;
+    padding-left: 5px;
+}
+
+/* =========================
+   LEYENDA
+========================= */
+
+.blocks-legend-horizontal {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 11pt;
+}
+
+/* =========================
+   FIRMAS
+========================= */
+
+.signature-line {
+    border-top: 1px solid #000;
+    width: 80%;
+    margin: auto;
+    margin-top: 20px;
+}
+
+.signature-name {
+    text-align: center;
+    font-weight: bold;
+    font-size: 11pt;
+}
+
+.signature-role {
+    text-align: center;
+    font-size: 10pt;
 }

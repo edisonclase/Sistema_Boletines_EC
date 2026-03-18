@@ -1,129 +1,83 @@
-<div class="page cover-page">
-    <div class="page-inner cover-page-inner">
-        <div class="cover-layout">
-            <!-- IZQUIERDA: DATOS DEL ESTUDIANTE -->
-            <div class="cover-left cover-student-side">
-                <div class="cover-student-card">
-                    <div class="cover-student-title">Datos del estudiante</div>
+<div class="pdf-page cover-page">
+    <div class="pdf-frame cover-frame">
 
-                    <table class="cover-student-table">
-                        <tr>
-                            <th>Nombre completo</th>
-                            <td>{{ student.nombre_estudiante }}</td>
-                        </tr>
-                        <tr>
-                            <th>ID</th>
-                            <td>{{ student.id_estudiante }}</td>
-                        </tr>
-                        <tr>
-                            <th>Número</th>
-                            <td>
-                                {% if student.numero is defined and student.numero %}
-                                    {{ student.numero }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Curso</th>
-                            <td>{{ student.curso if student.curso is defined and student.curso else "-" }}</td>
-                        </tr>
+        <div class="cover-grid">
 
-                        {% if student.seccion is defined and student.seccion %}
-                        <tr>
-                            <th>Sección</th>
-                            <td>{{ student.seccion }}</td>
-                        </tr>
-                        {% endif %}
+            <!-- IZQUIERDA: FILOSOFÍA -->
+            <div class="cover-left">
+                <div class="cover-section-title">FILOSOFÍA INSTITUCIONAL</div>
+                <div class="cover-text">{{ settings.filosofia }}</div>
 
-                        {% if student.tanda is defined and student.tanda %}
-                        <tr>
-                            <th>Tanda</th>
-                            <td>{{ student.tanda }}</td>
-                        </tr>
-                        {% endif %}
+                <div class="cover-section-title">MISIÓN</div>
+                <div class="cover-text">{{ settings.mision }}</div>
 
-                        {% if student.jornada_extendida is defined and student.jornada_extendida %}
-                        <tr>
-                            <th>Jornada extendida</th>
-                            <td>{{ student.jornada_extendida }}</td>
-                        </tr>
-                        {% endif %}
+                <div class="cover-section-title">VISIÓN</div>
+                <div class="cover-text">{{ settings.vision }}</div>
 
-                        {% if cycle is defined and cycle %}
-                        <tr>
-                            <th>Ciclo</th>
-                            <td>{{ cycle.replace("_", " ") }}</td>
-                        </tr>
-                        {% endif %}
-
-                        {% if student.especialidad_tecnica is defined and student.especialidad_tecnica %}
-                        <tr>
-                            <th>Especialidad técnica</th>
-                            <td>{{ student.especialidad_tecnica }}</td>
-                        </tr>
-                        {% endif %}
-
-                        <tr>
-                            <th>Año escolar</th>
-                            <td>{{ school_year }}</td>
-                        </tr>
-
-                        {% if student.prof_titular is defined and student.prof_titular %}
-                        <tr>
-                            <th>Profesor titular</th>
-                            <td>{{ student.prof_titular }}</td>
-                        </tr>
-                        {% endif %}
-                    </table>
-                </div>
+                <div class="cover-section-title">VALORES</div>
+                <ul class="cover-values">
+                    {% for v in settings.valores %}
+                        <li>{{ v }}</li>
+                    {% endfor %}
+                </ul>
             </div>
 
-            <!-- DERECHA: MEMBRETE + FILOSOFÍA -->
-            <div class="cover-right cover-institution-side">
-                {% if letterhead_src %}
-                <div class="cover-letterhead">
-                    <img src="{{ letterhead_src }}" alt="Membrete institucional">
-                </div>
-                {% endif %}
+            <!-- DERECHA: MEMBRETE + DATOS -->
+            <div class="cover-right">
 
-                <div class="cover-block cover-block-main">
+                <!-- MEMBRETE -->
+                <div class="cover-header">
+                    {% if institution_logo_src %}
+                        <img src="{{ institution_logo_src }}" class="cover-logo">
+                    {% endif %}
+
                     <div class="cover-title">
-                        {{ settings.institution_philosophy_title if settings.institution_philosophy_title else "Filosofía Institucional" }}
+                        {{ settings.institution_name }}
                     </div>
-                    <div class="cover-text preserve-lines">
-                        {{ settings.institution_philosophy_text }}
+
+                    <div class="cover-subtitle">
+                        {{ settings.institution_address }}
                     </div>
+
+                    <div class="cover-subtitle">
+                        {{ settings.institution_phone }}
+                    </div>
+
+                    {% if minerd_logo_src %}
+                        <img src="{{ minerd_logo_src }}" class="cover-logo-right">
+                    {% endif %}
                 </div>
 
-                {% if settings.institution_mission_text %}
-                <div class="cover-block">
-                    <div class="cover-title">Misión</div>
-                    <div class="cover-text preserve-lines">
-                        {{ settings.institution_mission_text }}
-                    </div>
-                </div>
-                {% endif %}
+                <!-- GRAN ESPACIO CONTROLADO -->
+                <div class="cover-separator"></div>
 
-                {% if settings.institution_vision_text %}
-                <div class="cover-block">
-                    <div class="cover-title">Visión</div>
-                    <div class="cover-text preserve-lines">
-                        {{ settings.institution_vision_text }}
-                    </div>
-                </div>
-                {% endif %}
+                <!-- DATOS ESTUDIANTE -->
+                <table class="cover-student-table">
+                    <tr>
+                        <th>Nombre</th>
+                        <td>{{ student.nombre_estudiante }}</td>
+                    </tr>
+                    <tr>
+                        <th>ID</th>
+                        <td>{{ student.id_estudiante }}</td>
+                    </tr>
+                    <tr>
+                        <th>Curso</th>
+                        <td>{{ student.curso }}</td>
+                    </tr>
+                    <tr>
+                        <th>Número</th>
+                        <td>{{ student.numero }}</td>
+                    </tr>
+                    <tr>
+                        <th>Ciclo</th>
+                        <td>{{ cycle }}</td>
+                    </tr>
+                </table>
 
-                {% if settings.institution_values_text %}
-                <div class="cover-block">
-                    <div class="cover-title">Valores</div>
-                    <div class="cover-text preserve-lines">
-                        {{ settings.institution_values_text }}
-                    </div>
-                </div>
-                {% endif %}
             </div>
+
         </div>
+
     </div>
 </div>

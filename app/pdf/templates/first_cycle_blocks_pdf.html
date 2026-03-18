@@ -2,31 +2,173 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Boletín PDF - Primer Ciclo Bloques</title>
-    <style>
-        {{ bulletin_base_css | safe }}
-    </style>
-    <style>
-        {{ bulletin_pdf_css | safe }}
-    </style>
+    <title>Boletín PDF - Primer Ciclo por Bloques</title>
+    <style>{{ bulletin_cover_pdf_css | safe }}</style>
+    <style>{{ bulletin_pdf_css | safe }}</style>
 </head>
-<body style="--low-grade-color: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};">
+<body>
     {% include "bulletin_cover_pdf.html" %}
 
-    <div class="page bulletin-page">
-        <div class="page-inner bulletin-page-inner">
-            <div class="pdf-student-line">
-                <strong>Estudiante:</strong> {{ student.nombre_estudiante }}
-                <span class="pdf-sep">|</span>
-                <strong>No.:</strong>
-                {% if student.numero is defined and student.numero %}{{ student.numero }}{% else %}-{% endif %}
-                <span class="pdf-sep">|</span>
-                <strong>ID:</strong> {{ student.id_estudiante }}
-                <span class="pdf-sep">|</span>
-                <strong>Curso:</strong> {{ student.curso if student.curso is defined and student.curso else "-" }}
+    <div class="pdf-page">
+        <div class="pdf-frame">
+            <div class="pdf-header">
+                <table class="pdf-header-table">
+                    <tr>
+                        <td class="pdf-logo-cell">
+                            {% if institution_logo_src %}
+                                <img src="{{ institution_logo_src }}" alt="Logo institucional" class="pdf-header-logo">
+                            {% endif %}
+                        </td>
+
+                        <td class="pdf-title-cell">
+                            <div class="pdf-institution-name">{{ settings.institution_name }}</div>
+
+                            {% if settings.institution_address %}
+                                <div class="pdf-institution-line">{{ settings.institution_address }}</div>
+                            {% endif %}
+
+                            {% if settings.institution_email or settings.institution_phone %}
+                                <div class="pdf-institution-line">
+                                    {% if settings.institution_email %}{{ settings.institution_email }}{% endif %}
+                                    {% if settings.institution_email and settings.institution_phone %} | {% endif %}
+                                    {% if settings.institution_phone %}{{ settings.institution_phone }}{% endif %}
+                                </div>
+                            {% endif %}
+
+                            <div class="pdf-department-title">{{ settings.institution_academic_department }}</div>
+                            <div class="pdf-report-title">REPORTE DE EVALUACIONES POR BLOQUES DE COMPETENCIAS</div>
+                        </td>
+
+                        <td class="pdf-logo-cell">
+                            {% if minerd_logo_src %}
+                                <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="pdf-header-logo">
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
             </div>
 
-            {{ page2_content | safe }}
+            <table class="student-inline-table">
+                <tbody>
+                    <tr>
+                        <th>Año escolar</th>
+                        <td>{{ school_year }}</td>
+                        <th>Nombre</th>
+                        <td>{{ student.nombre_estudiante }}</td>
+                        <th>Número</th>
+                        <td>{% if student.numero is defined and student.numero %}{{ student.numero }}{% else %}-{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th>ID</th>
+                        <td>{{ student.id_estudiante }}</td>
+                        <th>Curso</th>
+                        <td>{{ student.curso if student.curso is defined and student.curso else "-" }}</td>
+                        <th>Profesor titular</th>
+                        <td>{{ student.prof_titular if student.prof_titular is defined and student.prof_titular else "-" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section-title">Áreas académicas</div>
+
+            <table class="academic-table blocks-table">
+                <thead>
+                    <tr>
+                        <th class="subject-col" rowspan="2">ASIGNATURA</th>
+                        <th colspan="4">COMUNICATIVA</th>
+                        <th colspan="4">PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO / RESOLUCIÓN DE PROBLEMAS</th>
+                        <th colspan="4">CIENTÍFICA Y TECNOLÓGICA / AMBIENTAL Y DE LA SALUD</th>
+                        <th colspan="4">ÉTICA Y CIUDADANA / DESARROLLO PERSONAL Y ESPIRITUAL</th>
+                    </tr>
+                    <tr>
+                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject in student.subjects %}
+                    <tr>
+                        <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "-" }}</td>
+
+                        <td>{{ "%.1f"|format(subject.p1_c1|float) if subject.p1_c1 is defined and subject.p1_c1 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p2_c1|float) if subject.p2_c1 is defined and subject.p2_c1 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p3_c1|float) if subject.p3_c1 is defined and subject.p3_c1 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p4_c1|float) if subject.p4_c1 is defined and subject.p4_c1 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+
+                        <td>{{ "%.1f"|format(subject.p1_c2|float) if subject.p1_c2 is defined and subject.p1_c2 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p2_c2|float) if subject.p2_c2 is defined and subject.p2_c2 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p3_c2|float) if subject.p3_c2 is defined and subject.p3_c2 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p4_c2|float) if subject.p4_c2 is defined and subject.p4_c2 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+
+                        <td>{{ "%.1f"|format(subject.p1_c3|float) if subject.p1_c3 is defined and subject.p1_c3 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p2_c3|float) if subject.p2_c3 is defined and subject.p2_c3 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p3_c3|float) if subject.p3_c3 is defined and subject.p3_c3 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p4_c3|float) if subject.p4_c3 is defined and subject.p4_c3 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+
+                        <td>{{ "%.1f"|format(subject.p1_c4|float) if subject.p1_c4 is defined and subject.p1_c4 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p2_c4|float) if subject.p2_c4 is defined and subject.p2_c4 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p3_c4|float) if subject.p3_c4 is defined and subject.p3_c4 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                        <td>{{ "%.1f"|format(subject.p4_c4|float) if subject.p4_c4 is defined and subject.p4_c4 not in [None, "", 0, 0.0, "0", "0.0", "0.00"] else "" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="legend-box">
+                <div class="legend-title">Bloques de competencias</div>
+                <div class="blocks-legend-horizontal">
+                    <div><strong>Comunicativa</strong></div>
+                    <div><strong>Pensamiento Lógico, Creativo y Crítico / Resolución de Problemas</strong></div>
+                    <div><strong>Científica y Tecnológica / Ambiental y de la Salud</strong></div>
+                    <div><strong>Ética y Ciudadana / Desarrollo Personal y Espiritual</strong></div>
+                </div>
+            </div>
+
+            <div class="comment-box">
+                <div class="comment-title">Comentario del profesor titular</div>
+                <div class="muted">
+                    {% if student.comentario_final is defined and student.comentario_final %}
+                        {{ student.comentario_final }}
+                    {% else %}
+                        ________________________________________________
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-title">Observaciones generales</div>
+                <div class="muted">
+                    Este reporte presenta el desempeño del estudiante por bloques de competencias fundamentales en los cuatro períodos del año escolar.
+                </div>
+            </div>
+
+            <div class="signatures">
+                <table class="signatures-table">
+                    <tr>
+                        <td>
+                            <div class="signature-line"></div>
+                            <div class="signature-name">{{ director_name }}</div>
+                            <div class="signature-role">Director(a)</div>
+                        </td>
+                        <td>
+                            <div class="signature-line"></div>
+                            <div class="signature-name">{{ student.prof_titular if student.prof_titular is defined and student.prof_titular else "-" }}</div>
+                            <div class="signature-role">Profesor(a) Titular</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="footer">
+                <div class="footer-left">
+                    Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %}
+                </div>
+                <div class="footer-right">
+                    Desarrollado por {{ settings.bulletin_author }}
+                </div>
+            </div>
         </div>
     </div>
 </body>
