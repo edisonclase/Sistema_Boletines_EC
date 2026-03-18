@@ -1,83 +1,138 @@
-<div class="pdf-page cover-page">
-    <div class="pdf-frame cover-frame">
+<div class="pdf-cover-page">
+    <div class="pdf-cover-frame">
+        <div class="pdf-cover-columns">
 
-        <div class="cover-grid">
-
-            <!-- IZQUIERDA: FILOSOFÍA -->
-            <div class="cover-left">
-                <div class="cover-section-title">FILOSOFÍA INSTITUCIONAL</div>
-                <div class="cover-text">{{ settings.filosofia }}</div>
-
-                <div class="cover-section-title">MISIÓN</div>
-                <div class="cover-text">{{ settings.mision }}</div>
-
-                <div class="cover-section-title">VISIÓN</div>
-                <div class="cover-text">{{ settings.vision }}</div>
-
-                <div class="cover-section-title">VALORES</div>
-                <ul class="cover-values">
-                    {% for v in settings.valores %}
-                        <li>{{ v }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <!-- DERECHA: MEMBRETE + DATOS -->
-            <div class="cover-right">
-
-                <!-- MEMBRETE -->
-                <div class="cover-header">
-                    {% if institution_logo_src %}
-                        <img src="{{ institution_logo_src }}" class="cover-logo">
-                    {% endif %}
-
-                    <div class="cover-title">
-                        {{ settings.institution_name }}
+            <!-- IZQUIERDA: FILOSOFÍA / MISIÓN / VISIÓN / VALORES -->
+            <div class="pdf-cover-left">
+                <div class="pdf-cover-info-box pdf-cover-info-main">
+                    <div class="pdf-cover-box-title">
+                        {{ settings.institution_philosophy_title if settings.institution_philosophy_title else "FILOSOFÍA INSTITUCIONAL" }}
                     </div>
-
-                    <div class="cover-subtitle">
-                        {{ settings.institution_address }}
+                    <div class="pdf-cover-box-content cover-centered preserve-lines">
+                        {{ settings.institution_philosophy_text }}
                     </div>
-
-                    <div class="cover-subtitle">
-                        {{ settings.institution_phone }}
-                    </div>
-
-                    {% if minerd_logo_src %}
-                        <img src="{{ minerd_logo_src }}" class="cover-logo-right">
-                    {% endif %}
                 </div>
 
-                <!-- GRAN ESPACIO CONTROLADO -->
-                <div class="cover-separator"></div>
+                {% if settings.institution_mission_text %}
+                <div class="pdf-cover-info-box">
+                    <div class="pdf-cover-box-title">MISIÓN</div>
+                    <div class="pdf-cover-box-content cover-centered preserve-lines">
+                        {{ settings.institution_mission_text }}
+                    </div>
+                </div>
+                {% endif %}
 
-                <!-- DATOS ESTUDIANTE -->
-                <table class="cover-student-table">
-                    <tr>
-                        <th>Nombre</th>
-                        <td>{{ student.nombre_estudiante }}</td>
-                    </tr>
-                    <tr>
-                        <th>ID</th>
-                        <td>{{ student.id_estudiante }}</td>
-                    </tr>
-                    <tr>
-                        <th>Curso</th>
-                        <td>{{ student.curso }}</td>
-                    </tr>
-                    <tr>
-                        <th>Número</th>
-                        <td>{{ student.numero }}</td>
-                    </tr>
-                    <tr>
-                        <th>Ciclo</th>
-                        <td>{{ cycle }}</td>
-                    </tr>
-                </table>
+                {% if settings.institution_vision_text %}
+                <div class="pdf-cover-info-box">
+                    <div class="pdf-cover-box-title">VISIÓN</div>
+                    <div class="pdf-cover-box-content cover-centered preserve-lines">
+                        {{ settings.institution_vision_text }}
+                    </div>
+                </div>
+                {% endif %}
 
+                {% if settings.institution_values_text %}
+                <div class="pdf-cover-info-box">
+                    <div class="pdf-cover-box-title">VALORES</div>
+                    <div class="pdf-cover-box-content cover-centered cover-values-list">
+                        {% for item in settings.institution_values_text.split(",") %}
+                            {% set value_text = item.strip() %}
+                            {% if value_text %}
+                                <div class="cover-value-item">{{ value_text }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- DERECHA: MEMBRETE + DATOS DEL ESTUDIANTE (PORTADA AL DOBLAR) -->
+            <div class="pdf-cover-right">
+                {% if letterhead_src %}
+                <div class="pdf-cover-letterhead">
+                    <img src="{{ letterhead_src }}" alt="Membrete institucional">
+                </div>
+                {% endif %}
+
+                <div class="pdf-cover-student-separator"></div>
+
+                <div class="pdf-cover-student-box">
+                    <div class="pdf-cover-box-title">DATOS DEL ESTUDIANTE</div>
+
+                    <table class="pdf-cover-student-table">
+                        <tr>
+                            <th>Nombre completo</th>
+                            <td>{{ student.nombre_estudiante }}</td>
+                        </tr>
+                        <tr>
+                            <th>ID</th>
+                            <td>{{ student.id_estudiante }}</td>
+                        </tr>
+                        <tr>
+                            <th>Número</th>
+                            <td>
+                                {% if student.numero is defined and student.numero %}
+                                    {{ student.numero }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Curso</th>
+                            <td>{{ student.curso if student.curso is defined and student.curso else "-" }}</td>
+                        </tr>
+
+                        {% if student.seccion is defined and student.seccion %}
+                        <tr>
+                            <th>Sección</th>
+                            <td>{{ student.seccion }}</td>
+                        </tr>
+                        {% endif %}
+
+                        {% if student.tanda is defined and student.tanda %}
+                        <tr>
+                            <th>Tanda</th>
+                            <td>{{ student.tanda }}</td>
+                        </tr>
+                        {% endif %}
+
+                        {% if student.jornada_extendida is defined and student.jornada_extendida %}
+                        <tr>
+                            <th>Jornada extendida</th>
+                            <td>{{ student.jornada_extendida }}</td>
+                        </tr>
+                        {% endif %}
+
+                        {% if cycle is defined and cycle %}
+                        <tr>
+                            <th>Ciclo</th>
+                            <td>{{ cycle.replace("_", " ") }}</td>
+                        </tr>
+                        {% endif %}
+
+                        {% if student.especialidad_tecnica is defined and student.especialidad_tecnica %}
+                        <tr>
+                            <th>Especialidad técnica</th>
+                            <td>{{ student.especialidad_tecnica }}</td>
+                        </tr>
+                        {% endif %}
+
+                        <tr>
+                            <th>Año escolar</th>
+                            <td>{{ school_year }}</td>
+                        </tr>
+
+                        {% if student.prof_titular is defined and student.prof_titular %}
+                        <tr>
+                            <th>Profesor titular</th>
+                            <td>{{ student.prof_titular }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
             </div>
 
         </div>
-
     </div>
 </div>

@@ -1,107 +1,43 @@
-/* =========================
-   TIPOGRAFÍA PROFESIONAL
-========================= */
-
-body {
-    font-family: "Times New Roman", Arial, sans-serif;
-    font-size: 12pt;
-    color: #000;
+@page {
+    size: Letter landscape;
+    margin: 6mm;
 }
 
-/* =========================
-   ESTRUCTURA GENERAL
-========================= */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #111;
+    font-family: "Times New Roman", Arial, sans-serif;
+    font-size: 12pt;
+}
 
 .pdf-page {
     width: 100%;
-    height: 100%;
+    min-height: 100%;
+    background: #fff;
+    page-break-after: always;
+    break-after: page;
+}
+
+.pdf-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
 }
 
 .pdf-frame {
-    border: 1.5px solid #000;
-    padding: 10px;
-}
-
-/* =========================
-   PORTADA
-========================= */
-
-.cover-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.cover-section-title {
-    font-weight: bold;
-    text-align: center;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    font-size: 13pt;
-}
-
-.cover-text {
-    text-align: center;
-    margin-bottom: 12px;
-    font-size: 12pt;
-}
-
-.cover-values {
-    margin-left: 20px;
-    font-size: 12pt;
-}
-
-/* MEMBRETE */
-.cover-header {
-    text-align: center;
-    position: relative;
-}
-
-.cover-logo {
-    width: 60px;
-    position: absolute;
-    left: 0;
-}
-
-.cover-logo-right {
-    width: 60px;
-    position: absolute;
-    right: 0;
-}
-
-.cover-title {
-    font-weight: bold;
-    font-size: 14pt;
-}
-
-.cover-subtitle {
-    font-size: 11pt;
-}
-
-/* SEPARACIÓN GRANDE */
-.cover-separator {
-    height: 120px;
-}
-
-/* TABLA ESTUDIANTE */
-.cover-student-table {
     width: 100%;
-    border-collapse: collapse;
-    font-size: 12pt;
+    min-height: 180mm;
+    border: 1.4px solid #66BB6A;
+    border-radius: 6px;
+    padding: 6px 8px 5px 8px;
+    box-sizing: border-box;
 }
 
-.cover-student-table th,
-.cover-student-table td {
-    border: 1px solid #000;
-    padding: 6px;
-}
-
-/* =========================
-   HOJA 2 (ENCABEZADO)
-========================= */
-
+/* Encabezado institucional hoja 2 */
 .pdf-header {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .pdf-header-table {
@@ -109,75 +45,257 @@ body {
     border-collapse: collapse;
 }
 
+.pdf-header-table td {
+    vertical-align: middle;
+}
+
+.pdf-logo-cell {
+    width: 58px;
+    text-align: center;
+}
+
 .pdf-header-logo {
-    width: 50px; /* 🔥 CONTROL TOTAL */
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: inline-block;
 }
 
 .pdf-title-cell {
     text-align: center;
+    padding: 0 6px;
 }
 
 .pdf-institution-name {
-    font-weight: bold;
-    font-size: 13pt;
+    font-weight: 700;
+    font-size: 15pt;
+    line-height: 1.05;
+    text-transform: uppercase;
+}
+
+.pdf-institution-line {
+    font-size: 9.4pt;
+    line-height: 1.1;
+}
+
+.pdf-department-title {
+    margin-top: 2px;
+    font-size: 10pt;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .pdf-report-title {
-    font-weight: bold;
-    font-size: 12pt;
+    margin-top: 2px;
+    font-size: 10.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
-/* =========================
-   TABLAS
-========================= */
-
-.academic-table {
+/* Tabla de datos del estudiante hoja 2 */
+.student-inline-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 11pt;
+    border: 1.2px solid #66BB6A;
+    margin-bottom: 7px;
+}
+
+.student-inline-table th,
+.student-inline-table td {
+    border: 1px solid #94c79a;
+    padding: 5px 7px;
+    font-size: 10.4pt;
+    line-height: 1.1;
+}
+
+.student-inline-table th {
+    text-align: left;
+    background: #F4FBF4;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.student-inline-table td {
+    text-align: center;
+    font-weight: 700;
+}
+
+/* Títulos de sección */
+.section-title {
+    margin: 7px 0 0 0;
+    padding: 5px 8px;
+    background: #E8F5E9;
+    border: 1.2px solid #66BB6A;
+    border-bottom: 0;
+    border-radius: 5px 5px 0 0;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #111;
+    font-size: 10pt;
+    line-height: 1.05;
+    text-align: center;
+}
+
+/* Tablas */
+.academic-table,
+.modules-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 1.2px solid #66BB6A;
+    margin-top: 0;
+    margin-bottom: 6px;
 }
 
 .academic-table th,
-.academic-table td {
-    border: 1px solid #000;
-    padding: 5px;
+.academic-table td,
+.modules-table th,
+.modules-table td {
+    border: 1px solid #94c79a;
+    padding: 4px 3px;
+    text-align: center;
+    vertical-align: middle;
+    color: #111;
+    line-height: 1.12;
+}
+
+.academic-table thead th,
+.modules-table thead th {
+    background: #E8F5E9;
+    font-weight: 700;
+}
+
+.academic-table thead tr:first-child th {
+    font-size: 9pt;
+    height: 27px;
+    padding: 4px 2px;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.academic-table thead tr:nth-child(2) th {
+    font-size: 8.8pt;
+    height: 20px;
+    padding: 3px 2px;
+}
+
+.academic-table tbody td {
+    font-size: 10.2pt;
+    height: 23px;
+}
+
+.academic-table .subject-col {
+    text-align: left;
+    font-weight: 700;
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: 10.2pt;
+    line-height: 1.12;
+}
+
+.modules-table thead th {
+    font-size: 8.8pt;
+    padding: 4px 2px;
     text-align: center;
 }
 
-.subject-col {
+.modules-table tbody td {
+    font-size: 10pt;
+    height: 22px;
+}
+
+.module-col {
+    text-align: left !important;
+    font-weight: 700;
+    padding-left: 5px !important;
+}
+
+/* Resaltado amarillo para notas menores de 70 */
+.low-grade {
+    background: #FFF59D !important;
+    font-weight: 700 !important;
+}
+
+/* Comentario / observaciones */
+.legend-box,
+.comment-box,
+.summary-box {
+    border: 1.2px solid #66BB6A;
+    border-radius: 5px;
+    background: #fcfffc;
+    margin-top: 4px;
+    margin-bottom: 5px;
+    padding: 5px 7px;
+}
+
+.comment-title,
+.summary-title {
+    font-weight: 700;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    color: #111;
+    font-size: 9.4pt;
+    line-height: 1.05;
     text-align: left;
-    padding-left: 5px;
 }
 
-/* =========================
-   LEYENDA
-========================= */
+.muted {
+    color: #333;
+    font-size: 9.4pt;
+    line-height: 1.15;
+}
 
-.blocks-legend-horizontal {
-    display: flex;
-    justify-content: space-between;
+/* Firmas */
+.signatures {
     margin-top: 10px;
-    font-size: 11pt;
+    margin-bottom: 4px;
 }
 
-/* =========================
-   FIRMAS
-========================= */
+.signatures-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.signatures-table td {
+    width: 50%;
+    padding: 0 24px;
+    text-align: center;
+    vertical-align: top;
+}
 
 .signature-line {
     border-top: 1px solid #000;
-    width: 80%;
-    margin: auto;
-    margin-top: 20px;
+    margin: 12px auto 4px auto;
+    width: 64%;
 }
 
 .signature-name {
-    text-align: center;
-    font-weight: bold;
-    font-size: 11pt;
+    font-size: 10.4pt;
+    font-weight: 700;
 }
 
 .signature-role {
-    text-align: center;
-    font-size: 10pt;
+    font-size: 9pt;
+}
+
+/* Footer */
+.footer {
+    margin-top: 4px;
+    padding-top: 3px;
+    border-top: 1px solid #b8d8ba;
+    font-size: 8.4pt;
+    color: #444;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.footer-left,
+.footer-right {
+    width: 50%;
+}
+
+.footer-right {
+    text-align: right;
 }
