@@ -1,147 +1,138 @@
-@page {
-    size: Letter landscape;
-    margin: 6mm;
-}
+<div class="pdf-cover-page">
+    <div class="pdf-cover-frame">
+        <div class="pdf-cover-columns">
 
-.pdf-cover-page {
-    width: 100%;
-    min-height: 100%;
-    page-break-after: always;
-    break-after: page;
-    background: #fff;
-}
+            <!-- IZQUIERDA: FILOSOFÍA / MISIÓN / VISIÓN / VALORES -->
+            <div class="pdf-cover-left">
+                <div class="pdf-cover-info-box pdf-cover-info-main">
+                    <div class="pdf-cover-box-title">
+                        {{ settings.institution_philosophy_title if settings.institution_philosophy_title else "FILOSOFÍA INSTITUCIONAL" }}
+                    </div>
+                    <div class="pdf-cover-box-content cover-centered preserve-lines">
+                        {{ settings.institution_philosophy_text }}
+                    </div>
+                </div>
 
-.pdf-cover-frame {
-    width: 100%;
-    min-height: 180mm;
-    border: 1.4px solid #66BB6A;
-    border-radius: 6px;
-    padding: 10px 10px 8px 10px;
-    box-sizing: border-box;
-}
+                {% if settings.institution_mission_text %}
+                <div class="pdf-cover-info-box">
+                    <div class="pdf-cover-box-title">MISIÓN</div>
+                    <div class="pdf-cover-box-content cover-centered preserve-lines">
+                        {{ settings.institution_mission_text }}
+                    </div>
+                </div>
+                {% endif %}
 
-.pdf-cover-columns {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-    min-height: 166mm;
-}
+                {% if settings.institution_vision_text %}
+                <div class="pdf-cover-info-box">
+                    <div class="pdf-cover-box-title">VISIÓN</div>
+                    <div class="pdf-cover-box-content cover-centered preserve-lines">
+                        {{ settings.institution_vision_text }}
+                    </div>
+                </div>
+                {% endif %}
 
-.pdf-cover-left,
-.pdf-cover-right {
-    display: table-cell;
-    width: 50%;
-    vertical-align: top;
-}
+                {% if settings.institution_values_text %}
+                <div class="pdf-cover-info-box">
+                    <div class="pdf-cover-box-title">VALORES</div>
+                    <div class="pdf-cover-box-content cover-centered cover-values-list">
+                        {% for item in settings.institution_values_text.split(",") %}
+                            {% set value_text = item.strip() %}
+                            {% if value_text %}
+                                <div class="cover-value-item">{{ value_text }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
 
-.pdf-cover-left {
-    padding-right: 8px;
-    border-right: 1.4px solid #66BB6A;
-}
+            <!-- DERECHA: MEMBRETE + DATOS DEL ESTUDIANTE (PORTADA AL DOBLAR) -->
+            <div class="pdf-cover-right">
+                {% if letterhead_src %}
+                <div class="pdf-cover-letterhead">
+                    <img src="{{ letterhead_src }}" alt="Membrete institucional">
+                </div>
+                {% endif %}
 
-.pdf-cover-right {
-    padding-left: 8px;
-}
+                <div class="pdf-cover-student-separator"></div>
 
-.pdf-cover-letterhead {
-    width: 100%;
-    margin-bottom: 12px;
-    text-align: center;
-}
+                <div class="pdf-cover-student-box">
+                    <div class="pdf-cover-box-title">DATOS DEL ESTUDIANTE</div>
 
-.pdf-cover-letterhead img {
-    width: 100%;
-    max-height: 38mm;
-    object-fit: contain;
-    display: block;
-}
+                    <table class="pdf-cover-student-table">
+                        <tr>
+                            <th>Nombre completo</th>
+                            <td>{{ student.nombre_estudiante }}</td>
+                        </tr>
+                        <tr>
+                            <th>ID</th>
+                            <td>{{ student.id_estudiante }}</td>
+                        </tr>
+                        <tr>
+                            <th>Número</th>
+                            <td>
+                                {% if student.numero is defined and student.numero %}
+                                    {{ student.numero }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Curso</th>
+                            <td>{{ student.curso if student.curso is defined and student.curso else "-" }}</td>
+                        </tr>
 
-.pdf-cover-student-box,
-.pdf-cover-info-box {
-    border: 1.2px solid #66BB6A;
-    border-radius: 5px;
-    overflow: hidden;
-    background: #fcfffc;
-}
+                        {% if student.seccion is defined and student.seccion %}
+                        <tr>
+                            <th>Sección</th>
+                            <td>{{ student.seccion }}</td>
+                        </tr>
+                        {% endif %}
 
-.pdf-cover-student-box {
-    width: 92%;
-    margin: 0 auto;
-}
+                        {% if student.tanda is defined and student.tanda %}
+                        <tr>
+                            <th>Tanda</th>
+                            <td>{{ student.tanda }}</td>
+                        </tr>
+                        {% endif %}
 
-.pdf-cover-box-title {
-    padding: 4px 8px;
-    background: #E8F5E9;
-    border-bottom: 1.2px solid #66BB6A;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 8.2px;
-    text-align: center;
-    color: #111;
-}
+                        {% if student.jornada_extendida is defined and student.jornada_extendida %}
+                        <tr>
+                            <th>Jornada extendida</th>
+                            <td>{{ student.jornada_extendida }}</td>
+                        </tr>
+                        {% endif %}
 
-.pdf-cover-student-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+                        {% if cycle is defined and cycle %}
+                        <tr>
+                            <th>Ciclo</th>
+                            <td>{{ cycle.replace("_", " ") }}</td>
+                        </tr>
+                        {% endif %}
 
-.pdf-cover-student-table th,
-.pdf-cover-student-table td {
-    border: 1px solid #94c79a;
-    padding: 6px 7px;
-    font-size: 8px;
-    line-height: 1.15;
-    vertical-align: top;
-}
+                        {% if student.especialidad_tecnica is defined and student.especialidad_tecnica %}
+                        <tr>
+                            <th>Especialidad técnica</th>
+                            <td>{{ student.especialidad_tecnica }}</td>
+                        </tr>
+                        {% endif %}
 
-.pdf-cover-student-table th {
-    width: 36%;
-    text-align: left;
-    background: #F4FBF4;
-    font-weight: 700;
-}
+                        <tr>
+                            <th>Año escolar</th>
+                            <td>{{ school_year }}</td>
+                        </tr>
 
-.pdf-cover-student-table td {
-    text-align: left;
-    font-weight: 700;
-}
+                        {% if student.prof_titular is defined and student.prof_titular %}
+                        <tr>
+                            <th>Profesor titular</th>
+                            <td>{{ student.prof_titular }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
 
-.pdf-cover-right .pdf-cover-info-box {
-    margin-bottom: 8px;
-}
-
-.pdf-cover-right .pdf-cover-info-box:last-child {
-    margin-bottom: 0;
-}
-
-.pdf-cover-info-main .pdf-cover-box-content {
-    min-height: 36mm;
-}
-
-.pdf-cover-box-content {
-    padding: 7px 9px;
-    font-size: 7.8px;
-    line-height: 1.28;
-    background: #fcfffc;
-}
-
-.cover-centered {
-    text-align: center;
-}
-
-.preserve-lines {
-    white-space: pre-line;
-}
-
-.cover-values-list {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.cover-value-item {
-    display: block;
-    text-align: center;
-    font-size: 7.8px;
-    line-height: 1.18;
-}
+        </div>
+    </div>
+</div>
