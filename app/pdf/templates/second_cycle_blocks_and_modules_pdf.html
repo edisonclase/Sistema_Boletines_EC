@@ -11,7 +11,300 @@
 
     <div class="pdf-page">
         <div class="pdf-frame">
-            {{ page2_content | safe }}
+            <div class="pdf-header">
+                <table class="pdf-header-table">
+                    <tr>
+                        <td class="pdf-logo-cell">
+                            {% if institution_logo_src %}
+                                <img src="{{ institution_logo_src }}" alt="Logo institucional" class="pdf-header-logo">
+                            {% endif %}
+                        </td>
+
+                        <td class="pdf-title-cell">
+                            <div class="pdf-institution-name">{{ settings.institution_name }}</div>
+                            <div class="pdf-department-title">{{ settings.institution_academic_department }}</div>
+                            <div class="pdf-report-title">REPORTE DE EVALUACIONES POR BLOQUES DE COMPETENCIAS Y MÓDULOS FORMATIVOS</div>
+                        </td>
+
+                        <td class="pdf-logo-cell">
+                            {% if minerd_logo_src %}
+                                <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="pdf-header-logo">
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <table class="student-inline-table">
+                <tbody>
+                    <tr>
+                        <th>Año escolar</th>
+                        <td>{{ school_year }}</td>
+                        <th>Nombre</th>
+                        <td>{{ student.nombre_estudiante }}</td>
+                        <th>Número</th>
+                        <td>{% if student.numero is defined and student.numero %}{{ student.numero }}{% else %}-{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th>ID</th>
+                        <td>{{ student.id_estudiante }}</td>
+                        <th>Curso</th>
+                        <td>{{ student.curso if student.curso is defined and student.curso else "-" }}</td>
+                        <th>Profesor titular</th>
+                        <td>{{ student.prof_titular if student.prof_titular is defined and student.prof_titular else "-" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {% macro grade_cell(value) -%}
+                {%- if value is defined and value not in [None, "", 0, 0.0, "0", "0.0", "0.00"] -%}
+                    {{ "%.1f"|format(value|float) }}
+                {%- else -%}
+                    {{ "" }}
+                {%- endif -%}
+            {%- endmacro %}
+
+            {% macro text_cell(value) -%}
+                {%- if value is defined and value not in [None, ""] -%}
+                    {{ value }}
+                {%- else -%}
+                    -
+                {%- endif -%}
+            {%- endmacro %}
+
+            {% macro low_class(value) -%}
+                {%- if value is defined and value not in [None, "", 0, 0.0, "0", "0.0", "0.00"] and (value|float) < 70 -%}
+                    low-grade
+                {%- endif -%}
+            {%- endmacro %}
+
+            <div class="section-title">Áreas académicas</div>
+
+            <table class="academic-table blocks-table">
+                <thead>
+                    <tr>
+                        <th class="subject-col" rowspan="2">ASIGNATURAS</th>
+                        <th colspan="4">COMUNICATIVA</th>
+                        <th colspan="4">PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO / RESOLUCIÓN DE PROBLEMAS</th>
+                        <th colspan="4">CIENTÍFICA Y TECNOLÓGICA / AMBIENTAL Y DE LA SALUD</th>
+                        <th colspan="4">ÉTICA Y CIUDADANA / DESARROLLO PERSONAL Y ESPIRITUAL</th>
+                    </tr>
+                    <tr>
+                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject in student.subjects %}
+                    <tr>
+                        <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "-" }}</td>
+
+                        <td class="{{ low_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ grade_cell(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ grade_cell(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ grade_cell(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ grade_cell(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+
+                        <td class="{{ low_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ grade_cell(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ grade_cell(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ grade_cell(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ grade_cell(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+
+                        <td class="{{ low_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ grade_cell(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ grade_cell(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ grade_cell(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ grade_cell(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+
+                        <td class="{{ low_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ grade_cell(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ grade_cell(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ grade_cell(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+                        <td class="{{ low_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ grade_cell(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if student.modules is defined and student.modules %}
+                <div class="section-title">Módulos formativos y resultados de aprendizaje</div>
+
+                <table class="academic-table modules-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">MÓDULO FORMATIVO</th>
+                            <th style="width: 34%;">RESULTADO DE APRENDIZAJE (RA)</th>
+                            <th style="width: 7%;">P1</th>
+                            <th style="width: 7%;">P2</th>
+                            <th style="width: 7%;">P3</th>
+                            <th style="width: 7%;">P4</th>
+                            <th style="width: 9%;">CF</th>
+                            <th style="width: 9%;">SIT.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for module in student.modules %}
+                            {% set module_name = module.modulo_formativo if module.modulo_formativo is defined and module.modulo_formativo else (
+                                module.modulo if module.modulo is defined and module.modulo else (
+                                module.nombre_modulo if module.nombre_modulo is defined and module.nombre_modulo else (
+                                module.nombre if module.nombre is defined and module.nombre else "Módulo formativo"
+                            ))) %}
+
+                            {% set ra_list = module.ras if module.ras is defined and module.ras else (
+                                module.resultados_aprendizaje if module.resultados_aprendizaje is defined and module.resultados_aprendizaje else (
+                                module.ra_list if module.ra_list is defined and module.ra_list else []
+                            )) %}
+
+                            {% if ra_list %}
+                                {% for ra in ra_list %}
+                                <tr>
+                                    {% if loop.first %}
+                                        <td class="subject-col" rowspan="{{ ra_list|length }}">{{ module_name }}</td>
+                                    {% endif %}
+
+                                    <td class="text-left">
+                                        {% if ra.codigo is defined and ra.codigo %}
+                                            <strong>{{ ra.codigo }}</strong>
+                                            {% if ra.resultado_aprendizaje is defined and ra.resultado_aprendizaje %}
+                                                - {{ ra.resultado_aprendizaje }}
+                                            {% elif ra.ra is defined and ra.ra %}
+                                                - {{ ra.ra }}
+                                            {% elif ra.descripcion is defined and ra.descripcion %}
+                                                - {{ ra.descripcion }}
+                                            {% endif %}
+                                        {% elif ra.codigo_ra is defined and ra.codigo_ra %}
+                                            <strong>{{ ra.codigo_ra }}</strong>
+                                            {% if ra.resultado_aprendizaje is defined and ra.resultado_aprendizaje %}
+                                                - {{ ra.resultado_aprendizaje }}
+                                            {% elif ra.ra is defined and ra.ra %}
+                                                - {{ ra.ra }}
+                                            {% elif ra.descripcion is defined and ra.descripcion %}
+                                                - {{ ra.descripcion }}
+                                            {% endif %}
+                                        {% else %}
+                                            {% if ra.resultado_aprendizaje is defined and ra.resultado_aprendizaje %}
+                                                {{ ra.resultado_aprendizaje }}
+                                            {% elif ra.ra is defined and ra.ra %}
+                                                {{ ra.ra }}
+                                            {% elif ra.descripcion is defined and ra.descripcion %}
+                                                {{ ra.descripcion }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="{{ low_class(ra.p1 if ra.p1 is defined else none) }}">{{ grade_cell(ra.p1 if ra.p1 is defined else none) }}</td>
+                                    <td class="{{ low_class(ra.p2 if ra.p2 is defined else none) }}">{{ grade_cell(ra.p2 if ra.p2 is defined else none) }}</td>
+                                    <td class="{{ low_class(ra.p3 if ra.p3 is defined else none) }}">{{ grade_cell(ra.p3 if ra.p3 is defined else none) }}</td>
+                                    <td class="{{ low_class(ra.p4 if ra.p4 is defined else none) }}">{{ grade_cell(ra.p4 if ra.p4 is defined else none) }}</td>
+
+                                    <td class="{{ low_class(
+                                        ra.cf if ra.cf is defined else (
+                                        ra.cf_ra if ra.cf_ra is defined else (
+                                        ra.calificacion_final if ra.calificacion_final is defined else none))
+                                    ) }}">
+                                        {{ grade_cell(
+                                            ra.cf if ra.cf is defined else (
+                                            ra.cf_ra if ra.cf_ra is defined else (
+                                            ra.calificacion_final if ra.calificacion_final is defined else none))
+                                        ) }}
+                                    </td>
+
+                                    <td>
+                                        {{ text_cell(
+                                            ra.situacion if ra.situacion is defined else (
+                                            ra.sit if ra.sit is defined else (
+                                            ra.condicion if ra.condicion is defined else none))
+                                        ) }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td class="subject-col">{{ module_name }}</td>
+                                    <td class="text-left">
+                                        {% if module.resultado_aprendizaje is defined and module.resultado_aprendizaje %}
+                                            {{ module.resultado_aprendizaje }}
+                                        {% elif module.ra is defined and module.ra %}
+                                            {{ module.ra }}
+                                        {% elif module.descripcion is defined and module.descripcion %}
+                                            {{ module.descripcion }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="{{ low_class(module.p1 if module.p1 is defined else none) }}">{{ grade_cell(module.p1 if module.p1 is defined else none) }}</td>
+                                    <td class="{{ low_class(module.p2 if module.p2 is defined else none) }}">{{ grade_cell(module.p2 if module.p2 is defined else none) }}</td>
+                                    <td class="{{ low_class(module.p3 if module.p3 is defined else none) }}">{{ grade_cell(module.p3 if module.p3 is defined else none) }}</td>
+                                    <td class="{{ low_class(module.p4 if module.p4 is defined else none) }}">{{ grade_cell(module.p4 if module.p4 is defined else none) }}</td>
+
+                                    <td class="{{ low_class(
+                                        module.cf if module.cf is defined else (
+                                        module.cf_ra if module.cf_ra is defined else (
+                                        module.calificacion_final if module.calificacion_final is defined else none))
+                                    ) }}">
+                                        {{ grade_cell(
+                                            module.cf if module.cf is defined else (
+                                            module.cf_ra if module.cf_ra is defined else (
+                                            module.calificacion_final if module.calificacion_final is defined else none))
+                                        ) }}
+                                    </td>
+
+                                    <td>
+                                        {{ text_cell(
+                                            module.situacion if module.situacion is defined else (
+                                            module.sit if module.sit is defined else (
+                                            module.condicion if module.condicion is defined else none))
+                                        ) }}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            {% endif %}
+
+            <div class="comment-box">
+                <div class="comment-title">Comentario del profesor titular:</div>
+                <div class="muted">
+                    {% if student.comentario_final is defined and student.comentario_final %}
+                        {{ student.comentario_final }}
+                    {% else %}
+                        __________________________________________________________________________________
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-title">Observaciones generales:</div>
+                <div class="muted">
+                    Este reporte presenta el desempeño del estudiante por bloques de competencias y, en el segundo ciclo, los módulos formativos con sus resultados de aprendizaje.
+                </div>
+            </div>
+
+            <div class="signatures">
+                <table class="signatures-table">
+                    <tr>
+                        <td>
+                            <div class="signature-line"></div>
+                            <div class="signature-name">{{ student.prof_titular if student.prof_titular is defined and student.prof_titular else "-" }}</div>
+                            <div class="signature-role">Profesor(a) Titular</div>
+                        </td>
+                        <td>
+                            <div class="signature-line"></div>
+                            <div class="signature-name">{{ director_name }}</div>
+                            <div class="signature-role">Director(a)</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="footer">
+                Generado el {{ generated_at }} por {{ generated_by }} {% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+            </div>
         </div>
     </div>
 </body>
