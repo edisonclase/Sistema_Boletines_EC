@@ -204,7 +204,10 @@
             </div>
 
             <div class="footer">
-                Generado el {{ generated_at if generated_at is defined else "" }}{% if generated_by is defined and generated_by %} | Por: {{ generated_by }}{% endif %}{% if generated_role is defined and generated_role %} | Departamento/Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+                Generado el {{ generated_at if generated_at is defined else "" }}
+                {% if generated_by %} | Por: {{ generated_by }}{% endif %}
+                {% if generated_role %} | Departamento/Rol: {{ generated_role }}{% endif %}
+                | Desarrollado por {{ settings.bulletin_author }}
             </div>
         </div>
     </div>

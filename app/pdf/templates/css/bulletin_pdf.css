@@ -59,8 +59,8 @@ body {
 }
 
 .pdf-header-logo {
-    width: 46px;
-    height: 46px;
+    width: 52px;
+    height: 52px;
     object-fit: contain;
     display: inline-block;
 }
@@ -140,7 +140,7 @@ body {
 }
 
 .section-title-modules {
-    margin-top: 12px;
+    margin-top: 20px;
 }
 
 /* Tabla académica por bloques */
@@ -367,7 +367,7 @@ body {
 }
 
 .signature-line {
-    border-top: 1px solid #000;
+    border-top: 1.2px solid #000;
     margin: 8px auto 4px auto;
     width: 60%;
 }
