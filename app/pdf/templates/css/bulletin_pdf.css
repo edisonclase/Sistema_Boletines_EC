@@ -40,7 +40,7 @@ body {
 
 /* Encabezado institucional hoja 2 */
 .pdf-header {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     flex: 0 0 auto;
 }
 
@@ -82,13 +82,15 @@ body {
     font-size: 8.8pt;
     font-weight: 700;
     text-transform: uppercase;
+    line-height: 1.02;
 }
 
 .pdf-report-title {
     margin-top: 1px;
-    font-size: 9.2pt;
+    font-size: 9pt;
     font-weight: 700;
     text-transform: uppercase;
+    line-height: 1.03;
 }
 
 /* Tabla de datos del estudiante hoja 2 */
@@ -96,7 +98,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     border: 1.2px solid #66BB6A;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     flex: 0 0 auto;
 }
 
@@ -104,7 +106,7 @@ body {
 .student-inline-table td {
     border: 1px solid #94c79a;
     padding: 4px 6px;
-    font-size: 9.2pt;
+    font-size: 9pt;
     line-height: 1.02;
 }
 
@@ -122,7 +124,7 @@ body {
 
 /* Títulos de sección */
 .section-title {
-    margin: 7px 0 0 0;
+    margin: 6px 0 0 0;
     padding: 4px 8px;
     background: #E8F5E9;
     border: 1.2px solid #66BB6A;
@@ -131,13 +133,13 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     color: #111;
-    font-size: 8.8pt;
+    font-size: 8.7pt;
     line-height: 1;
     text-align: center;
     flex: 0 0 auto;
 }
 
-/* Tablas */
+/* Tablas generales */
 .academic-table,
 .modules-table {
     width: 100%;
@@ -145,7 +147,7 @@ body {
     table-layout: fixed;
     border: 1.2px solid #66BB6A;
     margin-top: 0;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     flex: 0 0 auto;
 }
 
@@ -154,11 +156,11 @@ body {
 .modules-table th,
 .modules-table td {
     border: 1px solid #94c79a;
-    padding: 3px 2px;
+    padding: 2px 2px;
     text-align: center;
     vertical-align: middle;
     color: #111;
-    line-height: 1.05;
+    line-height: 1.02;
 }
 
 .academic-table thead th,
@@ -167,33 +169,35 @@ body {
     font-weight: 700;
 }
 
+/* Tabla de bloques */
 .academic-table thead tr:first-child th {
-    font-size: 7.4pt;
-    height: 21px;
-    padding: 3px 2px;
+    font-size: 7pt;
+    height: 19px;
+    padding: 2px 2px;
     white-space: normal;
     word-break: break-word;
     overflow-wrap: anywhere;
 }
 
 .academic-table thead tr:nth-child(2) th {
-    font-size: 7.2pt;
-    height: 16px;
-    padding: 2px 1px;
+    font-size: 6.9pt;
+    height: 15px;
+    padding: 1px 1px;
 }
 
 .academic-table tbody td {
-    font-size: 8.3pt;
-    height: 16px;
+    font-size: 7.9pt;
+    height: 14px;
+    padding: 2px 1px;
 }
 
 .academic-table .subject-col {
-    width: 132px;
+    width: 128px;
     text-align: left;
     font-weight: 700;
     padding-left: 5px;
-    padding-right: 5px;
-    font-size: 8.4pt;
+    padding-right: 4px;
+    font-size: 8pt;
     line-height: 1.02;
     white-space: normal;
     word-break: normal;
@@ -201,15 +205,46 @@ body {
     hyphens: auto;
 }
 
+/* Tabla de módulos y RA */
+.modules-table {
+    table-layout: fixed;
+}
+
 .modules-table thead th {
-    font-size: 7.2pt;
-    padding: 3px 2px;
+    font-size: 6.95pt;
+    padding: 2px 2px;
     text-align: center;
+    line-height: 1.02;
 }
 
 .modules-table tbody td {
-    font-size: 8pt;
-    height: 18px;
+    font-size: 7.6pt;
+    min-height: 15px;
+    padding: 2px 2px;
+    vertical-align: middle;
+}
+
+.modules-table td:first-child {
+    text-align: left;
+    font-weight: 700;
+    padding-left: 5px;
+    padding-right: 4px;
+    line-height: 1.03;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.modules-table td:nth-child(2) {
+    text-align: left;
+    padding-left: 5px;
+    padding-right: 4px;
+    line-height: 1.03;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 .module-col {
@@ -218,9 +253,13 @@ body {
     padding-left: 5px !important;
 }
 
-/* Amarillo bajo 70 */
+.text-left {
+    text-align: left !important;
+}
+
+/* Notas bajas: sin amarillo */
 .low-grade {
-    background: #FFF59D !important;
+    background: #F4FBF4 !important;
     font-weight: 700 !important;
 }
 
@@ -230,33 +269,33 @@ body {
     border: 1.2px solid #66BB6A;
     border-radius: 5px;
     background: #fcfffc;
-    margin-top: 6px;
-    margin-bottom: 8px;
-    padding: 5px 7px;
+    margin-top: 4px;
+    margin-bottom: 5px;
+    padding: 4px 6px;
     flex: 0 0 auto;
 }
 
 .comment-title,
 .summary-title {
     font-weight: 700;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     text-transform: uppercase;
     color: #111;
-    font-size: 8.2pt;
+    font-size: 8pt;
     line-height: 1;
     text-align: left;
 }
 
 .muted {
     color: #333;
-    font-size: 8pt;
-    line-height: 1.08;
+    font-size: 7.7pt;
+    line-height: 1.05;
 }
 
 /* Firmas */
 .signatures {
-    margin-top: 14px;
-    margin-bottom: 6px;
+    margin-top: 8px;
+    margin-bottom: 4px;
     flex: 0 0 auto;
 }
 
@@ -274,26 +313,29 @@ body {
 
 .signature-line {
     border-top: 1px solid #000;
-    margin: 9px auto 4px auto;
+    margin: 8px auto 4px auto;
     width: 60%;
 }
 
 .signature-name {
-    font-size: 8.8pt;
+    font-size: 8.5pt;
     font-weight: 700;
+    line-height: 1.02;
 }
 
 .signature-role {
-    font-size: 7.6pt;
+    font-size: 7.4pt;
+    line-height: 1.02;
 }
 
-/* Footer en una sola línea */
+/* Footer */
 .footer {
     margin-top: 2px;
     padding-top: 2px;
     border-top: 1px solid #b8d8ba;
-    font-size: 7pt;
+    font-size: 6.9pt;
     color: #444;
     text-align: center;
+    line-height: 1.02;
     flex: 0 0 auto;
 }
