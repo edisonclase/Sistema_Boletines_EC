@@ -75,7 +75,7 @@
             <table class="academic-table blocks-table">
                 <thead>
                     <tr>
-                        <th class="subject-col" rowspan="2">ASIGNATURA</th>
+                        <th class="subject-col" rowspan="2">ASIGNATURAS</th>
                         <th colspan="4">COMUNICATIVA</th>
                         <th colspan="4">PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO / RESOLUCIÓN DE PROBLEMAS</th>
                         <th colspan="4">CIENTÍFICA Y TECNOLÓGICA / AMBIENTAL Y DE LA SALUD</th>
@@ -118,20 +118,20 @@
             </table>
 
             <div class="comment-box">
-                <div class="comment-title">Comentario del profesor titular</div>
+                <div class="comment-title">Comentario del profesor titular:</div>
                 <div class="muted">
                     {% if student.comentario_final is defined and student.comentario_final %}
                         {{ student.comentario_final }}
                     {% else %}
-                        ________________________________________________
+                        __________________________________________________________________________________
                     {% endif %}
                 </div>
             </div>
 
             <div class="summary-box">
-                <div class="summary-title">Observaciones generales</div>
+                <div class="summary-title">Observaciones generales:</div>
                 <div class="muted">
-                    Este reporte presenta el desempeño del estudiante por bloques de competencias fundamentales en los cuatro períodos del año escolar.
+                    Este reporte presenta el desempeño del estudiante por bloques de competencias en los cuatro períodos del año escolar.
                 </div>
             </div>
 
@@ -153,7 +153,7 @@
             </div>
 
             <div class="footer">
-                Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+                Generado el {{ generated_at }} por {{ generated_by }} {% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
             </div>
         </div>
     </div>

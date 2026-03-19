@@ -61,11 +61,11 @@
 
                     <table class="pdf-cover-student-table">
                         <tr>
-                            <th>Nombre completo</th>
+                            <th>Nombre completo:</th>
                             <td>{{ student.nombre_estudiante }}</td>
                         </tr>
                         <tr>
-                            <th>ID</th>
+                            <th>ID / Matrícula:</th>
                             <td>{{ student.id_estudiante }}</td>
                         </tr>
                         <tr>
@@ -79,20 +79,20 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>Curso</th>
+                            <th>Curso:</th>
                             <td>{{ student.curso if student.curso is defined and student.curso else "-" }}</td>
                         </tr>
 
                         {% if student.seccion is defined and student.seccion %}
                         <tr>
-                            <th>Sección</th>
+                            <th>Sección:</th>
                             <td>{{ student.seccion }}</td>
                         </tr>
                         {% endif %}
 
                         {% if student.tanda is defined and student.tanda %}
                         <tr>
-                            <th>Tanda</th>
+                            <th>Tanda:</th>
                             <td>{{ student.tanda }}</td>
                         </tr>
                         {% endif %}
@@ -113,19 +113,19 @@
 
                         {% if student.especialidad_tecnica is defined and student.especialidad_tecnica %}
                         <tr>
-                            <th>Especialidad técnica</th>
+                            <th>Especialidad técnica:</th>
                             <td>{{ student.especialidad_tecnica }}</td>
                         </tr>
                         {% endif %}
 
                         <tr>
-                            <th>Año escolar</th>
+                            <th>Año escolar:</th>
                             <td>{{ school_year }}</td>
                         </tr>
 
                         {% if student.prof_titular is defined and student.prof_titular %}
                         <tr>
-                            <th>Profesor titular</th>
+                            <th>Profesor titular:</th>
                             <td>{{ student.prof_titular }}</td>
                         </tr>
                         {% endif %}
