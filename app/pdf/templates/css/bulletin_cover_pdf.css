@@ -18,22 +18,25 @@ body {
     page-break-after: always;
     break-after: page;
     background: #fff;
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 .pdf-cover-frame {
     width: 100%;
-    min-height: 180mm;
+    height: 176mm;
     border: 1.4px solid #66BB6A;
     border-radius: 6px;
-    padding: 10px 10px 8px 10px;
+    padding: 8px 9px 7px 9px;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .pdf-cover-columns {
     display: table;
     width: 100%;
+    height: 100%;
     table-layout: fixed;
-    min-height: 166mm;
 }
 
 .pdf-cover-left,
@@ -41,6 +44,7 @@ body {
     display: table-cell;
     width: 50%;
     vertical-align: top;
+    height: 100%;
 }
 
 .pdf-cover-left {
@@ -50,9 +54,6 @@ body {
 
 .pdf-cover-right {
     padding-left: 10px;
-}
-
-.pdf-cover-right {
     text-align: center;
 }
 
@@ -64,14 +65,13 @@ body {
 
 .pdf-cover-letterhead img {
     width: 100%;
-    max-height: 42mm;
+    max-height: 36mm;
     object-fit: contain;
     display: block;
 }
 
-/* MUCHA separación entre membrete y tabla, sin bajarla demasiado */
 .pdf-cover-student-separator {
-    height: 18mm;
+    height: 12mm;
 }
 
 .pdf-cover-student-box,
@@ -80,6 +80,8 @@ body {
     border-radius: 5px;
     overflow: hidden;
     background: #fcfffc;
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 .pdf-cover-student-box {
@@ -88,12 +90,12 @@ body {
 }
 
 .pdf-cover-box-title {
-    padding: 5px 8px;
+    padding: 4px 8px;
     background: #E8F5E9;
     border-bottom: 1.2px solid #66BB6A;
     font-weight: 700;
     text-transform: uppercase;
-    font-size: 10.6pt;
+    font-size: 9.6pt;
     text-align: center;
     color: #111;
     letter-spacing: 0.2px;
@@ -107,9 +109,9 @@ body {
 .pdf-cover-student-table th,
 .pdf-cover-student-table td {
     border: 1px solid #94c79a;
-    padding: 7px 8px;
-    font-size: 11.2pt;
-    line-height: 1.15;
+    padding: 5px 7px;
+    font-size: 10.1pt;
+    line-height: 1.08;
     vertical-align: top;
 }
 
@@ -126,7 +128,7 @@ body {
 }
 
 .pdf-cover-left .pdf-cover-info-box {
-    margin-bottom: 9px;
+    margin-bottom: 10px;
 }
 
 .pdf-cover-left .pdf-cover-info-box:last-child {
@@ -134,13 +136,13 @@ body {
 }
 
 .pdf-cover-info-main .pdf-cover-box-content {
-    min-height: 42mm;
+    min-height: 34mm;
 }
 
 .pdf-cover-box-content {
     padding: 8px 10px;
-    font-size: 11.2pt;
-    line-height: 1.24;
+    font-size: 9.8pt;
+    line-height: 1.18;
     background: #fcfffc;
 }
 
@@ -161,6 +163,20 @@ body {
 .cover-value-item {
     display: block;
     text-align: center;
-    font-size: 11.2pt;
-    line-height: 1.18;
+    font-size: 9.8pt;
+    line-height: 1.12;
+}
+
+/* Espacio para lema / imagen inferior de portada */
+.pdf-cover-lema-space {
+    width: 100%;
+    margin-top: 10mm;
+    text-align: center;
+}
+
+.pdf-cover-lema-img {
+    max-width: 52mm;
+    max-height: 52mm;
+    object-fit: contain;
+    display: inline-block;
 }

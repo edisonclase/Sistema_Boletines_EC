@@ -28,16 +28,20 @@ body {
 
 .pdf-frame {
     width: 100%;
-    min-height: 180mm;
+    height: 176mm;
     border: 1.4px solid #66BB6A;
-    border-radius: 6px;
-    padding: 6px 8px 5px 8px;
+    border-radius: 4px;
+    padding: 4px 6px 3px 6px;
     box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Encabezado institucional hoja 2 */
 .pdf-header {
     margin-bottom: 8px;
+    flex: 0 0 auto;
 }
 
 .pdf-header-table {
@@ -50,13 +54,13 @@ body {
 }
 
 .pdf-logo-cell {
-    width: 58px;
+    width: 48px;
     text-align: center;
 }
 
 .pdf-header-logo {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     object-fit: contain;
     display: inline-block;
 }
@@ -68,26 +72,21 @@ body {
 
 .pdf-institution-name {
     font-weight: 700;
-    font-size: 15pt;
-    line-height: 1.05;
+    font-size: 12.8pt;
+    line-height: 1.02;
     text-transform: uppercase;
 }
 
-.pdf-institution-line {
-    font-size: 9.4pt;
-    line-height: 1.1;
-}
-
 .pdf-department-title {
-    margin-top: 2px;
-    font-size: 10pt;
+    margin-top: 1px;
+    font-size: 8.8pt;
     font-weight: 700;
     text-transform: uppercase;
 }
 
 .pdf-report-title {
-    margin-top: 2px;
-    font-size: 10.5pt;
+    margin-top: 1px;
+    font-size: 9.2pt;
     font-weight: 700;
     text-transform: uppercase;
 }
@@ -97,15 +96,16 @@ body {
     width: 100%;
     border-collapse: collapse;
     border: 1.2px solid #66BB6A;
-    margin-bottom: 7px;
+    margin-bottom: 10px;
+    flex: 0 0 auto;
 }
 
 .student-inline-table th,
 .student-inline-table td {
     border: 1px solid #94c79a;
-    padding: 5px 7px;
-    font-size: 10.4pt;
-    line-height: 1.1;
+    padding: 4px 6px;
+    font-size: 9.2pt;
+    line-height: 1.02;
 }
 
 .student-inline-table th {
@@ -123,7 +123,7 @@ body {
 /* Títulos de sección */
 .section-title {
     margin: 7px 0 0 0;
-    padding: 5px 8px;
+    padding: 4px 8px;
     background: #E8F5E9;
     border: 1.2px solid #66BB6A;
     border-bottom: 0;
@@ -131,9 +131,10 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     color: #111;
-    font-size: 10pt;
-    line-height: 1.05;
+    font-size: 8.8pt;
+    line-height: 1;
     text-align: center;
+    flex: 0 0 auto;
 }
 
 /* Tablas */
@@ -144,7 +145,8 @@ body {
     table-layout: fixed;
     border: 1.2px solid #66BB6A;
     margin-top: 0;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    flex: 0 0 auto;
 }
 
 .academic-table th,
@@ -152,11 +154,11 @@ body {
 .modules-table th,
 .modules-table td {
     border: 1px solid #94c79a;
-    padding: 4px 3px;
+    padding: 3px 2px;
     text-align: center;
     vertical-align: middle;
     color: #111;
-    line-height: 1.12;
+    line-height: 1.05;
 }
 
 .academic-table thead th,
@@ -166,67 +168,72 @@ body {
 }
 
 .academic-table thead tr:first-child th {
-    font-size: 9pt;
-    height: 27px;
-    padding: 4px 2px;
+    font-size: 7.4pt;
+    height: 21px;
+    padding: 3px 2px;
     white-space: normal;
     word-break: break-word;
     overflow-wrap: anywhere;
 }
 
 .academic-table thead tr:nth-child(2) th {
-    font-size: 8.8pt;
-    height: 20px;
-    padding: 3px 2px;
+    font-size: 7.2pt;
+    height: 16px;
+    padding: 2px 1px;
 }
 
 .academic-table tbody td {
-    font-size: 10.2pt;
-    height: 23px;
+    font-size: 8.3pt;
+    height: 16px;
 }
 
 .academic-table .subject-col {
+    width: 132px;
     text-align: left;
     font-weight: 700;
     padding-left: 5px;
     padding-right: 5px;
-    font-size: 10.2pt;
-    line-height: 1.12;
+    font-size: 8.4pt;
+    line-height: 1.02;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 .modules-table thead th {
-    font-size: 8.8pt;
-    padding: 4px 2px;
+    font-size: 7.2pt;
+    padding: 3px 2px;
     text-align: center;
 }
 
 .modules-table tbody td {
-    font-size: 10pt;
-    height: 22px;
+    font-size: 8pt;
+    height: 18px;
 }
 
 .module-col {
     text-align: left !important;
-    font-weight: 700;
+    font-weight: 700 !important;
     padding-left: 5px !important;
 }
 
-/* Resaltado amarillo para notas menores de 70 */
+/* Amarillo bajo 70 */
 .low-grade {
     background: #FFF59D !important;
     font-weight: 700 !important;
 }
 
 /* Comentario / observaciones */
-.legend-box,
 .comment-box,
 .summary-box {
     border: 1.2px solid #66BB6A;
     border-radius: 5px;
     background: #fcfffc;
-    margin-top: 4px;
-    margin-bottom: 5px;
+    margin-top: 6px;
+    margin-bottom: 8px;
     padding: 5px 7px;
+    flex: 0 0 auto;
 }
 
 .comment-title,
@@ -235,21 +242,22 @@ body {
     margin-bottom: 3px;
     text-transform: uppercase;
     color: #111;
-    font-size: 9.4pt;
-    line-height: 1.05;
+    font-size: 8.2pt;
+    line-height: 1;
     text-align: left;
 }
 
 .muted {
     color: #333;
-    font-size: 9.4pt;
-    line-height: 1.15;
+    font-size: 8pt;
+    line-height: 1.08;
 }
 
 /* Firmas */
 .signatures {
-    margin-top: 10px;
-    margin-bottom: 4px;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    flex: 0 0 auto;
 }
 
 .signatures-table {
@@ -266,36 +274,26 @@ body {
 
 .signature-line {
     border-top: 1px solid #000;
-    margin: 12px auto 4px auto;
-    width: 64%;
+    margin: 9px auto 4px auto;
+    width: 60%;
 }
 
 .signature-name {
-    font-size: 10.4pt;
+    font-size: 8.8pt;
     font-weight: 700;
 }
 
 .signature-role {
-    font-size: 9pt;
+    font-size: 7.6pt;
 }
 
-/* Footer */
+/* Footer en una sola línea */
 .footer {
-    margin-top: 4px;
-    padding-top: 3px;
+    margin-top: 2px;
+    padding-top: 2px;
     border-top: 1px solid #b8d8ba;
-    font-size: 8.4pt;
+    font-size: 7pt;
     color: #444;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.footer-left,
-.footer-right {
-    width: 50%;
-}
-
-.footer-right {
-    text-align: right;
+    text-align: center;
+    flex: 0 0 auto;
 }

@@ -116,7 +116,10 @@ def build_base_context(context: dict | None = None) -> dict:
             _get_setting("institution_letterhead", "")
         )
 
-    # CSS WEB (se mantiene solo para vistas web)
+    if "lema_logo_src" not in safe_context:
+        safe_context["lema_logo_src"] = build_image_data_uri("app/pdf/assets/lema.png")
+
+    # CSS WEB
     if "bulletin_base_css" not in safe_context:
         safe_context["bulletin_base_css"] = load_css_text("bulletin_base.css")
 
@@ -164,10 +167,6 @@ def render_second_cycle_full(student: dict, extra_context: dict | None = None) -
 
 
 def extract_page_inner_content(rendered_html: str) -> str:
-    """
-    Extrae el contenido útil de los HTML web para reutilizarlo dentro de los
-    templates PDF, sin toolbar ni scripts.
-    """
     if not rendered_html:
         return ""
 
@@ -178,9 +177,8 @@ def extract_page_inner_content(rendered_html: str) -> str:
         flags=re.IGNORECASE | re.DOTALL,
     )
 
-    # elimina toolbar
     html = re.sub(
-        r'<div class="screen-toolbar".*?</div>',
+        r'<div class="screen-toolbar">.*?</div>',
         "",
         html,
         flags=re.IGNORECASE | re.DOTALL,

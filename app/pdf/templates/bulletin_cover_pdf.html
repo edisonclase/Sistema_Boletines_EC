@@ -46,7 +46,7 @@
                 {% endif %}
             </div>
 
-            <!-- DERECHA: MEMBRETE + DATOS DEL ESTUDIANTE (PORTADA AL DOBLAR) -->
+            <!-- DERECHA: MEMBRETE + DATOS DEL ESTUDIANTE + ESPACIO PARA LEMA -->
             <div class="pdf-cover-right">
                 {% if letterhead_src %}
                 <div class="pdf-cover-letterhead">
@@ -130,6 +130,12 @@
                         </tr>
                         {% endif %}
                     </table>
+                </div>
+
+                <div class="pdf-cover-lema-space">
+                    {% if lema_logo_src %}
+                        <img src="{{ lema_logo_src }}" alt="Lema institucional" class="pdf-cover-lema-img">
+                    {% endif %}
                 </div>
             </div>
 

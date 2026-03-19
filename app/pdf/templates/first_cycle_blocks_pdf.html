@@ -22,19 +22,6 @@
 
                         <td class="pdf-title-cell">
                             <div class="pdf-institution-name">{{ settings.institution_name }}</div>
-
-                            {% if settings.institution_address %}
-                                <div class="pdf-institution-line">{{ settings.institution_address }}</div>
-                            {% endif %}
-
-                            {% if settings.institution_email or settings.institution_phone %}
-                                <div class="pdf-institution-line">
-                                    {% if settings.institution_email %}{{ settings.institution_email }}{% endif %}
-                                    {% if settings.institution_email and settings.institution_phone %} | {% endif %}
-                                    {% if settings.institution_phone %}{{ settings.institution_phone }}{% endif %}
-                                </div>
-                            {% endif %}
-
                             <div class="pdf-department-title">{{ settings.institution_academic_department }}</div>
                             <div class="pdf-report-title">REPORTE DE EVALUACIONES POR BLOQUES DE COMPETENCIAS</div>
                         </td>
@@ -153,25 +140,20 @@
                     <tr>
                         <td>
                             <div class="signature-line"></div>
-                            <div class="signature-name">{{ director_name }}</div>
-                            <div class="signature-role">Director(a)</div>
+                            <div class="signature-name">{{ student.prof_titular if student.prof_titular is defined and student.prof_titular else "-" }}</div>
+                            <div class="signature-role">Profesor(a) Titular</div>
                         </td>
                         <td>
                             <div class="signature-line"></div>
-                            <div class="signature-name">{{ student.prof_titular if student.prof_titular is defined and student.prof_titular else "-" }}</div>
-                            <div class="signature-role">Profesor(a) Titular</div>
+                            <div class="signature-name">{{ director_name }}</div>
+                            <div class="signature-role">Director(a)</div>
                         </td>
                     </tr>
                 </table>
             </div>
 
             <div class="footer">
-                <div class="footer-left">
-                    Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %}
-                </div>
-                <div class="footer-right">
-                    Desarrollado por {{ settings.bulletin_author }}
-                </div>
+                Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
             </div>
         </div>
     </div>
