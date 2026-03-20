@@ -11,14 +11,16 @@ body {
     color: #111;
     font-family: "Times New Roman", Arial, sans-serif;
     font-size: 12pt;
+    height: 100%;
 }
 
 .pdf-page {
     width: 100%;
-    min-height: 100%;
+    height: 203.9mm;
     background: #fff;
     page-break-after: always;
     break-after: page;
+    box-sizing: border-box;
 }
 
 .pdf-page:last-child {
@@ -28,10 +30,10 @@ body {
 
 .pdf-frame {
     width: 100%;
-    height: 176mm;
+    height: 100%;
     border: 1.4px solid #66BB6A;
     border-radius: 4px;
-    padding: 4px 6px 3px 6px;
+    padding: 4px 6px 2px 6px;
     box-sizing: border-box;
     overflow: hidden;
     display: flex;
@@ -40,7 +42,7 @@ body {
 
 /* Encabezado institucional hoja 2 */
 .pdf-header {
-    margin-bottom: 6px;
+    margin-bottom: 12px;
     flex: 0 0 auto;
 }
 
@@ -98,7 +100,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     border: 1.2px solid #66BB6A;
-    margin-bottom: 8px;
+    margin-bottom: 18px;
     flex: 0 0 auto;
 }
 
@@ -124,7 +126,7 @@ body {
 
 /* Títulos de sección */
 .section-title {
-    margin: 6px 0 0 0;
+    margin: 18px 0 0 0;
     padding: 4px 8px;
     background: #E8F5E9;
     border: 1.2px solid #66BB6A;
@@ -140,7 +142,7 @@ body {
 }
 
 .section-title-modules {
-    margin-top: 20px;
+    margin-top: 24px;
 }
 
 /* Tabla académica por bloques */
@@ -150,7 +152,7 @@ body {
     table-layout: fixed;
     border: 1.2px solid #66BB6A;
     margin-top: 0;
-    margin-bottom: 6px;
+    margin-bottom: 20px;
     flex: 0 0 auto;
 }
 
@@ -217,12 +219,12 @@ body {
     table-layout: fixed;
     border: 1.2px solid #66BB6A;
     margin-top: 0;
-    margin-bottom: 6px;
+    margin-bottom: 20px;
     flex: 0 0 auto;
 }
 
 .modules-table-spaced {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .modules-table th,
@@ -304,20 +306,41 @@ body {
     font-weight: inherit !important;
 }
 
-/* Comentario */
+/* Observaciones / resumen */
+.summary-box {
+    border: 1.2px solid #66BB6A;
+    border-radius: 5px;
+    background: #fcfffc;
+    margin-top: 12px;
+    margin-bottom: 22px;
+    padding: 4px 6px 8px 6px;
+    flex: 0 0 auto;
+}
+
+.summary-title {
+    font-weight: 700;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    color: #111;
+    font-size: 8pt;
+    line-height: 1;
+    text-align: left;
+}
+
+/* Compatibilidad si alguna plantilla usa comment-box */
 .comment-box {
     border: 1.2px solid #66BB6A;
     border-radius: 5px;
     background: #fcfffc;
-    margin-top: 4px;
-    margin-bottom: 5px;
-    padding: 4px 6px;
+    margin-top: 12px;
+    margin-bottom: 22px;
+    padding: 4px 6px 8px 6px;
     flex: 0 0 auto;
 }
 
 .comment-title {
     font-weight: 700;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
     text-transform: uppercase;
     color: #111;
     font-size: 8pt;
@@ -327,19 +350,19 @@ body {
 
 .muted {
     color: #333;
-    font-size: 7.7pt;
+    font-size: 7.3pt;
     line-height: 1.05;
 }
 
 /* Firmas */
 .signatures {
-    margin-top: 8px;
-    margin-bottom: 4px;
+    margin-top: auto;
+    margin-bottom: 2px;
     flex: 0 0 auto;
 }
 
 .signatures-wide {
-    margin-top: 14px;
+    margin-top: auto;
 }
 
 .signatures-table {
@@ -389,13 +412,13 @@ body {
 
 /* Footer */
 .footer {
-    margin-top: 2px;
+    margin-top: 0;
     padding-top: 2px;
+    padding-bottom: 0;
     border-top: 1px solid #b8d8ba;
-    font-size: 6.9pt;
+    font-size: 5.8pt;
     color: #444;
     text-align: center;
-    line-height: 1.02;
+    line-height: 0.95;
     white-space: nowrap;
-    flex: 0 0 auto;
 }
