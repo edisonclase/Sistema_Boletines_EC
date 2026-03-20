@@ -33,16 +33,17 @@ body {
     height: 100%;
     border: 1.4px solid #66BB6A;
     border-radius: 4px;
-    padding: 4px 6px 2px 6px;
+    padding: 4px 6px 30mm 6px;
     box-sizing: border-box;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 /* Encabezado institucional hoja 2 */
 .pdf-header {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     flex: 0 0 auto;
 }
 
@@ -100,7 +101,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     border: 1.2px solid #66BB6A;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
     flex: 0 0 auto;
 }
 
@@ -109,7 +110,7 @@ body {
     border: 1px solid #94c79a;
     padding: 4px 6px;
     font-size: 9pt;
-    line-height: 1.02;
+    line-height: 1.04;
 }
 
 .student-inline-table th {
@@ -126,7 +127,7 @@ body {
 
 /* Títulos de sección */
 .section-title {
-    margin: 18px 0 0 0;
+    margin: 12px 0 0 0;
     padding: 4px 8px;
     background: #E8F5E9;
     border: 1.2px solid #66BB6A;
@@ -142,7 +143,7 @@ body {
 }
 
 .section-title-modules {
-    margin-top: 24px;
+    margin-top: 14px;
 }
 
 /* Tabla académica por bloques */
@@ -152,18 +153,18 @@ body {
     table-layout: fixed;
     border: 1.2px solid #66BB6A;
     margin-top: 0;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
     flex: 0 0 auto;
 }
 
 .academic-table th,
 .academic-table td {
     border: 1px solid #94c79a;
-    padding: 2px 2px;
+    padding: 3px 2px;
     text-align: center;
     vertical-align: middle;
     color: #111;
-    line-height: 1.02;
+    line-height: 1.05;
 }
 
 .academic-table thead th {
@@ -173,8 +174,8 @@ body {
 
 .academic-table thead tr:first-child th {
     font-size: 7pt;
-    height: 19px;
-    padding: 2px 2px;
+    height: 21px;
+    padding: 3px 2px;
     white-space: normal;
     word-break: break-word;
     overflow-wrap: anywhere;
@@ -182,14 +183,14 @@ body {
 
 .academic-table thead tr:nth-child(2) th {
     font-size: 6.9pt;
-    height: 15px;
-    padding: 1px 1px;
+    height: 17px;
+    padding: 2px 1px;
 }
 
 .academic-table tbody td {
     font-size: 7.9pt;
-    height: 14px;
-    padding: 2px 1px;
+    height: 16px;
+    padding: 3px 1px;
 }
 
 .academic-table .subject-col {
@@ -199,7 +200,7 @@ body {
     padding-left: 5px;
     padding-right: 4px;
     font-size: 8pt;
-    line-height: 1.02;
+    line-height: 1.04;
     white-space: normal;
     word-break: normal;
     overflow-wrap: break-word;
@@ -219,22 +220,22 @@ body {
     table-layout: fixed;
     border: 1.2px solid #66BB6A;
     margin-top: 0;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
     flex: 0 0 auto;
 }
 
 .modules-table-spaced {
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .modules-table th,
 .modules-table td {
     border: 1px solid #a5c9a7;
-    padding: 4px 3px;
+    padding: 5px 3px;
     text-align: center;
     vertical-align: middle;
     color: #111;
-    line-height: 1.03;
+    line-height: 1.05;
 }
 
 .modules-table thead th {
@@ -261,6 +262,7 @@ body {
     word-break: normal;
     overflow-wrap: break-word;
     hyphens: auto;
+    line-height: 1.04;
 }
 
 .modules-table .ra-cell {
@@ -311,8 +313,8 @@ body {
     border: 1.2px solid #66BB6A;
     border-radius: 5px;
     background: #fcfffc;
-    margin-top: 12px;
-    margin-bottom: 22px;
+    margin-top: 10px;
+    margin-bottom: 14px;
     padding: 4px 6px 8px 6px;
     flex: 0 0 auto;
 }
@@ -332,8 +334,8 @@ body {
     border: 1.2px solid #66BB6A;
     border-radius: 5px;
     background: #fcfffc;
-    margin-top: 12px;
-    margin-bottom: 22px;
+    margin-top: 10px;
+    margin-bottom: 14px;
     padding: 4px 6px 8px 6px;
     flex: 0 0 auto;
 }
@@ -354,15 +356,23 @@ body {
     line-height: 1.05;
 }
 
+/* Bloque final */
+.bottom-final {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: 4px;
+}
+
 /* Firmas */
 .signatures {
-    margin-top: auto;
-    margin-bottom: 2px;
+    margin-top: 0;
+    margin-bottom: 4px;
     flex: 0 0 auto;
 }
 
 .signatures-wide {
-    margin-top: auto;
+    margin-top: 0;
 }
 
 .signatures-table {
@@ -421,4 +431,5 @@ body {
     text-align: center;
     line-height: 0.95;
     white-space: nowrap;
+    flex: 0 0 auto;
 }

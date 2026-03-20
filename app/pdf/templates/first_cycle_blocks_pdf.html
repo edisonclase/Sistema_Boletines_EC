@@ -135,25 +135,27 @@
                 </div>
             </div>
 
-            <div class="signatures">
-                <table class="signatures-table">
-                    <tr>
-                        <td>
-                            <div class="signature-line"></div>
-                            <div class="signature-name">{{ student.prof_titular if student.prof_titular is defined and student.prof_titular else "-" }}</div>
-                            <div class="signature-role">Profesor(a) Titular</div>
-                        </td>
-                        <td>
-                            <div class="signature-line"></div>
-                            <div class="signature-name">{{ director_name }}</div>
-                            <div class="signature-role">Director(a)</div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+            <div class="bottom-final">
+                <div class="signatures">
+                    <table class="signatures-table">
+                        <tr>
+                            <td>
+                                <div class="signature-line"></div>
+                                <div class="signature-name">{{ student.prof_titular if student.prof_titular is defined and student.prof_titular else "-" }}</div>
+                                <div class="signature-role">Profesor(a) Titular</div>
+                            </td>
+                            <td>
+                                <div class="signature-line"></div>
+                                <div class="signature-name">{{ director_name }}</div>
+                                <div class="signature-role">Director(a)</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
 
-            <div class="footer">
-                Generado el {{ generated_at }} por {{ generated_by }} {% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+                <div class="footer">
+                    Generado el {{ generated_at }} por {{ generated_by }} {% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+                </div>
             </div>
         </div>
     </div>
