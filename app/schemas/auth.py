@@ -12,6 +12,10 @@ class AuthUserResponse(BaseModel):
     full_name: str
     email: EmailStr
     role: str
+    institution_name: str | None = None
+    institution_minerd_code: str | None = None
+    institution_regional_code: str | None = None
+    institution_district_code: str | None = None
 
 
 class TokenResponse(BaseModel):

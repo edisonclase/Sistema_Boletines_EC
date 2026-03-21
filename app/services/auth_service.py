@@ -24,6 +24,10 @@ def build_auth_user_response(user: User) -> AuthUserResponse:
         full_name=user.full_name,
         email=user.email,
         role=role_name,
+        institution_name=user.institution.name if user.institution else None,
+        institution_minerd_code=user.institution.minerd_code if user.institution else None,
+        institution_regional_code=user.institution.regional_code if user.institution else None,
+        institution_district_code=user.institution.district_code if user.institution else None,
     )
 
 
