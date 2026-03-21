@@ -1,3 +1,4 @@
+#user.py
 import uuid
 from datetime import datetime
 
@@ -15,6 +16,13 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String(150), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    institution_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("institutions.id"),
+        nullable=True,
+        index=True,
+    )
+
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), nullable=False, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     failed_login_attempts: Mapped[int] = mapped_column(nullable=False, default=0)
@@ -26,5 +34,6 @@ class User(Base):
         server_default=func.now(),
     )
 
+    institution = relationship("Institution", back_populates="users")
     role = relationship("Role", back_populates="users")
     audit_logs = relationship("AuditLog", back_populates="user")
