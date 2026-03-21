@@ -17,7 +17,7 @@ const STORAGE_KEYS = {
 
 const progressPresets = {
     "bulletin-html": {
-        title: "Abriendo boletín completo",
+        title: "Abriendo boletín completo.",
         subtitle: "Estamos preparando la vista HTML del estudiante seleccionado.",
         steps: [
             { percent: 18, label: "Validando selección del estudiante..." },
@@ -27,7 +27,7 @@ const progressPresets = {
         ]
     },
     "bulletin-pdf": {
-        title: "Generando boletín completo",
+        title: "Generando boletín completo.",
         subtitle: "Estamos preparando el PDF individual con los datos académicos.",
         steps: [
             { percent: 16, label: "Validando datos del estudiante..." },
@@ -335,10 +335,34 @@ function updatePanelUserUI(user) {
     const nameEl = document.getElementById("sessionUserName");
     const roleEl = document.getElementById("sessionUserRole");
     const emailEl = document.getElementById("sessionUserEmail");
+    const institutionNameEl = document.getElementById("sessionInstitutionName");
+    const institutionMetaEl = document.getElementById("sessionInstitutionMeta");
 
     if (nameEl) nameEl.textContent = user?.full_name || "-";
     if (roleEl) roleEl.textContent = user?.role || "-";
     if (emailEl) emailEl.textContent = user?.email || "-";
+
+    if (institutionNameEl) {
+        institutionNameEl.textContent = user?.institution_name || "-";
+    }
+
+    if (institutionMetaEl) {
+        const parts = [];
+
+        if (user?.institution_minerd_code) {
+            parts.push(`Código MINERD: ${user.institution_minerd_code}`);
+        }
+
+        if (user?.institution_regional_code) {
+            parts.push(`Regional: ${user.institution_regional_code}`);
+        }
+
+        if (user?.institution_district_code) {
+            parts.push(`Distrito: ${user.institution_district_code}`);
+        }
+
+        institutionMetaEl.textContent = parts.length ? parts.join(" · ") : "-";
+    }
 }
 
 function logout(redirect = true) {
