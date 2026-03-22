@@ -2,27 +2,331 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Boletín PDF - Segundo Ciclo Solo Módulos</title>
+    <title>Boletín PDF - Módulos Formativos</title>
+
     <style>{{ bulletin_cover_pdf_css | safe }}</style>
     <style>{{ bulletin_pdf_css | safe }}</style>
+
+    <style>
+        /* =========================
+           AJUSTES AISLADOS SOLO PARA
+           second_cycle_modules_only_pdf.html
+           ========================= */
+
+        .scm-page {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .scm-content {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .scm-section-title {
+            margin: 9px 0 0 0;
+            padding: 5px 10px;
+            background: #E8F5E9;
+            border: 1.4px solid #66BB6A;
+            border-bottom: 0;
+            border-radius: 6px 6px 0 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 8.4pt;
+            line-height: 1.05;
+            color: #111;
+            text-align: center;
+        }
+
+        .scm-modules-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 1.4px solid #66BB6A !important;
+            margin: 0 0 10px 0;
+        }
+
+        .scm-modules-table th,
+        .scm-modules-table td {
+            border: 1px solid #a5c9a7 !important;
+            text-align: center;
+            vertical-align: middle;
+            color: #111;
+        }
+
+        .scm-modules-table th {
+            background: #E8F5E9;
+            font-weight: 700;
+            font-size: 6.9pt;
+            line-height: 1.02;
+            padding: 4px 2px;
+            height: 18px;
+        }
+
+        .scm-modules-table td {
+            font-size: 6.7pt;
+            line-height: 1.08;
+            padding: 3px 2px;
+            height: 17px;
+        }
+
+        .scm-modules-table tbody tr:nth-child(even) td {
+            background: #fcfffc;
+        }
+
+        .scm-modules-table .module-col {
+            width: 29%;
+            text-align: left !important;
+            font-weight: 700;
+            padding-left: 5px !important;
+            padding-right: 4px !important;
+            white-space: normal !important;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .scm-modules-table .ra-cell {
+            font-size: 6.5pt;
+        }
+
+        .scm-modules-table th:nth-child(2),
+        .scm-modules-table th:nth-child(3),
+        .scm-modules-table th:nth-child(4),
+        .scm-modules-table th:nth-child(5),
+        .scm-modules-table th:nth-child(6),
+        .scm-modules-table th:nth-child(7),
+        .scm-modules-table th:nth-child(8),
+        .scm-modules-table th:nth-child(9),
+        .scm-modules-table th:nth-child(10),
+        .scm-modules-table th:nth-child(11),
+        .scm-modules-table td:nth-child(2),
+        .scm-modules-table td:nth-child(3),
+        .scm-modules-table td:nth-child(4),
+        .scm-modules-table td:nth-child(5),
+        .scm-modules-table td:nth-child(6),
+        .scm-modules-table td:nth-child(7),
+        .scm-modules-table td:nth-child(8),
+        .scm-modules-table td:nth-child(9),
+        .scm-modules-table td:nth-child(10),
+        .scm-modules-table td:nth-child(11) {
+            width: 5.1%;
+        }
+
+        .scm-modules-table th:nth-child(12),
+        .scm-modules-table td:nth-child(12) {
+            width: 6.5%;
+        }
+
+        .scm-modules-table th:nth-child(13),
+        .scm-modules-table td:nth-child(13) {
+            width: 8.5%;
+        }
+
+        /* Sin resaltado amarillo */
+        .scm-modules-table .low-grade {
+            background: transparent !important;
+            font-weight: inherit !important;
+        }
+
+        .scm-comment-box {
+            border: 1.1px solid #66BB6A;
+            border-radius: 5px;
+            padding: 6px 7px;
+            margin: 10px 0 0 0;
+            background: #fcfffc;
+        }
+
+        .scm-comment-title {
+            font-size: 7.8pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .scm-comment-content {
+            min-height: 9mm;
+            font-size: 6.95pt;
+            line-height: 1.1;
+            color: #222;
+        }
+
+        .scm-content-bottom-space {
+            height: 2mm;
+        }
+    </style>
 </head>
+
 <body>
+
+    {% macro format_integer_grade(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- else -%}
+            {%- set text = (value|string).strip() -%}
+            {%- if text in ("", "0", "0.0", "0.00") -%}
+                {{- "" -}}
+            {%- else -%}
+                {{- value|float|round(0)|int -}}
+            {%- endif -%}
+        {%- endif -%}
+    {%- endmacro %}
+
+    {% macro text_value(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- elif value is string -%}
+            {{- value -}}
+        {%- elif value is iterable -%}
+            {{- value | join(" / ") -}}
+        {%- else -%}
+            {{- value -}}
+        {%- endif -%}
+    {%- endmacro %}
+
+    {% set generated_at = generated_at if generated_at is defined else "" %}
+    {% set generated_by = generated_by if generated_by is defined else settings.bulletin_generated_by %}
+    {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
+    {% set director_name = director_name if director_name is defined else settings.institution_director %}
+
+    <!-- PORTADA APROBADA -->
     {% include "bulletin_cover_pdf.html" %}
 
+    <!-- SEGUNDA HOJA -->
     <div class="pdf-page">
         <div class="pdf-frame">
-            <div class="pdf-top-student-line">
-                <strong>Estudiante:</strong> {{ student.nombre_estudiante }}
-                <span class="sep">|</span>
-                <strong>No.:</strong> {% if student.numero is defined and student.numero %}{{ student.numero }}{% else %}-{% endif %}
-                <span class="sep">|</span>
-                <strong>ID:</strong> {{ student.id_estudiante }}
-                <span class="sep">|</span>
-                <strong>Curso:</strong> {{ student.curso if student.curso is defined and student.curso else "-" }}
-            </div>
+            <div class="scm-page">
 
-            <div class="modules-only-center-wrap">
-                {{ page2_content | safe }}
+                <div class="scm-content">
+                    <div class="pdf-header">
+                        <table class="pdf-header-table">
+                            <tr>
+                                <td class="pdf-logo-cell">
+                                    {% if institution_logo_src %}
+                                        <img src="{{ institution_logo_src }}" alt="Logo institucional" class="pdf-header-logo">
+                                    {% endif %}
+                                </td>
+                                <td class="pdf-title-cell">
+                                    <div class="pdf-institution-name">{{ settings.institution_name }}</div>
+                                    <div class="pdf-department-title">{{ settings.institution_academic_department }}</div>
+                                    <div class="pdf-report-title">REPORTE DE MÓDULOS FORMATIVOS</div>
+                                </td>
+                                <td class="pdf-logo-cell">
+                                    {% if minerd_logo_src %}
+                                        <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="pdf-header-logo">
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <table class="student-inline-table">
+                        <tbody>
+                            <tr>
+                                <th>Año escolar</th>
+                                <td>{{ school_year if school_year is defined else "2025-2026" }}</td>
+                                <th>Nombre</th>
+                                <td>{{ student.nombre_estudiante }}</td>
+                                <th>Número</th>
+                                <td>{{ student.numero if student.numero is defined and student.numero else "1" }}</td>
+                            </tr>
+                            <tr>
+                                <th>ID</th>
+                                <td>{{ student.id_estudiante }}</td>
+                                <th>Curso</th>
+                                <td>{{ student.curso }}</td>
+                                <th>Profesor titular</th>
+                                <td>{{ student.prof_titular }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="scm-section-title">Módulos formativos</div>
+
+                    <table class="scm-modules-table">
+                        <thead>
+                            <tr>
+                                <th class="module-col">Módulo</th>
+                                <th>RA1</th>
+                                <th>RA2</th>
+                                <th>RA3</th>
+                                <th>RA4</th>
+                                <th>RA5</th>
+                                <th>RA6</th>
+                                <th>RA7</th>
+                                <th>RA8</th>
+                                <th>RA9</th>
+                                <th>RA10</th>
+                                <th>CF</th>
+                                <th>Situación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for module in student.modules %}
+                            <tr>
+                                <td class="module-col">{{ module.modulo if module.modulo is defined else "Módulo" }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra1 if module.ra1 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra2 if module.ra2 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra3 if module.ra3 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra4 if module.ra4 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra5 if module.ra5 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra6 if module.ra6 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra7 if module.ra7 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra8 if module.ra8 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra9 if module.ra9 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra10 if module.ra10 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(module.cf if module.cf is defined else none) }}</td>
+                                <td>
+                                    {% if module.situ_a is defined and module.situ_a %}
+                                        {{ module.situ_a }}
+                                    {% elif module.situ_r is defined and module.situ_r %}
+                                        {{ module.situ_r }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="scm-comment-box">
+                        <div class="scm-comment-title">Comentario del profesor titular</div>
+                        <div class="scm-comment-content">
+                            {% if student.comentario_final is defined and student.comentario_final %}
+                                {{ student.comentario_final }}
+                            {% else %}
+                                ________________________________________________
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="scm-content-bottom-space"></div>
+                </div>
+
+                <div class="bottom-final">
+                    <div class="signatures signatures-wide">
+                        <table class="signatures-table">
+                            <tr>
+                                <td class="signature-left">
+                                    <div class="signature-line"></div>
+                                    <div class="signature-name">{{ student.prof_titular }}</div>
+                                    <div class="signature-role">Profesor(a) Titular</div>
+                                </td>
+                                <td class="signature-right">
+                                    <div class="signature-line"></div>
+                                    <div class="signature-name">{{ director_name }}</div>
+                                    <div class="signature-role">Director(a)</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="footer">
+                        Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
