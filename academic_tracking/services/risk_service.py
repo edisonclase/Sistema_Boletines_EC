@@ -39,7 +39,7 @@ from .parsing_service import (
 MIN_APPROVAL_SCORE = 70.0
 
 
-def is_failed_competency(value: Optional[float], min_score: float = DEFAULT_MIN_COMPETENCY_SCORE) -> bool:
+def is_failed_competency(value: Optional[float], min_score: float = MIN_APPROVAL_SCORE) -> bool:
     """
     Determina si una competencia está reprobada.
     """
@@ -53,7 +53,7 @@ def get_failed_competencies_for_student_subject_period(
     subject_code: str,
     period_code: str,
     subject_period_map: Dict[str, Dict[str, List[str]]],
-    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+    min_score: float = MIN_APPROVAL_SCORE,
 ) -> Dict[str, Any]:
     """
     Devuelve el detalle de competencias reprobadas de un estudiante
@@ -99,7 +99,7 @@ def get_student_risk_for_period(
     period_code: str,
     subject_period_map: Dict[str, Dict[str, List[str]]],
     selected_subjects: Optional[List[str]] = None,
-    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+    min_score: float = MIN_APPROVAL_SCORE,
 ) -> Dict[str, Any]:
     """
     Evalúa el riesgo de un estudiante en un período completo.
@@ -143,7 +143,7 @@ def get_students_at_risk_for_course_period(
     period_code: str,
     subject_period_map: Dict[str, Dict[str, List[str]]],
     selected_subjects: Optional[List[str]] = None,
-    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+    min_score: float = MIN_APPROVAL_SCORE,
 ) -> Dict[str, Any]:
     """
     Obtiene todos los estudiantes en riesgo para un curso y período.
@@ -185,7 +185,7 @@ def summarize_subject_risk_for_course_period(
     period_code: str,
     subject_period_map: Dict[str, Dict[str, List[str]]],
     selected_subjects: Optional[List[str]] = None,
-    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+    min_score: float = MIN_APPROVAL_SCORE,
 ) -> List[Dict[str, Any]]:
     """
     Resume el riesgo por asignatura dentro de un curso y período.
@@ -234,7 +234,7 @@ def calculate_course_risk_summary(
     course_name: str,
     selected_periods: Optional[List[str]] = None,
     selected_subjects: Optional[List[str]] = None,
-    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+    min_score: float = MIN_APPROVAL_SCORE,
 ) -> Dict[str, Any]:
     """
     Calcula el resumen de riesgo completo para un curso.
@@ -281,7 +281,7 @@ def calculate_all_courses_risk_summary(
     subject_period_map: Dict[str, Dict[str, List[str]]],
     selected_periods: Optional[List[str]] = None,
     selected_subjects: Optional[List[str]] = None,
-    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+    min_score: float = MIN_APPROVAL_SCORE,
 ) -> Dict[str, Any]:
     """
     Calcula el resumen de riesgo para todos los cursos detectados.
@@ -314,7 +314,7 @@ def build_risk_dashboard_data(
     center_id: Optional[Any] = None,
     school_year: Optional[str] = None,
     ciclo: Optional[str] = None,
-    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+    min_score: float = MIN_APPROVAL_SCORE,
 ) -> Dict[str, Any]:
     """
     Punto de entrada principal del servicio.
