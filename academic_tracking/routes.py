@@ -10,76 +10,47 @@ Objetivos:
 - Soportar carga futura desde Google Sheets, BD o servicios propios
 
 Notas:
-- Este archivo asume integración con Flask
-- La carga real de datos del sheet se deja desacoplada en funciones helper
+- Este archivo asume integración con FastAPI
+- La carga real de datos del sheet se deja desacoplada en services
 - Si luego conectamos con BD o servicios internos, solo cambiamos la fuente
 """
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
-from flask import Blueprint, jsonify, render_template, request
+from fastapi import APIRouter, Query, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
-from .services.tracking_service import build_tracking_dashboard_data
 from .services.data_loader_service import (
     load_academic_rows_from_source,
     load_teacher_assignments_from_source,
 )
+from .services.tracking_service import build_tracking_dashboard_data
 
 
-academic_tracking_bp = Blueprint(
-    "academic_tracking",
-    __name__,
-    template_folder="templates",
-    static_folder="static",
-    url_prefix="/academic-tracking",
+router = APIRouter(
+    prefix="/academic-tracking",
+    tags=["academic_tracking"],
 )
+
+templates = Jinja2Templates(directory="academic_tracking/templates")
 
 
 # =========================
 # Helpers internos
 # =========================
 
-def _get_request_arg(name: str, default: Optional[str] = None) -> Optional[str]:
+def _parse_min_approval_score(raw_value: Optional[str], default: float = 70.0) -> float:
     """
-    Lee parámetros GET y limpia espacios.
+    Convierte el valor del query param a float de manera segura.
     """
-    value = request.args.get(name, default)
-    if value is None:
+    if raw_value is None:
         return default
 
-    value = str(value).strip()
-    return value if value else default
-
-
-def _get_current_center_id() -> Optional[Any]:
-    return _get_request_arg("center_id")
-
-
-def _get_current_school_year() -> Optional[str]:
-    return _get_request_arg("school_year")
-
-
-def _get_current_ciclo() -> Optional[str]:
-    return _get_request_arg("ciclo")
-
-
-def _get_current_course_name() -> Optional[str]:
-    return _get_request_arg("curso")
-
-
-def _get_current_period_code() -> Optional[str]:
-    return _get_request_arg("periodo")
-
-
-def _get_current_subject_code() -> Optional[str]:
-    return _get_request_arg("asignatura")
-
-
-def _get_min_approval_score(default: float = 70.0) -> float:
-    raw_value = _get_request_arg("min_approval_score")
-    if raw_value is None:
+    raw_value = str(raw_value).strip()
+    if not raw_value:
         return default
 
     try:
@@ -88,19 +59,18 @@ def _get_min_approval_score(default: float = 70.0) -> float:
         return default
 
 
-def _build_dashboard_response(as_json: bool = False):
+def _build_dashboard_payload(
+    center_id: Optional[Any] = None,
+    school_year: Optional[str] = None,
+    ciclo: Optional[str] = None,
+    course_name: Optional[str] = None,
+    period_code: Optional[str] = None,
+    subject_code: Optional[str] = None,
+    min_approval_score: float = 70.0,
+):
     """
-    Construye la respuesta principal del dashboard.
+    Construye la data unificada del dashboard.
     """
-    center_id = _get_current_center_id()
-    school_year = _get_current_school_year()
-    ciclo = _get_current_ciclo()
-    course_name = _get_current_course_name()
-    period_code = _get_current_period_code()
-    subject_code = _get_current_subject_code()
-    min_approval_score = _get_min_approval_score()
-
-    # 🔹 Carga desacoplada (YA CONECTADA A SERVICE)
     rows = load_academic_rows_from_source(
         center_id=center_id,
         school_year=school_year,
@@ -125,29 +95,58 @@ def _build_dashboard_response(as_json: bool = False):
         teacher_assignments=teacher_assignments,
     )
 
-    if as_json:
-        return jsonify(dashboard_data)
-
-    return render_template(
-        "academic_tracking_dashboard.html",
-        dashboard=dashboard_data,
-    )
+    return dashboard_data
 
 
 # =========================
 # Rutas públicas del módulo
 # =========================
 
-@academic_tracking_bp.route("/", methods=["GET"])
-def dashboard():
+@router.get("/", response_class=HTMLResponse)
+def dashboard(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    periodo: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    min_approval_score: Optional[str] = Query(default=None),
+):
     """
     Vista principal HTML del dashboard académico.
     """
-    return _build_dashboard_response(as_json=False)
+    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
+
+    dashboard_data = _build_dashboard_payload(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+        course_name=curso,
+        period_code=periodo,
+        subject_code=asignatura,
+        min_approval_score=min_score,
+    )
+
+    return templates.TemplateResponse(
+        "academic_tracking_dashboard.html",
+        {
+            "request": request,
+            "dashboard": dashboard_data,
+        },
+    )
 
 
-@academic_tracking_bp.route("/data", methods=["GET"])
-def dashboard_data():
+@router.get("/data")
+def dashboard_data(
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    periodo: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    min_approval_score: Optional[str] = Query(default=None),
+):
     """
     Salida JSON del dashboard.
 
@@ -157,18 +156,28 @@ def dashboard_data():
     - futura integración AJAX
     - validación de estructura antes de pulir la interfaz
     """
-    return _build_dashboard_response(as_json=True)
+    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
+
+    dashboard_data = _build_dashboard_payload(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+        course_name=curso,
+        period_code=periodo,
+        subject_code=asignatura,
+        min_approval_score=min_score,
+    )
+
+    return dashboard_data
 
 
-@academic_tracking_bp.route("/health", methods=["GET"])
+@router.get("/health")
 def healthcheck():
     """
     Ruta simple para validar que el módulo está vivo.
     """
-    return jsonify(
-        {
-            "module": "academic_tracking",
-            "status": "ok",
-            "message": "Academic tracking module is running.",
-        }
-    )
+    return {
+        "module": "academic_tracking",
+        "status": "ok",
+        "message": "Academic tracking module is running.",
+    }
