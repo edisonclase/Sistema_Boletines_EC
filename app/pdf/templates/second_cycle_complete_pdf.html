@@ -2,26 +2,670 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Boletín PDF - Segundo Ciclo Completo</title>
+    <title>Boletín Completo PDF - Segundo Ciclo</title>
+
     <style>{{ bulletin_cover_pdf_css | safe }}</style>
     <style>{{ bulletin_pdf_css | safe }}</style>
+
+    <style>
+        /* =========================
+           AJUSTES AISLADOS SOLO PARA
+           second_cycle_complete_pdf.html
+           ========================= */
+
+        .sc-complete-page {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .sc-complete-content {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .sc-complete-section-title {
+            margin: 9px 0 0 0;
+            padding: 5px 10px;
+            background: #E8F5E9;
+            border: 1.4px solid #66BB6A;
+            border-bottom: 0;
+            border-radius: 6px 6px 0 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 8.4pt;
+            line-height: 1.05;
+            color: #111;
+            text-align: center;
+        }
+
+        .sc-complete-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 1.4px solid #66BB6A !important;
+            margin: 0 0 9px 0;
+        }
+
+        .sc-complete-table col.subject-col-width {
+            width: 16%;
+        }
+
+        .sc-complete-table col.grade-col-width {
+            width: 3.2%;
+        }
+
+        .sc-complete-table col.small-grade-col-width {
+            width: 2.85%;
+        }
+
+        .sc-complete-table col.situation-col-width {
+            width: 2%;
+        }
+
+        .sc-complete-table th,
+        .sc-complete-table td {
+            border: 0 !important;
+            border-right: 1px solid #c7ddc9 !important;
+            border-bottom: 1px solid #c7ddc9 !important;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+            color: #111;
+        }
+
+        .sc-complete-table th:last-child,
+        .sc-complete-table td:last-child {
+            border-right: 0 !important;
+        }
+
+        .sc-complete-table tbody tr:last-child td {
+            border-bottom: 0 !important;
+        }
+
+        .sc-complete-table thead th {
+            background: #E8F5E9;
+            color: #111;
+            font-weight: 700;
+            word-break: normal;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .sc-complete-table thead tr:first-child th {
+            border-bottom: 1px solid #66BB6A !important;
+            padding: 3px 2px;
+            font-size: 5.35pt !important;
+            line-height: 1.02 !important;
+            height: 34px !important;
+            white-space: normal !important;
+        }
+
+        .sc-complete-table thead tr:nth-child(2) th {
+            border-bottom: 1px solid #9cc79f !important;
+            padding: 2px 0 !important;
+            font-size: 5.35pt !important;
+            line-height: 1 !important;
+            height: 15px !important;
+            white-space: nowrap !important;
+        }
+
+        .sc-complete-table tbody td {
+            height: 16px;
+            padding: 1px 1px !important;
+            font-size: 6.1pt !important;
+            line-height: 1.08 !important;
+        }
+
+        .sc-complete-table tbody tr:nth-child(even) td {
+            background: #fcfffc;
+        }
+
+        .sc-complete-table .subject-col {
+            text-align: left !important;
+            font-weight: 700;
+            padding-left: 3px !important;
+            padding-right: 3px !important;
+            font-size: 6.1pt !important;
+            line-height: 1.08 !important;
+            white-space: normal !important;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .sc-complete-table .small-col {
+            width: 2.85%;
+            min-width: 2.85%;
+        }
+
+        .sc-complete-table .situation-col {
+            width: 2%;
+            min-width: 2%;
+        }
+
+        .sc-complete-table tbody td:nth-child(1) {
+            border-right: 1px solid #66BB6A !important;
+        }
+
+        .sc-complete-table tbody td:nth-child(5),
+        .sc-complete-table tbody td:nth-child(9),
+        .sc-complete-table tbody td:nth-child(13),
+        .sc-complete-table tbody td:nth-child(17),
+        .sc-complete-table tbody td:nth-child(21),
+        .sc-complete-table tbody td:nth-child(22),
+        .sc-complete-table tbody td:nth-child(26),
+        .sc-complete-table tbody td:nth-child(30),
+        .sc-complete-table tbody td:nth-child(31),
+        .sc-complete-table tbody td:nth-child(32) {
+            border-right: 1px solid #66BB6A !important;
+        }
+
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(4),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(8),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(12),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(16),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(20),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(24),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(28),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(29) {
+            border-right: 1px solid #66BB6A !important;
+        }
+
+        .sc-complete-table tbody td:not(.subject-col) {
+            white-space: nowrap;
+        }
+
+        /* Sin resaltado amarillo en este boletín */
+        .sc-complete-table .low-grade,
+        .sc-complete-table .sc-complete-low-grade {
+            background: transparent !important;
+            font-weight: inherit !important;
+        }
+
+        .sc-complete-modules-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 1.4px solid #66BB6A !important;
+            margin: 0 0 9px 0;
+        }
+
+        .sc-complete-modules-table th,
+        .sc-complete-modules-table td {
+            border: 1px solid #a5c9a7 !important;
+            text-align: center;
+            vertical-align: middle;
+            color: #111;
+        }
+
+        .sc-complete-modules-table th {
+            background: #E8F5E9;
+            font-weight: 700;
+            font-size: 6.4pt;
+            line-height: 1.02;
+            padding: 3px 2px;
+            height: 17px;
+        }
+
+        .sc-complete-modules-table td {
+            font-size: 6.2pt;
+            line-height: 1.06;
+            padding: 2px 2px;
+            height: 16px;
+        }
+
+        .sc-complete-modules-table tbody tr:nth-child(even) td {
+            background: #fcfffc;
+        }
+
+        .sc-complete-modules-table .module-col {
+            width: 29%;
+            text-align: left !important;
+            font-weight: 700;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
+            white-space: normal !important;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .sc-complete-modules-table .ra-cell {
+            font-size: 6.1pt;
+        }
+
+        .sc-complete-modules-table th:nth-child(2),
+        .sc-complete-modules-table th:nth-child(3),
+        .sc-complete-modules-table th:nth-child(4),
+        .sc-complete-modules-table th:nth-child(5),
+        .sc-complete-modules-table th:nth-child(6),
+        .sc-complete-modules-table th:nth-child(7),
+        .sc-complete-modules-table th:nth-child(8),
+        .sc-complete-modules-table th:nth-child(9),
+        .sc-complete-modules-table th:nth-child(10),
+        .sc-complete-modules-table th:nth-child(11),
+        .sc-complete-modules-table td:nth-child(2),
+        .sc-complete-modules-table td:nth-child(3),
+        .sc-complete-modules-table td:nth-child(4),
+        .sc-complete-modules-table td:nth-child(5),
+        .sc-complete-modules-table td:nth-child(6),
+        .sc-complete-modules-table td:nth-child(7),
+        .sc-complete-modules-table td:nth-child(8),
+        .sc-complete-modules-table td:nth-child(9),
+        .sc-complete-modules-table td:nth-child(10),
+        .sc-complete-modules-table td:nth-child(11) {
+            width: 5.1%;
+        }
+
+        .sc-complete-modules-table th:nth-child(12),
+        .sc-complete-modules-table td:nth-child(12) {
+            width: 6.4%;
+        }
+
+        .sc-complete-modules-table th:nth-child(13),
+        .sc-complete-modules-table td:nth-child(13) {
+            width: 8.6%;
+        }
+
+        .sc-complete-modules-table .low-grade {
+            background: transparent !important;
+            font-weight: inherit !important;
+        }
+
+        .sc-complete-legend-box {
+            border: 1.1px solid #66BB6A;
+            border-radius: 5px;
+            padding: 6px 7px;
+            margin: 8px 0 8px 0;
+            background: #fcfffc;
+        }
+
+        .sc-complete-legend-title {
+            font-size: 7.8pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .sc-complete-legend-grid {
+            font-size: 6.6pt;
+            line-height: 1.12;
+            color: #111;
+        }
+
+        .sc-complete-legend-grid table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .sc-complete-legend-grid td {
+            padding: 1px 6px 1px 0;
+            vertical-align: top;
+        }
+
+        .sc-complete-comment-box {
+            border: 1.1px solid #66BB6A;
+            border-radius: 5px;
+            padding: 6px 7px;
+            margin: 8px 0 0 0;
+            background: #fcfffc;
+        }
+
+        .sc-complete-comment-title {
+            font-size: 7.8pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .sc-complete-comment-content {
+            min-height: 8mm;
+            font-size: 6.9pt;
+            line-height: 1.1;
+            color: #222;
+        }
+
+        .sc-complete-content-bottom-space {
+            height: 1mm;
+        }
+    </style>
 </head>
+
 <body>
+
+    {% macro format_decimal_grade(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- else -%}
+            {%- set text = (value|string).strip() -%}
+            {%- if text in ("", "0", "0.0", "0.00") -%}
+                {{- "" -}}
+            {%- else -%}
+                {{- "%.1f"|format(value|float) -}}
+            {%- endif -%}
+        {%- endif -%}
+    {%- endmacro %}
+
+    {% macro format_integer_grade(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- else -%}
+            {%- set text = (value|string).strip() -%}
+            {%- if text in ("", "0", "0.0", "0.00") -%}
+                {{- "" -}}
+            {%- else -%}
+                {{- value|float|round(0)|int -}}
+            {%- endif -%}
+        {%- endif -%}
+    {%- endmacro %}
+
+    {% macro text_value(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- elif value is string -%}
+            {{- value -}}
+        {%- elif value is iterable -%}
+            {{- value | join(" / ") -}}
+        {%- else -%}
+            {{- value -}}
+        {%- endif -%}
+    {%- endmacro %}
+
+    {% set generated_at = generated_at if generated_at is defined else "" %}
+    {% set generated_by = generated_by if generated_by is defined else settings.bulletin_generated_by %}
+    {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
+    {% set director_name = director_name if director_name is defined else settings.institution_director %}
+
+    <!-- PORTADA APROBADA -->
     {% include "bulletin_cover_pdf.html" %}
 
+    <!-- SEGUNDA HOJA -->
     <div class="pdf-page">
         <div class="pdf-frame">
-            <div class="pdf-top-student-line">
-                <strong>Estudiante:</strong> {{ student.nombre_estudiante }}
-                <span class="sep">|</span>
-                <strong>No.:</strong> {% if student.numero is defined and student.numero %}{{ student.numero }}{% else %}-{% endif %}
-                <span class="sep">|</span>
-                <strong>ID:</strong> {{ student.id_estudiante }}
-                <span class="sep">|</span>
-                <strong>Curso:</strong> {{ student.curso if student.curso is defined and student.curso else "-" }}
-            </div>
+            <div class="sc-complete-page">
 
-            {{ page2_content | safe }}
+                <div class="sc-complete-content">
+                    <div class="pdf-header">
+                        <table class="pdf-header-table">
+                            <tr>
+                                <td class="pdf-logo-cell">
+                                    {% if institution_logo_src %}
+                                        <img src="{{ institution_logo_src }}" alt="Logo institucional" class="pdf-header-logo">
+                                    {% endif %}
+                                </td>
+                                <td class="pdf-title-cell">
+                                    <div class="pdf-institution-name">{{ settings.institution_name }}</div>
+                                    <div class="pdf-department-title">{{ settings.institution_academic_department }}</div>
+                                    <div class="pdf-report-title">REPORTE DE EVALUACIONES DEL SEGUNDO CICLO</div>
+                                </td>
+                                <td class="pdf-logo-cell">
+                                    {% if minerd_logo_src %}
+                                        <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="pdf-header-logo">
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <table class="student-inline-table">
+                        <tbody>
+                            <tr>
+                                <th>Año escolar</th>
+                                <td>{{ school_year if school_year is defined else "2025-2026" }}</td>
+                                <th>Nombre</th>
+                                <td>{{ student.nombre_estudiante }}</td>
+                                <th>Número</th>
+                                <td>{{ student.numero if student.numero is defined and student.numero else "1" }}</td>
+                            </tr>
+                            <tr>
+                                <th>ID</th>
+                                <td>{{ student.id_estudiante }}</td>
+                                <th>Curso</th>
+                                <td>{{ student.curso }}</td>
+                                <th>Profesor titular</th>
+                                <td>{{ student.prof_titular }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="sc-complete-section-title">Áreas académicas</div>
+
+                    <table class="sc-complete-table">
+                        <colgroup>
+                            <col class="subject-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="situation-col-width"><col class="situation-col-width">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="subject-col" rowspan="2">ASIG.</th>
+
+                                <th colspan="4">COMUNICATIVA</th>
+                                <th colspan="4">PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO / RESOLUCIÓN DE PROBLEMAS</th>
+                                <th colspan="4">CIENTÍFICA Y TECNOLÓGICA / AMBIENTAL Y DE LA SALUD</th>
+                                <th colspan="4">ÉTICA Y CIUDADANA / DESARROLLO PERSONAL Y ESPIRITUAL</th>
+                                <th colspan="4">PC</th>
+
+                                <th class="small-col" rowspan="2">CF</th>
+                                <th colspan="4">COMP</th>
+                                <th colspan="4">EXT</th>
+                                <th colspan="1">ESP</th>
+                                <th class="small-col" rowspan="2">ASIS</th>
+                                <th colspan="2">SIT</th>
+                            </tr>
+                            <tr>
+                                <th class="tiny-col">P1</th>
+                                <th class="tiny-col">P2</th>
+                                <th class="tiny-col">P3</th>
+                                <th class="tiny-col">P4</th>
+
+                                <th class="tiny-col">P1</th>
+                                <th class="tiny-col">P2</th>
+                                <th class="tiny-col">P3</th>
+                                <th class="tiny-col">P4</th>
+
+                                <th class="tiny-col">P1</th>
+                                <th class="tiny-col">P2</th>
+                                <th class="tiny-col">P3</th>
+                                <th class="tiny-col">P4</th>
+
+                                <th class="tiny-col">P1</th>
+                                <th class="tiny-col">P2</th>
+                                <th class="tiny-col">P3</th>
+                                <th class="tiny-col">P4</th>
+
+                                <th class="tiny-col">PC1</th>
+                                <th class="tiny-col">PC2</th>
+                                <th class="tiny-col">PC3</th>
+                                <th class="tiny-col">PC4</th>
+
+                                <th class="tiny-col">50CF</th>
+                                <th class="tiny-col">CEC</th>
+                                <th class="tiny-col">50CEC</th>
+                                <th class="tiny-col">CCF</th>
+
+                                <th class="tiny-col">30CF</th>
+                                <th class="tiny-col">CEEX</th>
+                                <th class="tiny-col">70CE</th>
+                                <th class="tiny-col">CEXF</th>
+
+                                <th class="tiny-col">CE</th>
+
+                                <th class="situation-col">A</th>
+                                <th class="situation-col">R</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in student.subjects %}
+                            <tr>
+                                <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
+
+                                <td>{{ format_decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+
+                                <td>{{ format_decimal_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+
+                                <td>{{ format_decimal_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+
+                                <td>{{ format_decimal_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.final if subject.final is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.comp_50cf if subject.comp_50cf is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.comp_cec if subject.comp_cec is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.comp_50cec if subject.comp_50cec is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.ccf if subject.ccf is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.ext_30cf if subject.ext_30cf is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.ext_ceex if subject.ext_ceex is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.ext_70ceex if subject.ext_70ceex is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.cexf if subject.cexf is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
+
+                                <td>{% if subject.situ_a is defined and subject.situ_a %}{{ subject.situ_a }}{% else %}-{% endif %}</td>
+                                <td>{% if subject.situ_r is defined and subject.situ_r %}{{ subject.situ_r }}{% else %}-{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {% if student.modules is defined and student.modules %}
+                    <div class="sc-complete-section-title">Módulos técnicos</div>
+
+                    <table class="sc-complete-modules-table">
+                        <thead>
+                            <tr>
+                                <th class="module-col">Módulo</th>
+                                <th>RA1</th>
+                                <th>RA2</th>
+                                <th>RA3</th>
+                                <th>RA4</th>
+                                <th>RA5</th>
+                                <th>RA6</th>
+                                <th>RA7</th>
+                                <th>RA8</th>
+                                <th>RA9</th>
+                                <th>RA10</th>
+                                <th>CF</th>
+                                <th>Situación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for module in student.modules %}
+                            <tr>
+                                <td class="module-col">{{ module.modulo if module.modulo is defined else "Módulo" }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra1 if module.ra1 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra2 if module.ra2 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra3 if module.ra3 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra4 if module.ra4 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra5 if module.ra5 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra6 if module.ra6 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra7 if module.ra7 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra8 if module.ra8 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra9 if module.ra9 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra10 if module.ra10 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(module.cf if module.cf is defined else none) }}</td>
+                                <td>
+                                    {% if module.situ_a is defined and module.situ_a %}
+                                        {{ module.situ_a }}
+                                    {% elif module.situ_r is defined and module.situ_r %}
+                                        {{ module.situ_r }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+
+                    <div class="sc-complete-legend-box">
+                        <div class="sc-complete-legend-title">Leyenda de abreviaturas</div>
+                        <div class="sc-complete-legend-grid">
+                            <table>
+                                <tr>
+                                    <td><strong>PC</strong> = Promedio de competencias</td>
+                                    <td><strong>CF</strong> = Calificación final</td>
+                                    <td><strong>COMP</strong> = Completivo</td>
+                                    <td><strong>EXT</strong> = Extraordinario</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ESP</strong> = Evaluación especial</td>
+                                    <td><strong>ASIS</strong> = Asistencia</td>
+                                    <td><strong>SIT</strong> = Situación final</td>
+                                    <td><strong>A / R</strong> = Aprobado / Reprobado</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="sc-complete-comment-box">
+                        <div class="sc-complete-comment-title">Comentario del profesor titular</div>
+                        <div class="sc-complete-comment-content">
+                            {% if student.comentario_final is defined and student.comentario_final %}
+                                {{ student.comentario_final }}
+                            {% else %}
+                                ________________________________________________
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="sc-complete-content-bottom-space"></div>
+                </div>
+
+                <div class="bottom-final">
+                    <div class="signatures signatures-wide">
+                        <table class="signatures-table">
+                            <tr>
+                                <td class="signature-left">
+                                    <div class="signature-line"></div>
+                                    <div class="signature-name">{{ student.prof_titular }}</div>
+                                    <div class="signature-role">Profesor(a) Titular</div>
+                                </td>
+                                <td class="signature-right">
+                                    <div class="signature-line"></div>
+                                    <div class="signature-name">{{ director_name }}</div>
+                                    <div class="signature-role">Director(a)</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="footer">
+                        Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </body>
