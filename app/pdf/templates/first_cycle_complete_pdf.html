@@ -2,160 +2,571 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Boletín PDF - Primer Ciclo por Bloques</title>
+    <title>Boletín Completo PDF - Primer Ciclo</title>
+
     <style>{{ bulletin_cover_pdf_css | safe }}</style>
     <style>{{ bulletin_pdf_css | safe }}</style>
+
+    <style>
+        /* =========================
+           AJUSTES AISLADOS SOLO PARA
+           first_cycle_complete_pdf.html
+           ========================= */
+
+        .fc-complete-page {
+            width: 100%;
+            min-height: 184mm;
+            box-sizing: border-box;
+            position: relative;
+            padding-bottom: 28mm; /* reserva para firmas + créditos */
+        }
+
+        .fc-complete-main {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .fc-complete-bottom {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 4mm;
+        }
+
+        .fc-complete-section-title {
+            margin: 6px 0 0 0;
+            padding: 5px 10px;
+            background: #E8F5E9;
+            border: 1.4px solid #66BB6A;
+            border-bottom: 0;
+            border-radius: 6px 6px 0 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 8.4pt;
+            line-height: 1.05;
+            color: #111;
+        }
+
+        .fc-complete-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 1.4px solid #66BB6A !important;
+            margin: 0 0 5px 0;
+        }
+
+        .fc-complete-table col.subject-col-width {
+            width: 17%;
+        }
+
+        .fc-complete-table col.grade-col-width {
+            width: 2.95%;
+        }
+
+        .fc-complete-table col.small-grade-col-width {
+            width: 2.45%;
+        }
+
+        .fc-complete-table col.situation-col-width {
+            width: 2.15%;
+        }
+
+        .fc-complete-table th,
+        .fc-complete-table td {
+            border: 0 !important;
+            border-right: 1px solid #c7ddc9 !important;
+            border-bottom: 1px solid #c7ddc9 !important;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+            color: #111;
+        }
+
+        .fc-complete-table th:last-child,
+        .fc-complete-table td:last-child {
+            border-right: 0 !important;
+        }
+
+        .fc-complete-table tbody tr:last-child td {
+            border-bottom: 0 !important;
+        }
+
+        .fc-complete-table thead th {
+            background: #E8F5E9;
+            color: #111;
+            font-weight: 700;
+            white-space: normal !important;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            line-height: 1.03 !important;
+        }
+
+        .fc-complete-table thead tr:first-child th {
+            border-bottom: 1px solid #66BB6A !important;
+            padding: 2px 1px;
+            font-size: 4.95pt !important;
+            line-height: 1.03 !important;
+            height: 25px !important;
+        }
+
+        .fc-complete-table thead tr:nth-child(2) th {
+            border-bottom: 1px solid #9cc79f !important;
+            padding: 1px 0 !important;
+            font-size: 5.2pt !important;
+            line-height: 1 !important;
+            height: 14px !important;
+        }
+
+        .fc-complete-table tbody td {
+            height: 15px;
+            padding: 1px 1px !important;
+            font-size: 5.95pt !important;
+            line-height: 1.05 !important;
+        }
+
+        .fc-complete-table tbody tr:nth-child(even) td {
+            background: #fcfffc;
+        }
+
+        .fc-complete-table .subject-col {
+            text-align: left !important;
+            font-weight: 700;
+            padding-left: 3px !important;
+            padding-right: 3px !important;
+            font-size: 6.05pt !important;
+            line-height: 1.05 !important;
+            white-space: normal !important;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .fc-complete-table .small-col {
+            width: 2.45%;
+            min-width: 2.45%;
+        }
+
+        .fc-complete-table .situation-col {
+            width: 2.15%;
+            min-width: 2.15%;
+        }
+
+        .fc-complete-table tbody td:nth-child(1) {
+            border-right: 1px solid #66BB6A !important;
+        }
+
+        .fc-complete-table tbody td:nth-child(5),
+        .fc-complete-table tbody td:nth-child(9),
+        .fc-complete-table tbody td:nth-child(13),
+        .fc-complete-table tbody td:nth-child(17),
+        .fc-complete-table tbody td:nth-child(21),
+        .fc-complete-table tbody td:nth-child(22),
+        .fc-complete-table tbody td:nth-child(26),
+        .fc-complete-table tbody td:nth-child(30),
+        .fc-complete-table tbody td:nth-child(31),
+        .fc-complete-table tbody td:nth-child(32) {
+            border-right: 1px solid #66BB6A !important;
+        }
+
+        .fc-complete-table thead tr:nth-child(2) th:nth-child(4),
+        .fc-complete-table thead tr:nth-child(2) th:nth-child(8),
+        .fc-complete-table thead tr:nth-child(2) th:nth-child(12),
+        .fc-complete-table thead tr:nth-child(2) th:nth-child(16),
+        .fc-complete-table thead tr:nth-child(2) th:nth-child(20),
+        .fc-complete-table thead tr:nth-child(2) th:nth-child(24),
+        .fc-complete-table thead tr:nth-child(2) th:nth-child(28),
+        .fc-complete-table thead tr:nth-child(2) th:nth-child(29) {
+            border-right: 1px solid #66BB6A !important;
+        }
+
+        .fc-complete-table tbody td:not(.subject-col) {
+            white-space: nowrap;
+        }
+
+        .fc-complete-legend-box {
+            border: 1.1px solid #66BB6A;
+            border-radius: 5px;
+            padding: 5px 7px;
+            margin: 5px 0 5px 0;
+            background: #fcfffc;
+        }
+
+        .fc-complete-legend-title {
+            font-size: 7.8pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .fc-complete-legend-grid {
+            font-size: 6.55pt;
+            line-height: 1.12;
+            color: #111;
+        }
+
+        .fc-complete-legend-grid table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .fc-complete-legend-grid td {
+            padding: 1px 6px 1px 0;
+            vertical-align: top;
+        }
+
+        .fc-complete-comment-box {
+            border: 1.1px solid #66BB6A;
+            border-radius: 5px;
+            padding: 5px 7px;
+            margin: 5px 0 0 0;
+            background: #fcfffc;
+        }
+
+        .fc-complete-comment-title {
+            font-size: 7.8pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .fc-complete-comment-content {
+            min-height: 9mm;
+            font-size: 6.95pt;
+            line-height: 1.1;
+            color: #222;
+        }
+
+        .fc-complete-signatures {
+            margin-top: 4px;
+        }
+
+        .fc-complete-signatures-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .fc-complete-signatures-table td {
+            width: 50%;
+            text-align: center;
+            vertical-align: top;
+            padding: 0 10px;
+        }
+
+        .fc-complete-signature-line {
+            width: 68%;
+            margin: 0 auto 3px auto;
+            border-top: 1px solid #111;
+            height: 0;
+        }
+
+        .fc-complete-signature-name {
+            font-size: 7.25pt;
+            font-weight: 700;
+            line-height: 1.08;
+            color: #111;
+        }
+
+        .fc-complete-signature-role {
+            font-size: 6.8pt;
+            line-height: 1.05;
+            color: #111;
+        }
+
+        .fc-complete-footer {
+            margin-top: 3px;
+            font-size: 6.15pt;
+            line-height: 1.02;
+            color: #222;
+            text-align: center;
+        }
+
+        .fc-complete-low-grade {
+            background: var(--low-grade-color, #FFF59D) !important;
+            font-weight: 700;
+        }
+    </style>
 </head>
-<body>
+
+<body style="--low-grade-color: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};">
+
+    {% macro format_decimal_grade(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- else -%}
+            {%- set text = (value|string).strip() -%}
+            {%- if text in ("", "0", "0.0", "0.00") -%}
+                {{- "" -}}
+            {%- else -%}
+                {{- "%.1f"|format(value|float) -}}
+            {%- endif -%}
+        {%- endif -%}
+    {%- endmacro %}
+
+    {% macro format_integer_grade(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- else -%}
+            {%- set text = (value|string).strip() -%}
+            {%- if text in ("", "0", "0.0", "0.00") -%}
+                {{- "" -}}
+            {%- else -%}
+                {{- value|float|round(0)|int -}}
+            {%- endif -%}
+        {%- endif -%}
+    {%- endmacro %}
+
+    {% macro block_cell_class(value) -%}
+        {%- set visible = format_decimal_grade(value)|trim -%}
+        {%- if visible != "" and (value|float) >= 1 and (value|float) < 70 -%}
+            fc-complete-low-grade
+        {%- endif -%}
+    {%- endmacro %}
+
+    {% set generated_at = generated_at if generated_at is defined else "" %}
+    {% set generated_by = generated_by if generated_by is defined else settings.bulletin_generated_by %}
+    {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
+    {% set director_name = director_name if director_name is defined else settings.institution_director %}
+
+    <!-- PORTADA APROBADA -->
     {% include "bulletin_cover_pdf.html" %}
 
+    <!-- SEGUNDA HOJA -->
     <div class="pdf-page">
         <div class="pdf-frame">
-            <div class="pdf-header">
-                <table class="pdf-header-table">
-                    <tr>
-                        <td class="pdf-logo-cell">
-                            {% if institution_logo_src %}
-                                <img src="{{ institution_logo_src }}" alt="Logo institucional" class="pdf-header-logo">
-                            {% endif %}
-                        </td>
+            <div class="fc-complete-page">
 
-                        <td class="pdf-title-cell">
-                            <div class="pdf-institution-name">{{ settings.institution_name }}</div>
-                            <div class="pdf-department-title">{{ settings.institution_academic_department }}</div>
-                            <div class="pdf-report-title">REPORTE DE EVALUACIONES POR BLOQUES DE COMPETENCIAS</div>
-                        </td>
+                <div class="fc-complete-main">
 
-                        <td class="pdf-logo-cell">
-                            {% if minerd_logo_src %}
-                                <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="pdf-header-logo">
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
-            </div>
+                    <div class="pdf-header">
+                        <table class="pdf-header-table">
+                            <tr>
+                                <td class="pdf-logo-cell">
+                                    {% if institution_logo_src %}
+                                        <img src="{{ institution_logo_src }}" alt="Logo institucional" class="pdf-header-logo">
+                                    {% endif %}
+                                </td>
+                                <td class="pdf-title-cell">
+                                    <div class="pdf-institution-name">{{ settings.institution_name }}</div>
+                                    <div class="pdf-department-title">{{ settings.institution_academic_department }}</div>
+                                    <div class="pdf-report-title">REPORTE DE EVALUACIONES DEL PRIMER CICLO</div>
+                                </td>
+                                <td class="pdf-logo-cell">
+                                    {% if minerd_logo_src %}
+                                        <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="pdf-header-logo">
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
 
-            <table class="student-inline-table">
-                <tbody>
-                    <tr>
-                        <th>Año escolar</th>
-                        <td>{{ school_year }}</td>
-                        <th>Nombre</th>
-                        <td>{{ student.nombre_estudiante }}</td>
-                        <th>Número</th>
-                        <td>{% if student.numero is defined and student.numero %}{{ student.numero }}{% else %}-{% endif %}</td>
-                    </tr>
-                    <tr>
-                        <th>ID</th>
-                        <td>{{ student.id_estudiante }}</td>
-                        <th>Curso</th>
-                        <td>{{ student.curso if student.curso is defined and student.curso else "-" }}</td>
-                        <th>Profesor titular</th>
-                        <td>{{ student.prof_titular if student.prof_titular is defined and student.prof_titular else "-" }}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="section-title">Áreas académicas</div>
-
-            {% macro grade_cell(value) -%}
-                {%- if value is defined and value not in [None, "", 0, 0.0, "0", "0.0", "0.00"] -%}
-                    {{ "%.1f"|format(value|float) }}
-                {%- else -%}
-                    {{ "" }}
-                {%- endif -%}
-            {%- endmacro %}
-
-            {% macro low_class(value) -%}
-                {%- if value is defined and value not in [None, "", 0, 0.0, "0", "0.0", "0.00"] and (value|float) < 70 -%}
-                    low-grade
-                {%- endif -%}
-            {%- endmacro %}
-
-            <table class="academic-table blocks-table">
-                <thead>
-                    <tr>
-                        <th class="subject-col" rowspan="2">ASIGNATURAS</th>
-                        <th colspan="4">COMUNICATIVA</th>
-                        <th colspan="4">PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO / RESOLUCIÓN DE PROBLEMAS</th>
-                        <th colspan="4">CIENTÍFICA Y TECNOLÓGICA / AMBIENTAL Y DE LA SALUD</th>
-                        <th colspan="4">ÉTICA Y CIUDADANA / DESARROLLO PERSONAL Y ESPIRITUAL</th>
-                    </tr>
-                    <tr>
-                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
-                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
-                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
-                        <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for subject in student.subjects %}
-                    <tr>
-                        <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "-" }}</td>
-
-                        <td class="{{ low_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ grade_cell(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ grade_cell(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ grade_cell(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ grade_cell(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
-
-                        <td class="{{ low_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ grade_cell(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ grade_cell(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ grade_cell(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ grade_cell(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
-
-                        <td class="{{ low_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ grade_cell(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ grade_cell(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ grade_cell(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ grade_cell(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
-
-                        <td class="{{ low_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ grade_cell(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ grade_cell(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ grade_cell(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
-                        <td class="{{ low_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ grade_cell(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <div class="comment-box">
-                <div class="comment-title">Comentario del profesor titular:</div>
-                <div class="muted">
-                    {% if student.comentario_final is defined and student.comentario_final %}
-                        {{ student.comentario_final }}
-                    {% else %}
-                        __________________________________________________________________________________
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="summary-box">
-                <div class="summary-title">Observaciones generales:</div>
-                <div class="muted">
-                    Este reporte presenta el desempeño del estudiante por bloques de competencias en los cuatro períodos del año escolar.
-                </div>
-            </div>
-
-            <div class="bottom-final">
-                <div class="signatures">
-                    <table class="signatures-table">
-                        <tr>
-                            <td>
-                                <div class="signature-line"></div>
-                                <div class="signature-name">{{ student.prof_titular if student.prof_titular is defined and student.prof_titular else "-" }}</div>
-                                <div class="signature-role">Profesor(a) Titular</div>
-                            </td>
-                            <td>
-                                <div class="signature-line"></div>
-                                <div class="signature-name">{{ director_name }}</div>
-                                <div class="signature-role">Director(a)</div>
-                            </td>
-                        </tr>
+                    <table class="student-inline-table">
+                        <tbody>
+                            <tr>
+                                <th>Año escolar</th>
+                                <td>{{ school_year if school_year is defined else "2025-2026" }}</td>
+                                <th>Nombre</th>
+                                <td>{{ student.nombre_estudiante }}</td>
+                                <th>Número</th>
+                                <td>{{ student.numero if student.numero is defined and student.numero else "1" }}</td>
+                            </tr>
+                            <tr>
+                                <th>ID</th>
+                                <td>{{ student.id_estudiante }}</td>
+                                <th>Curso</th>
+                                <td>{{ student.curso }}</td>
+                                <th>Profesor titular</th>
+                                <td>{{ student.prof_titular }}</td>
+                            </tr>
+                        </tbody>
                     </table>
+
+                    <div class="fc-complete-section-title">Áreas académicas</div>
+
+                    <table class="fc-complete-table">
+                        <colgroup>
+                            <col class="subject-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="situation-col-width"><col class="situation-col-width">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="subject-col" rowspan="2">ASIG.</th>
+
+                                <th colspan="4">COMUNICATIVA</th>
+                                <th colspan="4">PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO / RESOLUCIÓN DE PROBLEMAS</th>
+                                <th colspan="4">CIENTÍFICA Y TECNOLÓGICA / AMBIENTAL Y DE LA SALUD</th>
+                                <th colspan="4">ÉTICA Y CIUDADANA / DESARROLLO PERSONAL Y ESPIRITUAL</th>
+                                <th colspan="4">PC</th>
+
+                                <th class="small-col" rowspan="2">CF</th>
+                                <th colspan="4">COMP</th>
+                                <th colspan="4">EXT</th>
+                                <th colspan="1">ESP</th>
+                                <th class="small-col" rowspan="2">ASIS</th>
+                                <th colspan="2">SIT</th>
+                            </tr>
+                            <tr>
+                                <th class="tiny-col">P1</th>
+                                <th class="tiny-col">P2</th>
+                                <th class="tiny-col">P3</th>
+                                <th class="tiny-col">P4</th>
+
+                                <th class="tiny-col">P1</th>
+                                <th class="tiny-col">P2</th>
+                                <th class="tiny-col">P3</th>
+                                <th class="tiny-col">P4</th>
+
+                                <th class="tiny-col">P1</th>
+                                <th class="tiny-col">P2</th>
+                                <th class="tiny-col">P3</th>
+                                <th class="tiny-col">P4</th>
+
+                                <th class="tiny-col">P1</th>
+                                <th class="tiny-col">P2</th>
+                                <th class="tiny-col">P3</th>
+                                <th class="tiny-col">P4</th>
+
+                                <th class="tiny-col">PC1</th>
+                                <th class="tiny-col">PC2</th>
+                                <th class="tiny-col">PC3</th>
+                                <th class="tiny-col">PC4</th>
+
+                                <th class="tiny-col">50CF</th>
+                                <th class="tiny-col">CEC</th>
+                                <th class="tiny-col">50CEC</th>
+                                <th class="tiny-col">CCF</th>
+
+                                <th class="tiny-col">30CF</th>
+                                <th class="tiny-col">CEEX</th>
+                                <th class="tiny-col">70CE</th>
+                                <th class="tiny-col">CEXF</th>
+
+                                <th class="tiny-col">CE</th>
+
+                                <th class="situation-col">A</th>
+                                <th class="situation-col">R</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in student.subjects %}
+                            <tr>
+                                <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
+
+                                <td class="{{ block_cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ format_decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ format_decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ format_decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ format_decimal_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+
+                                <td class="{{ block_cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ format_decimal_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ format_decimal_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ format_decimal_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ format_decimal_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+
+                                <td class="{{ block_cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ format_decimal_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ format_decimal_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ format_decimal_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ format_decimal_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+
+                                <td class="{{ block_cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ format_decimal_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ format_decimal_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ format_decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ format_decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+
+                                <td class="{{ block_cell_class(subject.pc1 if subject.pc1 is defined else none) }}">{{ format_decimal_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.pc2 if subject.pc2 is defined else none) }}">{{ format_decimal_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.pc3 if subject.pc3 is defined else none) }}">{{ format_decimal_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
+                                <td class="{{ block_cell_class(subject.pc4 if subject.pc4 is defined else none) }}">{{ format_decimal_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.final if subject.final is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.comp_50cf if subject.comp_50cf is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.comp_cec if subject.comp_cec is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.comp_50cec if subject.comp_50cec is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.ccf if subject.ccf is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.ext_30cf if subject.ext_30cf is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.ext_ceex if subject.ext_ceex is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.ext_70ceex if subject.ext_70ceex is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.cexf if subject.cexf is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
+
+                                <td>{{ format_integer_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
+
+                                <td>{% if subject.situ_a is defined and subject.situ_a %}{{ subject.situ_a }}{% else %}-{% endif %}</td>
+                                <td>{% if subject.situ_r is defined and subject.situ_r %}{{ subject.situ_r }}{% else %}-{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="fc-complete-legend-box">
+                        <div class="fc-complete-legend-title">Leyenda de abreviaturas</div>
+                        <div class="fc-complete-legend-grid">
+                            <table>
+                                <tr>
+                                    <td><strong>PC</strong> = Promedio de competencias</td>
+                                    <td><strong>CF</strong> = Calificación final</td>
+                                    <td><strong>COMP</strong> = Completivo</td>
+                                    <td><strong>EXT</strong> = Extraordinario</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ESP</strong> = Evaluación especial</td>
+                                    <td><strong>ASIS</strong> = Asistencia</td>
+                                    <td><strong>SIT</strong> = Situación final</td>
+                                    <td><strong>A / R</strong> = Aprobado / Reprobado</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="fc-complete-comment-box">
+                        <div class="fc-complete-comment-title">Comentario del profesor titular</div>
+                        <div class="fc-complete-comment-content">
+                            {% if student.comentario_final is defined and student.comentario_final %}
+                                {{ student.comentario_final }}
+                            {% else %}
+                                ________________________________________________
+                            {% endif %}
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="footer">
-                    Generado el {{ generated_at }} por {{ generated_by }} {% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+                <div class="fc-complete-bottom">
+                    <div class="fc-complete-signatures">
+                        <table class="fc-complete-signatures-table">
+                            <tr>
+                                <td>
+                                    <div class="fc-complete-signature-line"></div>
+                                    <div class="fc-complete-signature-name">{{ director_name }}</div>
+                                    <div class="fc-complete-signature-role">Director(a)</div>
+                                </td>
+                                <td>
+                                    <div class="fc-complete-signature-line"></div>
+                                    <div class="fc-complete-signature-name">{{ student.prof_titular }}</div>
+                                    <div class="fc-complete-signature-role">Profesor(a) Titular</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="fc-complete-footer">
+                        Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
