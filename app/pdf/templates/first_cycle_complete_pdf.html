@@ -15,25 +15,16 @@
 
         .fc-complete-page {
             width: 100%;
-            min-height: 184mm;
             box-sizing: border-box;
-            display: table;
-            table-layout: fixed;
         }
 
         .fc-complete-content {
-            display: table-row;
-            height: auto;
-        }
-
-        .fc-complete-bottom {
-            display: table-row;
-            height: 1%;
-            vertical-align: bottom;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .fc-complete-section-title {
-            margin: 7px 0 0 0;
+            margin: 9px 0 0 0;
             padding: 5px 10px;
             background: #E8F5E9;
             border: 1.4px solid #66BB6A;
@@ -44,6 +35,7 @@
             font-size: 8.4pt;
             line-height: 1.05;
             color: #111;
+            text-align: center;
         }
 
         .fc-complete-table {
@@ -51,7 +43,7 @@
             border-collapse: collapse;
             table-layout: fixed;
             border: 1.4px solid #66BB6A !important;
-            margin: 0 0 6px 0;
+            margin: 0 0 10px 0;
         }
 
         .fc-complete-table col.subject-col-width {
@@ -99,6 +91,7 @@
             hyphens: auto;
         }
 
+        /* Nombres completos de los bloques de competencia */
         .fc-complete-table thead tr:first-child th {
             border-bottom: 1px solid #66BB6A !important;
             padding: 3px 2px;
@@ -108,6 +101,7 @@
             white-space: normal !important;
         }
 
+        /* Encabezados internos abreviados */
         .fc-complete-table thead tr:nth-child(2) th {
             border-bottom: 1px solid #9cc79f !important;
             padding: 2px 0 !important;
@@ -182,11 +176,18 @@
             white-space: nowrap;
         }
 
+        /* Sin resaltado amarillo en este boletín */
+        .fc-complete-table .low-grade,
+        .fc-complete-table .fc-complete-low-grade {
+            background: transparent !important;
+            font-weight: inherit !important;
+        }
+
         .fc-complete-legend-box {
             border: 1.1px solid #66BB6A;
             border-radius: 5px;
             padding: 6px 7px;
-            margin: 6px 0 6px 0;
+            margin: 10px 0 10px 0;
             background: #fcfffc;
         }
 
@@ -218,7 +219,7 @@
             border: 1.1px solid #66BB6A;
             border-radius: 5px;
             padding: 6px 7px;
-            margin: 6px 0 0 0;
+            margin: 10px 0 0 0;
             background: #fcfffc;
         }
 
@@ -237,53 +238,8 @@
             color: #222;
         }
 
-        .fc-complete-bottom-inner {
-            padding-top: 8mm;
-        }
-
-        .fc-complete-signatures {
-            margin-top: 0;
-        }
-
-        .fc-complete-signatures-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-
-        .fc-complete-signatures-table td {
-            width: 50%;
-            text-align: center;
-            vertical-align: top;
-            padding: 0 10px;
-        }
-
-        .fc-complete-signature-line {
-            width: 66%;
-            margin: 0 auto 3px auto;
-            border-top: 1px solid #111;
-            height: 0;
-        }
-
-        .fc-complete-signature-name {
-            font-size: 7.2pt;
-            font-weight: 700;
-            line-height: 1.05;
-            color: #111;
-        }
-
-        .fc-complete-signature-role {
-            font-size: 6.8pt;
-            line-height: 1.02;
-            color: #111;
-        }
-
-        .fc-complete-footer {
-            margin-top: 3px;
-            font-size: 6.1pt;
-            line-height: 1.0;
-            color: #222;
-            text-align: center;
+        .fc-complete-content-bottom-space {
+            height: 2mm;
         }
     </style>
 </head>
@@ -454,6 +410,7 @@
                             <tr>
                                 <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
 
+                                <!-- Bloques de competencias: decimales -->
                                 <td>{{ format_decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
                                 <td>{{ format_decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
                                 <td>{{ format_decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
@@ -474,10 +431,11 @@
                                 <td>{{ format_decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
                                 <td>{{ format_decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
 
-                                <td>{{ format_decimal_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
+                                <!-- Desde promedio por competencias en adelante: enteros -->
+                                <td>{{ format_integer_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.final if subject.final is defined else none) }}</td>
 
@@ -532,30 +490,30 @@
                             {% endif %}
                         </div>
                     </div>
+
+                    <div class="fc-complete-content-bottom-space"></div>
                 </div>
 
-                <div class="fc-complete-bottom">
-                    <div class="fc-complete-bottom-inner">
-                        <div class="fc-complete-signatures">
-                            <table class="fc-complete-signatures-table">
-                                <tr>
-                                    <td>
-                                        <div class="fc-complete-signature-line"></div>
-                                        <div class="fc-complete-signature-name">{{ director_name }}</div>
-                                        <div class="fc-complete-signature-role">Director(a)</div>
-                                    </td>
-                                    <td>
-                                        <div class="fc-complete-signature-line"></div>
-                                        <div class="fc-complete-signature-name">{{ student.prof_titular }}</div>
-                                        <div class="fc-complete-signature-role">Profesor(a) Titular</div>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+                <div class="bottom-final">
+                    <div class="signatures signatures-wide">
+                        <table class="signatures-table">
+                            <tr>
+                                <td class="signature-left">
+                                    <div class="signature-line"></div>
+                                    <div class="signature-name">{{ student.prof_titular }}</div>
+                                    <div class="signature-role">Profesor(a) Titular</div>
+                                </td>
+                                <td class="signature-right">
+                                    <div class="signature-line"></div>
+                                    <div class="signature-name">{{ director_name }}</div>
+                                    <div class="signature-role">Director(a)</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
 
-                        <div class="fc-complete-footer">
-                            Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
-                        </div>
+                    <div class="footer">
+                        Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
                     </div>
                 </div>
 
