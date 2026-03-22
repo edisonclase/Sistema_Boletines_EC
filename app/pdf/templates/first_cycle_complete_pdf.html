@@ -17,24 +17,23 @@
             width: 100%;
             min-height: 184mm;
             box-sizing: border-box;
-            position: relative;
-            padding-bottom: 28mm; /* reserva para firmas + créditos */
+            display: table;
+            table-layout: fixed;
         }
 
-        .fc-complete-main {
-            width: 100%;
-            box-sizing: border-box;
+        .fc-complete-content {
+            display: table-row;
+            height: auto;
         }
 
         .fc-complete-bottom {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 4mm;
+            display: table-row;
+            height: 1%;
+            vertical-align: bottom;
         }
 
         .fc-complete-section-title {
-            margin: 6px 0 0 0;
+            margin: 7px 0 0 0;
             padding: 5px 10px;
             background: #E8F5E9;
             border: 1.4px solid #66BB6A;
@@ -52,23 +51,23 @@
             border-collapse: collapse;
             table-layout: fixed;
             border: 1.4px solid #66BB6A !important;
-            margin: 0 0 5px 0;
+            margin: 0 0 6px 0;
         }
 
         .fc-complete-table col.subject-col-width {
-            width: 17%;
+            width: 16%;
         }
 
         .fc-complete-table col.grade-col-width {
-            width: 2.95%;
+            width: 3.2%;
         }
 
         .fc-complete-table col.small-grade-col-width {
-            width: 2.45%;
+            width: 2.85%;
         }
 
         .fc-complete-table col.situation-col-width {
-            width: 2.15%;
+            width: 2%;
         }
 
         .fc-complete-table th,
@@ -95,33 +94,34 @@
             background: #E8F5E9;
             color: #111;
             font-weight: 700;
-            white-space: normal !important;
-            word-break: break-word;
-            overflow-wrap: anywhere;
-            line-height: 1.03 !important;
+            word-break: normal;
+            overflow-wrap: break-word;
+            hyphens: auto;
         }
 
         .fc-complete-table thead tr:first-child th {
             border-bottom: 1px solid #66BB6A !important;
-            padding: 2px 1px;
-            font-size: 4.95pt !important;
-            line-height: 1.03 !important;
-            height: 25px !important;
+            padding: 3px 2px;
+            font-size: 5.35pt !important;
+            line-height: 1.02 !important;
+            height: 34px !important;
+            white-space: normal !important;
         }
 
         .fc-complete-table thead tr:nth-child(2) th {
             border-bottom: 1px solid #9cc79f !important;
-            padding: 1px 0 !important;
-            font-size: 5.2pt !important;
+            padding: 2px 0 !important;
+            font-size: 5.35pt !important;
             line-height: 1 !important;
-            height: 14px !important;
+            height: 15px !important;
+            white-space: nowrap !important;
         }
 
         .fc-complete-table tbody td {
-            height: 15px;
+            height: 16px;
             padding: 1px 1px !important;
-            font-size: 5.95pt !important;
-            line-height: 1.05 !important;
+            font-size: 6.1pt !important;
+            line-height: 1.08 !important;
         }
 
         .fc-complete-table tbody tr:nth-child(even) td {
@@ -133,21 +133,21 @@
             font-weight: 700;
             padding-left: 3px !important;
             padding-right: 3px !important;
-            font-size: 6.05pt !important;
-            line-height: 1.05 !important;
+            font-size: 6.1pt !important;
+            line-height: 1.08 !important;
             white-space: normal !important;
             overflow-wrap: break-word;
             word-break: break-word;
         }
 
         .fc-complete-table .small-col {
-            width: 2.45%;
-            min-width: 2.45%;
+            width: 2.85%;
+            min-width: 2.85%;
         }
 
         .fc-complete-table .situation-col {
-            width: 2.15%;
-            min-width: 2.15%;
+            width: 2%;
+            min-width: 2%;
         }
 
         .fc-complete-table tbody td:nth-child(1) {
@@ -185,8 +185,8 @@
         .fc-complete-legend-box {
             border: 1.1px solid #66BB6A;
             border-radius: 5px;
-            padding: 5px 7px;
-            margin: 5px 0 5px 0;
+            padding: 6px 7px;
+            margin: 6px 0 6px 0;
             background: #fcfffc;
         }
 
@@ -199,7 +199,7 @@
         }
 
         .fc-complete-legend-grid {
-            font-size: 6.55pt;
+            font-size: 6.6pt;
             line-height: 1.12;
             color: #111;
         }
@@ -217,8 +217,8 @@
         .fc-complete-comment-box {
             border: 1.1px solid #66BB6A;
             border-radius: 5px;
-            padding: 5px 7px;
-            margin: 5px 0 0 0;
+            padding: 6px 7px;
+            margin: 6px 0 0 0;
             background: #fcfffc;
         }
 
@@ -231,14 +231,18 @@
         }
 
         .fc-complete-comment-content {
-            min-height: 9mm;
+            min-height: 10mm;
             font-size: 6.95pt;
             line-height: 1.1;
             color: #222;
         }
 
+        .fc-complete-bottom-inner {
+            padding-top: 8mm;
+        }
+
         .fc-complete-signatures {
-            margin-top: 4px;
+            margin-top: 0;
         }
 
         .fc-complete-signatures-table {
@@ -255,41 +259,36 @@
         }
 
         .fc-complete-signature-line {
-            width: 68%;
+            width: 66%;
             margin: 0 auto 3px auto;
             border-top: 1px solid #111;
             height: 0;
         }
 
         .fc-complete-signature-name {
-            font-size: 7.25pt;
+            font-size: 7.2pt;
             font-weight: 700;
-            line-height: 1.08;
+            line-height: 1.05;
             color: #111;
         }
 
         .fc-complete-signature-role {
             font-size: 6.8pt;
-            line-height: 1.05;
+            line-height: 1.02;
             color: #111;
         }
 
         .fc-complete-footer {
             margin-top: 3px;
-            font-size: 6.15pt;
-            line-height: 1.02;
+            font-size: 6.1pt;
+            line-height: 1.0;
             color: #222;
             text-align: center;
-        }
-
-        .fc-complete-low-grade {
-            background: var(--low-grade-color, #FFF59D) !important;
-            font-weight: 700;
         }
     </style>
 </head>
 
-<body style="--low-grade-color: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};">
+<body>
 
     {% macro format_decimal_grade(value) -%}
         {%- if value is none -%}
@@ -317,13 +316,6 @@
         {%- endif -%}
     {%- endmacro %}
 
-    {% macro block_cell_class(value) -%}
-        {%- set visible = format_decimal_grade(value)|trim -%}
-        {%- if visible != "" and (value|float) >= 1 and (value|float) < 70 -%}
-            fc-complete-low-grade
-        {%- endif -%}
-    {%- endmacro %}
-
     {% set generated_at = generated_at if generated_at is defined else "" %}
     {% set generated_by = generated_by if generated_by is defined else settings.bulletin_generated_by %}
     {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
@@ -337,8 +329,7 @@
         <div class="pdf-frame">
             <div class="fc-complete-page">
 
-                <div class="fc-complete-main">
-
+                <div class="fc-complete-content">
                     <div class="pdf-header">
                         <table class="pdf-header-table">
                             <tr>
@@ -463,30 +454,30 @@
                             <tr>
                                 <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
 
-                                <td class="{{ block_cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ format_decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ format_decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ format_decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ format_decimal_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
 
-                                <td class="{{ block_cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ format_decimal_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ format_decimal_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ format_decimal_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ format_decimal_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
 
-                                <td class="{{ block_cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ format_decimal_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ format_decimal_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ format_decimal_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ format_decimal_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
 
-                                <td class="{{ block_cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ format_decimal_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ format_decimal_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ format_decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ format_decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
 
-                                <td class="{{ block_cell_class(subject.pc1 if subject.pc1 is defined else none) }}">{{ format_decimal_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.pc2 if subject.pc2 is defined else none) }}">{{ format_decimal_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.pc3 if subject.pc3 is defined else none) }}">{{ format_decimal_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.pc4 if subject.pc4 is defined else none) }}">{{ format_decimal_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.final if subject.final is defined else none) }}</td>
 
@@ -541,29 +532,30 @@
                             {% endif %}
                         </div>
                     </div>
-
                 </div>
 
                 <div class="fc-complete-bottom">
-                    <div class="fc-complete-signatures">
-                        <table class="fc-complete-signatures-table">
-                            <tr>
-                                <td>
-                                    <div class="fc-complete-signature-line"></div>
-                                    <div class="fc-complete-signature-name">{{ director_name }}</div>
-                                    <div class="fc-complete-signature-role">Director(a)</div>
-                                </td>
-                                <td>
-                                    <div class="fc-complete-signature-line"></div>
-                                    <div class="fc-complete-signature-name">{{ student.prof_titular }}</div>
-                                    <div class="fc-complete-signature-role">Profesor(a) Titular</div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
+                    <div class="fc-complete-bottom-inner">
+                        <div class="fc-complete-signatures">
+                            <table class="fc-complete-signatures-table">
+                                <tr>
+                                    <td>
+                                        <div class="fc-complete-signature-line"></div>
+                                        <div class="fc-complete-signature-name">{{ director_name }}</div>
+                                        <div class="fc-complete-signature-role">Director(a)</div>
+                                    </td>
+                                    <td>
+                                        <div class="fc-complete-signature-line"></div>
+                                        <div class="fc-complete-signature-name">{{ student.prof_titular }}</div>
+                                        <div class="fc-complete-signature-role">Profesor(a) Titular</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
 
-                    <div class="fc-complete-footer">
-                        Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+                        <div class="fc-complete-footer">
+                            Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
+                        </div>
                     </div>
                 </div>
 
