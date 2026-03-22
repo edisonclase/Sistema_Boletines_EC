@@ -17,6 +17,7 @@ app = FastAPI(
 )
 
 app.mount("/assets", StaticFiles(directory="app/pdf/assets"), name="assets")
+app.mount("/static", StaticFiles(directory="academic_tracking/static"), name="static")
 
 app.include_router(ui_router)
 app.include_router(auth_router)

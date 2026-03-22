@@ -4,375 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seguimiento Académico | Clase Edutech</title>
-    <style>
-        :root {
-            --primary: #1f6f43;
-            --primary-dark: #185735;
-            --primary-soft: #eaf5ef;
-            --border: #d9e3dc;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --bg: #f7faf8;
-            --white: #ffffff;
-            --danger: #b42318;
-            --danger-soft: #fef3f2;
-            --warning: #b54708;
-            --warning-soft: #fffaeb;
-            --success: #067647;
-            --success-soft: #ecfdf3;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-            --radius: 16px;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-        }
-
-        .page {
-            max-width: 1500px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border-radius: var(--radius);
-            padding: 28px;
-            box-shadow: var(--shadow);
-            margin-bottom: 24px;
-        }
-
-        .header h1 {
-            margin: 0 0 8px;
-            font-size: 30px;
-        }
-
-        .header p {
-            margin: 0;
-            font-size: 15px;
-            opacity: 0.95;
-        }
-
-        .card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-
-        .card h2 {
-            margin: 0 0 16px;
-            font-size: 20px;
-            color: var(--primary-dark);
-        }
-
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(6, minmax(160px, 1fr));
-            gap: 14px;
-        }
-
-        .field label {
-            display: block;
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 6px;
-            color: var(--muted);
-        }
-
-        .field input,
-        .field select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            font-size: 14px;
-            background: #fff;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            align-items: end;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 11px 16px;
-            border-radius: 10px;
-            border: none;
-            text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-secondary {
-            background: #eef2f7;
-            color: var(--text);
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(180px, 1fr));
-            gap: 16px;
-        }
-
-        .summary-box {
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 18px;
-            background: #fff;
-        }
-
-        .summary-box h3 {
-            margin: 0 0 10px;
-            font-size: 14px;
-            color: var(--muted);
-            font-weight: bold;
-        }
-
-        .summary-box .number {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary-dark);
-        }
-
-        .period-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(220px, 1fr));
-            gap: 16px;
-        }
-
-        .period-card {
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 16px;
-            background: var(--white);
-        }
-
-        .period-card h3 {
-            margin: 0 0 12px;
-            color: var(--primary-dark);
-        }
-
-        .period-card ul {
-            margin: 0;
-            padding-left: 18px;
-        }
-
-        .period-card li {
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
-
-        .course-block {
-            margin-bottom: 28px;
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            overflow: hidden;
-            background: white;
-        }
-
-        .course-header {
-            padding: 18px 20px;
-            background: var(--primary-soft);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .course-header h3 {
-            margin: 0 0 6px;
-            color: var(--primary-dark);
-        }
-
-        .course-header p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .period-section {
-            padding: 20px;
-            border-bottom: 1px solid #eef2f0;
-        }
-
-        .period-section:last-child {
-            border-bottom: none;
-        }
-
-        .period-section h4 {
-            margin: 0 0 14px;
-            font-size: 18px;
-            color: var(--primary-dark);
-        }
-
-        .period-meta {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .meta-box {
-            border-radius: 12px;
-            padding: 12px;
-            background: #f9fbfa;
-            border: 1px solid var(--border);
-        }
-
-        .meta-box span {
-            display: block;
-            font-size: 12px;
-            color: var(--muted);
-            margin-bottom: 4px;
-        }
-
-        .meta-box strong {
-            font-size: 18px;
-            color: var(--text);
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1100px;
-            background: white;
-        }
-
-        th, td {
-            padding: 12px 12px;
-            border-bottom: 1px solid #eef2f0;
-            text-align: left;
-            font-size: 14px;
-            vertical-align: top;
-        }
-
-        th {
-            background: #f8faf9;
-            color: var(--primary-dark);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .badge-reportado {
-            background: var(--success-soft);
-            color: var(--success);
-        }
-
-        .badge-parcial {
-            background: var(--warning-soft);
-            color: var(--warning);
-        }
-
-        .badge-pendiente {
-            background: var(--danger-soft);
-            color: var(--danger);
-        }
-
-        .audit-box {
-            background: #fff;
-            border: 1px dashed var(--border);
-            border-radius: 14px;
-            padding: 18px;
-        }
-
-        .audit-box p {
-            margin: 8px 0 0;
-            color: var(--muted);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--muted);
-        }
-
-        .students-risk-list {
-            margin-top: 18px;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 14px;
-            background: #fcfdfc;
-        }
-
-        .students-risk-list h5 {
-            margin: 0 0 12px;
-            color: var(--primary-dark);
-            font-size: 15px;
-        }
-
-        .students-risk-list ul {
-            margin: 0;
-            padding-left: 18px;
-        }
-
-        .students-risk-list li {
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        @media (max-width: 1200px) {
-            .filters-grid,
-            .summary-grid,
-            .period-grid,
-            .period-meta {
-                grid-template-columns: repeat(2, minmax(180px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .page {
-                padding: 14px;
-            }
-
-            .filters-grid,
-            .summary-grid,
-            .period-grid,
-            .period-meta {
-                grid-template-columns: 1fr;
-            }
-
-            .header h1 {
-                font-size: 24px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', path='academic_tracking/dashboard.css') }}">
 </head>
-<body>
+<body
+    style="
+        --center-primary: {{ dashboard.theme.primary_color if dashboard.theme and dashboard.theme.primary_color else '#1f6f43' }};
+        --center-primary-dark: {{ dashboard.theme.primary_dark if dashboard.theme and dashboard.theme.primary_dark else '#185735' }};
+        --center-primary-soft: {{ dashboard.theme.primary_soft if dashboard.theme and dashboard.theme.primary_soft else '#eaf5ef' }};
+    "
+>
     <div class="page">
         <section class="header">
             <h1>Dashboard de Seguimiento Académico</h1>
@@ -384,6 +24,7 @@
 
         <section class="card">
             <h2>Filtros del módulo</h2>
+
             <form method="GET" action="">
                 <div class="filters-grid">
                     <div class="field">
@@ -458,31 +99,53 @@
 
                 <div style="margin-top: 16px;" class="actions">
                     <button type="submit" class="btn btn-primary">Aplicar filtros</button>
-                    <a href="{{ url_for('academic_tracking.dashboard') }}" class="btn btn-secondary">Limpiar</a>
-                    <a href="{{ url_for('academic_tracking.dashboard_data', center_id=dashboard.filters.center_id, school_year=dashboard.filters.school_year, ciclo=dashboard.filters.ciclo, curso=dashboard.filters.curso, periodo=dashboard.filters.periodo, asignatura=dashboard.filters.asignatura) }}" class="btn btn-secondary">Ver JSON</a>
+
+                    <a href="{{ url_for('academic_tracking.dashboard') }}" class="btn btn-secondary">
+                        Limpiar
+                    </a>
+
+                    <a
+                        href="{{ url_for(
+                            'academic_tracking.dashboard_data',
+                            center_id=dashboard.filters.center_id,
+                            school_year=dashboard.filters.school_year,
+                            ciclo=dashboard.filters.ciclo,
+                            curso=dashboard.filters.curso,
+                            periodo=dashboard.filters.periodo,
+                            asignatura=dashboard.filters.asignatura
+                        ) }}"
+                        class="btn btn-secondary"
+                    >
+                        Ver JSON
+                    </a>
                 </div>
             </form>
         </section>
 
         <section class="card">
             <h2>Resumen general</h2>
+
             <div class="summary-grid">
                 <div class="summary-box">
                     <h3>Asignaturas reportadas</h3>
                     <div class="number">{{ dashboard.summary.status.reported }}</div>
                 </div>
+
                 <div class="summary-box">
                     <h3>Asignaturas parciales</h3>
                     <div class="number">{{ dashboard.summary.status.partial }}</div>
                 </div>
+
                 <div class="summary-box">
                     <h3>Asignaturas pendientes</h3>
                     <div class="number">{{ dashboard.summary.status.pending }}</div>
                 </div>
+
                 <div class="summary-box">
                     <h3>Estudiantes en riesgo</h3>
                     <div class="number">{{ dashboard.summary.risk.students_at_risk_count }}</div>
                 </div>
+
                 <div class="summary-box">
                     <h3>Competencias reprobadas</h3>
                     <div class="number">{{ dashboard.summary.risk.failed_competencies_count }}</div>
@@ -492,6 +155,7 @@
 
         <section class="card">
             <h2>Resumen por período</h2>
+
             <div class="period-grid">
                 {% for period_code, period_data in dashboard.summary.period_cards.items() %}
                     <div class="period-card">
@@ -528,14 +192,17 @@
                                         <span>Reportadas</span>
                                         <strong>{{ period_payload.totals.reported or 0 }}</strong>
                                     </div>
+
                                     <div class="meta-box">
                                         <span>Parciales</span>
                                         <strong>{{ period_payload.totals.partial or 0 }}</strong>
                                     </div>
+
                                     <div class="meta-box">
                                         <span>Pendientes</span>
                                         <strong>{{ period_payload.totals.pending or 0 }}</strong>
                                     </div>
+
                                     <div class="meta-box">
                                         <span>Estudiantes en riesgo</span>
                                         <strong>{{ period_payload.students_at_risk_count or 0 }}</strong>
@@ -556,13 +223,15 @@
                                                 <th>Docente</th>
                                             </tr>
                                         </thead>
+
                                         <tbody>
                                             {% for subject in period_payload.subjects %}
                                                 <tr>
                                                     <td>
                                                         <strong>{{ subject.subject_name }}</strong><br>
-                                                        <span style="color:#6b7280;">{{ subject.subject_code }}</span>
+                                                        <span class="text-muted">{{ subject.subject_code }}</span>
                                                     </td>
+
                                                     <td>
                                                         {% if subject.status == dashboard.status_reference.reported %}
                                                             <span class="badge badge-reportado">{{ subject.status_label }}</span>
@@ -572,16 +241,18 @@
                                                             <span class="badge badge-pendiente">{{ subject.status_label }}</span>
                                                         {% endif %}
                                                     </td>
+
                                                     <td>{{ subject.coverage_pct }}%</td>
                                                     <td>{{ subject.students_with_any_report }}</td>
                                                     <td>{{ subject.students_without_report }}</td>
                                                     <td>{{ subject.students_at_risk_count }}</td>
                                                     <td>{{ subject.failed_competencies_count }}</td>
+
                                                     <td>
                                                         {% if subject.docente_asignatura %}
                                                             {{ subject.docente_asignatura }}
                                                         {% else %}
-                                                            <span style="color:#6b7280;">No asignado</span>
+                                                            <span class="text-muted">No asignado</span>
                                                         {% endif %}
                                                     </td>
                                                 </tr>
@@ -607,7 +278,9 @@
                                             {% endfor %}
                                         </ul>
                                     {% else %}
-                                        <p style="margin:0; color:#6b7280;">No se detectaron estudiantes en riesgo en este período.</p>
+                                        <p class="text-muted" style="margin: 0;">
+                                            No se detectaron estudiantes en riesgo en este período.
+                                        </p>
                                     {% endif %}
                                 </div>
                             </div>
@@ -624,6 +297,7 @@
 
         <section class="card">
             <h2>Auditoría académica y recuperaciones</h2>
+
             <div class="audit-box">
                 <strong>Estado actual:</strong>
                 {% if dashboard.audit_and_recovery.enabled %}
