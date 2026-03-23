@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     """
 
     passing_grade: int = 70
-    low_grade_highlight_color: str = "#FFF59D"
+    low_grade_highlight_color: str = "#FFF2CC"
 
     bulletin_generated_by: str = "Aula Nova"
     bulletin_generated_role: str = "Coordinación de Registro y Control Académico"
