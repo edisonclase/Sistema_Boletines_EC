@@ -113,15 +113,7 @@
                     </a>
 
                     <a
-                        href="{{ url_for(
-                            'academic_tracking_dashboard_data',
-                            center_id=dashboard.filters.center_id,
-                            school_year=dashboard.filters.school_year,
-                            ciclo=dashboard.filters.ciclo,
-                            curso=dashboard.filters.curso,
-                            periodo=dashboard.filters.periodo,
-                            asignatura=dashboard.filters.asignatura
-                        ) }}"
+                        href="{{ url_for('academic_tracking_dashboard_data') }}?center_id={{ dashboard.filters.center_id or '' }}&school_year={{ dashboard.filters.school_year or '' }}&ciclo={{ dashboard.filters.ciclo or '' }}&curso={{ dashboard.filters.curso or '' }}&periodo={{ dashboard.filters.periodo or '' }}&asignatura={{ dashboard.filters.asignatura or '' }}"
                         class="btn btn-secondary"
                     >
                         Ver JSON
