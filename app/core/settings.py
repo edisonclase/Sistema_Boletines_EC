@@ -33,34 +33,31 @@ class Settings(BaseSettings):
     institution_philosophy_title: str = "Filosofía Institucional"
 
     institution_philosophy_text: str = """
-    El Politécnico Profesor José Mercedes Alvino tiene como propósito formar
-    ciudadanos íntegros, críticos y comprometidos con el desarrollo social,
-    científico y tecnológico del país.
-
-    Promovemos una educación basada en valores, el respeto a la dignidad
-    humana, el pensamiento lógico, creativo y crítico, así como la formación
-    técnico profesional orientada al trabajo productivo y al servicio de la
-    sociedad.
-
-    Nuestra institución impulsa el desarrollo de competencias comunicativas,
-    científicas, éticas y ciudadanas que permitan a nuestros estudiantes
-    integrarse de manera responsable al mundo laboral y continuar su formación
-    académica con éxito.
+    En el Politécnico Profesor José Mercedes Alvino (CEJOMAL) Ofrecemos una formación técnico-profesional 
+    basada en una educación integral de calidad, orientada al desarrollo de competencias y el fortalecimiento 
+    de los valores humanos.
+    
+	Somos una institución de servicio comprometida con una educación cualificada que promueve la formación de 
+    personas justas, capaces, dispuestas a enfrentar las exigencias empresariales e insertarse con éxito en estudios 
+    superiores. 
+    
+	Creemos que la verdadera felicidad se alcanza actuando con imparcialidad, respeto a las leyes y a la dignidad humana; servir con amor, entrega y pasión, ha de ser nuestra esencia.
     """
 
     institution_mission_text: str = """
-    Formar técnicos competentes, ciudadanos responsables y personas íntegras,
-    capaces de insertarse en el mundo laboral y contribuir al desarrollo de la sociedad.
+    Formar profesionales técnicos competentes, aptos para responder con eficiencia 
+    a los nuevos desafíos del mundo laboral y del nivel superior; dispuestos a transformar 
+    con amor y justicia su entorno social, cultural, científico y tecnológico.
+
     """
 
     institution_vision_text: str = """
-    Ser una institución educativa técnico-profesional reconocida por la calidad
-    de su formación integral, la excelencia académica y su aporte al desarrollo
-    de la sociedad.
+	Ser un centro educativo modelo que ofrezca un servicio de la más alta calidad y 
+    logre la formación de recursos humanos capacitados, respetuosos e identificados con su patria.
     """
 
     institution_values_text: str = """
-    Responsabilidad, respeto, honestidad, disciplina, compromiso social y trabajo en equipo.
+    Amor, Justicia, Responsabilidad, Respeto, Honestidad, Solidaridad
     """
 
     passing_grade: int = 70
