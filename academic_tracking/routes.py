@@ -4,15 +4,15 @@ routes.py
 Rutas del módulo academic_tracking.
 
 Objetivos:
-- Exponer una vista nueva e independiente para coordinadores
-- No tocar rutas de boletines ni PDF
-- Permitir filtros por centro, ciclo, curso, período y asignatura
-- Soportar carga futura desde Google Sheets, BD o servicios propios
+- Exponer una vista nueva e independiente para coordinadores.
+- No tocar rutas de boletines ni PDF.
+- Permitir filtros por centro, ciclo, curso, período y asignatura.
+- Soportar carga futura desde Google Sheets, BD o servicios propios.
 
 Notas:
-- Este archivo asume integración con FastAPI
-- La carga real de datos del sheet se deja desacoplada en services
-- Si luego conectamos con BD o servicios internos, solo cambiamos la fuente
+- Este archivo asume integración con FastAPI.
+- La carga real de datos del sheet se deja desacoplada en services.
+- Si luego conectamos con BD o servicios internos, solo cambiamos la fuente.
 """
 
 from __future__ import annotations
@@ -41,8 +41,10 @@ templates = Jinja2Templates(directory="academic_tracking/templates")
 # =========================
 # Helpers internos
 # =========================
-
-def _parse_min_approval_score(raw_value: Optional[str], default: float = 70.0) -> float:
+def _parse_min_approval_score(
+    raw_value: Optional[str],
+    default: float = 70.0,
+) -> float:
     """
     Convierte el valor del query param a float de manera segura.
     """
@@ -67,7 +69,7 @@ def _build_dashboard_payload(
     period_code: Optional[str] = None,
     subject_code: Optional[str] = None,
     min_approval_score: float = 70.0,
-):
+) -> dict[str, Any]:
     """
     Construye la data unificada del dashboard.
     """
@@ -95,13 +97,20 @@ def _build_dashboard_payload(
         teacher_assignments=teacher_assignments,
     )
 
+    # Tema visual base del sistema.
+    # Más adelante podrá venir desde la configuración del centro.
+    dashboard_data["theme"] = {
+        "primary_color": "#1f6f43",
+        "primary_dark": "#185735",
+        "primary_soft": "#eaf5ef",
+    }
+
     return dashboard_data
 
 
 # =========================
 # Rutas públicas del módulo
 # =========================
-
 @router.get("/", response_class=HTMLResponse)
 def dashboard(
     request: Request,
@@ -116,9 +125,12 @@ def dashboard(
     """
     Vista principal HTML del dashboard académico.
     """
-    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
+    min_score = _parse_min_approval_score(
+        min_approval_score,
+        default=70.0,
+    )
 
-    dashboard_data = _build_dashboard_payload(
+    dashboard_payload = _build_dashboard_payload(
         center_id=center_id,
         school_year=school_year,
         ciclo=ciclo,
@@ -132,7 +144,7 @@ def dashboard(
         "academic_tracking_dashboard.html",
         {
             "request": request,
-            "dashboard": dashboard_data,
+            "dashboard": dashboard_payload,
         },
     )
 
@@ -156,9 +168,12 @@ def dashboard_data(
     - futura integración AJAX
     - validación de estructura antes de pulir la interfaz
     """
-    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
+    min_score = _parse_min_approval_score(
+        min_approval_score,
+        default=70.0,
+    )
 
-    dashboard_data = _build_dashboard_payload(
+    dashboard_payload = _build_dashboard_payload(
         center_id=center_id,
         school_year=school_year,
         ciclo=ciclo,
@@ -168,7 +183,7 @@ def dashboard_data(
         min_approval_score=min_score,
     )
 
-    return dashboard_data
+    return dashboard_payload
 
 
 @router.get("/health")
