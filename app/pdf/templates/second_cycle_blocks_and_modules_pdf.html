@@ -49,7 +49,9 @@
 
                         <td class="pdf-title-cell">
                             <div class="pdf-institution-name">{{ settings.institution_name }}</div>
+                            <div class="pdf-institution-motto">{{ settings.institution_motto }}</div>
                             <div class="pdf-department-title">{{ settings.institution_academic_department }}</div>
+
                             <div class="pdf-report-title">
                                 REPORTE DE EVALUACIONES POR BLOQUES Y MÓDULOS
                             </div>
@@ -169,7 +171,7 @@
                                 <td>{{ text_value(m.ra9) }}</td>
                                 <td>{{ text_value(m.ra10) }}</td>
 
-                                <td>{{ format_integer(m.cf if m.cf is defined else m.calificacion_final) }}</td>
+                                <td></td>
 
                                 <td>{{ m.situacion or m.sit or m.situ_a or m.situ_r or " " }}</td>
                             </tr>

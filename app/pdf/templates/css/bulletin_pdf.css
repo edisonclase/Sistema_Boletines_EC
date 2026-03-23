@@ -80,6 +80,14 @@ body {
     text-transform: uppercase;
 }
 
+.pdf-institution-motto {
+    margin-top: 1px;
+    font-size: 7.8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.02;
+}
+
 .pdf-department-title {
     margin-top: 1px;
     font-size: 8.9pt;

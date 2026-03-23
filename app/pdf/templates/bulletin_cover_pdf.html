@@ -69,7 +69,7 @@
                             <td>{{ student.id_estudiante }}</td>
                         </tr>
                         <tr>
-                            <th>Número</th>
+                            <th>Número:</th>
                             <td>
                                 {% if student.numero is defined and student.numero %}
                                     {{ student.numero }}
@@ -106,7 +106,7 @@
 
                         {% if cycle is defined and cycle %}
                         <tr>
-                            <th>Ciclo</th>
+                            <th>Ciclo:</th>
                             <td>{{ cycle.replace("_", " ") }}</td>
                         </tr>
                         {% endif %}
