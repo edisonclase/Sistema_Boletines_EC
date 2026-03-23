@@ -11,9 +11,9 @@ from academic_tracking.routes import router as academic_tracking_router
 
 
 app = FastAPI(
-    title="Sistema de Gestión Escolar Privado",
+    title="Aula Nova - Sistema de Gestión Escolar",
     version="0.1.0",
-    description="Sistema de gestión escolar."
+    description="Sistema de gestión escolar privado."
 )
 
 app.mount("/assets", StaticFiles(directory="app/pdf/assets"), name="assets")

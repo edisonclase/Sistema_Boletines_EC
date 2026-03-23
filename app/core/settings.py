@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = "CLASE Edutech"
+    app_name: str = "Aula Nova - Sistema de Gestión Escolar"
     app_env: str = "development"
     app_debug: bool = True
 
@@ -66,9 +66,9 @@ class Settings(BaseSettings):
     passing_grade: int = 70
     low_grade_highlight_color: str = "#FFF59D"
 
-    bulletin_generated_by: str = "CLASE Edutech"
+    bulletin_generated_by: str = "Aula Nova"
     bulletin_generated_role: str = "Coordinación de Registro y Control Académico"
-    bulletin_author: str = "CLASE Edutech"
+    bulletin_author: str = "Aula Nova"
 
     philosophy_pdf_path: str = "app/pdf/assets/filosofia.pdf"
 

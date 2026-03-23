@@ -181,7 +181,7 @@
             <div class="comment-box">
                 <div class="comment-title">Comentario:</div>
                 <div class="muted">
-                    {{ student.comentario_final if student.comentario_final else "_____________________________" }}
+                    {{ student.comentario_final if student.comentario_final else "________________________________" }}
                 </div>
             </div>
 
@@ -192,13 +192,13 @@
                             <td class="signature-left">
                                 <div class="signature-line"></div>
                                 <div class="signature-name">{{ student.prof_titular if student.prof_titular else "-" }}</div>
-                                <div class="signature-role">Profesor</div>
+                                <div class="signature-role">Profesor(a)</div>
                             </td>
 
                             <td class="signature-right">
                                 <div class="signature-line"></div>
                                 <div class="signature-name">{{ settings.institution_director }}</div>
-                                <div class="signature-role">Director</div>
+                                <div class="signature-role">Director(a)</div>
                             </td>
                         </tr>
                     </table>
