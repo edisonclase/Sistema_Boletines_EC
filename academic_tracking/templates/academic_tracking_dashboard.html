@@ -14,6 +14,14 @@
     "
 >
     <div class="page">
+        <section class="card">
+            <strong>{{ dashboard.institution.name }}</strong><br>
+            <span class="text-muted">
+                Año escolar: {{ dashboard.institution.school_year }} |
+                Ciclo: {{ dashboard.institution.ciclo }}
+            </span>
+        </section>
+
         <section class="header">
             <h1>Dashboard de Seguimiento Académico</h1>
             <p>
@@ -100,13 +108,13 @@
                 <div style="margin-top: 16px;" class="actions">
                     <button type="submit" class="btn btn-primary">Aplicar filtros</button>
 
-                    <a href="{{ url_for('academic_tracking.dashboard') }}" class="btn btn-secondary">
+                    <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">
                         Limpiar
                     </a>
 
                     <a
                         href="{{ url_for(
-                            'academic_tracking.dashboard_data',
+                            'academic_tracking_dashboard_data',
                             center_id=dashboard.filters.center_id,
                             school_year=dashboard.filters.school_year,
                             ciclo=dashboard.filters.ciclo,

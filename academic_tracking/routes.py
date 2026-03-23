@@ -97,12 +97,16 @@ def _build_dashboard_payload(
         teacher_assignments=teacher_assignments,
     )
 
-    # Tema visual base del sistema.
-    # Más adelante podrá venir desde la configuración del centro.
     dashboard_data["theme"] = {
         "primary_color": "#1f6f43",
         "primary_dark": "#185735",
         "primary_soft": "#eaf5ef",
+    }
+
+    dashboard_data["institution"] = {
+        "name": "Centro Educativo Ejemplo",
+        "school_year": school_year or "2025-2026",
+        "ciclo": ciclo or "Todos los ciclos",
     }
 
     return dashboard_data
@@ -111,7 +115,7 @@ def _build_dashboard_payload(
 # =========================
 # Rutas públicas del módulo
 # =========================
-@router.get("/", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse, name="academic_tracking_dashboard")
 def dashboard(
     request: Request,
     center_id: Optional[str] = Query(default=None),
@@ -149,7 +153,7 @@ def dashboard(
     )
 
 
-@router.get("/data")
+@router.get("/data", name="academic_tracking_dashboard_data")
 def dashboard_data(
     center_id: Optional[str] = Query(default=None),
     school_year: Optional[str] = Query(default=None),
@@ -186,7 +190,7 @@ def dashboard_data(
     return dashboard_payload
 
 
-@router.get("/health")
+@router.get("/health", name="academic_tracking_health")
 def healthcheck():
     """
     Ruta simple para validar que el módulo está vivo.
