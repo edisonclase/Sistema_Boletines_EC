@@ -1,479 +1,426 @@
 """
 tracking_service.py
 
-Servicio orquestador del módulo academic_tracking.
+Servicio principal de construcción del dashboard del módulo academic_tracking.
 
-Objetivos:
-- Unificar la salida de status_service y risk_service
-- Preparar una estructura única para el dashboard de coordinadores
-- Mantener filtros listos para multi-centro
-- Dejar base preparada para integrar docente_asignatura y auditoría académica
-- No tocar nada de boletines web o PDF
-
-Notas de diseño:
-- Este archivo NO debe contener lógica pesada duplicada
-- Debe apoyarse en parsing_service, status_service y risk_service
-- Debe devolver estructuras limpias, predecibles y fáciles de renderizar
+Responsabilidades:
+- Consumir filas crudas del origen de datos
+- Aplicar parsing y evaluación de riesgo académico
+- Construir métricas resumidas para el dashboard
+- Organizar resultados por curso, período y asignatura
+- Mantener el payload listo para render HTML o salida JSON
 """
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from .parsing_service import (
-    PERIODS,
-    SUBJECTS,
-    parse_academic_rows,
+    get_detected_academic_subjects,
+    get_supported_period_codes,
 )
 from .risk_service import (
-    MIN_APPROVAL_SCORE,
-    build_risk_dashboard_data,
-)
-from .status_service import (
-    STATUS_PARCIAL,
-    STATUS_PENDIENTE,
-    STATUS_REPORTADO,
-    build_status_dashboard_data,
+    PERIOD_STATUS_COMPROMISED,
+    PERIOD_STATUS_INCOMPLETE,
+    PERIOD_STATUS_PASSED,
+    build_risk_entries_from_rows,
 )
 
 
-def _build_default_teacher_index(
-    teacher_assignments: Optional[List[Dict[str, Any]]] = None,
-) -> Dict[str, Dict[str, Any]]:
+DASHBOARD_STATUS_REFERENCE = {
+    "reported": "reported",
+    "partial": "partial",
+    "pending": "pending",
+}
+
+
+def _normalize_filter_value(value: Optional[Any]) -> Optional[str]:
     """
-    Construye un índice rápido para buscar docente por:
-    center_id + school_year + ciclo + curso + asignatura_codigo
+    Normaliza filtros textuales.
+    """
+    if value is None:
+        return None
 
-    Formato de salida:
-    {
-        "1|2025-2026|Primer Ciclo|1ro A|LEN": {
-            "docente_asignatura": "María Pérez",
-            "docente_asignatura_id": "15",
-            ...
+    text = str(value).strip()
+    if not text:
+        return None
+
+    return text
+
+
+def _apply_entry_filters(
+    entries: list[dict[str, Any]],
+    course_name: Optional[str] = None,
+    period_code: Optional[str] = None,
+    subject_code: Optional[str] = None,
+) -> list[dict[str, Any]]:
+    """
+    Filtra entradas ya evaluadas por curso, período y asignatura.
+    """
+    filtered = entries
+
+    normalized_course = _normalize_filter_value(course_name)
+    normalized_period = _normalize_filter_value(period_code)
+    normalized_subject = _normalize_filter_value(subject_code)
+
+    if normalized_course:
+        filtered = [
+            entry
+            for entry in filtered
+            if str(entry.get("curso", "")).strip() == normalized_course
+        ]
+
+    if normalized_period:
+        filtered = [
+            entry
+            for entry in filtered
+            if str(entry.get("period_code", "")).strip() == normalized_period
+        ]
+
+    if normalized_subject:
+        filtered = [
+            entry
+            for entry in filtered
+            if str(entry.get("subject_code", "")).strip() == normalized_subject
+        ]
+
+    return filtered
+
+
+def _extract_detected_courses(entries: list[dict[str, Any]]) -> list[str]:
+    """
+    Detecta cursos presentes en las entradas.
+    """
+    return sorted(
+        {
+            str(entry.get("curso", "")).strip()
+            for entry in entries
+            if str(entry.get("curso", "")).strip()
         }
-    }
+    )
+
+
+def _count_summary_statuses(entries: list[dict[str, Any]]) -> dict[str, int]:
     """
-    if not teacher_assignments:
-        return {}
+    Cuenta cuántas entradas están reportadas, parciales o con período comprometido.
+    """
+    reported = sum(
+        1 for entry in entries if entry.get("period_status") == PERIOD_STATUS_PASSED
+    )
+    partial = sum(
+        1 for entry in entries if entry.get("period_status") == PERIOD_STATUS_INCOMPLETE
+    )
+    pending = sum(
+        1
+        for entry in entries
+        if entry.get("period_status") == PERIOD_STATUS_COMPROMISED
+    )
 
-    teacher_index: Dict[str, Dict[str, Any]] = {}
+    return {
+        "reported": reported,
+        "partial": partial,
+        "pending": pending,
+    }
 
-    for item in teacher_assignments:
-        center_id = item.get("center_id")
-        school_year = item.get("school_year")
-        ciclo = item.get("ciclo")
-        curso = item.get("curso")
-        asignatura_codigo = item.get("asignatura_codigo")
 
-        key = _build_teacher_assignment_key(
-            center_id=center_id,
-            school_year=school_year,
-            ciclo=ciclo,
-            curso=curso,
-            asignatura_codigo=asignatura_codigo,
+def _build_unique_students_at_risk(
+    entries: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """
+    Construye una lista única de estudiantes con períodos comprometidos.
+    Agrupa por estudiante + curso.
+    """
+    grouped: dict[tuple[str, str], dict[str, Any]] = {}
+
+    for entry in entries:
+        if entry.get("period_status") != PERIOD_STATUS_COMPROMISED:
+            continue
+
+        student_id = entry.get("student_id", "")
+        course_name = entry.get("curso", "")
+        key = (student_id, course_name)
+
+        if key not in grouped:
+            grouped[key] = {
+                "student": {
+                    "id_estudiante": student_id,
+                    "nombre_estudiante": entry.get("student_name", ""),
+                    "numero": entry.get("numero", ""),
+                    "curso": course_name,
+                },
+                "subjects_at_risk_count": 0,
+                "failed_blocks_count": 0,
+                "entries": [],
+            }
+
+        grouped[key]["subjects_at_risk_count"] += 1
+        grouped[key]["failed_blocks_count"] += int(entry.get("failed_blocks_count", 0))
+        grouped[key]["entries"].append(entry)
+
+    return sorted(
+        grouped.values(),
+        key=lambda item: (
+            item["student"].get("curso", ""),
+            item["student"].get("numero", ""),
+            item["student"].get("nombre_estudiante", ""),
+        ),
+    )
+
+
+def _build_period_cards(entries: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
+    """
+    Construye resumen por período para tarjetas superiores.
+    """
+    period_codes = get_supported_period_codes()
+    cards: dict[str, dict[str, int]] = {}
+
+    for period_code in period_codes:
+        period_entries = [
+            entry for entry in entries if entry.get("period_code") == period_code
+        ]
+
+        cards[period_code] = {
+            "reported_subjects": sum(
+                1
+                for entry in period_entries
+                if entry.get("period_status") == PERIOD_STATUS_PASSED
+            ),
+            "partial_subjects": sum(
+                1
+                for entry in period_entries
+                if entry.get("period_status") == PERIOD_STATUS_INCOMPLETE
+            ),
+            "pending_subjects": sum(
+                1
+                for entry in period_entries
+                if entry.get("period_status") == PERIOD_STATUS_COMPROMISED
+            ),
+            "students_at_risk_count": len(
+                {
+                    (entry.get("student_id", ""), entry.get("curso", ""))
+                    for entry in period_entries
+                    if entry.get("period_status") == PERIOD_STATUS_COMPROMISED
+                }
+            ),
+            "failed_competencies_count": sum(
+                int(entry.get("failed_blocks_count", 0)) for entry in period_entries
+            ),
+        }
+
+    return cards
+
+
+def _map_entry_to_subject_row(entry: dict[str, Any]) -> dict[str, Any]:
+    """
+    Convierte una entrada evaluada a una fila de resumen por asignatura/período.
+    """
+    status = entry.get("period_status")
+
+    if status == PERIOD_STATUS_PASSED:
+        dashboard_status = DASHBOARD_STATUS_REFERENCE["reported"]
+        status_label = "Reportado"
+
+    elif status == PERIOD_STATUS_INCOMPLETE:
+        dashboard_status = DASHBOARD_STATUS_REFERENCE["partial"]
+        status_label = "Parcial"
+
+    else:
+        dashboard_status = DASHBOARD_STATUS_REFERENCE["pending"]
+        status_label = "Período comprometido"
+
+    reported_blocks_count = int(entry.get("reported_blocks_count", 0))
+    coverage_pct = round((reported_blocks_count / 4) * 100, 2)
+
+    return {
+        "subject_code": entry.get("subject_code", ""),
+        "subject_name": entry.get("subject_name", ""),
+        "status": dashboard_status,
+        "status_label": status_label,
+        "coverage_pct": coverage_pct,
+        "students_with_any_report": 1 if reported_blocks_count > 0 else 0,
+        "students_without_report": 1 if reported_blocks_count == 0 else 0,
+        "students_at_risk_count": 1 if status == PERIOD_STATUS_COMPROMISED else 0,
+        "failed_competencies_count": int(entry.get("failed_blocks_count", 0)),
+        "docente_asignatura": "",
+        "failed_blocks": entry.get("failed_blocks", []),
+        "student_id": entry.get("student_id", ""),
+        "student_name": entry.get("student_name", ""),
+        "numero": entry.get("numero", ""),
+    }
+
+
+def _group_course_period_subjects(
+    entries: list[dict[str, Any]],
+    teacher_assignments: Optional[list[dict[str, Any]]] = None,
+) -> list[dict[str, Any]]:
+    """
+    Organiza la vista detallada por curso -> período -> asignatura.
+
+    Nota:
+    - teacher_assignments queda preparado para futura integración real.
+    - Por ahora, si no hay asignación docente, se deja vacío.
+    """
+    teacher_lookup: dict[tuple[str, str], str] = {}
+
+    if teacher_assignments:
+        for item in teacher_assignments:
+            course_name = str(item.get("course_name", "")).strip()
+            subject_code = str(item.get("subject_code", "")).strip()
+            teacher_name = str(item.get("teacher_name", "")).strip()
+
+            if course_name and subject_code and teacher_name:
+                teacher_lookup[(course_name, subject_code)] = teacher_name
+
+    courses_map: dict[str, dict[str, Any]] = {}
+
+    for entry in entries:
+        course_name = str(entry.get("curso", "")).strip()
+        period_code = str(entry.get("period_code", "")).strip()
+        subject_code = str(entry.get("subject_code", "")).strip()
+
+        if not course_name or not period_code or not subject_code:
+            continue
+
+        if course_name not in courses_map:
+            courses_map[course_name] = {
+                "curso": course_name,
+                "total_students": len(
+                    {
+                        e.get("student_id", "")
+                        for e in entries
+                        if str(e.get("curso", "")).strip() == course_name
+                    }
+                ),
+                "periods": {},
+            }
+
+        if period_code not in courses_map[course_name]["periods"]:
+            courses_map[course_name]["periods"][period_code] = {
+                "totals": {
+                    "reported": 0,
+                    "partial": 0,
+                    "pending": 0,
+                },
+                "students_at_risk_count": 0,
+                "subjects": [],
+                "students_at_risk": [],
+            }
+
+        period_bucket = courses_map[course_name]["periods"][period_code]
+        subject_row = _map_entry_to_subject_row(entry)
+        subject_row["docente_asignatura"] = teacher_lookup.get(
+            (course_name, subject_code), ""
         )
 
-        teacher_index[key] = item
+        period_bucket["subjects"].append(subject_row)
 
-    return teacher_index
+        if subject_row["status"] == DASHBOARD_STATUS_REFERENCE["reported"]:
+            period_bucket["totals"]["reported"] += 1
+        elif subject_row["status"] == DASHBOARD_STATUS_REFERENCE["partial"]:
+            period_bucket["totals"]["partial"] += 1
+        else:
+            period_bucket["totals"]["pending"] += 1
 
+    for course_name, course_payload in courses_map.items():
+        for period_code in get_supported_period_codes():
+            if period_code not in course_payload["periods"]:
+                continue
 
-def _build_teacher_assignment_key(
-    center_id: Optional[Any],
-    school_year: Optional[str],
-    ciclo: Optional[str],
-    curso: Optional[str],
-    asignatura_codigo: Optional[str],
-) -> str:
-    """
-    Crea la llave única del cruce de docente_asignatura.
-    """
-    return "|".join(
-        [
-            str(center_id or ""),
-            str(school_year or ""),
-            str(ciclo or ""),
-            str(curso or ""),
-            str(asignatura_codigo or ""),
-        ]
-    )
+            period_entries = [
+                entry
+                for entry in entries
+                if str(entry.get("curso", "")).strip() == course_name
+                and str(entry.get("period_code", "")).strip() == period_code
+                and entry.get("period_status") == PERIOD_STATUS_COMPROMISED
+            ]
 
+            grouped_students: dict[str, dict[str, Any]] = {}
 
-def _get_teacher_assignment(
-    teacher_index: Dict[str, Dict[str, Any]],
-    center_id: Optional[Any],
-    school_year: Optional[str],
-    ciclo: Optional[str],
-    curso: Optional[str],
-    asignatura_codigo: Optional[str],
-) -> Dict[str, Any]:
-    """
-    Busca el docente asignado a una combinación curso + asignatura.
-    Si no existe, devuelve estructura vacía sin romper el flujo.
-    """
-    key = _build_teacher_assignment_key(
-        center_id=center_id,
-        school_year=school_year,
-        ciclo=ciclo,
-        curso=curso,
-        asignatura_codigo=asignatura_codigo,
-    )
-    return teacher_index.get(
-        key,
-        {
-            "docente_asignatura": None,
-            "docente_asignatura_id": None,
-            "teacher_assignment_found": False,
-        },
-    )
+            for entry in period_entries:
+                student_id = entry.get("student_id", "")
+                if student_id not in grouped_students:
+                    grouped_students[student_id] = {
+                        "student": {
+                            "id_estudiante": student_id,
+                            "nombre_estudiante": entry.get("student_name", ""),
+                            "numero": entry.get("numero", ""),
+                            "curso": course_name,
+                        },
+                        "subjects_at_risk_count": 0,
+                        "failed_competencies_count": 0,
+                        "details": [],
+                    }
 
+                grouped_students[student_id]["subjects_at_risk_count"] += 1
+                grouped_students[student_id]["failed_competencies_count"] += int(
+                    entry.get("failed_blocks_count", 0)
+                )
+                grouped_students[student_id]["details"].append(
+                    {
+                        "subject_code": entry.get("subject_code", ""),
+                        "subject_name": entry.get("subject_name", ""),
+                        "failed_blocks": entry.get("failed_blocks", []),
+                    }
+                )
 
-def _build_status_index(status_dashboard_data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
-    """
-    Convierte la salida de status_service en índice por:
-    curso -> período -> asignatura
-    """
-    index: Dict[str, Dict[str, Any]] = {}
-
-    for course_item in status_dashboard_data.get("courses", []):
-        curso = course_item.get("curso")
-        periods = course_item.get("periods", {})
-
-        index[curso] = {}
-
-        for period_code, period_payload in periods.items():
-            index[curso][period_code] = {}
-
-            for subject_item in period_payload.get("subjects", []):
-                subject_code = subject_item.get("subject_code")
-                index[curso][period_code][subject_code] = subject_item
-
-    return index
-
-
-def _build_risk_index(risk_dashboard_data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
-    """
-    Convierte la salida de risk_service en índice por:
-    curso -> período
-    """
-    index: Dict[str, Dict[str, Any]] = {}
-
-    for course_item in risk_dashboard_data.get("courses", []):
-        curso = course_item.get("curso")
-        periods = course_item.get("periods", {})
-        index[curso] = periods
-
-    return index
-
-
-def _summarize_global_status(status_dashboard_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Resume estados globales de reporte.
-    """
-    total_reported = 0
-    total_partial = 0
-    total_pending = 0
-
-    for course_item in status_dashboard_data.get("courses", []):
-        for period_payload in course_item.get("periods", {}).values():
-            totals = period_payload.get("totals", {})
-            total_reported += totals.get("reported", 0)
-            total_partial += totals.get("partial", 0)
-            total_pending += totals.get("pending", 0)
-
-    return {
-        "reported": total_reported,
-        "partial": total_partial,
-        "pending": total_pending,
-    }
-
-
-def _summarize_global_risk(risk_dashboard_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Resume riesgos globales.
-    """
-    students_at_risk_count = 0
-    failed_competencies_count = 0
-
-    for course_item in risk_dashboard_data.get("courses", []):
-        for period_payload in course_item.get("periods", {}).values():
-            students_at_risk_count += period_payload.get("students_at_risk_count", 0)
-            failed_competencies_count += period_payload.get("failed_competencies_count", 0)
-
-    return {
-        "students_at_risk_count": students_at_risk_count,
-        "failed_competencies_count": failed_competencies_count,
-    }
-
-
-def _merge_subject_row(
-    curso: str,
-    period_code: str,
-    subject_code: str,
-    status_item: Dict[str, Any],
-    risk_period_payload: Dict[str, Any],
-    teacher_index: Dict[str, Dict[str, Any]],
-    center_id: Optional[Any],
-    school_year: Optional[str],
-    ciclo: Optional[str],
-) -> Dict[str, Any]:
-    """
-    Une en una sola fila:
-    - estado de reporte
-    - datos de riesgo por asignatura
-    - docente asignado
-    """
-    subjects_summary = risk_period_payload.get("subjects_summary", [])
-    matching_subject_risk = next(
-        (item for item in subjects_summary if item.get("subject_code") == subject_code),
-        {
-            "subject_code": subject_code,
-            "subject_name": SUBJECTS.get(subject_code, subject_code),
-            "period": period_code,
-            "students_at_risk_count": 0,
-            "failed_competencies_count": 0,
-        },
-    )
-
-    teacher_assignment = _get_teacher_assignment(
-        teacher_index=teacher_index,
-        center_id=center_id,
-        school_year=school_year,
-        ciclo=ciclo,
-        curso=curso,
-        asignatura_codigo=subject_code,
-    )
-
-    return {
-        "curso": curso,
-        "period": period_code,
-        "subject_code": subject_code,
-        "subject_name": SUBJECTS.get(subject_code, subject_code),
-        "status": status_item.get("status"),
-        "status_label": status_item.get("status"),
-        "coverage_pct": status_item.get("coverage_pct", 0.0),
-        "total_students": status_item.get("total_students", 0),
-        "students_with_any_report": status_item.get("students_with_any_report", 0),
-        "students_without_report": status_item.get("students_without_report", 0),
-        "reported_competencies_count": status_item.get("reported_competencies_count", 0),
-        "expected_competencies_count": status_item.get("expected_competencies_count", 0),
-        "students_at_risk_count": matching_subject_risk.get("students_at_risk_count", 0),
-        "failed_competencies_count": matching_subject_risk.get("failed_competencies_count", 0),
-        "docente_asignatura": teacher_assignment.get("docente_asignatura"),
-        "docente_asignatura_id": teacher_assignment.get("docente_asignatura_id"),
-        "teacher_assignment_found": teacher_assignment.get("teacher_assignment_found", True)
-        if "teacher_assignment_found" in teacher_assignment
-        else True,
-    }
-
-
-def _build_period_summary_cards(
-    status_dashboard_data: Dict[str, Any],
-    risk_dashboard_data: Dict[str, Any],
-    selected_periods: List[str],
-) -> Dict[str, Any]:
-    """
-    Construye tarjetas resumen por período.
-    """
-    result: Dict[str, Any] = {}
-
-    for period_code in selected_periods:
-        reported = 0
-        partial = 0
-        pending = 0
-        students_at_risk = 0
-        failed_competencies = 0
-
-        for course_item in status_dashboard_data.get("courses", []):
-            period_payload = course_item.get("periods", {}).get(period_code, {})
-            totals = period_payload.get("totals", {})
-            reported += totals.get("reported", 0)
-            partial += totals.get("partial", 0)
-            pending += totals.get("pending", 0)
-
-        for course_item in risk_dashboard_data.get("courses", []):
-            period_payload = course_item.get("periods", {}).get(period_code, {})
-            students_at_risk += period_payload.get("students_at_risk_count", 0)
-            failed_competencies += period_payload.get("failed_competencies_count", 0)
-
-        result[period_code] = {
-            "reported_subjects": reported,
-            "partial_subjects": partial,
-            "pending_subjects": pending,
-            "students_at_risk_count": students_at_risk,
-            "failed_competencies_count": failed_competencies,
-        }
-
-    return result
-
-
-def _build_course_periods_view(
-    status_dashboard_data: Dict[str, Any],
-    risk_dashboard_data: Dict[str, Any],
-    teacher_index: Dict[str, Dict[str, Any]],
-    center_id: Optional[Any],
-    school_year: Optional[str],
-    ciclo: Optional[str],
-) -> List[Dict[str, Any]]:
-    """
-    Construye la vista principal por curso y período,
-    lista para ser renderizada en dashboard.
-    """
-    status_index = _build_status_index(status_dashboard_data)
-    risk_index = _build_risk_index(risk_dashboard_data)
-
-    courses_view: List[Dict[str, Any]] = []
-
-    for course_item in status_dashboard_data.get("courses", []):
-        curso = course_item.get("curso")
-        periods_payload: Dict[str, Any] = {}
-
-        for period_code, period_payload in course_item.get("periods", {}).items():
-            subject_rows: List[Dict[str, Any]] = []
-
-            risk_period_payload = risk_index.get(curso, {}).get(
-                period_code,
-                {
-                    "students_at_risk": [],
-                    "students_at_risk_count": 0,
-                    "failed_competencies_count": 0,
-                    "subjects_summary": [],
-                },
+            course_payload["periods"][period_code]["students_at_risk"] = sorted(
+                grouped_students.values(),
+                key=lambda item: (
+                    item["student"].get("numero", ""),
+                    item["student"].get("nombre_estudiante", ""),
+                ),
+            )
+            course_payload["periods"][period_code]["students_at_risk_count"] = len(
+                grouped_students
             )
 
-            for status_item in period_payload.get("subjects", []):
-                subject_code = status_item.get("subject_code")
+            course_payload["periods"][period_code]["subjects"] = sorted(
+                course_payload["periods"][period_code]["subjects"],
+                key=lambda item: (
+                    item.get("subject_name", ""),
+                    item.get("numero", ""),
+                ),
+            )
 
-                merged_row = _merge_subject_row(
-                    curso=curso,
-                    period_code=period_code,
-                    subject_code=subject_code,
-                    status_item=status_item,
-                    risk_period_payload=risk_period_payload,
-                    teacher_index=teacher_index,
-                    center_id=center_id,
-                    school_year=school_year,
-                    ciclo=ciclo,
-                )
-                subject_rows.append(merged_row)
-
-            periods_payload[period_code] = {
-                "subjects": subject_rows,
-                "students_at_risk": risk_period_payload.get("students_at_risk", []),
-                "students_at_risk_count": risk_period_payload.get("students_at_risk_count", 0),
-                "failed_competencies_count": risk_period_payload.get("failed_competencies_count", 0),
-                "totals": period_payload.get("totals", {}),
-            }
-
-        courses_view.append(
-            {
-                "curso": curso,
-                "total_students": course_item.get("total_students", 0),
-                "periods": periods_payload,
-            }
-        )
-
-    return courses_view
-
-
-def _build_recovery_placeholder(selected_periods: List[str]) -> Dict[str, Any]:
-    """
-    Estructura base para futura integración de recuperaciones y auditoría académica.
-
-    Importante:
-    - Por ahora es placeholder intencional
-    - Deja el dashboard listo para crecer sin romper estructura
-    """
-    return {
-        "enabled": False,
-        "message": (
-            "La auditoría académica y el seguimiento de recuperaciones "
-            "requieren historial de cambios o snapshots de importación."
-        ),
-        "periods": {
-            period_code: {
-                "students_recovered_count": 0,
-                "students_still_failed_count": 0,
-                "recent_changes": [],
-            }
-            for period_code in selected_periods
-        },
-    }
+    return sorted(courses_map.values(), key=lambda item: item.get("curso", ""))
 
 
 def build_tracking_dashboard_data(
-    rows: List[Dict[str, Any]],
+    rows: list[dict[str, Any]],
     center_id: Optional[Any] = None,
     school_year: Optional[str] = None,
     ciclo: Optional[str] = None,
     course_name: Optional[str] = None,
     period_code: Optional[str] = None,
     subject_code: Optional[str] = None,
-    min_score: float = MIN_APPROVAL_SCORE,
-    teacher_assignments: Optional[List[Dict[str, Any]]] = None,
-) -> Dict[str, Any]:
+    min_score: float = 70.0,
+    teacher_assignments: Optional[list[dict[str, Any]]] = None,
+) -> dict[str, Any]:
     """
-    Punto de entrada principal del módulo academic_tracking.
-
-    Flujo:
-    1. Parsea filas académicas
-    2. Construye estado de reporte
-    3. Construye riesgo académico
-    4. Une ambas salidas en una estructura única
-    5. Deja preparada base para docente_asignatura y auditoría
-
-    Parámetros:
-    - rows: filas crudas provenientes del import actual
-    - center_id: obligatorio a nivel de arquitectura, aunque hoy haya un solo centro
-    - school_year: recomendado
-    - ciclo: recomendado
-    - course_name, period_code, subject_code: filtros
-    - min_score: mínimo de aprobación (70 por defecto)
-    - teacher_assignments: fuente auxiliar de docente_asignatura
+    Construye el payload completo del dashboard de seguimiento académico.
     """
-    parsed_data = parse_academic_rows(rows)
-
-    metadata = parsed_data.get("metadata", {})
-    selected_periods = [period_code] if period_code else metadata.get("periods_detected", list(PERIODS))
-    selected_subjects = [subject_code] if subject_code else metadata.get(
-        "subjects_detected",
-        list(SUBJECTS.keys()),
-    )
-
-    status_dashboard_data = build_status_dashboard_data(
-        parsed_data=parsed_data,
-        course_name=course_name,
-        period_code=period_code,
-        subject_code=subject_code,
-        center_id=center_id,
-        school_year=school_year,
-        ciclo=ciclo,
-    )
-
-    risk_dashboard_data = build_risk_dashboard_data(
-        parsed_data=parsed_data,
-        course_name=course_name,
-        period_code=period_code,
-        subject_code=subject_code,
-        center_id=center_id,
-        school_year=school_year,
-        ciclo=ciclo,
+    raw_entries = build_risk_entries_from_rows(
+        rows=rows,
         min_score=min_score,
     )
 
-    teacher_index = _build_default_teacher_index(teacher_assignments)
-
-    courses_view = _build_course_periods_view(
-        status_dashboard_data=status_dashboard_data,
-        risk_dashboard_data=risk_dashboard_data,
-        teacher_index=teacher_index,
-        center_id=center_id,
-        school_year=school_year,
-        ciclo=ciclo,
+    filtered_entries = _apply_entry_filters(
+        entries=raw_entries,
+        course_name=course_name,
+        period_code=period_code,
+        subject_code=subject_code,
     )
 
-    global_status_summary = _summarize_global_status(status_dashboard_data)
-    global_risk_summary = _summarize_global_risk(risk_dashboard_data)
+    summary_status = _count_summary_statuses(filtered_entries)
+    unique_students_at_risk = _build_unique_students_at_risk(filtered_entries)
+    period_cards = _build_period_cards(filtered_entries)
+    courses = _group_course_period_subjects(
+        entries=filtered_entries,
+        teacher_assignments=teacher_assignments,
+    )
+
+    detected_subjects = get_detected_academic_subjects(rows)
+    detected_subject_codes = [item["subject_code"] for item in detected_subjects]
 
     dashboard_data = {
         "filters": {
@@ -483,35 +430,37 @@ def build_tracking_dashboard_data(
             "curso": course_name,
             "periodo": period_code,
             "asignatura": subject_code,
-            "min_approval_score": min_score,
+            "min_score": min_score,
         },
         "metadata": {
-            "subjects_detected": metadata.get("subjects_detected", []),
-            "periods_detected": metadata.get("periods_detected", []),
-            "courses_detected": metadata.get("courses_detected", []),
-            "row_count": metadata.get("row_count", 0),
+            "courses_detected": _extract_detected_courses(raw_entries),
+            "periods_detected": get_supported_period_codes(),
+            "subjects_detected": detected_subject_codes,
+            "subjects_catalog": detected_subjects,
+            "entries_total": len(filtered_entries),
         },
         "summary": {
-            "status": global_status_summary,
-            "risk": global_risk_summary,
-            "period_cards": _build_period_summary_cards(
-                status_dashboard_data=status_dashboard_data,
-                risk_dashboard_data=risk_dashboard_data,
-                selected_periods=selected_periods,
+            "status": summary_status,
+            "risk": {
+                "students_at_risk_count": len(unique_students_at_risk),
+                "failed_competencies_count": sum(
+                    int(entry.get("failed_blocks_count", 0))
+                    for entry in filtered_entries
+                ),
+            },
+            "period_cards": period_cards,
+        },
+        "courses": courses,
+        "students_at_risk": unique_students_at_risk,
+        "status_reference": DASHBOARD_STATUS_REFERENCE,
+        "teacher_assignments": teacher_assignments or [],
+        "audit_and_recovery": {
+            "enabled": False,
+            "message": (
+                "La auditoría académica y el seguimiento de recuperación "
+                "se integrarán en una etapa posterior del módulo."
             ),
         },
-        "courses": courses_view,
-        "status_reference": {
-            "reported": STATUS_REPORTADO,
-            "partial": STATUS_PARCIAL,
-            "pending": STATUS_PENDIENTE,
-        },
-        "teacher_assignments": {
-            "enabled": True,
-            "source_loaded": bool(teacher_assignments),
-            "records_count": len(teacher_assignments or []),
-        },
-        "audit_and_recovery": _build_recovery_placeholder(selected_periods),
     }
 
     return dashboard_data
