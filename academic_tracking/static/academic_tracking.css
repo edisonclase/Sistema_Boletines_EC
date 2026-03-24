@@ -1,0 +1,38 @@
+.dashboard-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.dashboard-topbar-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.meta-pill {
+    min-width: 150px;
+    background: #f8faf9;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow-sm);
+}
+
+.meta-pill span {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.meta-pill strong {
+    display: block;
+    font-size: var(--font-size-xl);
+    color: var(--primary-dark);
+    line-height: 1.1;
+}
