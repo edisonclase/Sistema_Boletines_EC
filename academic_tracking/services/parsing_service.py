@@ -1,31 +1,38 @@
 """
 parsing_service.py
 
-Servicio base para interpretar la estructura académica importada desde Google Sheets
-sin alterar la fuente original.
+Servicio de parsing para el módulo academic_tracking.
 
-Objetivo:
-- Detectar asignaturas a partir de los prefijos de columnas
-- Detectar períodos disponibles (P1, P2, P3, P4)
-- Agrupar columnas de competencias por asignatura y período
-- Normalizar valores provenientes del sheet
-- Preparar estructuras limpias para status_service, risk_service y tracking_service
+Responsabilidades:
+- Normalizar identificadores provenientes de Google Sheets / CSV
+- Detectar columnas académicas válidas por patrón
+- Excluir módulos formativos y columnas no relevantes para seguimiento
+- Convertir una fila cruda del sheet en una estructura académica usable
+- Preparar la base para evaluación por:
+    estudiante + asignatura + período + bloque
 
-Reglas de diseño:
-- No depende de PDF ni boletines
-- No asume una sola institución
-- No rompe la estructura actual del import
+Importante:
+- Este módulo trabaja SOLO con asignaturas académicas
+- No procesa módulos formativos (MOD1, MOD2, etc.)
+- No usa todavía promedios finales ni lógica de cierre anual
 """
 
 from __future__ import annotations
 
-import math
 import re
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Any, Optional
 
-# Catálogo oficial de asignaturas para este módulo.
-# Debe coincidir con los prefijos reales de la hoja principal.
-SUBJECTS: Dict[str, str] = {
+
+DEFAULT_MIN_COMPETENCY_SCORE = 70.0
+
+COMPETENCY_BLOCK_LABELS = {
+    "C1": "Competencia Comunicativa",
+    "C2": "Pensamiento Lógico, Creativo y Crítico",
+    "C3": "Científica y Tecnológica / Ambiental y de la Salud / Desarrollo Personal y Espiritual",
+    "C4": "Ética y Ciudadana",
+}
+
+SUBJECT_LABELS = {
     "LEN": "Lengua Española",
     "ING": "Inglés",
     "FRA": "Francés",
@@ -37,68 +44,92 @@ SUBJECTS: Dict[str, str] = {
     "FOR": "Formación Humana",
 }
 
-PERIODS: Tuple[str, ...] = ("P1", "P2", "P3", "P4")
-COMPETENCY_KEYS: Tuple[str, ...] = ("C1", "C2", "C3", "C4")
+# Prefijos no académicos que debemos ignorar en este módulo.
+NON_ACADEMIC_PREFIXES = {
+    "MOD1",
+    "MOD2",
+    "MOD3",
+    "MOD4",
+    "MOD5",
+}
 
-# Campos base frecuentes de la hoja principal
-BASE_FIELDS: Tuple[str, ...] = (
-    "ID_ESTUDIANTE",
-    "NOMBRE_ESTUDIANTE",
-    "NUMERO",
-    "CURSO",
-    "PROF_TITULAR",
-    "ASIST_ANUAL_PCT",
-    "SITUACION_PROMOVIDO",
-    "SITUACION_REPITENTE",
-    "COMENTARIO_FINAL",
+ACADEMIC_BLOCK_COLUMN_PATTERN = re.compile(
+    r"^(?P<subject>[A-Z0-9]+)_(?P<block>C[1-4])_(?P<period>P[1-4])$"
 )
 
-# Regex para detectar columnas tipo LEN_C1_P1, MAT_C4_P3, etc.
-COMPETENCY_COLUMN_PATTERN = re.compile(
-    r"^(?P<subject>[A-Z]{3})_(?P<competency>C[1-4])_(?P<period>P[1-4])$"
-)
-
-# Regex para detectar otros campos de asignatura, por si luego se necesitan
-SUBJECT_GENERIC_COLUMN_PATTERN = re.compile(r"^(?P<subject>[A-Z]{3})_(?P<suffix>.+)$")
+VALID_PERIOD_CODES = {"P1", "P2", "P3", "P4"}
+VALID_BLOCK_CODES = {"C1", "C2", "C3", "C4"}
 
 
-def normalize_text(value: Any) -> str:
+def normalize_sheet_identifier(value: Any) -> str:
     """
-    Convierte cualquier valor a texto limpio.
+    Normaliza identificadores que pueden venir como float desde pandas/CSV.
+
+    Ejemplos:
+    - 12345.0 -> "12345"
+    - "00123.0" -> "00123"
+    - None -> ""
+    - nan -> ""
     """
     if value is None:
         return ""
 
     text = str(value).strip()
 
-    # Normalizar textos "vacíos" comunes en imports
-    if text.lower() in {"nan", "none", "null"}:
+    if not text:
+        return ""
+
+    if text.lower() == "nan":
+        return ""
+
+    if text.endswith(".0"):
+        text = text[:-2]
+
+    return text
+
+
+def normalize_text(value: Any) -> str:
+    """
+    Normaliza texto general.
+    """
+    if value is None:
+        return ""
+
+    text = str(value).strip()
+
+    if not text or text.lower() == "nan":
         return ""
 
     return text
 
 
-def normalize_numeric(value: Any) -> Optional[float]:
+def safe_float(value: Any) -> Optional[float]:
     """
-    Convierte un valor a float si es posible.
-    Devuelve None si el valor está vacío o no es numérico.
+    Convierte un valor a float de forma segura.
+
+    Retorna None si:
+    - está vacío
+    - es NaN
+    - no puede convertirse
     """
     if value is None:
         return None
 
-    if isinstance(value, bool):
-        return None
-
     if isinstance(value, (int, float)):
-        if isinstance(value, float) and math.isnan(value):
+        text = str(value).strip()
+        if text.lower() == "nan":
             return None
-        return float(value)
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
 
-    text = normalize_text(value)
-    if not text:
+    text = str(value).strip()
+
+    if not text or text.lower() == "nan":
         return None
 
-    # Permitir coma decimal si viene de hojas o CSV exportado
+    # Soporte básico por si viene coma decimal
     text = text.replace(",", ".")
 
     try:
@@ -107,408 +138,268 @@ def normalize_numeric(value: Any) -> Optional[float]:
         return None
 
 
-def is_value_present(value: Any) -> bool:
+def get_subject_name(subject_code: str) -> str:
     """
-    Determina si un valor se considera presente para fines de reporte.
+    Retorna el nombre legible de la asignatura.
     """
-    if value is None:
+    subject_code = normalize_text(subject_code).upper()
+    return SUBJECT_LABELS.get(subject_code, subject_code)
+
+
+def get_competency_block_label(block_code: str) -> str:
+    """
+    Retorna la etiqueta del bloque de competencia.
+    """
+    block_code = normalize_text(block_code).upper()
+    return COMPETENCY_BLOCK_LABELS.get(block_code, block_code)
+
+
+def is_non_academic_prefix(subject_code: str) -> bool:
+    """
+    Indica si el prefijo pertenece a módulos formativos u otros campos
+    que no deben procesarse en seguimiento académico.
+    """
+    subject_code = normalize_text(subject_code).upper()
+    return subject_code in NON_ACADEMIC_PREFIXES
+
+
+def is_supported_academic_subject(subject_code: str) -> bool:
+    """
+    Verifica si el código pertenece a una asignatura académica soportada.
+    """
+    subject_code = normalize_text(subject_code).upper()
+
+    if not subject_code:
         return False
 
-    if isinstance(value, str):
-        return normalize_text(value) != ""
+    if is_non_academic_prefix(subject_code):
+        return False
 
-    if isinstance(value, float):
-        return not math.isnan(value)
+    return subject_code in SUBJECT_LABELS
+
+
+def is_academic_block_column(column_name: str) -> bool:
+    """
+    Verifica si una columna corresponde a un bloque académico
+    con patrón tipo: LEN_C1_P1
+    """
+    if not column_name:
+        return False
+
+    column_name = normalize_text(column_name).upper()
+
+    match = ACADEMIC_BLOCK_COLUMN_PATTERN.match(column_name)
+    if not match:
+        return False
+
+    subject_code = match.group("subject").upper()
+    block_code = match.group("block").upper()
+    period_code = match.group("period").upper()
+
+    if subject_code in NON_ACADEMIC_PREFIXES:
+        return False
+
+    if subject_code not in SUBJECT_LABELS:
+        return False
+
+    if block_code not in VALID_BLOCK_CODES:
+        return False
+
+    if period_code not in VALID_PERIOD_CODES:
+        return False
 
     return True
 
 
-def normalize_course_name(course: Any) -> str:
+def parse_academic_block_column(column_name: str) -> Optional[dict[str, str]]:
     """
-    Normaliza el nombre del curso para comparaciones seguras.
-    Mantiene el contenido humano, pero limpia espacios.
-    """
-    return re.sub(r"\s+", " ", normalize_text(course))
+    Parsea una columna académica válida y devuelve sus partes.
 
-
-def safe_bool(value: Any) -> bool:
-    """
-    Interpreta valores comunes de booleanos.
-    """
-    if isinstance(value, bool):
-        return value
-
-    text = normalize_text(value).lower()
-    return text in {"1", "true", "t", "yes", "y", "si", "sí", "activo"}
-
-
-def get_row_value(row: Dict[str, Any], key: str, default: Any = None) -> Any:
-    """
-    Obtiene una clave desde una fila sin romper si no existe.
-    """
-    return row.get(key, default)
-
-
-def get_student_base_info(row: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Extrae los campos base mínimos de un estudiante.
-    """
-    return {
-        "id_estudiante": normalize_text(get_row_value(row, "ID_ESTUDIANTE")),
-        "nombre_estudiante": normalize_text(get_row_value(row, "NOMBRE_ESTUDIANTE")),
-        "numero": normalize_text(get_row_value(row, "NUMERO")),
-        "curso": normalize_course_name(get_row_value(row, "CURSO")),
-        "prof_titular": normalize_text(get_row_value(row, "PROF_TITULAR")),
-    }
-
-
-def detect_subjects_from_columns(columns: Iterable[str]) -> List[str]:
-    """
-    Detecta asignaturas reales presentes en el dataset
-    basándose en columnas tipo XXX_C1_P1.
-    """
-    found: Set[str] = set()
-
-    for column in columns:
-        match = COMPETENCY_COLUMN_PATTERN.match(column)
-        if not match:
-            continue
-
-        subject_code = match.group("subject")
-        if subject_code in SUBJECTS:
-            found.add(subject_code)
-
-    return sorted(found)
-
-
-def detect_periods_from_columns(columns: Iterable[str]) -> List[str]:
-    """
-    Detecta períodos reales presentes en el dataset.
-    """
-    found: Set[str] = set()
-
-    for column in columns:
-        match = COMPETENCY_COLUMN_PATTERN.match(column)
-        if not match:
-            continue
-
-        period = match.group("period")
-        if period in PERIODS:
-            found.add(period)
-
-    return [period for period in PERIODS if period in found]
-
-
-def build_subject_period_competency_columns(
-    columns: Iterable[str],
-) -> Dict[str, Dict[str, List[str]]]:
-    """
-    Construye un índice de columnas por asignatura y período.
-
-    Salida esperada:
+    Ejemplo:
+    LEN_C1_P1 ->
     {
-        "LEN": {
-            "P1": ["LEN_C1_P1", "LEN_C2_P1", "LEN_C3_P1", "LEN_C4_P1"],
-            "P2": [...],
-        },
-        ...
+        "subject_code": "LEN",
+        "subject_name": "Lengua Española",
+        "block_code": "C1",
+        "block_label": "Competencia Comunicativa",
+        "period_code": "P1",
     }
     """
-    grouped: Dict[str, Dict[str, List[str]]] = {
-        subject_code: {period: [] for period in PERIODS} for subject_code in SUBJECTS
-    }
+    if not column_name:
+        return None
 
-    for column in columns:
-        match = COMPETENCY_COLUMN_PATTERN.match(column)
-        if not match:
-            continue
+    normalized = normalize_text(column_name).upper()
+    match = ACADEMIC_BLOCK_COLUMN_PATTERN.match(normalized)
 
-        subject_code = match.group("subject")
-        competency_code = match.group("competency")
-        period_code = match.group("period")
+    if not match:
+        return None
 
-        if subject_code not in SUBJECTS or period_code not in PERIODS:
-            continue
+    subject_code = match.group("subject").upper()
+    block_code = match.group("block").upper()
+    period_code = match.group("period").upper()
 
-        grouped[subject_code][period_code].append(column)
-
-    # Ordenar siempre por C1, C2, C3, C4
-    for subject_code in grouped:
-        for period_code in grouped[subject_code]:
-            grouped[subject_code][period_code].sort(
-                key=lambda col: COMPETENCY_KEYS.index(col.split("_")[1])
-                if len(col.split("_")) >= 3 and col.split("_")[1] in COMPETENCY_KEYS
-                else 999
-            )
-
-    # Eliminar asignaturas completamente vacías del índice
-    clean_grouped: Dict[str, Dict[str, List[str]]] = {}
-    for subject_code, periods_map in grouped.items():
-        has_any_column = any(periods_map[period] for period in PERIODS)
-        if has_any_column:
-            clean_grouped[subject_code] = periods_map
-
-    return clean_grouped
-
-
-def build_subject_column_index(columns: Iterable[str]) -> Dict[str, List[str]]:
-    """
-    Índice general de columnas por asignatura.
-    Útil para futuras etapas del módulo.
-    """
-    grouped: Dict[str, List[str]] = {}
-
-    for column in columns:
-        match = SUBJECT_GENERIC_COLUMN_PATTERN.match(column)
-        if not match:
-            continue
-
-        subject_code = match.group("subject")
-        if subject_code not in SUBJECTS:
-            continue
-
-        grouped.setdefault(subject_code, []).append(column)
-
-    for subject_code in grouped:
-        grouped[subject_code].sort()
-
-    return grouped
-
-
-def get_competency_columns_for_subject_period(
-    subject_code: str,
-    period_code: str,
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-) -> List[str]:
-    """
-    Devuelve las columnas de competencias para una asignatura y período.
-    """
-    return subject_period_map.get(subject_code, {}).get(period_code, [])
-
-
-def extract_competency_values_from_row(
-    row: Dict[str, Any],
-    subject_code: str,
-    period_code: str,
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-) -> Dict[str, Optional[float]]:
-    """
-    Extrae los valores numéricos de competencias de una fila para una asignatura y período.
-
-    Salida esperada:
-    {
-        "C1": 85.0,
-        "C2": 72.0,
-        "C3": None,
-        "C4": 90.0
-    }
-    """
-    competency_columns = get_competency_columns_for_subject_period(
-        subject_code=subject_code,
-        period_code=period_code,
-        subject_period_map=subject_period_map,
-    )
-
-    values: Dict[str, Optional[float]] = {}
-
-    for column in competency_columns:
-        parts = column.split("_")
-        if len(parts) != 3:
-            continue
-
-        competency_code = parts[1]
-        raw_value = get_row_value(row, column)
-        values[competency_code] = normalize_numeric(raw_value)
-
-    # Garantizar estructura completa aunque falten columnas
-    for competency_code in COMPETENCY_KEYS:
-        values.setdefault(competency_code, None)
-
-    return values
-
-
-def row_has_any_reported_value_for_subject_period(
-    row: Dict[str, Any],
-    subject_code: str,
-    period_code: str,
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-) -> bool:
-    """
-    Indica si una fila tiene al menos una calificación reportada
-    para una asignatura y período.
-    """
-    competency_columns = get_competency_columns_for_subject_period(
-        subject_code=subject_code,
-        period_code=period_code,
-        subject_period_map=subject_period_map,
-    )
-
-    for column in competency_columns:
-        if is_value_present(get_row_value(row, column)):
-            return True
-
-    return False
-
-
-def row_count_reported_competencies_for_subject_period(
-    row: Dict[str, Any],
-    subject_code: str,
-    period_code: str,
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-) -> int:
-    """
-    Cuenta cuántas competencias tienen valor reportado
-    en una fila para una asignatura y período.
-    """
-    competency_columns = get_competency_columns_for_subject_period(
-        subject_code=subject_code,
-        period_code=period_code,
-        subject_period_map=subject_period_map,
-    )
-
-    return sum(
-        1 for column in competency_columns if is_value_present(get_row_value(row, column))
-    )
-
-
-def filter_rows_by_course(rows: Iterable[Dict[str, Any]], course_name: str) -> List[Dict[str, Any]]:
-    """
-    Filtra filas por curso.
-    """
-    normalized_target = normalize_course_name(course_name)
-    return [
-        row
-        for row in rows
-        if normalize_course_name(get_row_value(row, "CURSO")) == normalized_target
-    ]
-
-
-def get_available_courses(rows: Iterable[Dict[str, Any]]) -> List[str]:
-    """
-    Devuelve la lista de cursos únicos presentes en las filas.
-    """
-    courses = {
-        normalize_course_name(get_row_value(row, "CURSO"))
-        for row in rows
-        if normalize_course_name(get_row_value(row, "CURSO"))
-    }
-    return sorted(courses)
-
-
-def build_dataset_metadata(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """
-    Construye metadatos del dataset para uso interno del módulo.
-    """
-    columns: List[str] = list(rows[0].keys()) if rows else []
-    detected_subjects = detect_subjects_from_columns(columns)
-    detected_periods = detect_periods_from_columns(columns)
-    subject_period_map = build_subject_period_competency_columns(columns)
-    subject_column_index = build_subject_column_index(columns)
+    if not is_supported_academic_subject(subject_code):
+        return None
 
     return {
-        "row_count": len(rows),
-        "columns": columns,
-        "base_fields": list(BASE_FIELDS),
-        "subjects_detected": detected_subjects,
-        "periods_detected": detected_periods,
-        "courses_detected": get_available_courses(rows),
-        "subject_period_map": subject_period_map,
-        "subject_column_index": subject_column_index,
+        "column_name": normalized,
+        "subject_code": subject_code,
+        "subject_name": get_subject_name(subject_code),
+        "block_code": block_code,
+        "block_label": get_competency_block_label(block_code),
+        "period_code": period_code,
     }
 
 
-def build_student_period_snapshot(
-    row: Dict[str, Any],
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-    subjects: Optional[List[str]] = None,
-    periods: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+def build_student_identity(row: dict[str, Any]) -> dict[str, str]:
     """
-    Construye una vista resumida de una fila para análisis posteriores.
+    Construye la identidad base del estudiante a partir de la fila cruda.
+    """
+    return {
+        "id_estudiante": normalize_sheet_identifier(row.get("ID_ESTUDIANTE")),
+        "nombre_estudiante": normalize_text(row.get("NOMBRE_ESTUDIANTE")),
+        "numero": normalize_sheet_identifier(row.get("NUMERO")),
+        "curso": normalize_text(row.get("CURSO")),
+        "prof_titular": normalize_text(row.get("PROF_TITULAR")),
+    }
 
-    Salida:
+
+def initialize_subject_period_structure() -> dict[str, dict[str, Any]]:
+    """
+    Estructura base para períodos P1..P4 de una asignatura.
+    """
+    return {
+        "P1": {"blocks": {}},
+        "P2": {"blocks": {}},
+        "P3": {"blocks": {}},
+        "P4": {"blocks": {}},
+    }
+
+
+def parse_student_row(row: dict[str, Any]) -> dict[str, Any]:
+    """
+    Convierte una fila cruda del sheet en una estructura académica utilizable.
+
+    Estructura de salida:
     {
         "student": {...},
         "subjects": {
-            "LEN": {
-                "P1": {"C1": 80.0, "C2": None, ...},
-                "P2": {...}
+            "MAT": {
+                "subject_code": "MAT",
+                "subject_name": "Matemática",
+                "periods": {
+                    "P1": {
+                        "blocks": {
+                            "C1": {
+                                "block_code": "C1",
+                                "block_label": "...",
+                                "score": 85.0,
+                                "column_name": "MAT_C1_P1",
+                            }
+                        }
+                    }
+                }
             }
         }
     }
     """
-    selected_subjects = subjects or list(subject_period_map.keys())
-    selected_periods = periods or list(PERIODS)
+    student = build_student_identity(row)
+    subjects: dict[str, dict[str, Any]] = {}
 
-    snapshot = {
-        "student": get_student_base_info(row),
-        "subjects": {},
-    }
+    for raw_column_name, raw_value in row.items():
+        column_name = normalize_text(raw_column_name).upper()
 
-    for subject_code in selected_subjects:
-        if subject_code not in subject_period_map:
+        if not is_academic_block_column(column_name):
             continue
 
-        snapshot["subjects"][subject_code] = {}
+        parsed_column = parse_academic_block_column(column_name)
+        if not parsed_column:
+            continue
 
-        for period_code in selected_periods:
-            if period_code not in PERIODS:
-                continue
+        subject_code = parsed_column["subject_code"]
+        subject_name = parsed_column["subject_name"]
+        block_code = parsed_column["block_code"]
+        block_label = parsed_column["block_label"]
+        period_code = parsed_column["period_code"]
 
-            snapshot["subjects"][subject_code][period_code] = extract_competency_values_from_row(
-                row=row,
-                subject_code=subject_code,
-                period_code=period_code,
-                subject_period_map=subject_period_map,
-            )
+        if subject_code not in subjects:
+            subjects[subject_code] = {
+                "subject_code": subject_code,
+                "subject_name": subject_name,
+                "periods": initialize_subject_period_structure(),
+            }
 
-    return snapshot
+        score = safe_float(raw_value)
+
+        subjects[subject_code]["periods"][period_code]["blocks"][block_code] = {
+            "block_code": block_code,
+            "block_label": block_label,
+            "score": score,
+            "column_name": column_name,
+        }
+
+    return {
+        "student": student,
+        "subjects": subjects,
+    }
 
 
-def build_rows_snapshots(
-    rows: List[Dict[str, Any]],
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-    subjects: Optional[List[str]] = None,
-    periods: Optional[List[str]] = None,
-) -> List[Dict[str, Any]]:
+def parse_student_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
-    Construye snapshots de múltiples filas.
+    Parsea múltiples filas.
     """
+    parsed_rows: list[dict[str, Any]] = []
+
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        parsed_rows.append(parse_student_row(row))
+
+    return parsed_rows
+
+
+def get_detected_academic_subject_codes(rows: list[dict[str, Any]]) -> list[str]:
+    """
+    Detecta los códigos de asignaturas académicas presentes en las filas.
+    """
+    detected: set[str] = set()
+
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+
+        for raw_column_name in row.keys():
+            parsed = parse_academic_block_column(str(raw_column_name))
+            if parsed:
+                detected.add(parsed["subject_code"])
+
+    return sorted(detected)
+
+
+def get_detected_academic_subjects(rows: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """
+    Retorna asignaturas detectadas con código y nombre.
+    """
+    subject_codes = get_detected_academic_subject_codes(rows)
+
     return [
-        build_student_period_snapshot(
-            row=row,
-            subject_period_map=subject_period_map,
-            subjects=subjects,
-            periods=periods,
-        )
-        for row in rows
+        {
+            "subject_code": subject_code,
+            "subject_name": get_subject_name(subject_code),
+        }
+        for subject_code in subject_codes
     ]
 
 
-def parse_academic_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+def get_supported_period_codes() -> list[str]:
     """
-    Punto de entrada principal del servicio.
-
-    Recibe filas crudas del sheet y devuelve una estructura base
-    lista para que otros servicios la usen.
-
-    Salida esperada:
-    {
-        "metadata": {...},
-        "rows": [...],
-        "snapshots": [...]
-    }
+    Retorna la lista ordenada de períodos soportados.
     """
-    metadata = build_dataset_metadata(rows)
-    subject_period_map = metadata["subject_period_map"]
+    return ["P1", "P2", "P3", "P4"]
 
-    return {
-        "metadata": metadata,
-        "rows": rows,
-        "snapshots": build_rows_snapshots(
-            rows=rows,
-            subject_period_map=subject_period_map,
-            subjects=metadata["subjects_detected"],
-            periods=metadata["periods_detected"],
-        ),
-    }
+
+def get_supported_block_codes() -> list[str]:
+    """
+    Retorna la lista ordenada de bloques soportados.
+    """
+    return ["C1", "C2", "C3", "C4"]

@@ -1,368 +1,331 @@
 """
 risk_service.py
 
-Servicio para detectar estudiantes en riesgo académico por período
-y contabilizar competencias reprobadas.
+Servicio de análisis de riesgo académico para el módulo academic_tracking.
 
-Objetivos:
-- Identificar estudiantes que se quedaron en P1, P2, P3 y P4
-- Contar cuántas competencias reprobadas tiene cada estudiante por asignatura y período
-- Generar resúmenes por curso, período y asignatura
-- Mantener estructura preparada para multi-centro
+Responsabilidades:
+- Evaluar el estado de un período por asignatura
+- Detectar bloques reprobados dentro del período
+- Identificar períodos comprometidos por estudiante/asignatura
+- Preparar estructuras listas para el dashboard de seguimiento
 
-Regla inicial:
-- Un estudiante está en riesgo en una asignatura/período si al menos una competencia
-  del período está por debajo del mínimo de aprobación.
-- Un estudiante "se quedó" en un período si tiene al menos una asignatura en riesgo
-  en ese período.
-
-Nota:
-- Este servicio no toca boletines ni PDFs
-- El mínimo de aprobación es parametrizable
+Estados manejados:
+- passed: todos los bloques reportados y >= nota mínima
+- compromised: todos los bloques reportados, pero uno o más < nota mínima
+- incomplete: falta uno o más bloques del período
 """
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from .parsing_service import (
-    PERIODS,
-    SUBJECTS,
-    extract_competency_values_from_row,
-    filter_rows_by_course,
-    get_available_courses,
-    get_student_base_info,
-    normalize_course_name,
+    DEFAULT_MIN_COMPETENCY_SCORE,
+    get_supported_block_codes,
+    parse_student_row,
 )
 
 
-MIN_APPROVAL_SCORE = 70.0
+PERIOD_STATUS_PASSED = "passed"
+PERIOD_STATUS_COMPROMISED = "compromised"
+PERIOD_STATUS_INCOMPLETE = "incomplete"
+
+PERIOD_STATUS_LABELS = {
+    PERIOD_STATUS_PASSED: "Superado",
+    PERIOD_STATUS_COMPROMISED: "Comprometido",
+    PERIOD_STATUS_INCOMPLETE: "Incompleto",
+}
 
 
-def is_failed_competency(value: Optional[float], min_score: float = MIN_APPROVAL_SCORE) -> bool:
+def is_failed_competency(
+    value: Optional[float],
+    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+) -> bool:
     """
-    Determina si una competencia está reprobada.
+    Indica si una calificación de bloque está por debajo del mínimo aprobatorio.
     """
     if value is None:
         return False
-    return value < min_score
+    return float(value) < float(min_score)
 
 
-def get_failed_competencies_for_student_subject_period(
-    row: Dict[str, Any],
-    subject_code: str,
-    period_code: str,
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-    min_score: float = MIN_APPROVAL_SCORE,
-) -> Dict[str, Any]:
+def is_missing_score(value: Optional[float]) -> bool:
     """
-    Devuelve el detalle de competencias reprobadas de un estudiante
-    en una asignatura y período.
-
-    Salida esperada:
-    {
-        "subject_code": "LEN",
-        "subject_name": "Lengua Española",
-        "period": "P1",
-        "competency_values": {"C1": 65.0, "C2": 80.0, ...},
-        "failed_competencies": ["C1", "C3"],
-        "failed_count": 2,
-        "has_risk": True
-    }
+    Indica si un bloque no tiene calificación reportada.
     """
-    competency_values = extract_competency_values_from_row(
-        row=row,
-        subject_code=subject_code,
-        period_code=period_code,
-        subject_period_map=subject_period_map,
-    )
+    return value is None
 
-    failed_competencies = [
-        competency_code
-        for competency_code, score in competency_values.items()
-        if is_failed_competency(score, min_score=min_score)
-    ]
 
+def build_failed_block_payload(
+    block_code: str,
+    block_data: dict[str, Any],
+) -> dict[str, Any]:
+    """
+    Construye la representación estándar de un bloque reprobado.
+    """
     return {
-        "subject_code": subject_code,
-        "subject_name": SUBJECTS.get(subject_code, subject_code),
-        "period": period_code,
-        "competency_values": competency_values,
-        "failed_competencies": failed_competencies,
-        "failed_count": len(failed_competencies),
-        "has_risk": len(failed_competencies) > 0,
+        "block_code": block_code,
+        "block_label": block_data.get("block_label", block_code),
+        "score": block_data.get("score"),
+        "column_name": block_data.get("column_name", ""),
     }
 
 
-def get_student_risk_for_period(
-    row: Dict[str, Any],
-    period_code: str,
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-    selected_subjects: Optional[List[str]] = None,
-    min_score: float = MIN_APPROVAL_SCORE,
-) -> Dict[str, Any]:
+def evaluate_period_blocks(
+    blocks: dict[str, dict[str, Any]],
+    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+) -> dict[str, Any]:
     """
-    Evalúa el riesgo de un estudiante en un período completo.
+    Evalúa los 4 bloques de un período y determina su estado.
 
-    Un estudiante está en riesgo en el período si tiene al menos una asignatura
-    con una o más competencias reprobadas.
+    Reglas:
+    - incomplete: falta uno o más bloques o tienen score None
+    - compromised: todos los bloques reportados, pero uno o más < min_score
+    - passed: todos los bloques reportados y todos >= min_score
     """
-    subjects = selected_subjects or list(subject_period_map.keys())
-    subject_risks: List[Dict[str, Any]] = []
+    expected_block_codes = get_supported_block_codes()
 
-    for subject_code in subjects:
-        if subject_code not in subject_period_map:
+    reported_blocks: list[dict[str, Any]] = []
+    missing_block_codes: list[str] = []
+    failed_blocks: list[dict[str, Any]] = []
+
+    for block_code in expected_block_codes:
+        block_data = blocks.get(block_code)
+
+        if not block_data:
+            missing_block_codes.append(block_code)
             continue
 
-        subject_risk = get_failed_competencies_for_student_subject_period(
-            row=row,
-            subject_code=subject_code,
-            period_code=period_code,
-            subject_period_map=subject_period_map,
-            min_score=min_score,
-        )
+        score = block_data.get("score")
 
-        if subject_risk["has_risk"]:
-            subject_risks.append(subject_risk)
-
-    total_failed_competencies = sum(item["failed_count"] for item in subject_risks)
-
-    return {
-        "student": get_student_base_info(row),
-        "period": period_code,
-        "subjects_at_risk": subject_risks,
-        "subjects_at_risk_count": len(subject_risks),
-        "failed_competencies_count": total_failed_competencies,
-        "is_at_risk": len(subject_risks) > 0,
-    }
-
-
-def get_students_at_risk_for_course_period(
-    rows: List[Dict[str, Any]],
-    course_name: str,
-    period_code: str,
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-    selected_subjects: Optional[List[str]] = None,
-    min_score: float = MIN_APPROVAL_SCORE,
-) -> Dict[str, Any]:
-    """
-    Obtiene todos los estudiantes en riesgo para un curso y período.
-    """
-    course_rows = filter_rows_by_course(rows, course_name)
-    normalized_course = normalize_course_name(course_name)
-
-    students_risk_details: List[Dict[str, Any]] = []
-
-    for row in course_rows:
-        student_risk = get_student_risk_for_period(
-            row=row,
-            period_code=period_code,
-            subject_period_map=subject_period_map,
-            selected_subjects=selected_subjects,
-            min_score=min_score,
-        )
-
-        if student_risk["is_at_risk"]:
-            students_risk_details.append(student_risk)
-
-    total_failed_competencies = sum(
-        item["failed_competencies_count"] for item in students_risk_details
-    )
-
-    return {
-        "curso": normalized_course,
-        "period": period_code,
-        "total_students": len(course_rows),
-        "students_at_risk": students_risk_details,
-        "students_at_risk_count": len(students_risk_details),
-        "failed_competencies_count": total_failed_competencies,
-    }
-
-
-def summarize_subject_risk_for_course_period(
-    rows: List[Dict[str, Any]],
-    course_name: str,
-    period_code: str,
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-    selected_subjects: Optional[List[str]] = None,
-    min_score: float = MIN_APPROVAL_SCORE,
-) -> List[Dict[str, Any]]:
-    """
-    Resume el riesgo por asignatura dentro de un curso y período.
-    """
-    course_rows = filter_rows_by_course(rows, course_name)
-    subjects = selected_subjects or list(subject_period_map.keys())
-
-    summary: List[Dict[str, Any]] = []
-
-    for subject_code in subjects:
-        if subject_code not in subject_period_map:
+        if is_missing_score(score):
+            missing_block_codes.append(block_code)
             continue
 
-        students_with_risk = 0
-        failed_competencies_count = 0
-
-        for row in course_rows:
-            subject_risk = get_failed_competencies_for_student_subject_period(
-                row=row,
-                subject_code=subject_code,
-                period_code=period_code,
-                subject_period_map=subject_period_map,
-                min_score=min_score,
-            )
-
-            if subject_risk["has_risk"]:
-                students_with_risk += 1
-                failed_competencies_count += subject_risk["failed_count"]
-
-        summary.append(
+        reported_blocks.append(
             {
-                "subject_code": subject_code,
-                "subject_name": SUBJECTS.get(subject_code, subject_code),
-                "period": period_code,
-                "students_at_risk_count": students_with_risk,
-                "failed_competencies_count": failed_competencies_count,
+                "block_code": block_code,
+                "block_label": block_data.get("block_label", block_code),
+                "score": score,
+                "column_name": block_data.get("column_name", ""),
             }
         )
 
-    return summary
+        if is_failed_competency(score, min_score=min_score):
+            failed_blocks.append(build_failed_block_payload(block_code, block_data))
 
+    reported_blocks_count = len(reported_blocks)
+    missing_blocks_count = len(missing_block_codes)
+    failed_blocks_count = len(failed_blocks)
 
-def calculate_course_risk_summary(
-    rows: List[Dict[str, Any]],
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-    course_name: str,
-    selected_periods: Optional[List[str]] = None,
-    selected_subjects: Optional[List[str]] = None,
-    min_score: float = MIN_APPROVAL_SCORE,
-) -> Dict[str, Any]:
-    """
-    Calcula el resumen de riesgo completo para un curso.
-    """
-    normalized_course = normalize_course_name(course_name)
-    periods = selected_periods or list(PERIODS)
+    all_blocks_reported = missing_blocks_count == 0
 
-    periods_summary: Dict[str, Any] = {}
-
-    for period_code in periods:
-        course_period_risk = get_students_at_risk_for_course_period(
-            rows=rows,
-            course_name=normalized_course,
-            period_code=period_code,
-            subject_period_map=subject_period_map,
-            selected_subjects=selected_subjects,
-            min_score=min_score,
-        )
-
-        subject_summary = summarize_subject_risk_for_course_period(
-            rows=rows,
-            course_name=normalized_course,
-            period_code=period_code,
-            subject_period_map=subject_period_map,
-            selected_subjects=selected_subjects,
-            min_score=min_score,
-        )
-
-        periods_summary[period_code] = {
-            "students_at_risk": course_period_risk["students_at_risk"],
-            "students_at_risk_count": course_period_risk["students_at_risk_count"],
-            "failed_competencies_count": course_period_risk["failed_competencies_count"],
-            "subjects_summary": subject_summary,
-        }
-
-    return {
-        "curso": normalized_course,
-        "periods": periods_summary,
-    }
-
-
-def calculate_all_courses_risk_summary(
-    rows: List[Dict[str, Any]],
-    subject_period_map: Dict[str, Dict[str, List[str]]],
-    selected_periods: Optional[List[str]] = None,
-    selected_subjects: Optional[List[str]] = None,
-    min_score: float = MIN_APPROVAL_SCORE,
-) -> Dict[str, Any]:
-    """
-    Calcula el resumen de riesgo para todos los cursos detectados.
-    """
-    courses = get_available_courses(rows)
-    course_summaries: List[Dict[str, Any]] = []
-
-    for course_name in courses:
-        summary = calculate_course_risk_summary(
-            rows=rows,
-            subject_period_map=subject_period_map,
-            course_name=course_name,
-            selected_periods=selected_periods,
-            selected_subjects=selected_subjects,
-            min_score=min_score,
-        )
-        course_summaries.append(summary)
-
-    return {
-        "courses": course_summaries,
-        "course_count": len(course_summaries),
-    }
-
-
-def build_risk_dashboard_data(
-    parsed_data: Dict[str, Any],
-    course_name: Optional[str] = None,
-    period_code: Optional[str] = None,
-    subject_code: Optional[str] = None,
-    center_id: Optional[Any] = None,
-    school_year: Optional[str] = None,
-    ciclo: Optional[str] = None,
-    min_score: float = MIN_APPROVAL_SCORE,
-) -> Dict[str, Any]:
-    """
-    Punto de entrada principal del servicio.
-
-    Recibe la salida de parse_academic_rows() y devuelve una estructura lista
-    para el dashboard de seguimiento académico.
-    """
-    rows = parsed_data.get("rows", [])
-    metadata = parsed_data.get("metadata", {})
-    subject_period_map = metadata.get("subject_period_map", {})
-
-    selected_periods = [period_code] if period_code else metadata.get("periods_detected", [])
-    selected_subjects = [subject_code] if subject_code else metadata.get("subjects_detected", [])
-
-    if course_name:
-        summary = calculate_course_risk_summary(
-            rows=rows,
-            subject_period_map=subject_period_map,
-            course_name=course_name,
-            selected_periods=selected_periods,
-            selected_subjects=selected_subjects,
-            min_score=min_score,
-        )
-        courses_data = [summary]
+    if not all_blocks_reported:
+        period_status = PERIOD_STATUS_INCOMPLETE
+    elif failed_blocks_count > 0:
+        period_status = PERIOD_STATUS_COMPROMISED
     else:
-        all_courses = calculate_all_courses_risk_summary(
-            rows=rows,
-            subject_period_map=subject_period_map,
-            selected_periods=selected_periods,
-            selected_subjects=selected_subjects,
-            min_score=min_score,
-        )
-        courses_data = all_courses["courses"]
+        period_status = PERIOD_STATUS_PASSED
 
     return {
-        "filters": {
-            "center_id": center_id,
-            "school_year": school_year,
-            "ciclo": ciclo,
-            "curso": normalize_course_name(course_name) if course_name else None,
-            "periodo": period_code,
-            "asignatura": subject_code,
-            "min_score": min_score,
-        },
-        "metadata": {
-            "subjects_detected": metadata.get("subjects_detected", []),
-            "periods_detected": metadata.get("periods_detected", []),
-            "courses_detected": metadata.get("courses_detected", []),
-        },
-        "courses": courses_data,
+        "period_status": period_status,
+        "period_status_label": PERIOD_STATUS_LABELS[period_status],
+        "all_blocks_reported": all_blocks_reported,
+        "reported_blocks_count": reported_blocks_count,
+        "missing_blocks_count": missing_blocks_count,
+        "missing_block_codes": missing_block_codes,
+        "failed_blocks_count": failed_blocks_count,
+        "failed_blocks": failed_blocks,
+        "reported_blocks": reported_blocks,
     }
+
+
+def build_student_subject_period_statuses(
+    parsed_row: dict[str, Any],
+    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+) -> list[dict[str, Any]]:
+    """
+    Construye una lista de estados por estudiante + asignatura + período.
+
+    Entrada:
+    - parsed_row: salida de parse_student_row()
+
+    Salida:
+    [
+        {
+            "student_id": "...",
+            "student_name": "...",
+            "numero": "...",
+            "curso": "...",
+            "prof_titular": "...",
+            "subject_code": "MAT",
+            "subject_name": "Matemática",
+            "period_code": "P2",
+            "period_status": "compromised",
+            ...
+        }
+    ]
+    """
+    student = parsed_row.get("student", {})
+    subjects = parsed_row.get("subjects", {})
+
+    student_id = student.get("id_estudiante", "")
+    student_name = student.get("nombre_estudiante", "")
+    numero = student.get("numero", "")
+    curso = student.get("curso", "")
+    prof_titular = student.get("prof_titular", "")
+
+    results: list[dict[str, Any]] = []
+
+    for subject_code, subject_payload in subjects.items():
+        subject_name = subject_payload.get("subject_name", subject_code)
+        periods = subject_payload.get("periods", {})
+
+        for period_code, period_payload in periods.items():
+            blocks = period_payload.get("blocks", {})
+
+            period_evaluation = evaluate_period_blocks(
+                blocks=blocks,
+                min_score=min_score,
+            )
+
+            results.append(
+                {
+                    "student_id": student_id,
+                    "student_name": student_name,
+                    "numero": numero,
+                    "curso": curso,
+                    "prof_titular": prof_titular,
+                    "subject_code": subject_code,
+                    "subject_name": subject_name,
+                    "period_code": period_code,
+                    "period_status": period_evaluation["period_status"],
+                    "period_status_label": period_evaluation["period_status_label"],
+                    "all_blocks_reported": period_evaluation["all_blocks_reported"],
+                    "reported_blocks_count": period_evaluation["reported_blocks_count"],
+                    "missing_blocks_count": period_evaluation["missing_blocks_count"],
+                    "missing_block_codes": period_evaluation["missing_block_codes"],
+                    "failed_blocks_count": period_evaluation["failed_blocks_count"],
+                    "failed_blocks": period_evaluation["failed_blocks"],
+                    "reported_blocks": period_evaluation["reported_blocks"],
+                }
+            )
+
+    return results
+
+
+def build_risk_entries_from_row(
+    row: dict[str, Any],
+    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+) -> list[dict[str, Any]]:
+    """
+    Parsea una fila cruda y devuelve sus estados por asignatura/período.
+    """
+    parsed_row = parse_student_row(row)
+    return build_student_subject_period_statuses(
+        parsed_row=parsed_row,
+        min_score=min_score,
+    )
+
+
+def build_risk_entries_from_rows(
+    rows: list[dict[str, Any]],
+    min_score: float = DEFAULT_MIN_COMPETENCY_SCORE,
+) -> list[dict[str, Any]]:
+    """
+    Procesa múltiples filas crudas y devuelve una lista consolidada de
+    estados por estudiante/asignatura/período.
+    """
+    all_entries: list[dict[str, Any]] = []
+
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+
+        row_entries = build_risk_entries_from_row(
+            row=row,
+            min_score=min_score,
+        )
+
+        all_entries.extend(row_entries)
+
+    return all_entries
+
+
+def filter_period_status_entries(
+    entries: list[dict[str, Any]],
+    period_status: str,
+) -> list[dict[str, Any]]:
+    """
+    Filtra entradas por estado del período.
+    """
+    return [
+        entry
+        for entry in entries
+        if entry.get("period_status") == period_status
+    ]
+
+
+def get_compromised_entries(
+    entries: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """
+    Retorna entradas cuyo período quedó comprometido.
+    """
+    return filter_period_status_entries(entries, PERIOD_STATUS_COMPROMISED)
+
+
+def get_incomplete_entries(
+    entries: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """
+    Retorna entradas con reporte incompleto.
+    """
+    return filter_period_status_entries(entries, PERIOD_STATUS_INCOMPLETE)
+
+
+def get_passed_entries(
+    entries: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """
+    Retorna entradas con período superado.
+    """
+    return filter_period_status_entries(entries, PERIOD_STATUS_PASSED)
+
+
+def count_period_statuses(
+    entries: list[dict[str, Any]],
+) -> dict[str, int]:
+    """
+    Cuenta cuántas entradas hay por estado.
+    """
+    return {
+        PERIOD_STATUS_PASSED: len(get_passed_entries(entries)),
+        PERIOD_STATUS_COMPROMISED: len(get_compromised_entries(entries)),
+        PERIOD_STATUS_INCOMPLETE: len(get_incomplete_entries(entries)),
+    }
+
+
+def get_student_compromised_periods(
+    entries: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """
+    Retorna solo los períodos comprometidos, con la información esencial
+    para el dashboard o listas de seguimiento.
+    """
+    compromised_entries = get_compromised_entries(entries)
+
+    return [
+        {
+            "student_id": entry.get("student_id", ""),
+            "student_name": entry.get("student_name", ""),
+            "numero": entry.get("numero", ""),
+            "curso": entry.get("curso", ""),
+            "subject_code": entry.get("subject_code", ""),
+            "subject_name": entry.get("subject_name", ""),
+            "period_code": entry.get("period_code", ""),
+            "failed_blocks_count": entry.get("failed_blocks_count", 0),
+            "failed_blocks": entry.get("failed_blocks", []),
+        }
+        for entry in compromised_entries
+    ]
