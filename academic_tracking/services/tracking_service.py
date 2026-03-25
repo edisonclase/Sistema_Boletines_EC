@@ -16,7 +16,9 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from .parsing_service import (
+    COMPETENCY_BLOCK_LABELS,
     get_detected_academic_subjects,
+    get_supported_block_codes,
     get_supported_period_codes,
 )
 from .risk_service import (
@@ -46,6 +48,49 @@ def _normalize_filter_value(value: Optional[Any]) -> Optional[str]:
         return None
 
     return text
+
+
+def _safe_int_for_sort(value: Any) -> tuple[int, str]:
+    """
+    Convierte el número de lista a entero para ordenar.
+    Si no puede convertirse, lo deja al final y usa el texto como respaldo.
+    """
+    text = str(value or "").strip()
+
+    if not text:
+        return (999999999, "")
+
+    try:
+        return (int(text), text)
+    except ValueError:
+        return (999999999, text)
+
+
+def _student_sort_key_from_entry(entry: dict[str, Any]) -> tuple[Any, ...]:
+    """
+    Clave estándar para ordenar estudiantes por:
+    1. número de lista
+    2. id_estudiante
+    3. nombre
+    """
+    return (
+        _safe_int_for_sort(entry.get("numero", "")),
+        str(entry.get("student_id", "")).strip(),
+        str(entry.get("student_name", "")).strip(),
+    )
+
+
+def _student_sort_key_from_student_payload(student_payload: dict[str, Any]) -> tuple[Any, ...]:
+    """
+    Clave estándar para ordenar payloads de estudiante.
+    """
+    student = student_payload.get("student", {})
+
+    return (
+        _safe_int_for_sort(student.get("numero", "")),
+        str(student.get("id_estudiante", "")).strip(),
+        str(student.get("nombre_estudiante", "")).strip(),
+    )
 
 
 def _apply_entry_filters(
@@ -159,11 +204,7 @@ def _build_unique_students_at_risk(
 
     return sorted(
         grouped.values(),
-        key=lambda item: (
-            item["student"].get("curso", ""),
-            item["student"].get("numero", ""),
-            item["student"].get("nombre_estudiante", ""),
-        ),
+        key=_student_sort_key_from_student_payload,
     )
 
 
@@ -255,10 +296,6 @@ def _group_course_period_subjects(
 ) -> list[dict[str, Any]]:
     """
     Organiza la vista detallada por curso -> período -> asignatura.
-
-    Nota:
-    - teacher_assignments queda preparado para futura integración real.
-    - Por ahora, si no hay asignación docente, se deja vacío.
     """
     teacher_lookup: dict[tuple[str, str], str] = {}
 
@@ -365,10 +402,7 @@ def _group_course_period_subjects(
 
             course_payload["periods"][period_code]["students_at_risk"] = sorted(
                 grouped_students.values(),
-                key=lambda item: (
-                    item["student"].get("numero", ""),
-                    item["student"].get("nombre_estudiante", ""),
-                ),
+                key=_student_sort_key_from_student_payload,
             )
             course_payload["periods"][period_code]["students_at_risk_count"] = len(
                 grouped_students
@@ -378,11 +412,188 @@ def _group_course_period_subjects(
                 course_payload["periods"][period_code]["subjects"],
                 key=lambda item: (
                     item.get("subject_name", ""),
-                    item.get("numero", ""),
+                    _safe_int_for_sort(item.get("numero", "")),
+                    str(item.get("student_id", "")).strip(),
+                    str(item.get("student_name", "")).strip(),
                 ),
             )
 
     return sorted(courses_map.values(), key=lambda item: item.get("curso", ""))
+
+
+def _build_subject_block_summary(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Construye el resumen profesional por:
+    curso + período + asignatura + bloque
+
+    Aquí se obtiene, por bloque:
+    - cuántos estudiantes lo comprometieron
+    - cuántos lo superaron
+    - cuáles estudiantes fueron afectados
+    """
+    grouped: dict[tuple[str, str, str], dict[str, Any]] = {}
+
+    for entry in entries:
+        course_name = str(entry.get("curso", "")).strip()
+        period_code = str(entry.get("period_code", "")).strip()
+        subject_code = str(entry.get("subject_code", "")).strip()
+        subject_name = str(entry.get("subject_name", "")).strip()
+
+        if not course_name or not period_code or not subject_code:
+            continue
+
+        group_key = (course_name, period_code, subject_code)
+
+        if group_key not in grouped:
+            grouped[group_key] = {
+                "course_name": course_name,
+                "period_code": period_code,
+                "subject_code": subject_code,
+                "subject_name": subject_name,
+                "students_affected": set(),
+                "students_passed": set(),
+                "blocks": {
+                    block_code: {
+                        "block_code": block_code,
+                        "block_label": COMPETENCY_BLOCK_LABELS.get(block_code, block_code),
+                        "affected_students": set(),
+                        "passed_students": set(),
+                        "affected_student_details": [],
+                    }
+                    for block_code in get_supported_block_codes()
+                },
+            }
+
+        student_payload = {
+            "numero": entry.get("numero", ""),
+            "student_id": entry.get("student_id", ""),
+            "student_name": entry.get("student_name", ""),
+            "course_name": course_name,
+            "subject_code": subject_code,
+            "subject_name": subject_name,
+            "period_code": period_code,
+        }
+
+        failed_blocks = entry.get("failed_blocks", [])
+        failed_block_codes = {
+            block.get("block_code", "")
+            for block in failed_blocks
+            if block.get("block_code")
+        }
+
+        if failed_block_codes:
+            grouped[group_key]["students_affected"].add(entry.get("student_id", ""))
+        else:
+            grouped[group_key]["students_passed"].add(entry.get("student_id", ""))
+
+        for block_code in get_supported_block_codes():
+            block_bucket = grouped[group_key]["blocks"][block_code]
+
+            if block_code in failed_block_codes:
+                block_bucket["affected_students"].add(entry.get("student_id", ""))
+
+                failed_block_detail = next(
+                    (
+                        block
+                        for block in failed_blocks
+                        if block.get("block_code") == block_code
+                    ),
+                    None,
+                )
+
+                block_bucket["affected_student_details"].append(
+                    {
+                        "numero": student_payload["numero"],
+                        "student_id": student_payload["student_id"],
+                        "student_name": student_payload["student_name"],
+                        "score": failed_block_detail.get("score") if failed_block_detail else None,
+                    }
+                )
+            elif entry.get("all_blocks_reported"):
+                block_bucket["passed_students"].add(entry.get("student_id", ""))
+
+    summary_rows: list[dict[str, Any]] = []
+
+    for _, payload in grouped.items():
+        blocks_output: dict[str, Any] = {}
+
+        for block_code, block_bucket in payload["blocks"].items():
+            affected_details_sorted = sorted(
+                block_bucket["affected_student_details"],
+                key=lambda item: (
+                    _safe_int_for_sort(item.get("numero", "")),
+                    str(item.get("student_id", "")).strip(),
+                    str(item.get("student_name", "")).strip(),
+                ),
+            )
+
+            blocks_output[block_code] = {
+                "block_code": block_code,
+                "block_label": block_bucket["block_label"],
+                "affected_students_count": len(block_bucket["affected_students"]),
+                "passed_students_count": len(block_bucket["passed_students"]),
+                "affected_students": affected_details_sorted,
+            }
+
+        summary_rows.append(
+            {
+                "course_name": payload["course_name"],
+                "period_code": payload["period_code"],
+                "subject_code": payload["subject_code"],
+                "subject_name": payload["subject_name"],
+                "students_affected_count": len(payload["students_affected"]),
+                "students_passed_count": len(payload["students_passed"]),
+                "blocks": blocks_output,
+            }
+        )
+
+    return sorted(
+        summary_rows,
+        key=lambda item: (
+            item.get("course_name", ""),
+            item.get("period_code", ""),
+            item.get("subject_name", ""),
+        ),
+    )
+
+
+def _build_affected_students(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Construye una lista operativa de estudiantes afectados, una fila por:
+    estudiante + asignatura + período
+    """
+    affected_entries = [
+        entry for entry in entries
+        if entry.get("period_status") == PERIOD_STATUS_COMPROMISED
+    ]
+
+    rows: list[dict[str, Any]] = []
+
+    for entry in affected_entries:
+        rows.append(
+            {
+                "numero": entry.get("numero", ""),
+                "student_id": entry.get("student_id", ""),
+                "student_name": entry.get("student_name", ""),
+                "course_name": entry.get("curso", ""),
+                "subject_code": entry.get("subject_code", ""),
+                "subject_name": entry.get("subject_name", ""),
+                "period_code": entry.get("period_code", ""),
+                "affected_blocks_count": entry.get("failed_blocks_count", 0),
+                "affected_blocks": entry.get("failed_blocks", []),
+            }
+        )
+
+    return sorted(
+        rows,
+        key=lambda item: (
+            _safe_int_for_sort(item.get("numero", "")),
+            str(item.get("student_id", "")).strip(),
+            str(item.get("student_name", "")).strip(),
+            str(item.get("subject_name", "")).strip(),
+            str(item.get("period_code", "")).strip(),
+        ),
+    )
 
 
 def build_tracking_dashboard_data(
@@ -450,6 +661,8 @@ def build_tracking_dashboard_data(
             },
             "period_cards": period_cards,
         },
+        "subject_block_summary": _build_subject_block_summary(filtered_entries),
+        "affected_students": _build_affected_students(filtered_entries),
         "courses": courses,
         "students_at_risk": unique_students_at_risk,
         "status_reference": DASHBOARD_STATUS_REFERENCE,
