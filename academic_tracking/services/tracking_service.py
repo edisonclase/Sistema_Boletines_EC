@@ -35,11 +35,16 @@ DASHBOARD_STATUS_REFERENCE = {
     "pending": "pending",
 }
 
+PERIOD_SEQUENCE = ["P1", "P2", "P3", "P4"]
+NEXT_PERIOD_MAP = {
+    "P1": "P2",
+    "P2": "P3",
+    "P3": "P4",
+    "P4": None,
+}
+
 
 def _normalize_filter_value(value: Optional[Any]) -> Optional[str]:
-    """
-    Normaliza filtros textuales.
-    """
     if value is None:
         return None
 
@@ -51,10 +56,6 @@ def _normalize_filter_value(value: Optional[Any]) -> Optional[str]:
 
 
 def _safe_int_for_sort(value: Any) -> tuple[int, str]:
-    """
-    Convierte el número de lista a entero para ordenar.
-    Si no puede convertirse, lo deja al final y usa el texto como respaldo.
-    """
     text = str(value or "").strip()
 
     if not text:
@@ -67,12 +68,6 @@ def _safe_int_for_sort(value: Any) -> tuple[int, str]:
 
 
 def _student_sort_key_from_entry(entry: dict[str, Any]) -> tuple[Any, ...]:
-    """
-    Clave estándar para ordenar estudiantes por:
-    1. número de lista
-    2. id_estudiante
-    3. nombre
-    """
     return (
         _safe_int_for_sort(entry.get("numero", "")),
         str(entry.get("student_id", "")).strip(),
@@ -81,9 +76,6 @@ def _student_sort_key_from_entry(entry: dict[str, Any]) -> tuple[Any, ...]:
 
 
 def _student_sort_key_from_student_payload(student_payload: dict[str, Any]) -> tuple[Any, ...]:
-    """
-    Clave estándar para ordenar payloads de estudiante.
-    """
     student = student_payload.get("student", {})
 
     return (
@@ -99,9 +91,6 @@ def _apply_entry_filters(
     period_code: Optional[str] = None,
     subject_code: Optional[str] = None,
 ) -> list[dict[str, Any]]:
-    """
-    Filtra entradas ya evaluadas por curso, período y asignatura.
-    """
     filtered = entries
 
     normalized_course = _normalize_filter_value(course_name)
@@ -133,9 +122,6 @@ def _apply_entry_filters(
 
 
 def _extract_detected_courses(entries: list[dict[str, Any]]) -> list[str]:
-    """
-    Detecta cursos presentes en las entradas.
-    """
     return sorted(
         {
             str(entry.get("curso", "")).strip()
@@ -146,9 +132,6 @@ def _extract_detected_courses(entries: list[dict[str, Any]]) -> list[str]:
 
 
 def _count_summary_statuses(entries: list[dict[str, Any]]) -> dict[str, int]:
-    """
-    Cuenta cuántas entradas están reportadas, parciales o con período comprometido.
-    """
     reported = sum(
         1 for entry in entries if entry.get("period_status") == PERIOD_STATUS_PASSED
     )
@@ -171,10 +154,6 @@ def _count_summary_statuses(entries: list[dict[str, Any]]) -> dict[str, int]:
 def _build_unique_students_at_risk(
     entries: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    """
-    Construye una lista única de estudiantes con períodos comprometidos.
-    Agrupa por estudiante + curso.
-    """
     grouped: dict[tuple[str, str], dict[str, Any]] = {}
 
     for entry in entries:
@@ -209,9 +188,6 @@ def _build_unique_students_at_risk(
 
 
 def _build_period_cards(entries: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
-    """
-    Construye resumen por período para tarjetas superiores.
-    """
     period_codes = get_supported_period_codes()
     cards: dict[str, dict[str, int]] = {}
 
@@ -252,9 +228,6 @@ def _build_period_cards(entries: list[dict[str, Any]]) -> dict[str, dict[str, in
 
 
 def _map_entry_to_subject_row(entry: dict[str, Any]) -> dict[str, Any]:
-    """
-    Convierte una entrada evaluada a una fila de resumen por asignatura/período.
-    """
     status = entry.get("period_status")
 
     if status == PERIOD_STATUS_PASSED:
@@ -294,9 +267,6 @@ def _group_course_period_subjects(
     entries: list[dict[str, Any]],
     teacher_assignments: Optional[list[dict[str, Any]]] = None,
 ) -> list[dict[str, Any]]:
-    """
-    Organiza la vista detallada por curso -> período -> asignatura.
-    """
     teacher_lookup: dict[tuple[str, str], str] = {}
 
     if teacher_assignments:
@@ -422,15 +392,6 @@ def _group_course_period_subjects(
 
 
 def _build_subject_block_summary(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """
-    Construye el resumen profesional por:
-    curso + período + asignatura + bloque
-
-    Aquí se obtiene, por bloque:
-    - cuántos estudiantes lo comprometieron
-    - cuántos lo superaron
-    - cuáles estudiantes fueron afectados
-    """
     grouped: dict[tuple[str, str, str], dict[str, Any]] = {}
 
     for entry in entries:
@@ -558,10 +519,6 @@ def _build_subject_block_summary(entries: list[dict[str, Any]]) -> list[dict[str
 
 
 def _build_affected_students(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """
-    Construye una lista operativa de estudiantes afectados, una fila por:
-    estudiante + asignatura + período
-    """
     affected_entries = [
         entry for entry in entries
         if entry.get("period_status") == PERIOD_STATUS_COMPROMISED
@@ -596,6 +553,106 @@ def _build_affected_students(entries: list[dict[str, Any]]) -> list[dict[str, An
     )
 
 
+def _has_next_period_publication(
+    student_subject_entries: dict[str, dict[str, Any]],
+    next_period_code: Optional[str],
+) -> bool:
+    """
+    Determina si ya existe publicación del período siguiente para la misma
+    asignatura del mismo estudiante.
+    """
+    if not next_period_code:
+        return False
+
+    next_entry = student_subject_entries.get(next_period_code)
+    if not next_entry:
+        return False
+
+    return int(next_entry.get("reported_blocks_count", 0)) > 0
+
+
+def _build_recovery_follow_up(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Construye seguimiento provisional de recuperación.
+
+    Regla actual:
+    - Si un bloque del período anterior sigue < 70
+    - y ya existe publicación del período siguiente
+    => se marca como "No recuperó"
+
+    Limitación honesta:
+    - Sin historial o campos explícitos de recuperación por bloque,
+      no podemos reconstruir recuperación exitosa con total certeza.
+    """
+    grouped: dict[tuple[str, str], dict[str, dict[str, Any]]] = {}
+
+    for entry in entries:
+        key = (
+            str(entry.get("student_id", "")).strip(),
+            str(entry.get("subject_code", "")).strip(),
+        )
+        period = str(entry.get("period_code", "")).strip()
+
+        if key not in grouped:
+            grouped[key] = {}
+
+        grouped[key][period] = entry
+
+    rows: list[dict[str, Any]] = []
+
+    for (_, _), period_map in grouped.items():
+        for source_period in PERIOD_SEQUENCE:
+            source_entry = period_map.get(source_period)
+            if not source_entry:
+                continue
+
+            failed_blocks = source_entry.get("failed_blocks", [])
+            if not failed_blocks:
+                continue
+
+            next_period = NEXT_PERIOD_MAP.get(source_period)
+            has_next_publication = _has_next_period_publication(period_map, next_period)
+
+            for failed_block in failed_blocks:
+                if has_next_publication:
+                    recovery_status = "not_recovered"
+                    recovery_status_label = f"No recuperó {source_period}"
+                else:
+                    recovery_status = "pending_validation"
+                    recovery_status_label = f"Pendiente de validar {source_period}"
+
+                rows.append(
+                    {
+                        "numero": source_entry.get("numero", ""),
+                        "student_id": source_entry.get("student_id", ""),
+                        "student_name": source_entry.get("student_name", ""),
+                        "course_name": source_entry.get("curso", ""),
+                        "subject_code": source_entry.get("subject_code", ""),
+                        "subject_name": source_entry.get("subject_name", ""),
+                        "source_period": source_period,
+                        "checked_at_period": next_period,
+                        "block_code": failed_block.get("block_code", ""),
+                        "block_label": failed_block.get("block_label", ""),
+                        "original_score": failed_block.get("score"),
+                        "current_score": failed_block.get("score"),
+                        "recovery_status": recovery_status,
+                        "recovery_status_label": recovery_status_label,
+                    }
+                )
+
+    return sorted(
+        rows,
+        key=lambda item: (
+            _safe_int_for_sort(item.get("numero", "")),
+            str(item.get("student_id", "")).strip(),
+            str(item.get("student_name", "")).strip(),
+            str(item.get("subject_name", "")).strip(),
+            str(item.get("source_period", "")).strip(),
+            str(item.get("block_code", "")).strip(),
+        ),
+    )
+
+
 def build_tracking_dashboard_data(
     rows: list[dict[str, Any]],
     center_id: Optional[Any] = None,
@@ -607,9 +664,6 @@ def build_tracking_dashboard_data(
     min_score: float = 70.0,
     teacher_assignments: Optional[list[dict[str, Any]]] = None,
 ) -> dict[str, Any]:
-    """
-    Construye el payload completo del dashboard de seguimiento académico.
-    """
     raw_entries = build_risk_entries_from_rows(
         rows=rows,
         min_score=min_score,
@@ -663,15 +717,17 @@ def build_tracking_dashboard_data(
         },
         "subject_block_summary": _build_subject_block_summary(filtered_entries),
         "affected_students": _build_affected_students(filtered_entries),
+        "recovery_follow_up": _build_recovery_follow_up(filtered_entries),
         "courses": courses,
         "students_at_risk": unique_students_at_risk,
         "status_reference": DASHBOARD_STATUS_REFERENCE,
         "teacher_assignments": teacher_assignments or [],
         "audit_and_recovery": {
-            "enabled": False,
+            "enabled": True,
             "message": (
-                "La auditoría académica y el seguimiento de recuperación "
-                "se integrarán en una etapa posterior del módulo."
+                "El seguimiento provisional de recuperación ya está disponible. "
+                "La recuperación confirmada al 100% requerirá historial o campos "
+                "explícitos de recuperación por bloque."
             ),
         },
     }
