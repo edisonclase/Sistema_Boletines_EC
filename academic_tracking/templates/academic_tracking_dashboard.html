@@ -162,6 +162,57 @@
         </div>
     </section>
 
+    <section class="card">
+    <h2>Seguimiento de recuperación</h2>
+
+    {% if dashboard.recovery_follow_up %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>ID</th>
+                        <th>Estudiante</th>
+                        <th>Curso</th>
+                        <th>Asignatura</th>
+                        <th>Período origen</th>
+                        <th>Bloque</th>
+                        <th>Nota</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in dashboard.recovery_follow_up %}
+                        <tr>
+                            <td>{{ row.numero }}</td>
+                            <td>{{ row.student_id }}</td>
+                            <td><strong>{{ row.student_name }}</strong></td>
+                            <td>{{ row.course_name }}</td>
+                            <td>{{ row.subject_name }}</td>
+                            <td>{{ row.source_period }}</td>
+                            <td>{{ row.block_label }}</td>
+                            <td>{{ row.original_score }}</td>
+
+                            <td>
+                                {% if row.recovery_status == "not_recovered" %}
+                                    <span class="badge badge-pendiente">No recuperó</span>
+                                {% else %}
+                                    <span class="badge badge-parcial">Pendiente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">
+            No hay datos de recuperación para mostrar.
+        </p>
+    {% endif %}
+</section>
+
 </div>
 </body>
 </html>
