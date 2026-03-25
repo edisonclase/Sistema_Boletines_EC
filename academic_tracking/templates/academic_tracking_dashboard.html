@@ -2,367 +2,166 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguimiento Académico | Clase Edutech</title>
+    <title>Seguimiento Académico</title>
     <link rel="stylesheet" href="{{ url_for('static', path='academic_tracking/dashboard.css') }}">
 </head>
+
 <body
     style="
-        --center-primary: {{ dashboard.theme.primary_color if dashboard.theme and dashboard.theme.primary_color else '#1f6f43' }};
-        --center-primary-dark: {{ dashboard.theme.primary_dark if dashboard.theme and dashboard.theme.primary_dark else '#185735' }};
-        --center-primary-soft: {{ dashboard.theme.primary_soft if dashboard.theme and dashboard.theme.primary_soft else '#eaf5ef' }};
+        --center-primary: {{ dashboard.theme.primary_color if dashboard.theme else '#1f6f43' }};
+        --center-primary-dark: {{ dashboard.theme.primary_dark if dashboard.theme else '#185735' }};
+        --center-primary-soft: {{ dashboard.theme.primary_soft if dashboard.theme else '#eaf5ef' }};
     "
 >
-    <div class="page">
-        <section class="header">
-            <h1>Dashboard de Seguimiento Académico</h1>
-            <p>
-                Visualización institucional para coordinación académica, seguimiento por período,
-                control de reporte docente e identificación de estudiantes con períodos comprometidos.
-            </p>
-        </section>
 
-        <section class="card">
-            <div class="dashboard-topbar">
-                <div>
-                    <h2 style="margin-bottom: 6px;">{{ dashboard.institution.name }}</h2>
-                    <p class="text-muted" style="margin: 0;">
-                        Año escolar: {{ dashboard.institution.school_year }} |
-                        Ciclo: {{ dashboard.institution.ciclo }}
-                    </p>
-                </div>
+<div class="page">
 
-                <div class="dashboard-topbar-meta">
-                    <div class="meta-pill">
-                        <span>Total de entradas</span>
-                        <strong>{{ dashboard.metadata.entries_total }}</strong>
-                    </div>
-                    <div class="meta-pill">
-                        <span>Asignaturas detectadas</span>
-                        <strong>{{ dashboard.metadata.subjects_detected | length }}</strong>
-                    </div>
-                    <div class="meta-pill">
-                        <span>Cursos detectados</span>
-                        <strong>{{ dashboard.metadata.courses_detected | length }}</strong>
-                    </div>
-                </div>
+    <!-- HEADER -->
+    <section class="header">
+        <h1>Seguimiento Académico</h1>
+        <p>
+            Análisis por asignatura, período y bloques de competencia.
+        </p>
+    </section>
+
+    <!-- FILTROS -->
+    <section class="card">
+        <form method="GET">
+            <div class="filters-grid">
+
+                <input name="curso" placeholder="Curso" value="{{ dashboard.filters.curso or '' }}">
+                <input name="periodo" placeholder="Periodo (P1-P4)" value="{{ dashboard.filters.periodo or '' }}">
+                <input name="asignatura" placeholder="Asignatura" value="{{ dashboard.filters.asignatura or '' }}">
+
+                <button class="btn btn-primary">Filtrar</button>
+                <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
+
             </div>
-        </section>
+        </form>
+    </section>
 
-        <section class="card">
-            <h2>Filtros del módulo</h2>
+    <!-- ========================= -->
+    <!-- TABLA PRINCIPAL (LA IMPORTANTE) -->
+    <!-- ========================= -->
+    <section class="card">
+        <h2>Resumen por asignatura y bloque</h2>
 
-            <form method="GET" action="">
-                <div class="filters-grid">
-                    <div class="field">
-                        <label for="center_id">Centro</label>
-                        <input
-                            type="text"
-                            id="center_id"
-                            name="center_id"
-                            value="{{ dashboard.filters.center_id or '' }}"
-                            placeholder="Ej. 1"
-                        >
-                    </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Curso</th>
+                        <th>Periodo</th>
+                        <th>Asignatura</th>
+                        <th>C1</th>
+                        <th>C2</th>
+                        <th>C3</th>
+                        <th>C4</th>
+                        <th>Estudiantes afectados</th>
+                    </tr>
+                </thead>
 
-                    <div class="field">
-                        <label for="school_year">Año escolar</label>
-                        <input
-                            type="text"
-                            id="school_year"
-                            name="school_year"
-                            value="{{ dashboard.filters.school_year or '' }}"
-                            placeholder="Ej. 2025-2026"
-                        >
-                    </div>
+                <tbody>
+                    {% for row in dashboard.subject_block_summary %}
+                        <tr>
+                            <td>{{ row.course_name }}</td>
+                            <td>{{ row.period_code }}</td>
+                            <td><strong>{{ row.subject_name }}</strong></td>
 
-                    <div class="field">
-                        <label for="ciclo">Ciclo</label>
-                        <input
-                            type="text"
-                            id="ciclo"
-                            name="ciclo"
-                            value="{{ dashboard.filters.ciclo or '' }}"
-                            placeholder="Ej. Primer Ciclo"
-                        >
-                    </div>
+                            <td>{{ row.blocks.C1.affected_students_count }}</td>
+                            <td>{{ row.blocks.C2.affected_students_count }}</td>
+                            <td>{{ row.blocks.C3.affected_students_count }}</td>
+                            <td>{{ row.blocks.C4.affected_students_count }}</td>
 
-                    <div class="field">
-                        <label for="curso">Curso</label>
-                        <select id="curso" name="curso">
-                            <option value="">Todos</option>
-                            {% for course in dashboard.metadata.courses_detected %}
-                                <option value="{{ course }}" {% if dashboard.filters.curso == course %}selected{% endif %}>
-                                    {{ course }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                            <td><strong>{{ row.students_affected_count }}</strong></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-                    <div class="field">
-                        <label for="periodo">Período</label>
-                        <select id="periodo" name="periodo">
-                            <option value="">Todos</option>
-                            {% for period in dashboard.metadata.periods_detected %}
-                                <option value="{{ period }}" {% if dashboard.filters.periodo == period %}selected{% endif %}>
-                                    {{ period }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+    <!-- ========================= -->
+    <!-- DETALLE POR BLOQUE -->
+    <!-- ========================= -->
+    <section class="card">
+        <h2>Detalle por bloque de competencia</h2>
 
-                    <div class="field">
-                        <label for="asignatura">Asignatura</label>
-                        <select id="asignatura" name="asignatura">
-                            <option value="">Todas</option>
-                            {% for subject in dashboard.metadata.subjects_catalog %}
-                                <option value="{{ subject.subject_code }}" {% if dashboard.filters.asignatura == subject.subject_code %}selected{% endif %}>
-                                    {{ subject.subject_name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+        {% for row in dashboard.subject_block_summary %}
+
+            <div class="course-block">
+
+                <div class="course-header">
+                    <h3>{{ row.course_name }} - {{ row.subject_name }} - {{ row.period_code }}</h3>
                 </div>
 
-                <div class="actions" style="margin-top: 16px;">
-                    <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+                {% for block_code, block in row.blocks.items() %}
 
-                    <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">
-                        Limpiar
-                    </a>
+                    {% if block.affected_students_count > 0 %}
 
-                    <a
-                        href="{{ url_for('academic_tracking_dashboard_data') }}?center_id={{ dashboard.filters.center_id or '' }}&school_year={{ dashboard.filters.school_year or '' }}&ciclo={{ dashboard.filters.ciclo or '' }}&curso={{ dashboard.filters.curso or '' }}&periodo={{ dashboard.filters.periodo or '' }}&asignatura={{ dashboard.filters.asignatura or '' }}"
-                        class="btn btn-secondary"
-                    >
-                        Ver JSON técnico
-                    </a>
-                </div>
-            </form>
-        </section>
+                        <div class="period-section">
+                            <h4>{{ block.block_label }} ({{ block.affected_students_count }})</h4>
 
-        <section class="card">
-            <h2>Resumen ejecutivo</h2>
-
-            <div class="summary-grid">
-                <div class="summary-box">
-                    <h3>Períodos reportados</h3>
-                    <div class="number">{{ dashboard.summary.status.reported }}</div>
-                </div>
-
-                <div class="summary-box">
-                    <h3>Períodos parciales</h3>
-                    <div class="number">{{ dashboard.summary.status.partial }}</div>
-                </div>
-
-                <div class="summary-box">
-                    <h3>Períodos comprometidos</h3>
-                    <div class="number">{{ dashboard.summary.status.pending }}</div>
-                </div>
-
-                <div class="summary-box">
-                    <h3>Estudiantes en seguimiento</h3>
-                    <div class="number">{{ dashboard.summary.risk.students_at_risk_count }}</div>
-                </div>
-
-                <div class="summary-box">
-                    <h3>Bloques afectados</h3>
-                    <div class="number">{{ dashboard.summary.risk.failed_competencies_count }}</div>
-                </div>
-            </div>
-        </section>
-
-        <section class="card">
-            <h2>Comportamiento por período</h2>
-
-            <div class="period-grid">
-                {% for period_code, period_data in dashboard.summary.period_cards.items() %}
-                    <div class="period-card">
-                        <h3>{{ period_code }}</h3>
-                        <ul>
-                            <li><strong>Reportados:</strong> {{ period_data.reported_subjects }}</li>
-                            <li><strong>Parciales:</strong> {{ period_data.partial_subjects }}</li>
-                            <li><strong>Comprometidos:</strong> {{ period_data.pending_subjects }}</li>
-                            <li><strong>Estudiantes en seguimiento:</strong> {{ period_data.students_at_risk_count }}</li>
-                            <li><strong>Bloques afectados:</strong> {{ period_data.failed_competencies_count }}</li>
-                        </ul>
-                    </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="card">
-            <h2>Estudiantes con períodos comprometidos</h2>
-
-            {% if dashboard.students_at_risk %}
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Número</th>
-                                <th>ID</th>
-                                <th>Estudiante</th>
-                                <th>Curso</th>
-                                <th>Asignaturas comprometidas</th>
-                                <th>Bloques afectados</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in dashboard.students_at_risk %}
-                                <tr>
-                                    <td>{{ item.student.numero or '' }}</td>
-                                    <td>{{ item.student.id_estudiante or '' }}</td>
-                                    <td><strong>{{ item.student.nombre_estudiante }}</strong></td>
-                                    <td>{{ item.student.curso }}</td>
-                                    <td>{{ item.subjects_at_risk_count }}</td>
-                                    <td>{{ item.failed_blocks_count }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <p>No se detectaron estudiantes con períodos comprometidos en los filtros actuales.</p>
-                </div>
-            {% endif %}
-        </section>
-
-        <section class="card">
-            <h2>Detalle por curso y período</h2>
-
-            {% if dashboard.courses %}
-                {% for course in dashboard.courses %}
-                    <div class="course-block">
-                        <div class="course-header">
-                            <h3>{{ course.curso }}</h3>
-                            <p>Total de estudiantes detectados: {{ course.total_students }}</p>
+                            <ul>
+                                {% for student in block.affected_students %}
+                                    <li>
+                                        <strong>{{ student.numero }}</strong> -
+                                        {{ student.student_name }}
+                                        ({{ student.student_id }})
+                                        {% if student.score %}
+                                            → {{ student.score }}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         </div>
 
-                        {% for period_code, period_payload in course.periods.items() %}
-                            <div class="period-section">
-                                <h4>{{ period_code }}</h4>
+                    {% endif %}
 
-                                <div class="period-meta">
-                                    <div class="meta-box">
-                                        <span>Reportados</span>
-                                        <strong>{{ period_payload.totals.reported or 0 }}</strong>
-                                    </div>
-
-                                    <div class="meta-box">
-                                        <span>Parciales</span>
-                                        <strong>{{ period_payload.totals.partial or 0 }}</strong>
-                                    </div>
-
-                                    <div class="meta-box">
-                                        <span>Comprometidos</span>
-                                        <strong>{{ period_payload.totals.pending or 0 }}</strong>
-                                    </div>
-
-                                    <div class="meta-box">
-                                        <span>Estudiantes en seguimiento</span>
-                                        <strong>{{ period_payload.students_at_risk_count or 0 }}</strong>
-                                    </div>
-                                </div>
-
-                                <div class="table-wrap">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Asignatura</th>
-                                                <th>Estado</th>
-                                                <th>Cobertura</th>
-                                                <th>Con reporte</th>
-                                                <th>Sin reporte</th>
-                                                <th>Comprometidos</th>
-                                                <th>Bloques afectados</th>
-                                                <th>Docente</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for subject in period_payload.subjects %}
-                                                <tr>
-                                                    <td>
-                                                        <strong>{{ subject.subject_name }}</strong><br>
-                                                        <span class="text-muted">{{ subject.subject_code }}</span>
-                                                    </td>
-
-                                                    <td>
-                                                        {% if subject.status == dashboard.status_reference.reported %}
-                                                            <span class="badge badge-reportado">{{ subject.status_label }}</span>
-                                                        {% elif subject.status == dashboard.status_reference.partial %}
-                                                            <span class="badge badge-parcial">{{ subject.status_label }}</span>
-                                                        {% else %}
-                                                            <span class="badge badge-pendiente">{{ subject.status_label }}</span>
-                                                        {% endif %}
-                                                    </td>
-
-                                                    <td>{{ subject.coverage_pct }}%</td>
-                                                    <td>{{ subject.students_with_any_report }}</td>
-                                                    <td>{{ subject.students_without_report }}</td>
-                                                    <td>{{ subject.students_at_risk_count }}</td>
-                                                    <td>{{ subject.failed_competencies_count }}</td>
-                                                    <td>
-                                                        {% if subject.docente_asignatura %}
-                                                            {{ subject.docente_asignatura }}
-                                                        {% else %}
-                                                            <span class="text-muted">No asignado</span>
-                                                        {% endif %}
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div class="students-risk-list">
-                                    <h5>Estudiantes con período comprometido en {{ period_code }}</h5>
-
-                                    {% if period_payload.students_at_risk %}
-                                        <ul>
-                                            {% for student in period_payload.students_at_risk %}
-                                                <li>
-                                                    <strong>{{ student.student.nombre_estudiante }}</strong>
-                                                    {% if student.student.numero %}
-                                                        — No. {{ student.student.numero }}
-                                                    {% endif %}
-                                                    {% if student.student.id_estudiante %}
-                                                        — ID: {{ student.student.id_estudiante }}
-                                                    {% endif %}
-                                                    — Asignaturas comprometidas: {{ student.subjects_at_risk_count }}
-                                                    — Bloques afectados: {{ student.failed_competencies_count }}
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% else %}
-                                        <p class="text-muted" style="margin: 0;">
-                                            No se detectaron estudiantes con período comprometido en este período.
-                                        </p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
                 {% endfor %}
-            {% else %}
-                <div class="empty-state">
-                    <p>No hay datos disponibles para el detalle por curso con los filtros actuales.</p>
-                </div>
-            {% endif %}
-        </section>
 
-        <section class="card">
-            <h2>Auditoría académica y recuperación</h2>
-            <div class="audit-box">
-                <strong>Estado actual:</strong>
-                {% if dashboard.audit_and_recovery.enabled %}
-                    habilitado
-                {% else %}
-                    pendiente de implementación
-                {% endif %}
-                <p>{{ dashboard.audit_and_recovery.message }}</p>
             </div>
-        </section>
-    </div>
+
+        {% endfor %}
+    </section>
+
+    <!-- ========================= -->
+    <!-- LISTADO GENERAL -->
+    <!-- ========================= -->
+    <section class="card">
+        <h2>Estudiantes con períodos comprometidos</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Curso</th>
+                        <th>Asignatura</th>
+                        <th>Periodo</th>
+                        <th>Bloques afectados</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for student in dashboard.affected_students %}
+                        <tr>
+                            <td>{{ student.numero }}</td>
+                            <td>{{ student.student_id }}</td>
+                            <td><strong>{{ student.student_name }}</strong></td>
+                            <td>{{ student.course_name }}</td>
+                            <td>{{ student.subject_name }}</td>
+                            <td>{{ student.period_code }}</td>
+                            <td>{{ student.affected_blocks_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
 </body>
 </html>
