@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Seguimiento Académico</title>
+    <link rel="icon" type="image/png" href="{{ dashboard.institution.favicon or '/assets/interface_logo.png' }}">
     <link rel="stylesheet" href="{{ url_for('static', path='academic_tracking/dashboard.css') }}">
-    <link rel="icon" type="app\pdf\assets\interface_logo.png" />
 </head>
 
 <body
@@ -17,8 +17,18 @@
 <div class="page">
 
     <section class="header">
-        <h1>Seguimiento Académico</h1>
-        <p>Estudiantes con incidencias académicas por período, asignatura y bloque de competencia.</p>
+        <div class="header-brand-row">
+            <div class="header-logos">
+                {% for logo in dashboard.institution.logos %}
+                    <img src="{{ logo.src }}" alt="{{ logo.alt }}">
+                {% endfor %}
+            </div>
+
+            <div class="header-title-block">
+                <h1>Seguimiento Académico</h1>
+                <p>Estudiantes con incidencias académicas por período, asignatura y bloque de competencia.</p>
+            </div>
+        </div>
     </section>
 
     <section class="card">
@@ -30,22 +40,36 @@
                     Ciclo: {{ dashboard.institution.ciclo }}
                 </p>
             </div>
-
-            <div class="dashboard-topbar-meta">
-                <button type="button" class="btn btn-secondary" onclick="window.print()">Imprimir</button>
-            </div>
         </div>
     </section>
 
     <section class="card no-print">
-        <form method="GET">
+        <form method="GET" action="{{ url_for('academic_tracking_dashboard') }}">
             <div class="filters-grid">
+                <div class="field">
+                    <label for="ciclo">Ciclo</label>
+                    <select id="ciclo" name="ciclo">
+                        <option value="">Todos</option>
+                        {% for cycle in dashboard.metadata.cycle_options %}
+                            <option value="{{ cycle.value }}" {% if dashboard.filters.ciclo == cycle.value %}selected{% endif %}>
+                                {{ cycle.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <div class="field">
                     <label for="grado">Curso / grado</label>
                     <select id="grado" name="grado">
                         <option value="">Todos</option>
-                        {% for grado in dashboard.metadata.grades_detected %}
-                            <option value="{{ grado }}" {% if dashboard.filters.grado == grado %}selected{% endif %}>{{ grado }}</option>
+                        {% for grade in dashboard.metadata.grades_catalog %}
+                            <option
+                                value="{{ grade.value }}"
+                                data-cycle="{{ grade.cycle }}"
+                                {% if dashboard.filters.grado == grade.value %}selected{% endif %}
+                            >
+                                {{ grade.label }}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
@@ -54,13 +78,14 @@
                     <label for="seccion">Sección</label>
                     <select id="seccion" name="seccion">
                         <option value="">Todas</option>
-                        {% for seccion in dashboard.metadata.sections_detected %}
+                        {% for section in dashboard.metadata.sections_catalog %}
                             <option
-                                value="{{ seccion }}"
-                                data-grade-list="{% for grade, section_list in dashboard.metadata.sections_by_grade.items() %}{% if seccion in section_list %}{{ grade }}|{% endif %}{% endfor %}"
-                                {% if dashboard.filters.seccion == seccion %}selected{% endif %}
+                                value="{{ section.value }}"
+                                data-cycle="{{ section.cycle }}"
+                                data-grade-list="{% for grade, section_list in dashboard.metadata.sections_by_grade.items() %}{% for section_item in section_list %}{% if section.value == section_item.value %}{{ grade }}|{% endif %}{% endfor %}{% endfor %}"
+                                {% if dashboard.filters.seccion == section.value %}selected{% endif %}
                             >
-                                {{ seccion }}
+                                {{ section.label }}
                             </option>
                         {% endfor %}
                     </select>
@@ -100,10 +125,8 @@
 
                 <div class="actions">
                     <button class="btn btn-primary" type="submit">Filtrar</button>
-                </div>
-
-                <div class="actions">
                     <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
+                    <button type="button" class="btn btn-secondary" onclick="window.print()">Imprimir</button>
                 </div>
             </div>
         </form>
@@ -158,7 +181,10 @@
                             <tr class="{% if row.status == 'no_recuperado' %}row-danger{% elif row.status == 'en_riesgo' %}row-warning{% endif %}">
                                 <td>{{ row.numero or '—' }}</td>
                                 <td><strong>{{ row.student_name or '—' }}</strong></td>
-                                <td>{{ row.course_name or '—' }}</td>
+                                <td>
+                                    <strong>{{ row.grade_label or '—' }}</strong>
+                                    <div class="course-subline">{{ row.section_label or '—' }}</div>
+                                </td>
                                 <td>{{ row.period_code or '—' }}</td>
                                 <td>
                                     {% if row.subjects %}
@@ -212,26 +238,67 @@
 
 <script>
 (function () {
+    const cycleSelect = document.getElementById("ciclo");
     const gradeSelect = document.getElementById("grado");
     const sectionSelect = document.getElementById("seccion");
 
-    if (!gradeSelect || !sectionSelect) {
+    if (!cycleSelect || !gradeSelect || !sectionSelect) {
         return;
     }
 
-    const originalOptions = Array.from(sectionSelect.options).map((option) => ({
+    const originalGradeOptions = Array.from(gradeSelect.options).map((option) => ({
         value: option.value,
         text: option.text,
-        selected: option.selected,
+        cycle: option.getAttribute("data-cycle") || ""
+    }));
+
+    const originalSectionOptions = Array.from(sectionSelect.options).map((option) => ({
+        value: option.value,
+        text: option.text,
+        cycle: option.getAttribute("data-cycle") || "",
         gradeList: option.getAttribute("data-grade-list") || ""
     }));
 
+    function renderGrades() {
+        const selectedCycle = cycleSelect.value || "";
+        const currentGrade = gradeSelect.value || "";
+
+        gradeSelect.innerHTML = "";
+
+        originalGradeOptions.forEach((item) => {
+            if (item.value === "") {
+                const option = document.createElement("option");
+                option.value = "";
+                option.textContent = item.text;
+                gradeSelect.appendChild(option);
+                return;
+            }
+
+            if (!selectedCycle || item.cycle === selectedCycle) {
+                const option = document.createElement("option");
+                option.value = item.value;
+                option.textContent = item.text;
+                if (item.value === currentGrade) {
+                    option.selected = true;
+                }
+                gradeSelect.appendChild(option);
+            }
+        });
+
+        const availableGradeValues = Array.from(gradeSelect.options).map((opt) => opt.value);
+        if (!availableGradeValues.includes(currentGrade)) {
+            gradeSelect.value = "";
+        }
+    }
+
     function renderSections() {
+        const selectedCycle = cycleSelect.value || "";
         const selectedGrade = gradeSelect.value || "";
         const currentSection = sectionSelect.value || "";
+
         sectionSelect.innerHTML = "";
 
-        originalOptions.forEach((item) => {
+        originalSectionOptions.forEach((item) => {
             if (item.value === "") {
                 const option = document.createElement("option");
                 option.value = "";
@@ -240,19 +307,12 @@
                 return;
             }
 
-            if (!selectedGrade) {
-                const option = document.createElement("option");
-                option.value = item.value;
-                option.textContent = item.text;
-                if (item.value === currentSection) {
-                    option.selected = true;
-                }
-                sectionSelect.appendChild(option);
-                return;
-            }
-
             const grades = item.gradeList.split("|").filter(Boolean);
-            if (grades.includes(selectedGrade)) {
+
+            const cycleOk = !selectedCycle || item.cycle === selectedCycle;
+            const gradeOk = !selectedGrade || grades.includes(selectedGrade);
+
+            if (cycleOk && gradeOk) {
                 const option = document.createElement("option");
                 option.value = item.value;
                 option.textContent = item.text;
@@ -263,13 +323,20 @@
             }
         });
 
-        const availableValues = Array.from(sectionSelect.options).map((opt) => opt.value);
-        if (!availableValues.includes(currentSection)) {
+        const availableSectionValues = Array.from(sectionSelect.options).map((opt) => opt.value);
+        if (!availableSectionValues.includes(currentSection)) {
             sectionSelect.value = "";
         }
     }
 
+    cycleSelect.addEventListener("change", function () {
+        renderGrades();
+        renderSections();
+    });
+
     gradeSelect.addEventListener("change", renderSections);
+
+    renderGrades();
     renderSections();
 })();
 </script>

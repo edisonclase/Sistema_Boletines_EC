@@ -26,6 +26,18 @@ router = APIRouter(
 
 templates = Jinja2Templates(directory="academic_tracking/templates")
 
+# Ajusta aquí los logos por centro cuando lo necesites.
+DEFAULT_INSTITUTION_LOGOS = [
+    {
+        "src": "/assets/logo.jpg",
+        "alt": "Logo del centro educativo",
+    },
+    {
+        "src": "/assets/minerd.png",
+        "alt": "Logo institucional",
+    },
+]
+
 
 def _parse_min_approval_score(
     raw_value: Optional[str],
@@ -93,6 +105,8 @@ def _build_dashboard_payload(
         "name": "Centro Educativo Ejemplo",
         "school_year": school_year or "2025-2026",
         "ciclo": ciclo or "Vista general",
+        "logos": DEFAULT_INSTITUTION_LOGOS,
+        "favicon": "/assets/interface_logo.png",
     }
 
     return dashboard_data

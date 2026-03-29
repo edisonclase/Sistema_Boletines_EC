@@ -1,21 +1,12 @@
 :root {
-    /* =========================
-       Tema base CLASE EducTech
-       ========================= */
     --system-primary: #1f6f43;
     --system-primary-dark: #185735;
     --system-primary-soft: #eaf5ef;
 
-    /* =========================
-       Variables sobrescribibles por centro
-       ========================= */
     --primary: var(--center-primary, var(--system-primary));
     --primary-dark: var(--center-primary-dark, var(--system-primary-dark));
     --primary-soft: var(--center-primary-soft, var(--system-primary-soft));
 
-    /* =========================
-       Neutros
-       ========================= */
     --border: #d9e3dc;
     --border-soft: #eef2f0;
     --text: #1f2937;
@@ -23,9 +14,6 @@
     --bg: #f7faf8;
     --white: #ffffff;
 
-    /* =========================
-       Estados
-       ========================= */
     --danger: #b42318;
     --danger-soft: #fef3f2;
 
@@ -38,9 +26,6 @@
     --info: #175cd3;
     --info-soft: #eff6ff;
 
-    /* =========================
-       Sombras y radios
-       ========================= */
     --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
     --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.06);
 
@@ -49,16 +34,10 @@
     --radius-lg: 16px;
     --radius-xl: 18px;
 
-    /* =========================
-       Layout
-       ========================= */
     --container-max-width: 1500px;
     --section-gap: 24px;
     --content-padding: 24px;
 
-    /* =========================
-       Tipografía
-       ========================= */
     --font-family-base: Arial, Helvetica, sans-serif;
     --font-size-xs: 12px;
     --font-size-sm: 13px;
@@ -72,9 +51,6 @@
     --line-height-base: 1.45;
 }
 
-/* =========================
-   Reset base
-   ========================= */
 *,
 *::before,
 *::after {
@@ -113,18 +89,12 @@ strong {
     font-weight: 700;
 }
 
-/* =========================
-   Layout principal
-   ========================= */
 .page {
     max-width: var(--container-max-width);
     margin: 0 auto;
     padding: var(--content-padding);
 }
 
-/* =========================
-   Encabezado principal
-   ========================= */
 .header {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: var(--white);
@@ -146,6 +116,36 @@ strong {
     pointer-events: none;
 }
 
+.header-brand-row {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.header-logos {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.header-logos img {
+    height: 62px;
+    width: auto;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 6px;
+    border-radius: 12px;
+}
+
+.header-title-block {
+    flex: 1;
+    min-width: 260px;
+}
+
 .header h1 {
     position: relative;
     z-index: 1;
@@ -164,9 +164,6 @@ strong {
     max-width: 980px;
 }
 
-/* =========================
-   Tarjetas generales
-   ========================= */
 .card {
     background: var(--white);
     border: 1px solid var(--border);
@@ -191,9 +188,6 @@ strong {
     margin-bottom: 16px;
 }
 
-/* =========================
-   Topbar institucional
-   ========================= */
 .dashboard-topbar {
     display: flex;
     justify-content: space-between;
@@ -208,12 +202,9 @@ strong {
     flex-wrap: wrap;
 }
 
-/* =========================
-   Formularios y filtros
-   ========================= */
 .filters-grid {
     display: grid;
-    grid-template-columns: repeat(6, minmax(160px, 1fr));
+    grid-template-columns: repeat(7, minmax(140px, 1fr));
     gap: 14px;
     align-items: end;
 }
@@ -266,9 +257,6 @@ strong {
     flex-wrap: wrap;
 }
 
-/* =========================
-   Botones
-   ========================= */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -319,9 +307,6 @@ strong {
     background: #e4e9f0;
 }
 
-/* =========================
-   Resumen compacto
-   ========================= */
 .compact-summary-row {
     display: grid;
     grid-template-columns: repeat(3, minmax(180px, 1fr));
@@ -354,9 +339,6 @@ strong {
     color: var(--primary);
 }
 
-/* =========================
-   Tablas
-   ========================= */
 .table-wrap {
     overflow-x: auto;
     border: 1px solid var(--border);
@@ -411,9 +393,6 @@ tbody tr:last-child td {
     background-color: #fff7ed;
 }
 
-/* =========================
-   Badges y microcomponentes
-   ========================= */
 .badge {
     display: inline-flex;
     align-items: center;
@@ -471,9 +450,6 @@ tbody tr:last-child td {
     line-height: 1.25;
 }
 
-/* =========================
-   Agrupación por estudiante
-   ========================= */
 .subject-stack {
     display: flex;
     flex-direction: column;
@@ -509,9 +485,12 @@ tbody tr:last-child td {
     padding: 4px 8px;
 }
 
-/* =========================
-   Auditoría / nota final
-   ========================= */
+.course-subline {
+    margin-top: 4px;
+    font-size: var(--font-size-xs);
+    color: var(--muted);
+}
+
 .audit-box {
     background: var(--white);
     border: 1px dashed var(--border);
@@ -529,9 +508,6 @@ tbody tr:last-child td {
     font-size: var(--font-size-md);
 }
 
-/* =========================
-   Utilidades
-   ========================= */
 .text-muted {
     color: var(--muted);
 }
@@ -540,9 +516,6 @@ tbody tr:last-child td {
     display: block;
 }
 
-/* =========================
-   Scrollbar sutil
-   ========================= */
 .table-wrap::-webkit-scrollbar {
     height: 10px;
 }
@@ -561,18 +534,24 @@ tbody tr:last-child td {
     background: rgba(31, 111, 67, 0.65);
 }
 
-/* =========================
-   Responsive
-   ========================= */
-@media (max-width: 1200px) {
+@media (max-width: 1300px) {
     .filters-grid {
-        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
     }
 }
 
 @media (max-width: 900px) {
     .compact-summary-row {
         grid-template-columns: 1fr;
+    }
+
+    .header-brand-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-logos img {
+        height: 54px;
     }
 }
 
@@ -605,7 +584,7 @@ tbody tr:last-child td {
         align-items: stretch;
     }
 
-    .btn {
+    .actions .btn {
         width: 100%;
     }
 
@@ -625,9 +604,6 @@ tbody tr:last-child td {
     }
 }
 
-/* =========================
-   Impresión
-   ========================= */
 @media print {
     body {
         background: #ffffff;

@@ -12,6 +12,7 @@ Versión simplificada y operativa:
 
 from __future__ import annotations
 
+import re
 from typing import Any, Optional
 
 from .parsing_service import (
@@ -30,6 +31,34 @@ NEXT_PERIOD_MAP = {
     "P2": "P3",
     "P3": "P4",
     "P4": None,
+}
+
+CYCLE_OPTIONS = [
+    {"value": "Primer Ciclo", "label": "Primer Ciclo"},
+    {"value": "Segundo Ciclo", "label": "Segundo Ciclo"},
+]
+
+GRADE_LABELS = {
+    1: "Primero",
+    2: "Segundo",
+    3: "Tercero",
+    4: "Cuarto",
+    5: "Quinto",
+    6: "Sexto",
+}
+
+# Ajusta estas variables por centro cuando sea necesario.
+DEFAULT_SECTION_DISPLAY_BY_CYCLE = {
+    "Primer Ciclo": {
+        "A": "A",
+        "B": "B",
+        "C": "C",
+    },
+    "Segundo Ciclo": {
+        "A": "Servicios de Alojamiento",
+        "B": "Atención a Emergencias de Salud",
+        "C": "Logística y Transporte",
+    },
 }
 
 
@@ -53,10 +82,6 @@ def _safe_int_for_sort(value: Any) -> tuple[int, str]:
 
 
 def _split_course_name(course_name: str) -> tuple[str, str]:
-    """
-    Intenta separar grado y sección a partir de un valor como:
-    '2do A', '3ro B', '4to C', etc.
-    """
     text = str(course_name or "").strip()
     if not text:
         return ("", "")
@@ -70,6 +95,54 @@ def _split_course_name(course_name: str) -> tuple[str, str]:
     return (text, "")
 
 
+def _extract_grade_number(raw_grade: str) -> Optional[int]:
+    text = str(raw_grade or "").strip()
+    if not text:
+        return None
+
+    match = re.search(r"([1-6])", text)
+    if not match:
+        return None
+
+    try:
+        return int(match.group(1))
+    except ValueError:
+        return None
+
+
+def _infer_cycle_from_grade(raw_grade: str) -> Optional[str]:
+    grade_number = _extract_grade_number(raw_grade)
+    if grade_number is None:
+        return None
+
+    if grade_number in {1, 2, 3}:
+        return "Primer Ciclo"
+
+    if grade_number in {4, 5, 6}:
+        return "Segundo Ciclo"
+
+    return None
+
+
+def _get_grade_display(raw_grade: str) -> str:
+    grade_number = _extract_grade_number(raw_grade)
+    if grade_number in GRADE_LABELS:
+        return GRADE_LABELS[grade_number]
+    return str(raw_grade or "").strip()
+
+
+def _get_section_display(raw_section: str, ciclo: Optional[str] = None) -> str:
+    section = str(raw_section or "").strip()
+    if not section:
+        return ""
+
+    cycle_key = str(ciclo or "").strip()
+    if cycle_key in DEFAULT_SECTION_DISPLAY_BY_CYCLE:
+        return DEFAULT_SECTION_DISPLAY_BY_CYCLE[cycle_key].get(section, section)
+
+    return section
+
+
 def _extract_detected_courses(entries: list[dict[str, Any]]) -> list[str]:
     return sorted(
         {
@@ -80,33 +153,78 @@ def _extract_detected_courses(entries: list[dict[str, Any]]) -> list[str]:
     )
 
 
-def _extract_grades_and_sections(entries: list[dict[str, Any]]) -> dict[str, Any]:
-    grades: set[str] = set()
-    sections: set[str] = set()
-    sections_by_grade: dict[str, set[str]] = {}
+def _extract_grades_and_sections(
+    entries: list[dict[str, Any]],
+    selected_cycle: Optional[str] = None,
+) -> dict[str, Any]:
+    grades_map: dict[str, dict[str, str]] = {}
+    sections_map: dict[str, dict[str, Any]] = {}
+    sections_by_grade: dict[str, list[dict[str, str]]] = {}
+
+    normalized_selected_cycle = _normalize_filter_value(selected_cycle)
 
     for entry in entries:
         course_name = str(entry.get("curso", "")).strip()
-        grado, seccion = _split_course_name(course_name)
+        raw_grade, raw_section = _split_course_name(course_name)
 
-        if grado:
-            grades.add(grado)
+        if not raw_grade:
+            continue
 
-        if seccion:
-            sections.add(seccion)
+        inferred_cycle = _infer_cycle_from_grade(raw_grade)
+        if normalized_selected_cycle and inferred_cycle and inferred_cycle != normalized_selected_cycle:
+            continue
 
-        if grado:
-            sections_by_grade.setdefault(grado, set())
-            if seccion:
-                sections_by_grade[grado].add(seccion)
+        grade_display = _get_grade_display(raw_grade)
+        section_display = _get_section_display(raw_section, inferred_cycle)
+
+        if raw_grade not in grades_map:
+            grades_map[raw_grade] = {
+                "value": raw_grade,
+                "label": grade_display,
+                "cycle": inferred_cycle or "",
+            }
+
+        if raw_section:
+            if raw_section not in sections_map:
+                sections_map[raw_section] = {
+                    "value": raw_section,
+                    "label": section_display or raw_section,
+                    "cycle": inferred_cycle or "",
+                }
+
+            sections_by_grade.setdefault(raw_grade, [])
+            existing_values = {item["value"] for item in sections_by_grade[raw_grade]}
+            if raw_section not in existing_values:
+                sections_by_grade[raw_grade].append(
+                    {
+                        "value": raw_section,
+                        "label": section_display or raw_section,
+                    }
+                )
+
+    grades_catalog = sorted(
+        grades_map.values(),
+        key=lambda item: (
+            _safe_int_for_sort(_extract_grade_number(item.get("value", "")) or 999)[0],
+            item.get("label", ""),
+        ),
+    )
+
+    sections_catalog = sorted(
+        sections_map.values(),
+        key=lambda item: item.get("label", ""),
+    )
+
+    for raw_grade in sections_by_grade:
+        sections_by_grade[raw_grade] = sorted(
+            sections_by_grade[raw_grade],
+            key=lambda item: item.get("label", ""),
+        )
 
     return {
-        "grades": sorted(grades),
-        "sections": sorted(sections),
-        "sections_by_grade": {
-            grade: sorted(list(section_set))
-            for grade, section_set in sorted(sections_by_grade.items())
-        },
+        "grades_catalog": grades_catalog,
+        "sections_catalog": sections_catalog,
+        "sections_by_grade": sections_by_grade,
     }
 
 
@@ -215,6 +333,7 @@ def _build_recovery_follow_up(entries: list[dict[str, Any]]) -> list[dict[str, A
 
 def _apply_operational_filters(
     entries: list[dict[str, Any]],
+    ciclo: Optional[str] = None,
     course_name: Optional[str] = None,
     grade_name: Optional[str] = None,
     section_name: Optional[str] = None,
@@ -223,11 +342,19 @@ def _apply_operational_filters(
 ) -> list[dict[str, Any]]:
     filtered = entries
 
+    normalized_cycle = _normalize_filter_value(ciclo)
     normalized_course = _normalize_filter_value(course_name)
     normalized_grade = _normalize_filter_value(grade_name)
     normalized_section = _normalize_filter_value(section_name)
     normalized_period = _normalize_filter_value(period_code)
     normalized_subject = _normalize_filter_value(subject_code)
+
+    if normalized_cycle:
+        filtered = [
+            entry
+            for entry in filtered
+            if _infer_cycle_from_grade(_split_course_name(str(entry.get("curso", "")).strip())[0]) == normalized_cycle
+        ]
 
     if normalized_course:
         filtered = [
@@ -308,7 +435,8 @@ def _build_operational_rows(
         student_name = str(entry.get("student_name", "")).strip()
         numero = str(entry.get("numero", "")).strip()
 
-        grado, seccion = _split_course_name(course_name)
+        raw_grade, raw_section = _split_course_name(course_name)
+        inferred_cycle = _infer_cycle_from_grade(raw_grade)
 
         failed_blocks = entry.get("failed_blocks", [])
 
@@ -351,8 +479,11 @@ def _build_operational_rows(
                 "student_id": student_id or "—",
                 "student_name": student_name or "—",
                 "course_name": course_name or "—",
-                "grade_name": grado or "—",
-                "section_name": seccion or "—",
+                "grade_name": raw_grade or "—",
+                "grade_label": _get_grade_display(raw_grade) or "—",
+                "section_name": raw_section or "—",
+                "section_label": _get_section_display(raw_section, inferred_cycle) or "—",
+                "cycle_name": inferred_cycle or "—",
                 "subject_code": subject_code or "—",
                 "subject_name": str(entry.get("subject_name", "")).strip() or "—",
                 "period_code": period_code or "—",
@@ -373,7 +504,9 @@ def _build_operational_rows(
     return sorted(
         rows,
         key=lambda item: (
-            str(item.get("course_name", "")).strip(),
+            str(item.get("cycle_name", "")).strip(),
+            _safe_int_for_sort(_extract_grade_number(item.get("grade_name", "")) or 999)[0],
+            str(item.get("section_label", "")).strip(),
             _safe_int_for_sort(item.get("numero", "")),
             str(item.get("student_name", "")).strip(),
             str(item.get("subject_name", "")).strip(),
@@ -401,7 +534,10 @@ def _build_grouped_operational_rows(
                 "student_name": row.get("student_name", "—"),
                 "course_name": row.get("course_name", "—"),
                 "grade_name": row.get("grade_name", "—"),
+                "grade_label": row.get("grade_label", "—"),
                 "section_name": row.get("section_name", "—"),
+                "section_label": row.get("section_label", "—"),
+                "cycle_name": row.get("cycle_name", "—"),
                 "period_code": row.get("period_code", "—"),
                 "status": row.get("status", "pendiente"),
                 "status_label": row.get("status_label", "Pendiente"),
@@ -477,7 +613,9 @@ def _build_grouped_operational_rows(
     return sorted(
         grouped_rows,
         key=lambda item: (
-            str(item.get("course_name", "")).strip(),
+            str(item.get("cycle_name", "")).strip(),
+            _safe_int_for_sort(_extract_grade_number(item.get("grade_name", "")) or 999)[0],
+            str(item.get("section_label", "")).strip(),
             _safe_int_for_sort(item.get("numero", "")),
             str(item.get("student_name", "")).strip(),
             str(item.get("period_code", "")).strip(),
@@ -506,6 +644,7 @@ def build_tracking_dashboard_data(
 
     filtered_entries = _apply_operational_filters(
         entries=raw_entries,
+        ciclo=ciclo,
         course_name=course_name,
         grade_name=grade_name,
         section_name=section_name,
@@ -525,7 +664,7 @@ def build_tracking_dashboard_data(
     grouped_operational_rows = _build_grouped_operational_rows(operational_rows)
 
     detected_subjects = get_detected_academic_subjects(rows)
-    grade_section_catalog = _extract_grades_and_sections(raw_entries)
+    catalog = _extract_grades_and_sections(raw_entries, selected_cycle=ciclo)
 
     students_affected = {
         (str(item.get("student_id", "")).strip(), str(item.get("course_name", "")).strip())
@@ -545,6 +684,7 @@ def build_tracking_dashboard_data(
     }
 
     has_active_filters = any([
+        _normalize_filter_value(ciclo),
         _normalize_filter_value(course_name),
         _normalize_filter_value(grade_name),
         _normalize_filter_value(section_name),
@@ -567,10 +707,11 @@ def build_tracking_dashboard_data(
             "min_score": min_score,
         },
         "metadata": {
+            "cycle_options": CYCLE_OPTIONS,
             "courses_detected": _extract_detected_courses(raw_entries),
-            "grades_detected": grade_section_catalog["grades"],
-            "sections_detected": grade_section_catalog["sections"],
-            "sections_by_grade": grade_section_catalog["sections_by_grade"],
+            "grades_catalog": catalog["grades_catalog"],
+            "sections_catalog": catalog["sections_catalog"],
+            "sections_by_grade": catalog["sections_by_grade"],
             "periods_detected": get_supported_period_codes(),
             "subjects_catalog": detected_subjects,
             "entries_total": len(operational_rows),
