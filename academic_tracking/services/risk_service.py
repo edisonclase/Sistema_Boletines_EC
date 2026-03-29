@@ -12,7 +12,7 @@ Responsabilidades:
 Estados manejados:
 - passed: todos los bloques reportados y >= nota mínima
 - compromised: todos los bloques reportados, pero uno o más < nota mínima
-- incomplete: falta uno o más bloques del período
+- incomplete: falta uno o más bloques del período, o el período aún no ha sido publicado
 """
 
 from __future__ import annotations
@@ -56,6 +56,18 @@ def is_missing_score(value: Optional[float]) -> bool:
     return value is None
 
 
+def is_zero_score(value: Optional[float]) -> bool:
+    """
+    Indica si un valor corresponde a 0 o 0.0.
+    """
+    if value is None:
+        return False
+    try:
+        return float(value) == 0.0
+    except (TypeError, ValueError):
+        return False
+
+
 def build_failed_block_payload(
     block_code: str,
     block_data: dict[str, Any],
@@ -79,15 +91,21 @@ def evaluate_period_blocks(
     Evalúa los 4 bloques de un período y determina su estado.
 
     Reglas:
-    - incomplete: falta uno o más bloques o tienen score None
+    - incomplete: falta uno o más bloques, tienen score None,
+      o los 4 bloques están en 0.0 y se interpreta como no publicado
     - compromised: todos los bloques reportados, pero uno o más < min_score
     - passed: todos los bloques reportados y todos >= min_score
+
+    Regla institucional:
+    - Si los 4 bloques del período están en 0.0, el período se considera
+      NO PUBLICADO, no riesgo.
     """
     expected_block_codes = get_supported_block_codes()
 
     reported_blocks: list[dict[str, Any]] = []
     missing_block_codes: list[str] = []
     failed_blocks: list[dict[str, Any]] = []
+    numeric_scores: list[float] = []
 
     for block_code in expected_block_codes:
         block_data = blocks.get(block_code)
@@ -101,6 +119,9 @@ def evaluate_period_blocks(
         if is_missing_score(score):
             missing_block_codes.append(block_code)
             continue
+
+        score_float = float(score)
+        numeric_scores.append(score_float)
 
         reported_blocks.append(
             {
@@ -120,8 +141,18 @@ def evaluate_period_blocks(
 
     all_blocks_reported = missing_blocks_count == 0
 
+    all_scores_zero = (
+        all_blocks_reported
+        and len(numeric_scores) == len(expected_block_codes)
+        and all(score == 0.0 for score in numeric_scores)
+    )
+
     if not all_blocks_reported:
         period_status = PERIOD_STATUS_INCOMPLETE
+    elif all_scores_zero:
+        period_status = PERIOD_STATUS_INCOMPLETE
+        failed_blocks = []
+        failed_blocks_count = 0
     elif failed_blocks_count > 0:
         period_status = PERIOD_STATUS_COMPROMISED
     else:
@@ -137,6 +168,7 @@ def evaluate_period_blocks(
         "failed_blocks_count": failed_blocks_count,
         "failed_blocks": failed_blocks,
         "reported_blocks": reported_blocks,
+        "all_scores_zero": all_scores_zero,
     }
 
 
@@ -146,25 +178,6 @@ def build_student_subject_period_statuses(
 ) -> list[dict[str, Any]]:
     """
     Construye una lista de estados por estudiante + asignatura + período.
-
-    Entrada:
-    - parsed_row: salida de parse_student_row()
-
-    Salida:
-    [
-        {
-            "student_id": "...",
-            "student_name": "...",
-            "numero": "...",
-            "curso": "...",
-            "prof_titular": "...",
-            "subject_code": "MAT",
-            "subject_name": "Matemática",
-            "period_code": "P2",
-            "period_status": "compromised",
-            ...
-        }
-    ]
     """
     student = parsed_row.get("student", {})
     subjects = parsed_row.get("subjects", {})
@@ -208,6 +221,7 @@ def build_student_subject_period_statuses(
                     "failed_blocks_count": period_evaluation["failed_blocks_count"],
                     "failed_blocks": period_evaluation["failed_blocks"],
                     "reported_blocks": period_evaluation["reported_blocks"],
+                    "all_scores_zero": period_evaluation["all_scores_zero"],
                 }
             )
 
@@ -279,7 +293,7 @@ def get_incomplete_entries(
     entries: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     """
-    Retorna entradas con reporte incompleto.
+    Retorna entradas con reporte incompleto o no publicado.
     """
     return filter_period_status_entries(entries, PERIOD_STATUS_INCOMPLETE)
 
