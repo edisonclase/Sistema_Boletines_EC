@@ -709,3 +709,40 @@ tbody tr:last-child td {
         word-break: break-word;
     }
 }
+
+.compact-summary-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 18px;
+    align-items: stretch;
+}
+
+.compact-metric {
+    background: #f7faf8;
+    border: 1px solid #dbe7df;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 92px;
+}
+
+.compact-label {
+    font-size: 0.95rem;
+    color: #4e6474;
+    margin-bottom: 8px;
+}
+
+.compact-value {
+    font-size: 1.8rem;
+    line-height: 1;
+    color: var(--center-primary-dark);
+    font-weight: 700;
+}
+
+@media (max-width: 900px) {
+    .compact-summary-row {
+        grid-template-columns: 1fr;
+    }
+}

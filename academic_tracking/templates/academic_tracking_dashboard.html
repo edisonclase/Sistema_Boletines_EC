@@ -55,22 +55,18 @@
     </section>
 
     <section class="card">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-label">Total incidencias</span>
-                <strong class="stat-value">{{ dashboard.summary.cards.total_cases }}</strong>
+        <div class="compact-summary-row">
+            <div class="compact-metric">
+                <span class="compact-label">Estudiantes afectados</span>
+                <strong class="compact-value">{{ dashboard.summary.compact_cards.students_affected }}</strong>
             </div>
-            <div class="stat-card">
-                <span class="stat-label">Estudiantes afectados</span>
-                <strong class="stat-value">{{ dashboard.summary.cards.students_affected }}</strong>
+            <div class="compact-metric">
+                <span class="compact-label">Cursos con casos</span>
+                <strong class="compact-value">{{ dashboard.summary.compact_cards.courses_with_cases }}</strong>
             </div>
-            <div class="stat-card">
-                <span class="stat-label">No recuperados</span>
-                <strong class="stat-value">{{ dashboard.summary.cards.no_recuperados }}</strong>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Cursos con casos</span>
-                <strong class="stat-value">{{ dashboard.summary.cards.courses_with_cases }}</strong>
+            <div class="compact-metric">
+                <span class="compact-label">Asignaturas con casos</span>
+                <strong class="compact-value">{{ dashboard.summary.compact_cards.subjects_with_cases }}</strong>
             </div>
         </div>
     </section>
@@ -91,7 +87,6 @@
                     <thead>
                         <tr>
                             <th>No.</th>
-                            <th>ID</th>
                             <th>Estudiante</th>
                             <th>Curso</th>
                             <th>Asignatura</th>
@@ -105,12 +100,11 @@
                     <tbody>
                         {% for row in dashboard.operational_rows %}
                             <tr>
-                                <td>{{ row.numero }}</td>
-                                <td>{{ row.student_id }}</td>
-                                <td><strong>{{ row.student_name }}</strong></td>
-                                <td>{{ row.course_name }}</td>
-                                <td>{{ row.subject_name }}</td>
-                                <td>{{ row.period_code }}</td>
+                                <td>{{ row.numero or '—' }}</td>
+                                <td><strong>{{ row.student_name or '—' }}</strong></td>
+                                <td>{{ row.course_name or '—' }}</td>
+                                <td>{{ row.subject_name or '—' }}</td>
+                                <td>{{ row.period_code or '—' }}</td>
                                 <td>
                                     {% if row.failed_blocks %}
                                         <div class="sub-detail">
@@ -166,7 +160,6 @@
                     <thead>
                         <tr>
                             <th>No.</th>
-                            <th>ID</th>
                             <th>Estudiante</th>
                             <th>Curso</th>
                             <th>Asignatura</th>
@@ -180,14 +173,13 @@
                     <tbody>
                         {% for row in dashboard.recovery_follow_up %}
                             <tr>
-                                <td>{{ row.numero }}</td>
-                                <td>{{ row.student_id }}</td>
-                                <td><strong>{{ row.student_name }}</strong></td>
-                                <td>{{ row.course_name }}</td>
-                                <td>{{ row.subject_name }}</td>
-                                <td>{{ row.source_period }}</td>
-                                <td>{{ row.block_label }}</td>
-                                <td>{{ row.original_score }}</td>
+                                <td>{{ row.numero or '—' }}</td>
+                                <td><strong>{{ row.student_name or '—' }}</strong></td>
+                                <td>{{ row.course_name or '—' }}</td>
+                                <td>{{ row.subject_name or '—' }}</td>
+                                <td>{{ row.source_period or '—' }}</td>
+                                <td>{{ row.block_label or '—' }}</td>
+                                <td>{{ row.original_score if row.original_score is not none else '—' }}</td>
                                 <td>
                                     {% if row.recovery_status == "no_recuperado" %}
                                         <span class="badge badge-pendiente">No recuperó</span>

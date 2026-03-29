@@ -36,12 +36,8 @@ NEXT_PERIOD_MAP = {
 def _normalize_filter_value(value: Optional[Any]) -> Optional[str]:
     if value is None:
         return None
-
     text = str(value).strip()
-    if not text:
-        return None
-
-    return text
+    return text or None
 
 
 def _safe_int_for_sort(value: Any) -> tuple[int, str]:
@@ -169,6 +165,42 @@ def _build_recovery_follow_up(entries: list[dict[str, Any]]) -> list[dict[str, A
     )
 
 
+def _apply_operational_filters(
+    entries: list[dict[str, Any]],
+    course_name: Optional[str] = None,
+    period_code: Optional[str] = None,
+    subject_code: Optional[str] = None,
+) -> list[dict[str, Any]]:
+    filtered = entries
+
+    normalized_course = _normalize_filter_value(course_name)
+    normalized_period = _normalize_filter_value(period_code)
+    normalized_subject = _normalize_filter_value(subject_code)
+
+    if normalized_course:
+        filtered = [
+            entry
+            for entry in filtered
+            if str(entry.get("curso", "")).strip() == normalized_course
+        ]
+
+    if normalized_period:
+        filtered = [
+            entry
+            for entry in filtered
+            if str(entry.get("period_code", "")).strip() == normalized_period
+        ]
+
+    if normalized_subject:
+        filtered = [
+            entry
+            for entry in filtered
+            if str(entry.get("subject_code", "")).strip() == normalized_subject
+        ]
+
+    return filtered
+
+
 def _build_operational_rows(
     entries: list[dict[str, Any]],
     recovery_follow_up: list[dict[str, Any]],
@@ -207,9 +239,15 @@ def _build_operational_rows(
         subject_code = str(entry.get("subject_code", "")).strip()
         period_code = str(entry.get("period_code", "")).strip()
         course_name = str(entry.get("curso", "")).strip()
+        student_name = str(entry.get("student_name", "")).strip()
+        numero = str(entry.get("numero", "")).strip()
 
         failed_blocks = entry.get("failed_blocks", [])
-        failed_block_codes = [block.get("block_code", "") for block in failed_blocks if block.get("block_code")]
+        failed_block_codes = [
+            block.get("block_code", "")
+            for block in failed_blocks
+            if block.get("block_code")
+        ]
 
         if (student_id, subject_code, period_code) in recovery_index:
             derived_status = "no_recuperado"
@@ -218,7 +256,6 @@ def _build_operational_rows(
             next_period = NEXT_PERIOD_MAP.get(period_code)
             has_next_publication = False
 
-            # determinación simple para versión actual
             for candidate in entries:
                 if (
                     str(candidate.get("student_id", "")).strip() == student_id
@@ -239,23 +276,25 @@ def _build_operational_rows(
         if not _status_matches_filter(derived_status, student_status):
             continue
 
+        score_values = [
+            block.get("score")
+            for block in failed_blocks
+            if block.get("score") is not None
+        ]
+
         rows.append(
             {
-                "numero": entry.get("numero", ""),
-                "student_id": student_id,
-                "student_name": entry.get("student_name", ""),
-                "course_name": course_name,
-                "subject_code": subject_code,
-                "subject_name": entry.get("subject_name", ""),
-                "period_code": period_code,
+                "numero": numero or "—",
+                "student_id": student_id or "—",
+                "student_name": student_name or "—",
+                "course_name": course_name or "—",
+                "subject_code": subject_code or "—",
+                "subject_name": str(entry.get("subject_name", "")).strip() or "—",
+                "period_code": period_code or "—",
                 "failed_blocks": failed_blocks,
                 "failed_blocks_count": int(entry.get("failed_blocks_count", 0)),
                 "failed_block_codes": failed_block_codes,
-                "score_values": [block.get("score") for block in failed_blocks if block.get("score") is not None],
-                "lowest_score": min(
-                    [block.get("score") for block in failed_blocks if block.get("score") is not None],
-                    default=None,
-                ),
+                "lowest_score": min(score_values) if score_values else None,
                 "status": derived_status,
                 "status_label": derived_status_label,
                 "teacher_name": teacher_lookup.get((course_name, subject_code), ""),
@@ -267,47 +306,11 @@ def _build_operational_rows(
         key=lambda item: (
             str(item.get("course_name", "")).strip(),
             _safe_int_for_sort(item.get("numero", "")),
-            str(item.get("student_id", "")).strip(),
+            str(item.get("student_name", "")).strip(),
             str(item.get("subject_name", "")).strip(),
             str(item.get("period_code", "")).strip(),
         ),
     )
-
-
-def _apply_operational_filters(
-    entries: list[dict[str, Any]],
-    course_name: Optional[str] = None,
-    period_code: Optional[str] = None,
-    subject_code: Optional[str] = None,
-) -> list[dict[str, Any]]:
-    filtered = entries
-
-    normalized_course = _normalize_filter_value(course_name)
-    normalized_period = _normalize_filter_value(period_code)
-    normalized_subject = _normalize_filter_value(subject_code)
-
-    if normalized_course:
-        filtered = [
-            entry
-            for entry in filtered
-            if str(entry.get("curso", "")).strip() == normalized_course
-        ]
-
-    if normalized_period:
-        filtered = [
-            entry
-            for entry in filtered
-            if str(entry.get("period_code", "")).strip() == normalized_period
-        ]
-
-    if normalized_subject:
-        filtered = [
-            entry
-            for entry in filtered
-            if str(entry.get("subject_code", "")).strip() == normalized_subject
-        ]
-
-    return filtered
 
 
 def build_tracking_dashboard_data(
@@ -354,12 +357,14 @@ def build_tracking_dashboard_data(
     courses_with_cases = {
         str(item.get("course_name", "")).strip()
         for item in operational_rows
-        if str(item.get("course_name", "")).strip()
+        if str(item.get("course_name", "")).strip() and str(item.get("course_name", "")).strip() != "—"
     }
 
-    no_recuperados_count = sum(
-        1 for item in operational_rows if item.get("status") == "no_recuperado"
-    )
+    subjects_with_cases = {
+        str(item.get("subject_name", "")).strip()
+        for item in operational_rows
+        if str(item.get("subject_name", "")).strip() and str(item.get("subject_name", "")).strip() != "—"
+    }
 
     dashboard_data = {
         "filters": {
@@ -380,11 +385,10 @@ def build_tracking_dashboard_data(
             "entries_total": len(operational_rows),
         },
         "summary": {
-            "cards": {
-                "total_cases": len(operational_rows),
+            "compact_cards": {
                 "students_affected": len(students_affected),
-                "no_recuperados": no_recuperados_count,
                 "courses_with_cases": len(courses_with_cases),
+                "subjects_with_cases": len(subjects_with_cases),
             }
         },
         "operational_rows": operational_rows,
