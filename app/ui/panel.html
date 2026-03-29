@@ -20,26 +20,67 @@
                     <div class="panel-brand-copy">
                         <div class="panel-brand-kicker">Plataforma privada</div>
                         <h1 class="panel-brand-title">CLASE EducTech</h1>
-                        <p class="panel-brand-subtitle">Panel institucional de boletines</p>
+                        <p class="panel-brand-subtitle">Panel institucional de módulos académicos</p>
                     </div>
                 </div>
 
                 <div class="panel-userbox">
                     <div class="panel-user-meta">
-                    <div class="panel-user-name" id="sessionUserName">-</div>
-                    <div class="panel-user-role" id="sessionUserRole">-</div>
-                    <div class="panel-user-email" id="sessionUserEmail">-</div>
-                    <div class="panel-user-role" id="sessionInstitutionName">-</div>
-                    <div class="panel-user-email" id="sessionInstitutionMeta">-</div>
+                        <div class="panel-user-name" id="sessionUserName">-</div>
+                        <div class="panel-user-role" id="sessionUserRole">-</div>
+                        <div class="panel-user-email" id="sessionUserEmail">-</div>
+                        <div class="panel-user-role" id="sessionInstitutionName">-</div>
+                        <div class="panel-user-email" id="sessionInstitutionMeta">-</div>
                     </div>
-                        <button class="btn-outline btn-logout" onclick="logoutToLogin()">
-                            Cerrar sesión
-                        </button>
-                    </div>
+                    <button class="btn-outline btn-logout" onclick="logoutToLogin()">
+                        Cerrar sesión
+                    </button>
+                </div>
             </div>
 
             <div class="hero panel-hero">
-                <h2 class="hero-title">Panel de Boletines</h2>
+                <h2 class="hero-title">Panel institucional</h2>
+                <p class="hero-subtitle">
+                    Selecciona el módulo con el que deseas trabajar dentro de la plataforma.
+                </p>
+            </div>
+
+            <div class="grid" style="margin-bottom: 24px;">
+                <div class="card card-brand">
+                    <div class="card-header">
+                        <div class="card-kicker">Módulo académico</div>
+                        <h3 class="card-title">Boletines</h3>
+                        <p class="card-subtitle">
+                            Consulta individual y generación masiva de boletines por estudiante o por curso.
+                        </p>
+                    </div>
+
+                    <div class="buttons-grid">
+                        <a href="#modulo-boletines" class="btn-brand" style="text-align: center; text-decoration: none;">
+                            Entrar al módulo de boletines
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card card-brand-soft">
+                    <div class="card-header">
+                        <div class="card-kicker">Módulo académico</div>
+                        <h3 class="card-title">Seguimiento Académico</h3>
+                        <p class="card-subtitle">
+                            Identifica incidencias por estudiante, período, asignatura y bloque de competencia.
+                        </p>
+                    </div>
+
+                    <div class="buttons-grid">
+                        <a href="/academic-tracking/" class="btn-dark" style="text-align: center; text-decoration: none;">
+                            Entrar al seguimiento académico
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modulo-boletines" class="hero panel-hero" style="margin-top: 0;">
+                <h2 class="hero-title">Módulo de Boletines</h2>
                 <p class="hero-subtitle">
                     Selecciona estudiantes o cursos para generar boletines individuales o masivos.
                 </p>

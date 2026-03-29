@@ -17,12 +17,7 @@ from .services.data_loader_service import (
     load_teacher_assignments_from_source,
 )
 from .services.tracking_service import build_tracking_dashboard_data
-
-# IMPORTANTE:
-# Sustituye esta línea por el mismo import exacto que ya usas en tu
-# módulo de boletines para acceder a settings.institution_name,
-# settings.school_year e institution_logo.
-from app.core.settings import settings  # <- AJUSTA ESTA RUTA SI EN TU PROYECTO ES OTRA
+from app.core.settings import settings
 
 
 router = APIRouter(
@@ -71,7 +66,6 @@ def _resolve_institution_logos() -> list[dict[str, str]]:
         return f"/assets/{filename}"
 
     institution_logo = getattr(settings, "institution_logo", "")
-    minerd_logo = getattr(settings, "institution_minerd_logo", "")
 
     if institution_logo:
         logos.append({
@@ -79,13 +73,8 @@ def _resolve_institution_logos() -> list[dict[str, str]]:
             "alt": "Logo del centro educativo",
         })
 
-    if minerd_logo:
-        logos.append({
-            "src": to_asset_url(minerd_logo),
-            "alt": "Logo MINERD",
-        })
-
     return logos
+
 
 def _build_dashboard_payload(
     center_id: Optional[Any] = None,

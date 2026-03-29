@@ -462,7 +462,7 @@ def _build_operational_rows(
                 derived_status_label = "No recuperó"
             else:
                 derived_status = "en_riesgo"
-                derived_status_label = "En riesgo"
+                derived_status_label = "Recuperación pedagógica"
 
         if not _status_matches_filter(derived_status, student_status):
             continue
@@ -552,13 +552,14 @@ def _build_grouped_operational_rows(
             grouped[key]["status_label"] = "No recuperó"
         elif current_status not in {"no_recuperado", "en_riesgo"} and new_status == "en_riesgo":
             grouped[key]["status"] = "en_riesgo"
-            grouped[key]["status_label"] = "En riesgo"
+            grouped[key]["status_label"] = "Recuperación pedagógica"
 
         grouped[key]["subjects"].append(
             {
                 "subject_code": row.get("subject_code", "—"),
                 "subject_name": row.get("subject_name", "—"),
                 "failed_block_labels": row.get("failed_block_labels", []),
+                "failed_blocks": row.get("failed_blocks", []),
                 "lowest_score": row.get("lowest_score"),
                 "status": row.get("status", "pendiente"),
                 "status_label": row.get("status_label", "Pendiente"),
@@ -578,6 +579,7 @@ def _build_grouped_operational_rows(
                     "subject_code": subject.get("subject_code", "—"),
                     "subject_name": subject_name,
                     "failed_block_labels": [],
+                    "failed_blocks": [],
                     "lowest_score": subject.get("lowest_score"),
                     "status": subject.get("status", "pendiente"),
                     "status_label": subject.get("status_label", "Pendiente"),
@@ -588,6 +590,34 @@ def _build_grouped_operational_rows(
                 if label not in existing_labels:
                     subject_map[subject_name]["failed_block_labels"].append(label)
                     existing_labels.add(label)
+
+            block_index: dict[str, dict[str, Any]] = {
+                str(item.get("block_code", "")).strip() or str(item.get("block_label", "")).strip(): item
+                for item in subject_map[subject_name]["failed_blocks"]
+            }
+
+            for block in subject.get("failed_blocks", []):
+                block_key = str(block.get("block_code", "")).strip() or str(block.get("block_label", "")).strip()
+                if not block_key:
+                    continue
+
+                block_label = str(block.get("block_label", "")).strip() or "Bloque"
+                block_score = block.get("score")
+
+                if block_key not in block_index:
+                    block_index[block_key] = {
+                        "block_code": str(block.get("block_code", "")).strip(),
+                        "block_label": block_label,
+                        "score": block_score,
+                    }
+                else:
+                    current_score = block_index[block_key].get("score")
+                    if current_score is None:
+                        block_index[block_key]["score"] = block_score
+                    elif block_score is not None:
+                        block_index[block_key]["score"] = min(current_score, block_score)
+
+                subject_map[subject_name]["failed_blocks"] = list(block_index.values())
 
             current_lowest = subject_map[subject_name]["lowest_score"]
             new_lowest = subject.get("lowest_score")
@@ -602,6 +632,15 @@ def _build_grouped_operational_rows(
             ):
                 subject_map[subject_name]["status"] = "no_recuperado"
                 subject_map[subject_name]["status_label"] = "No recuperó"
+
+        for subject_payload in subject_map.values():
+            subject_payload["failed_blocks"] = sorted(
+                subject_payload["failed_blocks"],
+                key=lambda item: (
+                    str(item.get("block_label", "")).strip(),
+                    str(item.get("block_code", "")).strip(),
+                ),
+            )
 
         payload["subjects"] = sorted(
             subject_map.values(),

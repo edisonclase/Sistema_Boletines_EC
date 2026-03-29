@@ -26,4 +26,3 @@ def ui_styles():
 @router.get("/ui/app.js", response_class=FileResponse)
 def ui_app_js():
     return FileResponse(UI_DIR / "app.js", media_type="application/javascript")
-

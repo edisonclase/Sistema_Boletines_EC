@@ -18,15 +18,15 @@
 
     <section class="header">
         <div class="header-brand-row">
-            <div class="header-logos">
-                {% for logo in dashboard.institution.logos %}
-                    <img src="{{ logo.src }}" alt="{{ logo.alt }}">
-                {% endfor %}
-            </div>
-
             <div class="header-title-block">
                 <h1>Seguimiento Académico</h1>
                 <p>Estudiantes con incidencias académicas por período, asignatura y bloque de competencia.</p>
+            </div>
+
+            <div class="header-logos header-logos-right">
+                {% for logo in dashboard.institution.logos %}
+                    <img src="{{ logo.src }}" alt="{{ logo.alt }}">
+                {% endfor %}
             </div>
         </div>
     </section>
@@ -117,7 +117,7 @@
                     <label for="estado">Estado</label>
                     <select id="estado" name="estado">
                         <option value="">Todos</option>
-                        <option value="en_riesgo" {% if dashboard.filters.estado == "en_riesgo" %}selected{% endif %}>En riesgo</option>
+                        <option value="en_riesgo" {% if dashboard.filters.estado == "en_riesgo" %}selected{% endif %}>Recuperación pedagógica</option>
                         <option value="no_recuperado" {% if dashboard.filters.estado == "no_recuperado" %}selected{% endif %}>No recuperó</option>
                         <option value="pendiente" {% if dashboard.filters.estado == "pendiente" %}selected{% endif %}>Pendiente</option>
                     </select>
@@ -193,15 +193,28 @@
                                                 <div class="subject-item">
                                                     <div class="subject-name-row">
                                                         <strong class="subject-name">{{ subject.subject_name }}:</strong>
-                                                        {% if subject.lowest_score is not none %}
-                                                            <span class="subject-score">Nota mínima: {{ subject.lowest_score }}</span>
-                                                        {% endif %}
                                                     </div>
 
-                                                    {% if subject.failed_block_labels %}
+                                                    {% if subject.failed_blocks %}
+                                                        <div class="block-label-vertical-list">
+                                                            {% for block in subject.failed_blocks %}
+                                                                <div class="block-label-line">
+                                                                    <span class="block-label-name">{{ block.block_label }}</span>
+                                                                    <span class="block-label-separator">—</span>
+                                                                    <span class="block-label-score-text">Calificación del bloque de competencia:</span>
+                                                                    <span class="block-label-score-value">{{ block.score if block.score is not none else '—' }}</span>
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% elif subject.failed_block_labels %}
                                                         <div class="block-label-vertical-list">
                                                             {% for label in subject.failed_block_labels %}
-                                                                <div class="block-label-line">{{ label }}</div>
+                                                                <div class="block-label-line">
+                                                                    <span class="block-label-name">{{ label }}</span>
+                                                                    <span class="block-label-separator">—</span>
+                                                                    <span class="block-label-score-text">Calificación del bloque de competencia:</span>
+                                                                    <span class="block-label-score-value">{{ subject.lowest_score if subject.lowest_score is not none else '—' }}</span>
+                                                                </div>
                                                             {% endfor %}
                                                         </div>
                                                     {% else %}
@@ -218,7 +231,7 @@
                                     {% if row.status == "no_recuperado" %}
                                         <span class="badge badge-pendiente">No recuperó</span>
                                     {% elif row.status == "en_riesgo" %}
-                                        <span class="badge badge-parcial">En riesgo</span>
+                                        <span class="badge badge-parcial">Recuperación pedagógica</span>
                                     {% else %}
                                         <span class="badge">Pendiente</span>
                                     {% endif %}

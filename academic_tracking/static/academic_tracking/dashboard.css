@@ -121,6 +121,7 @@ strong {
     z-index: 1;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 20px;
     flex-wrap: wrap;
 }
@@ -130,6 +131,11 @@ strong {
     align-items: center;
     gap: 14px;
     flex-wrap: wrap;
+}
+
+.header-logos-right {
+    justify-content: flex-end;
+    margin-left: auto;
 }
 
 .header-logos img {
@@ -255,8 +261,11 @@ strong {
     display: flex;
     gap: 14px;
     align-items: center;
+    justify-content: flex-end;
     flex-wrap: wrap;
-    margin-top: 4px;
+    margin-top: 18px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-soft);
 }
 
 .btn {
@@ -463,15 +472,35 @@ tbody tr:last-child td {
 .block-label-vertical-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     margin-top: 4px;
 }
 
 .block-label-line {
     font-size: var(--font-size-sm);
     color: var(--text);
-    line-height: 1.35;
+    line-height: 1.45;
     padding-left: 2px;
+}
+
+.block-label-name {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.block-label-separator {
+    margin: 0 4px;
+    color: var(--muted);
+}
+
+.block-label-score-text {
+    color: var(--muted);
+}
+
+.block-label-score-value {
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-left: 4px;
 }
 
 .course-subline {
@@ -537,6 +566,11 @@ tbody tr:last-child td {
     .header-brand-row {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .header-logos-right {
+        justify-content: flex-start;
+        margin-left: 0;
     }
 
     .header-logos img {
