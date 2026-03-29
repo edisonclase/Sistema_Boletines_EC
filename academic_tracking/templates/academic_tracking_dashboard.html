@@ -122,12 +122,12 @@
                         <option value="pendiente" {% if dashboard.filters.estado == "pendiente" %}selected{% endif %}>Pendiente</option>
                     </select>
                 </div>
+            </div>
 
-                <div class="actions">
-                    <button class="btn btn-primary" type="submit">Filtrar</button>
-                    <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
-                    <button type="button" class="btn btn-secondary" onclick="window.print()">Imprimir</button>
-                </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" type="submit">Filtrar</button>
+                <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
+                <button type="button" class="btn btn-secondary" onclick="window.print()">Imprimir</button>
             </div>
         </form>
     </section>
@@ -155,7 +155,7 @@
     <section class="card">
         <div class="section-heading">
             <div>
-                <h2 style="margin-bottom: 6px;">Estudiantes con bloques de competencias afectados</h2>
+                <h2 style="margin-bottom: 6px;">Listado operativo de incidencias</h2>
                 <p class="text-muted" style="margin: 0;">
                     Vista agrupada por estudiante para coordinación, seguimiento y atención a familias.
                 </p>
@@ -192,16 +192,16 @@
                                             {% for subject in row.subjects %}
                                                 <div class="subject-item">
                                                     <div class="subject-name-row">
-                                                        <strong class="subject-name">{{ subject.subject_name }}</strong>
+                                                        <strong class="subject-name">{{ subject.subject_name }}:</strong>
                                                         {% if subject.lowest_score is not none %}
-                                                            <span class="subject-score">Calificación: {{ subject.lowest_score }}</span>
+                                                            <span class="subject-score">Nota mínima: {{ subject.lowest_score }}</span>
                                                         {% endif %}
                                                     </div>
 
                                                     {% if subject.failed_block_labels %}
-                                                        <div class="sub-detail block-label-list">
+                                                        <div class="block-label-vertical-list">
                                                             {% for label in subject.failed_block_labels %}
-                                                                <span class="mini-badge">{{ label }}</span>
+                                                                <div class="block-label-line">{{ label }}</div>
                                                             {% endfor %}
                                                         </div>
                                                     {% else %}
