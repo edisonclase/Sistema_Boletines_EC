@@ -155,7 +155,7 @@
     <section class="card">
         <div class="section-heading">
             <div>
-                <h2 style="margin-bottom: 6px;">Listado operativo de incidencias</h2>
+                <h2 style="margin-bottom: 6px;">Estudiantes con bloques de competencias afectados</h2>
                 <p class="text-muted" style="margin: 0;">
                     Vista agrupada por estudiante para coordinación, seguimiento y atención a familias.
                 </p>
@@ -194,7 +194,7 @@
                                                     <div class="subject-name-row">
                                                         <strong class="subject-name">{{ subject.subject_name }}</strong>
                                                         {% if subject.lowest_score is not none %}
-                                                            <span class="subject-score">Nota mínima: {{ subject.lowest_score }}</span>
+                                                            <span class="subject-score">Calificación: {{ subject.lowest_score }}</span>
                                                         {% endif %}
                                                     </div>
 
