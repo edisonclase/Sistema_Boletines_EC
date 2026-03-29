@@ -18,6 +18,12 @@ from .services.data_loader_service import (
 )
 from .services.tracking_service import build_tracking_dashboard_data
 
+# IMPORTANTE:
+# Sustituye esta línea por el mismo import exacto que ya usas en tu
+# módulo de boletines para acceder a settings.institution_name,
+# settings.school_year e institution_logo.
+from app.core.settings import settings  # <- AJUSTA ESTA RUTA SI EN TU PROYECTO ES OTRA
+
 
 router = APIRouter(
     prefix="/academic-tracking",
@@ -25,18 +31,6 @@ router = APIRouter(
 )
 
 templates = Jinja2Templates(directory="academic_tracking/templates")
-
-# Ajusta aquí los logos por centro cuando lo necesites.
-DEFAULT_INSTITUTION_LOGOS = [
-    {
-        "src": "/assets/logo.jpg",
-        "alt": "Logo del centro educativo",
-    },
-    {
-        "src": "/assets/minerd.png",
-        "alt": "Logo institucional",
-    },
-]
 
 
 def _parse_min_approval_score(
@@ -55,6 +49,43 @@ def _parse_min_approval_score(
     except ValueError:
         return default
 
+
+def _resolve_institution_name() -> str:
+    return str(getattr(settings, "institution_name", "") or "Centro Educativo Ejemplo").strip()
+
+
+def _resolve_school_year(fallback: Optional[str] = None) -> str:
+    configured = str(getattr(settings, "school_year", "") or "").strip()
+    if configured:
+        return configured
+    return str(fallback or "2025-2026").strip()
+
+
+def _resolve_institution_logos() -> list[dict[str, str]]:
+    logos: list[dict[str, str]] = []
+
+    def to_asset_url(path: str) -> str:
+        if not path:
+            return ""
+        filename = path.split("/")[-1]
+        return f"/assets/{filename}"
+
+    institution_logo = getattr(settings, "institution_logo", "")
+    minerd_logo = getattr(settings, "institution_minerd_logo", "")
+
+    if institution_logo:
+        logos.append({
+            "src": to_asset_url(institution_logo),
+            "alt": "Logo del centro educativo",
+        })
+
+    if minerd_logo:
+        logos.append({
+            "src": to_asset_url(minerd_logo),
+            "alt": "Logo MINERD",
+        })
+
+    return logos
 
 def _build_dashboard_payload(
     center_id: Optional[Any] = None,
@@ -102,10 +133,10 @@ def _build_dashboard_payload(
     }
 
     dashboard_data["institution"] = {
-        "name": "Centro Educativo Ejemplo",
-        "school_year": school_year or "2025-2026",
+        "name": _resolve_institution_name(),
+        "school_year": _resolve_school_year(school_year),
         "ciclo": ciclo or "Vista general",
-        "logos": DEFAULT_INSTITUTION_LOGOS,
+        "logos": _resolve_institution_logos(),
         "favicon": "/assets/interface_logo.png",
     }
 
