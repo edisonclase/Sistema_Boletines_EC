@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Seguimiento Académico</title>
     <link rel="stylesheet" href="{{ url_for('static', path='academic_tracking/dashboard.css') }}">
+    <link rel="icon" type="app\pdf\assets\interface_logo.png" />
 </head>
 
 <body
@@ -54,7 +55,13 @@
                     <select id="seccion" name="seccion">
                         <option value="">Todas</option>
                         {% for seccion in dashboard.metadata.sections_detected %}
-                            <option value="{{ seccion }}" {% if dashboard.filters.seccion == seccion %}selected{% endif %}>{{ seccion }}</option>
+                            <option
+                                value="{{ seccion }}"
+                                data-grade-list="{% for grade, section_list in dashboard.metadata.sections_by_grade.items() %}{% if seccion in section_list %}{{ grade }}|{% endif %}{% endfor %}"
+                                {% if dashboard.filters.seccion == seccion %}selected{% endif %}
+                            >
+                                {{ seccion }}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
@@ -127,12 +134,12 @@
             <div>
                 <h2 style="margin-bottom: 6px;">Listado operativo de incidencias</h2>
                 <p class="text-muted" style="margin: 0;">
-                    Vista priorizada para coordinación, seguimiento y toma de decisiones.
+                    Vista agrupada por estudiante para coordinación, seguimiento y atención a familias.
                 </p>
             </div>
         </div>
 
-        {% if dashboard.operational_rows %}
+        {% if dashboard.grouped_operational_rows %}
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -140,36 +147,43 @@
                             <th>No.</th>
                             <th>Estudiante</th>
                             <th>Curso</th>
-                            <th>Asignatura</th>
                             <th>Período</th>
-                            <th>Bloques de competencias afectados</th>
-                            <th>Calificación</th>
-                            <th>Estado</th>
+                            <th>Asignaturas pendientes y competencias afectadas</th>
+                            <th>Estado general</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        {% for row in dashboard.operational_rows %}
+                        {% for row in dashboard.grouped_operational_rows %}
                             <tr class="{% if row.status == 'no_recuperado' %}row-danger{% elif row.status == 'en_riesgo' %}row-warning{% endif %}">
                                 <td>{{ row.numero or '—' }}</td>
                                 <td><strong>{{ row.student_name or '—' }}</strong></td>
                                 <td>{{ row.course_name or '—' }}</td>
-                                <td>{{ row.subject_name or '—' }}</td>
                                 <td>{{ row.period_code or '—' }}</td>
                                 <td>
-                                    {% if row.failed_block_labels %}
-                                        <div class="sub-detail block-label-list">
-                                            {% for label in row.failed_block_labels %}
-                                                <span class="mini-badge">{{ label }}</span>
+                                    {% if row.subjects %}
+                                        <div class="subject-stack">
+                                            {% for subject in row.subjects %}
+                                                <div class="subject-item">
+                                                    <div class="subject-name-row">
+                                                        <strong class="subject-name">{{ subject.subject_name }}</strong>
+                                                        {% if subject.lowest_score is not none %}
+                                                            <span class="subject-score">Nota mínima: {{ subject.lowest_score }}</span>
+                                                        {% endif %}
+                                                    </div>
+
+                                                    {% if subject.failed_block_labels %}
+                                                        <div class="sub-detail block-label-list">
+                                                            {% for label in subject.failed_block_labels %}
+                                                                <span class="mini-badge">{{ label }}</span>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% else %}
+                                                        <span class="text-muted">Sin bloques identificados.</span>
+                                                    {% endif %}
+                                                </div>
                                             {% endfor %}
                                         </div>
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if row.lowest_score is not none %}
-                                        {{ row.lowest_score }}
                                     {% else %}
                                         —
                                     {% endif %}
@@ -195,5 +209,70 @@
     {% endif %}
 
 </div>
+
+<script>
+(function () {
+    const gradeSelect = document.getElementById("grado");
+    const sectionSelect = document.getElementById("seccion");
+
+    if (!gradeSelect || !sectionSelect) {
+        return;
+    }
+
+    const originalOptions = Array.from(sectionSelect.options).map((option) => ({
+        value: option.value,
+        text: option.text,
+        selected: option.selected,
+        gradeList: option.getAttribute("data-grade-list") || ""
+    }));
+
+    function renderSections() {
+        const selectedGrade = gradeSelect.value || "";
+        const currentSection = sectionSelect.value || "";
+        sectionSelect.innerHTML = "";
+
+        originalOptions.forEach((item) => {
+            if (item.value === "") {
+                const option = document.createElement("option");
+                option.value = "";
+                option.textContent = item.text;
+                sectionSelect.appendChild(option);
+                return;
+            }
+
+            if (!selectedGrade) {
+                const option = document.createElement("option");
+                option.value = item.value;
+                option.textContent = item.text;
+                if (item.value === currentSection) {
+                    option.selected = true;
+                }
+                sectionSelect.appendChild(option);
+                return;
+            }
+
+            const grades = item.gradeList.split("|").filter(Boolean);
+            if (grades.includes(selectedGrade)) {
+                const option = document.createElement("option");
+                option.value = item.value;
+                option.textContent = item.text;
+                if (item.value === currentSection) {
+                    option.selected = true;
+                }
+                sectionSelect.appendChild(option);
+            }
+        });
+
+        const availableValues = Array.from(sectionSelect.options).map((opt) => opt.value);
+        if (!availableValues.includes(currentSection)) {
+            sectionSelect.value = "";
+        }
+    }
+
+    gradeSelect.addEventListener("change", renderSections);
+    renderSections();
+})();
+</script>
+
 </body>
 </html>

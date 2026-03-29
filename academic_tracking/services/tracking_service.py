@@ -12,7 +12,6 @@ Versión simplificada y operativa:
 
 from __future__ import annotations
 
-import re
 from typing import Any, Optional
 
 from .parsing_service import (
@@ -81,21 +80,33 @@ def _extract_detected_courses(entries: list[dict[str, Any]]) -> list[str]:
     )
 
 
-def _extract_grades_and_sections(entries: list[dict[str, Any]]) -> dict[str, list[str]]:
+def _extract_grades_and_sections(entries: list[dict[str, Any]]) -> dict[str, Any]:
     grades: set[str] = set()
     sections: set[str] = set()
+    sections_by_grade: dict[str, set[str]] = {}
 
     for entry in entries:
         course_name = str(entry.get("curso", "")).strip()
         grado, seccion = _split_course_name(course_name)
+
         if grado:
             grades.add(grado)
+
         if seccion:
             sections.add(seccion)
+
+        if grado:
+            sections_by_grade.setdefault(grado, set())
+            if seccion:
+                sections_by_grade[grado].add(seccion)
 
     return {
         "grades": sorted(grades),
         "sections": sorted(sections),
+        "sections_by_grade": {
+            grade: sorted(list(section_set))
+            for grade, section_set in sorted(sections_by_grade.items())
+        },
     }
 
 
@@ -371,6 +382,109 @@ def _build_operational_rows(
     )
 
 
+def _build_grouped_operational_rows(
+    operational_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    grouped: dict[tuple[str, str, str], dict[str, Any]] = {}
+
+    for row in operational_rows:
+        key = (
+            str(row.get("student_id", "")).strip(),
+            str(row.get("course_name", "")).strip(),
+            str(row.get("period_code", "")).strip(),
+        )
+
+        if key not in grouped:
+            grouped[key] = {
+                "numero": row.get("numero", "—"),
+                "student_id": row.get("student_id", "—"),
+                "student_name": row.get("student_name", "—"),
+                "course_name": row.get("course_name", "—"),
+                "grade_name": row.get("grade_name", "—"),
+                "section_name": row.get("section_name", "—"),
+                "period_code": row.get("period_code", "—"),
+                "status": row.get("status", "pendiente"),
+                "status_label": row.get("status_label", "Pendiente"),
+                "subjects": [],
+            }
+
+        current_status = grouped[key]["status"]
+        new_status = row.get("status", "pendiente")
+
+        if current_status != "no_recuperado" and new_status == "no_recuperado":
+            grouped[key]["status"] = "no_recuperado"
+            grouped[key]["status_label"] = "No recuperó"
+        elif current_status not in {"no_recuperado", "en_riesgo"} and new_status == "en_riesgo":
+            grouped[key]["status"] = "en_riesgo"
+            grouped[key]["status_label"] = "En riesgo"
+
+        grouped[key]["subjects"].append(
+            {
+                "subject_code": row.get("subject_code", "—"),
+                "subject_name": row.get("subject_name", "—"),
+                "failed_block_labels": row.get("failed_block_labels", []),
+                "lowest_score": row.get("lowest_score"),
+                "status": row.get("status", "pendiente"),
+                "status_label": row.get("status_label", "Pendiente"),
+            }
+        )
+
+    grouped_rows: list[dict[str, Any]] = []
+
+    for payload in grouped.values():
+        subject_map: dict[str, dict[str, Any]] = {}
+
+        for subject in payload["subjects"]:
+            subject_name = str(subject.get("subject_name", "")).strip() or "—"
+
+            if subject_name not in subject_map:
+                subject_map[subject_name] = {
+                    "subject_code": subject.get("subject_code", "—"),
+                    "subject_name": subject_name,
+                    "failed_block_labels": [],
+                    "lowest_score": subject.get("lowest_score"),
+                    "status": subject.get("status", "pendiente"),
+                    "status_label": subject.get("status_label", "Pendiente"),
+                }
+
+            existing_labels = set(subject_map[subject_name]["failed_block_labels"])
+            for label in subject.get("failed_block_labels", []):
+                if label not in existing_labels:
+                    subject_map[subject_name]["failed_block_labels"].append(label)
+                    existing_labels.add(label)
+
+            current_lowest = subject_map[subject_name]["lowest_score"]
+            new_lowest = subject.get("lowest_score")
+            if current_lowest is None:
+                subject_map[subject_name]["lowest_score"] = new_lowest
+            elif new_lowest is not None:
+                subject_map[subject_name]["lowest_score"] = min(current_lowest, new_lowest)
+
+            if (
+                subject_map[subject_name]["status"] != "no_recuperado"
+                and subject.get("status") == "no_recuperado"
+            ):
+                subject_map[subject_name]["status"] = "no_recuperado"
+                subject_map[subject_name]["status_label"] = "No recuperó"
+
+        payload["subjects"] = sorted(
+            subject_map.values(),
+            key=lambda item: str(item.get("subject_name", "")).strip(),
+        )
+
+        grouped_rows.append(payload)
+
+    return sorted(
+        grouped_rows,
+        key=lambda item: (
+            str(item.get("course_name", "")).strip(),
+            _safe_int_for_sort(item.get("numero", "")),
+            str(item.get("student_name", "")).strip(),
+            str(item.get("period_code", "")).strip(),
+        ),
+    )
+
+
 def build_tracking_dashboard_data(
     rows: list[dict[str, Any]],
     center_id: Optional[Any] = None,
@@ -407,6 +521,8 @@ def build_tracking_dashboard_data(
         teacher_assignments=teacher_assignments,
         student_status=student_status,
     )
+
+    grouped_operational_rows = _build_grouped_operational_rows(operational_rows)
 
     detected_subjects = get_detected_academic_subjects(rows)
     grade_section_catalog = _extract_grades_and_sections(raw_entries)
@@ -454,6 +570,7 @@ def build_tracking_dashboard_data(
             "courses_detected": _extract_detected_courses(raw_entries),
             "grades_detected": grade_section_catalog["grades"],
             "sections_detected": grade_section_catalog["sections"],
+            "sections_by_grade": grade_section_catalog["sections_by_grade"],
             "periods_detected": get_supported_period_codes(),
             "subjects_catalog": detected_subjects,
             "entries_total": len(operational_rows),
@@ -467,6 +584,7 @@ def build_tracking_dashboard_data(
             }
         },
         "operational_rows": operational_rows,
+        "grouped_operational_rows": grouped_operational_rows,
         "recovery_follow_up": recovery_follow_up,
         "teacher_assignments": teacher_assignments or [],
         "audit_and_recovery": {
