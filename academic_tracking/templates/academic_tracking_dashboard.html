@@ -40,18 +40,45 @@
         <form method="GET">
             <div class="filters-grid">
                 <div class="field">
-                    <label for="curso">Curso</label>
-                    <input id="curso" name="curso" placeholder="Curso" value="{{ dashboard.filters.curso or '' }}">
+                    <label for="grado">Curso / grado</label>
+                    <select id="grado" name="grado">
+                        <option value="">Todos</option>
+                        {% for grado in dashboard.metadata.grades_detected %}
+                            <option value="{{ grado }}" {% if dashboard.filters.grado == grado %}selected{% endif %}>{{ grado }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="seccion">Sección</label>
+                    <select id="seccion" name="seccion">
+                        <option value="">Todas</option>
+                        {% for seccion in dashboard.metadata.sections_detected %}
+                            <option value="{{ seccion }}" {% if dashboard.filters.seccion == seccion %}selected{% endif %}>{{ seccion }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="field">
                     <label for="periodo">Período</label>
-                    <input id="periodo" name="periodo" placeholder="Período (P1-P4)" value="{{ dashboard.filters.periodo or '' }}">
+                    <select id="periodo" name="periodo">
+                        <option value="">Todos</option>
+                        {% for periodo in dashboard.metadata.periods_detected %}
+                            <option value="{{ periodo }}" {% if dashboard.filters.periodo == periodo %}selected{% endif %}>{{ periodo }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="field">
                     <label for="asignatura">Asignatura</label>
-                    <input id="asignatura" name="asignatura" placeholder="Asignatura" value="{{ dashboard.filters.asignatura or '' }}">
+                    <select id="asignatura" name="asignatura">
+                        <option value="">Todas las asignaturas</option>
+                        {% for subject in dashboard.metadata.subjects_catalog %}
+                            <option value="{{ subject.subject_code }}" {% if dashboard.filters.asignatura == subject.subject_code %}selected{% endif %}>
+                                {{ subject.subject_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="field">
@@ -94,6 +121,7 @@
         </div>
     </section>
 
+    {% if dashboard.metadata.has_active_filters %}
     <section class="card">
         <div class="section-heading">
             <div>
@@ -114,7 +142,7 @@
                             <th>Curso</th>
                             <th>Asignatura</th>
                             <th>Período</th>
-                            <th>Bloques</th>
+                            <th>Bloques de competencias afectados</th>
                             <th>Calificación</th>
                             <th>Estado</th>
                         </tr>
@@ -129,10 +157,10 @@
                                 <td>{{ row.subject_name or '—' }}</td>
                                 <td>{{ row.period_code or '—' }}</td>
                                 <td>
-                                    {% if row.failed_blocks %}
-                                        <div class="sub-detail">
-                                            {% for block in row.failed_blocks %}
-                                                <span class="mini-badge">{{ block.block_code }}</span>
+                                    {% if row.failed_block_labels %}
+                                        <div class="sub-detail block-label-list">
+                                            {% for label in row.failed_block_labels %}
+                                                <span class="mini-badge">{{ label }}</span>
                                             {% endfor %}
                                         </div>
                                     {% else %}
@@ -161,68 +189,10 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-muted">No se detectaron incidencias en los filtros actuales.</p>
+            <p class="text-muted">No se detectaron incidencias para la combinación de filtros seleccionada.</p>
         {% endif %}
     </section>
-
-    <section class="card">
-        <div class="section-heading">
-            <div>
-                <h2 style="margin-bottom: 6px;">Seguimiento de recuperación</h2>
-                <p class="text-muted" style="margin: 0;">
-                    Validación provisional basada en publicación del período siguiente.
-                </p>
-            </div>
-        </div>
-
-        {% if dashboard.recovery_follow_up %}
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>Estudiante</th>
-                            <th>Curso</th>
-                            <th>Asignatura</th>
-                            <th>Período origen</th>
-                            <th>Bloque</th>
-                            <th>Nota</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% for row in dashboard.recovery_follow_up %}
-                            <tr>
-                                <td>{{ row.numero or '—' }}</td>
-                                <td><strong>{{ row.student_name or '—' }}</strong></td>
-                                <td>{{ row.course_name or '—' }}</td>
-                                <td>{{ row.subject_name or '—' }}</td>
-                                <td>{{ row.source_period or '—' }}</td>
-                                <td>{{ row.block_label or '—' }}</td>
-                                <td>{{ row.original_score if row.original_score is not none else '—' }}</td>
-                                <td>
-                                    {% if row.recovery_status == "no_recuperado" %}
-                                        <span class="badge badge-pendiente">No recuperó</span>
-                                    {% else %}
-                                        <span class="badge badge-parcial">Pendiente</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p class="text-muted">No hay datos de recuperación para mostrar.</p>
-        {% endif %}
-    </section>
-
-    <section class="card audit-box">
-        <p class="text-muted" style="margin: 0;">
-            {{ dashboard.audit_and_recovery.message }}
-        </p>
-    </section>
+    {% endif %}
 
 </div>
 </body>

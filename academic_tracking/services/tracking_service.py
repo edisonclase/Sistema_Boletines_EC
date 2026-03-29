@@ -12,6 +12,7 @@ Versión simplificada y operativa:
 
 from __future__ import annotations
 
+import re
 from typing import Any, Optional
 
 from .parsing_service import (
@@ -52,6 +53,24 @@ def _safe_int_for_sort(value: Any) -> tuple[int, str]:
         return (999999999, text)
 
 
+def _split_course_name(course_name: str) -> tuple[str, str]:
+    """
+    Intenta separar grado y sección a partir de un valor como:
+    '2do A', '3ro B', '4to C', etc.
+    """
+    text = str(course_name or "").strip()
+    if not text:
+        return ("", "")
+
+    parts = text.split()
+    if len(parts) >= 2:
+        grado = " ".join(parts[:-1]).strip()
+        seccion = parts[-1].strip()
+        return (grado, seccion)
+
+    return (text, "")
+
+
 def _extract_detected_courses(entries: list[dict[str, Any]]) -> list[str]:
     return sorted(
         {
@@ -60,6 +79,24 @@ def _extract_detected_courses(entries: list[dict[str, Any]]) -> list[str]:
             if str(entry.get("curso", "")).strip()
         }
     )
+
+
+def _extract_grades_and_sections(entries: list[dict[str, Any]]) -> dict[str, list[str]]:
+    grades: set[str] = set()
+    sections: set[str] = set()
+
+    for entry in entries:
+        course_name = str(entry.get("curso", "")).strip()
+        grado, seccion = _split_course_name(course_name)
+        if grado:
+            grades.add(grado)
+        if seccion:
+            sections.add(seccion)
+
+    return {
+        "grades": sorted(grades),
+        "sections": sorted(sections),
+    }
 
 
 def _status_matches_filter(entry_status: str, filter_status: Optional[str]) -> bool:
@@ -168,12 +205,16 @@ def _build_recovery_follow_up(entries: list[dict[str, Any]]) -> list[dict[str, A
 def _apply_operational_filters(
     entries: list[dict[str, Any]],
     course_name: Optional[str] = None,
+    grade_name: Optional[str] = None,
+    section_name: Optional[str] = None,
     period_code: Optional[str] = None,
     subject_code: Optional[str] = None,
 ) -> list[dict[str, Any]]:
     filtered = entries
 
     normalized_course = _normalize_filter_value(course_name)
+    normalized_grade = _normalize_filter_value(grade_name)
+    normalized_section = _normalize_filter_value(section_name)
     normalized_period = _normalize_filter_value(period_code)
     normalized_subject = _normalize_filter_value(subject_code)
 
@@ -182,6 +223,20 @@ def _apply_operational_filters(
             entry
             for entry in filtered
             if str(entry.get("curso", "")).strip() == normalized_course
+        ]
+
+    if normalized_grade:
+        filtered = [
+            entry
+            for entry in filtered
+            if _split_course_name(str(entry.get("curso", "")).strip())[0] == normalized_grade
+        ]
+
+    if normalized_section:
+        filtered = [
+            entry
+            for entry in filtered
+            if _split_course_name(str(entry.get("curso", "")).strip())[1] == normalized_section
         ]
 
     if normalized_period:
@@ -242,12 +297,9 @@ def _build_operational_rows(
         student_name = str(entry.get("student_name", "")).strip()
         numero = str(entry.get("numero", "")).strip()
 
+        grado, seccion = _split_course_name(course_name)
+
         failed_blocks = entry.get("failed_blocks", [])
-        failed_block_codes = [
-            block.get("block_code", "")
-            for block in failed_blocks
-            if block.get("block_code")
-        ]
 
         if (student_id, subject_code, period_code) in recovery_index:
             derived_status = "no_recuperado"
@@ -288,12 +340,18 @@ def _build_operational_rows(
                 "student_id": student_id or "—",
                 "student_name": student_name or "—",
                 "course_name": course_name or "—",
+                "grade_name": grado or "—",
+                "section_name": seccion or "—",
                 "subject_code": subject_code or "—",
                 "subject_name": str(entry.get("subject_name", "")).strip() or "—",
                 "period_code": period_code or "—",
                 "failed_blocks": failed_blocks,
+                "failed_block_labels": [
+                    str(block.get("block_label", "")).strip()
+                    for block in failed_blocks
+                    if str(block.get("block_label", "")).strip()
+                ],
                 "failed_blocks_count": int(entry.get("failed_blocks_count", 0)),
-                "failed_block_codes": failed_block_codes,
                 "lowest_score": min(score_values) if score_values else None,
                 "status": derived_status,
                 "status_label": derived_status_label,
@@ -319,6 +377,8 @@ def build_tracking_dashboard_data(
     school_year: Optional[str] = None,
     ciclo: Optional[str] = None,
     course_name: Optional[str] = None,
+    grade_name: Optional[str] = None,
+    section_name: Optional[str] = None,
     period_code: Optional[str] = None,
     subject_code: Optional[str] = None,
     student_status: Optional[str] = None,
@@ -333,6 +393,8 @@ def build_tracking_dashboard_data(
     filtered_entries = _apply_operational_filters(
         entries=raw_entries,
         course_name=course_name,
+        grade_name=grade_name,
+        section_name=section_name,
         period_code=period_code,
         subject_code=subject_code,
     )
@@ -347,7 +409,7 @@ def build_tracking_dashboard_data(
     )
 
     detected_subjects = get_detected_academic_subjects(rows)
-    detected_subject_codes = [item["subject_code"] for item in detected_subjects]
+    grade_section_catalog = _extract_grades_and_sections(raw_entries)
 
     students_affected = {
         (str(item.get("student_id", "")).strip(), str(item.get("course_name", "")).strip())
@@ -366,12 +428,23 @@ def build_tracking_dashboard_data(
         if str(item.get("subject_name", "")).strip() and str(item.get("subject_name", "")).strip() != "—"
     }
 
+    has_active_filters = any([
+        _normalize_filter_value(course_name),
+        _normalize_filter_value(grade_name),
+        _normalize_filter_value(section_name),
+        _normalize_filter_value(period_code),
+        _normalize_filter_value(subject_code),
+        _normalize_filter_value(student_status),
+    ])
+
     dashboard_data = {
         "filters": {
             "center_id": center_id,
             "school_year": school_year,
             "ciclo": ciclo,
             "curso": course_name,
+            "grado": grade_name,
+            "seccion": section_name,
             "periodo": period_code,
             "asignatura": subject_code,
             "estado": student_status,
@@ -379,10 +452,12 @@ def build_tracking_dashboard_data(
         },
         "metadata": {
             "courses_detected": _extract_detected_courses(raw_entries),
+            "grades_detected": grade_section_catalog["grades"],
+            "sections_detected": grade_section_catalog["sections"],
             "periods_detected": get_supported_period_codes(),
-            "subjects_detected": detected_subject_codes,
             "subjects_catalog": detected_subjects,
             "entries_total": len(operational_rows),
+            "has_active_filters": has_active_filters,
         },
         "summary": {
             "compact_cards": {
