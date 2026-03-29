@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CLASE EducTech · Panel</title>
     <link rel="icon" type="image/png" href="/assets/interface_logo.png" />
-    <link rel="stylesheet" href="/ui/styles.css?v=20260329-01" />
+    <link rel="stylesheet" href="/ui/styles.css?v=20260329-02" />
 </head>
 <body class="panel-body">
     <div class="wrapper">
         <div class="shell">
-            <div class="panel-topbar">
+            <header class="panel-topbar">
                 <div class="panel-brand">
                     <img
                         src="/assets/interface_logo.png"
@@ -24,30 +24,31 @@
                     </div>
                 </div>
 
-                <div class="panel-userbox">
+                <aside class="panel-userbox" aria-label="Información de sesión">
                     <div class="panel-user-meta">
                         <div class="panel-user-name" id="sessionUserName">-</div>
                         <div class="panel-user-role" id="sessionUserRole">-</div>
                         <div class="panel-user-email" id="sessionUserEmail">-</div>
-                        <div class="panel-user-role" id="sessionInstitutionName">-</div>
+                        <div class="panel-user-email" id="sessionInstitutionName">-</div>
                         <div class="panel-user-email" id="sessionInstitutionMeta">-</div>
                     </div>
-                    <button class="btn-outline btn-logout" onclick="logoutToLogin()">
+
+                    <button type="button" class="btn-outline btn-logout" onclick="logoutToLogin()">
                         Cerrar sesión
                     </button>
-                </div>
-            </div>
+                </aside>
+            </header>
 
-            <div class="hero panel-hero panel-hero-premium">
-                <div class="hero-chip">ENTORNO INSTITUCIONAL</div>
+            <section class="hero panel-hero panel-hero-premium" aria-label="Introducción del panel">
+                <div class="hero-chip">Entorno institucional</div>
                 <h2 class="hero-title">Panel institucional</h2>
                 <p class="hero-subtitle">
                     Accede a los módulos del sistema desde una interfaz sobria, moderna y preparada
                     para el trabajo académico y administrativo.
                 </p>
-            </div>
+            </section>
 
-            <div class="module-grid">
+            <main class="module-grid">
                 <article class="module-card module-card-primary">
                     <div class="module-card-top">
                         <div class="module-kicker">Módulo académico</div>
@@ -58,7 +59,7 @@
                         </p>
                     </div>
 
-                    <div class="module-meta">
+                    <div class="module-meta" aria-label="Capacidades del módulo de boletines">
                         <span class="module-meta-item">Consulta individual</span>
                         <span class="module-meta-item">Generación masiva</span>
                         <span class="module-meta-item">Descarga por tipo</span>
@@ -81,7 +82,7 @@
                         </p>
                     </div>
 
-                    <div class="module-meta">
+                    <div class="module-meta" aria-label="Capacidades del módulo de seguimiento académico">
                         <span class="module-meta-item">Vista operativa</span>
                         <span class="module-meta-item">Reporte colectivo</span>
                         <span class="module-meta-item">Impresión individual</span>
@@ -93,19 +94,21 @@
                         </a>
                     </div>
                 </article>
-            </div>
+            </main>
 
-            <div class="panel-footer-band">
-                <div class="panel-footer-title">Plataforma preparada para roles, trazabilidad y evolución modular.</div>
+            <section class="panel-footer-band" aria-label="Información institucional del panel">
+                <div class="panel-footer-title">
+                    Plataforma preparada para roles, trazabilidad y evolución modular.
+                </div>
                 <div class="panel-footer-copy">
                     Aula Nova y la identidad del centro educativo cumplen funciones distintas:
                     la plataforma representa el sistema, mientras que cada módulo académico conserva
                     el contexto institucional del centro que opera.
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 
-    <script src="/ui/app.js"></script>
+    <script src="/ui/app.js?v=20260329-02"></script>
 </body>
 </html>
