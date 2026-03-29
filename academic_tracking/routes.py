@@ -2,17 +2,6 @@
 routes.py
 
 Rutas del módulo academic_tracking.
-
-Objetivos:
-- Exponer una vista nueva e independiente para coordinadores.
-- No tocar rutas de boletines ni PDF.
-- Permitir filtros por centro, ciclo, curso, período y asignatura.
-- Soportar carga futura desde Google Sheets, BD o servicios propios.
-
-Notas:
-- Este archivo asume integración con FastAPI.
-- La carga real de datos del sheet se deja desacoplada en services.
-- Si luego conectamos con BD o servicios internos, solo cambiamos la fuente.
 """
 
 from __future__ import annotations
@@ -38,16 +27,10 @@ router = APIRouter(
 templates = Jinja2Templates(directory="academic_tracking/templates")
 
 
-# =========================
-# Helpers internos
-# =========================
 def _parse_min_approval_score(
     raw_value: Optional[str],
     default: float = 70.0,
 ) -> float:
-    """
-    Convierte el valor del query param a float de manera segura.
-    """
     if raw_value is None:
         return default
 
@@ -68,11 +51,9 @@ def _build_dashboard_payload(
     course_name: Optional[str] = None,
     period_code: Optional[str] = None,
     subject_code: Optional[str] = None,
+    student_status: Optional[str] = None,
     min_approval_score: float = 70.0,
-) -> dict[str, Any]:
-    """
-    Construye la data unificada del dashboard.
-    """
+):
     rows = load_academic_rows_from_source(
         center_id=center_id,
         school_year=school_year,
@@ -93,28 +74,26 @@ def _build_dashboard_payload(
         course_name=course_name,
         period_code=period_code,
         subject_code=subject_code,
+        student_status=student_status,
         min_score=min_approval_score,
         teacher_assignments=teacher_assignments,
     )
 
     dashboard_data["theme"] = {
-        "primary_color": "#1f6f43",
-        "primary_dark": "#185735",
+        "primary_color": "#1f8f4a",
+        "primary_dark": "#0b3d24",
         "primary_soft": "#eaf5ef",
     }
 
     dashboard_data["institution"] = {
         "name": "Centro Educativo Ejemplo",
         "school_year": school_year or "2025-2026",
-        "ciclo": ciclo or "Todos los ciclos",
+        "ciclo": ciclo or "Vista general",
     }
 
     return dashboard_data
 
 
-# =========================
-# Rutas públicas del módulo
-# =========================
 @router.get("/", response_class=HTMLResponse, name="academic_tracking_dashboard")
 def dashboard(
     request: Request,
@@ -124,15 +103,10 @@ def dashboard(
     curso: Optional[str] = Query(default=None),
     periodo: Optional[str] = Query(default=None),
     asignatura: Optional[str] = Query(default=None),
+    estado: Optional[str] = Query(default=None),
     min_approval_score: Optional[str] = Query(default=None),
 ):
-    """
-    Vista principal HTML del dashboard académico.
-    """
-    min_score = _parse_min_approval_score(
-        min_approval_score,
-        default=70.0,
-    )
+    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
 
     dashboard_payload = _build_dashboard_payload(
         center_id=center_id,
@@ -141,6 +115,7 @@ def dashboard(
         course_name=curso,
         period_code=periodo,
         subject_code=asignatura,
+        student_status=estado,
         min_approval_score=min_score,
     )
 
@@ -149,6 +124,75 @@ def dashboard(
         {
             "request": request,
             "dashboard": dashboard_payload,
+            "view_mode": "general",
+        },
+    )
+
+
+@router.get("/primer-ciclo", response_class=HTMLResponse, name="academic_tracking_primer_ciclo")
+def primer_ciclo_dashboard(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    periodo: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    estado: Optional[str] = Query(default=None),
+    min_approval_score: Optional[str] = Query(default=None),
+):
+    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
+
+    dashboard_payload = _build_dashboard_payload(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo="Primer Ciclo",
+        course_name=curso,
+        period_code=periodo,
+        subject_code=asignatura,
+        student_status=estado,
+        min_approval_score=min_score,
+    )
+
+    return templates.TemplateResponse(
+        "academic_tracking_dashboard.html",
+        {
+            "request": request,
+            "dashboard": dashboard_payload,
+            "view_mode": "primer_ciclo",
+        },
+    )
+
+
+@router.get("/segundo-ciclo", response_class=HTMLResponse, name="academic_tracking_segundo_ciclo")
+def segundo_ciclo_dashboard(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    periodo: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    estado: Optional[str] = Query(default=None),
+    min_approval_score: Optional[str] = Query(default=None),
+):
+    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
+
+    dashboard_payload = _build_dashboard_payload(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo="Segundo Ciclo",
+        course_name=curso,
+        period_code=periodo,
+        subject_code=asignatura,
+        student_status=estado,
+        min_approval_score=min_score,
+    )
+
+    return templates.TemplateResponse(
+        "academic_tracking_dashboard.html",
+        {
+            "request": request,
+            "dashboard": dashboard_payload,
+            "view_mode": "segundo_ciclo",
         },
     )
 
@@ -161,21 +205,10 @@ def dashboard_data(
     curso: Optional[str] = Query(default=None),
     periodo: Optional[str] = Query(default=None),
     asignatura: Optional[str] = Query(default=None),
+    estado: Optional[str] = Query(default=None),
     min_approval_score: Optional[str] = Query(default=None),
 ):
-    """
-    Salida JSON del dashboard.
-
-    Útil para:
-    - pruebas
-    - depuración
-    - futura integración AJAX
-    - validación de estructura antes de pulir la interfaz
-    """
-    min_score = _parse_min_approval_score(
-        min_approval_score,
-        default=70.0,
-    )
+    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
 
     dashboard_payload = _build_dashboard_payload(
         center_id=center_id,
@@ -184,6 +217,7 @@ def dashboard_data(
         course_name=curso,
         period_code=periodo,
         subject_code=asignatura,
+        student_status=estado,
         min_approval_score=min_score,
     )
 
@@ -192,9 +226,6 @@ def dashboard_data(
 
 @router.get("/health", name="academic_tracking_health")
 def healthcheck():
-    """
-    Ruta simple para validar que el módulo está vivo.
-    """
     return {
         "module": "academic_tracking",
         "status": "ok",

@@ -8,19 +8,16 @@
 
 <body
     style="
-        --center-primary: {{ dashboard.theme.primary_color if dashboard.theme else '#1f6f43' }};
-        --center-primary-dark: {{ dashboard.theme.primary_dark if dashboard.theme else '#185735' }};
+        --center-primary: {{ dashboard.theme.primary_color if dashboard.theme else '#1f8f4a' }};
+        --center-primary-dark: {{ dashboard.theme.primary_dark if dashboard.theme else '#0b3d24' }};
         --center-primary-soft: {{ dashboard.theme.primary_soft if dashboard.theme else '#eaf5ef' }};
     "
 >
-
 <div class="page">
 
     <section class="header">
         <h1>Seguimiento Académico</h1>
-        <p>
-            Análisis por asignatura, período y bloques de competencia.
-        </p>
+        <p>Estudiantes con incidencias académicas por período, asignatura y bloque de competencia.</p>
     </section>
 
     <section class="card">
@@ -43,8 +40,14 @@
         <form method="GET">
             <div class="filters-grid">
                 <input name="curso" placeholder="Curso" value="{{ dashboard.filters.curso or '' }}">
-                <input name="periodo" placeholder="Periodo (P1-P4)" value="{{ dashboard.filters.periodo or '' }}">
+                <input name="periodo" placeholder="Período (P1-P4)" value="{{ dashboard.filters.periodo or '' }}">
                 <input name="asignatura" placeholder="Asignatura" value="{{ dashboard.filters.asignatura or '' }}">
+                <select name="estado">
+                    <option value="">Estado</option>
+                    <option value="en_riesgo" {% if dashboard.filters.estado == "en_riesgo" %}selected{% endif %}>En riesgo</option>
+                    <option value="no_recuperado" {% if dashboard.filters.estado == "no_recuperado" %}selected{% endif %}>No recuperó</option>
+                    <option value="pendiente" {% if dashboard.filters.estado == "pendiente" %}selected{% endif %}>Pendiente</option>
+                </select>
                 <button class="btn btn-primary">Filtrar</button>
                 <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
             </div>
@@ -52,129 +55,89 @@
     </section>
 
     <section class="card">
-        <h2>Resumen por asignatura y bloque</h2>
-
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Curso</th>
-                        <th>Período</th>
-                        <th>Asignatura</th>
-                        <th>C1 Afect.</th>
-                        <th>C2 Afect.</th>
-                        <th>C3 Afect.</th>
-                        <th>C4 Afect.</th>
-                        <th>Est. afectados</th>
-                        <th>Est. superaron</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for row in dashboard.subject_block_summary %}
-                        <tr>
-                            <td>{{ row.course_name }}</td>
-                            <td>{{ row.period_code }}</td>
-                            <td><strong>{{ row.subject_name }}</strong></td>
-                            <td>{{ row.blocks.C1.affected_students_count }}</td>
-                            <td>{{ row.blocks.C2.affected_students_count }}</td>
-                            <td>{{ row.blocks.C3.affected_students_count }}</td>
-                            <td>{{ row.blocks.C4.affected_students_count }}</td>
-                            <td><strong>{{ row.students_affected_count }}</strong></td>
-                            <td>{{ row.students_passed_count }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total incidencias</span>
+                <strong class="stat-value">{{ dashboard.summary.cards.total_cases }}</strong>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Estudiantes afectados</span>
+                <strong class="stat-value">{{ dashboard.summary.cards.students_affected }}</strong>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">No recuperados</span>
+                <strong class="stat-value">{{ dashboard.summary.cards.no_recuperados }}</strong>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Cursos con casos</span>
+                <strong class="stat-value">{{ dashboard.summary.cards.courses_with_cases }}</strong>
+            </div>
         </div>
     </section>
 
     <section class="card">
-        <h2>Detalle por bloque de competencia</h2>
-
-        {% for row in dashboard.subject_block_summary %}
-            <div class="course-block">
-                <div class="course-header">
-                    <h3>{{ row.course_name }} - {{ row.subject_name }} - {{ row.period_code }}</h3>
-                </div>
-
-                {% for block_code, block in row.blocks.items() %}
-                    <div class="period-section">
-                        <h4>
-                            {{ block.block_label }}
-                            <span class="inline-meta">
-                                Afectados: {{ block.affected_students_count }} |
-                                Superaron: {{ block.passed_students_count }}
-                            </span>
-                        </h4>
-
-                        {% if block.affected_students_count > 0 %}
-                            <div class="table-wrap">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>No.</th>
-                                            <th>ID</th>
-                                            <th>Estudiante</th>
-                                            <th>Nota</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for student in block.affected_students %}
-                                            <tr>
-                                                <td>{{ student.numero }}</td>
-                                                <td>{{ student.student_id }}</td>
-                                                <td><strong>{{ student.student_name }}</strong></td>
-                                                <td>{{ student.score }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        {% else %}
-                            <p class="text-muted" style="margin:0;">No hubo estudiantes afectados en este bloque.</p>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+        <div class="section-heading">
+            <div>
+                <h2 style="margin-bottom: 6px;">Listado operativo de incidencias</h2>
+                <p class="text-muted" style="margin: 0;">
+                    Vista priorizada para coordinación, seguimiento y toma de decisiones.
+                </p>
             </div>
-        {% endfor %}
-    </section>
+        </div>
 
-    <section class="card">
-        <h2>Estudiantes con períodos comprometidos</h2>
-
-        {% if dashboard.affected_students %}
+        {% if dashboard.operational_rows %}
             <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
                             <th>No.</th>
                             <th>ID</th>
-                            <th>Nombre</th>
+                            <th>Estudiante</th>
                             <th>Curso</th>
                             <th>Asignatura</th>
                             <th>Período</th>
-                            <th>Bloques afectados</th>
+                            <th>Bloques</th>
+                            <th>Calificación</th>
+                            <th>Estado</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        {% for student in dashboard.affected_students %}
+                        {% for row in dashboard.operational_rows %}
                             <tr>
-                                <td>{{ student.numero }}</td>
-                                <td>{{ student.student_id }}</td>
-                                <td><strong>{{ student.student_name }}</strong></td>
-                                <td>{{ student.course_name }}</td>
-                                <td>{{ student.subject_name }}</td>
-                                <td>{{ student.period_code }}</td>
+                                <td>{{ row.numero }}</td>
+                                <td>{{ row.student_id }}</td>
+                                <td><strong>{{ row.student_name }}</strong></td>
+                                <td>{{ row.course_name }}</td>
+                                <td>{{ row.subject_name }}</td>
+                                <td>{{ row.period_code }}</td>
                                 <td>
-                                    {{ student.affected_blocks_count }}
-                                    {% if student.affected_blocks %}
+                                    {% if row.failed_blocks %}
                                         <div class="sub-detail">
-                                            {% for block in student.affected_blocks %}
-                                                <span class="mini-badge">{{ block.block_code }}</span>
+                                            {% for block in row.failed_blocks %}
+                                                <span class="mini-badge">
+                                                    {{ block.block_code }}
+                                                </span>
                                             {% endfor %}
                                         </div>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if row.lowest_score is not none %}
+                                        {{ row.lowest_score }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if row.status == "no_recuperado" %}
+                                        <span class="badge badge-pendiente">No recuperó</span>
+                                    {% elif row.status == "en_riesgo" %}
+                                        <span class="badge badge-parcial">En riesgo</span>
+                                    {% else %}
+                                        <span class="badge">Pendiente</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -183,12 +146,19 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-muted">No se detectaron períodos comprometidos en los filtros actuales.</p>
+            <p class="text-muted">No se detectaron incidencias en los filtros actuales.</p>
         {% endif %}
     </section>
 
     <section class="card">
-        <h2>Seguimiento de recuperación</h2>
+        <div class="section-heading">
+            <div>
+                <h2 style="margin-bottom: 6px;">Seguimiento de recuperación</h2>
+                <p class="text-muted" style="margin: 0;">
+                    Validación provisional basada en publicación del período siguiente.
+                </p>
+            </div>
+        </div>
 
         {% if dashboard.recovery_follow_up %}
             <div class="table-wrap">
@@ -219,7 +189,7 @@
                                 <td>{{ row.block_label }}</td>
                                 <td>{{ row.original_score }}</td>
                                 <td>
-                                    {% if row.recovery_status == "not_recovered" %}
+                                    {% if row.recovery_status == "no_recuperado" %}
                                         <span class="badge badge-pendiente">No recuperó</span>
                                     {% else %}
                                         <span class="badge badge-parcial">Pendiente</span>
@@ -233,6 +203,12 @@
         {% else %}
             <p class="text-muted">No hay datos de recuperación para mostrar.</p>
         {% endif %}
+    </section>
+
+    <section class="card">
+        <p class="text-muted" style="margin: 0;">
+            {{ dashboard.audit_and_recovery.message }}
+        </p>
     </section>
 
 </div>
