@@ -47,7 +47,6 @@ GRADE_LABELS = {
     6: "Sexto",
 }
 
-# Ajusta estas variables por centro cuando sea necesario.
 DEFAULT_SECTION_DISPLAY_BY_CYCLE = {
     "Primer Ciclo": {
         "A": "A",
@@ -339,6 +338,7 @@ def _apply_operational_filters(
     section_name: Optional[str] = None,
     period_code: Optional[str] = None,
     subject_code: Optional[str] = None,
+    student_id: Optional[str] = None,
 ) -> list[dict[str, Any]]:
     filtered = entries
 
@@ -348,6 +348,7 @@ def _apply_operational_filters(
     normalized_section = _normalize_filter_value(section_name)
     normalized_period = _normalize_filter_value(period_code)
     normalized_subject = _normalize_filter_value(subject_code)
+    normalized_student_id = _normalize_filter_value(student_id)
 
     if normalized_cycle:
         filtered = [
@@ -389,6 +390,13 @@ def _apply_operational_filters(
             entry
             for entry in filtered
             if str(entry.get("subject_code", "")).strip() == normalized_subject
+        ]
+
+    if normalized_student_id:
+        filtered = [
+            entry
+            for entry in filtered
+            if str(entry.get("student_id", "")).strip() == normalized_student_id
         ]
 
     return filtered
@@ -673,6 +681,7 @@ def build_tracking_dashboard_data(
     period_code: Optional[str] = None,
     subject_code: Optional[str] = None,
     student_status: Optional[str] = None,
+    student_id: Optional[str] = None,
     min_score: float = 70.0,
     teacher_assignments: Optional[list[dict[str, Any]]] = None,
 ) -> dict[str, Any]:
@@ -689,6 +698,7 @@ def build_tracking_dashboard_data(
         section_name=section_name,
         period_code=period_code,
         subject_code=subject_code,
+        student_id=student_id,
     )
 
     recovery_follow_up = _build_recovery_follow_up(filtered_entries)
@@ -730,6 +740,7 @@ def build_tracking_dashboard_data(
         _normalize_filter_value(period_code),
         _normalize_filter_value(subject_code),
         _normalize_filter_value(student_status),
+        _normalize_filter_value(student_id),
     ])
 
     dashboard_data = {
@@ -743,6 +754,7 @@ def build_tracking_dashboard_data(
             "periodo": period_code,
             "asignatura": subject_code,
             "estado": student_status,
+            "student_id": student_id,
             "min_score": min_score,
         },
         "metadata": {

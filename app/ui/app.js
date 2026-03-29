@@ -153,9 +153,7 @@ function persistToStorage(key, value) {
 function loadFromStorage(key) {
     try {
         const raw = localStorage.getItem(key);
-        if (!raw) {
-            return null;
-        }
+        if (!raw) return null;
         return JSON.parse(raw);
     } catch (error) {
         console.warn("No se pudo leer desde localStorage:", error);
@@ -222,22 +220,13 @@ async function parseResponseSafely(response) {
 
     if (contentType.includes("application/json")) {
         try {
-            return {
-                data: JSON.parse(text),
-                rawText: text
-            };
-        } catch (error) {
-            return {
-                data: null,
-                rawText: text
-            };
+            return { data: JSON.parse(text), rawText: text };
+        } catch {
+            return { data: null, rawText: text };
         }
     }
 
-    return {
-        data: null,
-        rawText: text
-    };
+    return { data: null, rawText: text };
 }
 
 async function authFetch(url, options = {}) {
@@ -352,11 +341,9 @@ function updatePanelUserUI(user) {
         if (user?.institution_minerd_code) {
             parts.push(`Código MINERD: ${user.institution_minerd_code}`);
         }
-
         if (user?.institution_regional_code) {
             parts.push(`Regional: ${user.institution_regional_code}`);
         }
-
         if (user?.institution_district_code) {
             parts.push(`Distrito: ${user.institution_district_code}`);
         }
@@ -396,7 +383,7 @@ async function requirePanelSession() {
         setAuthUser(me);
         updatePanelUserUI(me);
         return true;
-    } catch (error) {
+    } catch {
         logout(true);
         return false;
     }
@@ -601,7 +588,7 @@ function getFileNameFromDisposition(disposition, fallbackName) {
 }
 
 function getSelectedStudentId() {
-    const value = document.getElementById("studentSelect").value;
+    const value = document.getElementById("studentSelect")?.value;
     if (!value) {
         throw new Error("Debes seleccionar un estudiante.");
     }
@@ -609,19 +596,19 @@ function getSelectedStudentId() {
 }
 
 function getIndividualCycle() {
-    return document.getElementById("studentCycle").value;
+    return document.getElementById("studentCycle")?.value || "";
 }
 
 function getIndividualCourse() {
-    return document.getElementById("studentCourse").value;
+    return document.getElementById("studentCourse")?.value || "";
 }
 
 function getMassiveCycle() {
-    return document.getElementById("massiveCycle").value;
+    return document.getElementById("massiveCycle")?.value || "";
 }
 
 function getMassiveCourse() {
-    return document.getElementById("massiveCourse").value;
+    return document.getElementById("massiveCourse")?.value || "";
 }
 
 function getCycleLabel(cycle) {
@@ -637,12 +624,19 @@ function getSelectedStudentLabel() {
 }
 
 function setIndividualButtonsDisabled(disabled) {
-    document.getElementById("btnBulletinHtml").disabled = disabled;
-    document.getElementById("btnBulletinPdf").disabled = disabled;
-    document.getElementById("btnBlocksHtml").disabled = disabled;
-    document.getElementById("btnBlocksPdf").disabled = disabled;
-    document.getElementById("btnModulesHtml").disabled = disabled;
-    document.getElementById("btnModulesPdf").disabled = disabled;
+    const ids = [
+        "btnBulletinHtml",
+        "btnBulletinPdf",
+        "btnBlocksHtml",
+        "btnBlocksPdf",
+        "btnModulesHtml",
+        "btnModulesPdf"
+    ];
+
+    ids.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = disabled;
+    });
 }
 
 function setMassiveStatus(message, tone = "info") {
@@ -690,20 +684,30 @@ function saveLastQuery(data) {
     lastIndividualQuery = data;
     persistToStorage(STORAGE_KEYS.lastIndividualQuery, data);
 
-    document.getElementById("lastQueryCycle").textContent = getCycleLabel(data.cycle);
-    document.getElementById("lastQueryCourse").textContent = data.course || "-";
-    document.getElementById("lastQueryStudent").textContent = data.studentLabel || data.studentId || "-";
-    document.getElementById("lastQueryBox").style.display = "block";
+    const cycleEl = document.getElementById("lastQueryCycle");
+    const courseEl = document.getElementById("lastQueryCourse");
+    const studentEl = document.getElementById("lastQueryStudent");
+    const boxEl = document.getElementById("lastQueryBox");
+
+    if (cycleEl) cycleEl.textContent = getCycleLabel(data.cycle);
+    if (courseEl) courseEl.textContent = data.course || "-";
+    if (studentEl) studentEl.textContent = data.studentLabel || data.studentId || "-";
+    if (boxEl) boxEl.style.display = "block";
 }
 
 function clearLastQuery() {
     lastIndividualQuery = null;
     removeFromStorage(STORAGE_KEYS.lastIndividualQuery);
 
-    document.getElementById("lastQueryBox").style.display = "none";
-    document.getElementById("lastQueryCycle").textContent = "-";
-    document.getElementById("lastQueryCourse").textContent = "-";
-    document.getElementById("lastQueryStudent").textContent = "-";
+    const box = document.getElementById("lastQueryBox");
+    const cycle = document.getElementById("lastQueryCycle");
+    const course = document.getElementById("lastQueryCourse");
+    const student = document.getElementById("lastQueryStudent");
+
+    if (box) box.style.display = "none";
+    if (cycle) cycle.textContent = "-";
+    if (course) course.textContent = "-";
+    if (student) student.textContent = "-";
 }
 
 function restoreLastQuery() {
@@ -711,10 +715,16 @@ function restoreLastQuery() {
     if (!saved) return;
 
     lastIndividualQuery = saved;
-    document.getElementById("lastQueryCycle").textContent = getCycleLabel(saved.cycle);
-    document.getElementById("lastQueryCourse").textContent = saved.course || "-";
-    document.getElementById("lastQueryStudent").textContent = saved.studentLabel || saved.studentId || "-";
-    document.getElementById("lastQueryBox").style.display = "block";
+
+    const cycleEl = document.getElementById("lastQueryCycle");
+    const courseEl = document.getElementById("lastQueryCourse");
+    const studentEl = document.getElementById("lastQueryStudent");
+    const boxEl = document.getElementById("lastQueryBox");
+
+    if (cycleEl) cycleEl.textContent = getCycleLabel(saved.cycle);
+    if (courseEl) courseEl.textContent = saved.course || "-";
+    if (studentEl) studentEl.textContent = saved.studentLabel || saved.studentId || "-";
+    if (boxEl) boxEl.style.display = "block";
 }
 
 async function repeatLastQuery() {
@@ -731,20 +741,31 @@ function saveLastMassiveQuery(data) {
     lastMassiveQuery = data;
     persistToStorage(STORAGE_KEYS.lastMassiveQuery, data);
 
-    document.getElementById("lastMassiveCycle").textContent = getCycleLabel(data.cycle);
-    document.getElementById("lastMassiveCourse").textContent = data.course || "-";
-    document.getElementById("lastMassiveType").textContent = data.typeLabel || "-";
-    document.getElementById("lastMassiveQueryBox").style.display = "block";
+    const cycleEl = document.getElementById("lastMassiveCycle");
+    const courseEl = document.getElementById("lastMassiveCourse");
+    const typeEl = document.getElementById("lastMassiveType");
+    const boxEl = document.getElementById("lastMassiveQueryBox");
+
+    if (cycleEl) cycleEl.textContent = getCycleLabel(data.cycle);
+    if (courseEl) courseEl.textContent = data.course || "-";
+    if (typeEl) typeEl.textContent = data.typeLabel || "-";
+    if (boxEl) boxEl.style.display = "block";
 }
 
 function clearLastMassiveQuery() {
     lastMassiveQuery = null;
     removeFromStorage(STORAGE_KEYS.lastMassiveQuery);
 
-    document.getElementById("lastMassiveQueryBox").style.display = "none";
-    document.getElementById("lastMassiveCycle").textContent = "-";
-    document.getElementById("lastMassiveCourse").textContent = "-";
-    document.getElementById("lastMassiveType").textContent = "-";
+    const box = document.getElementById("lastMassiveQueryBox");
+    const cycle = document.getElementById("lastMassiveCycle");
+    const course = document.getElementById("lastMassiveCourse");
+    const type = document.getElementById("lastMassiveType");
+
+    if (box) box.style.display = "none";
+    if (cycle) cycle.textContent = "-";
+    if (course) course.textContent = "-";
+    if (type) type.textContent = "-";
+
     updateMassiveButtons();
 }
 
@@ -753,10 +774,16 @@ function restoreLastMassiveQuery() {
     if (!saved) return;
 
     lastMassiveQuery = saved;
-    document.getElementById("lastMassiveCycle").textContent = getCycleLabel(saved.cycle);
-    document.getElementById("lastMassiveCourse").textContent = saved.course || "-";
-    document.getElementById("lastMassiveType").textContent = saved.typeLabel || "-";
-    document.getElementById("lastMassiveQueryBox").style.display = "block";
+
+    const cycleEl = document.getElementById("lastMassiveCycle");
+    const courseEl = document.getElementById("lastMassiveCourse");
+    const typeEl = document.getElementById("lastMassiveType");
+    const boxEl = document.getElementById("lastMassiveQueryBox");
+
+    if (cycleEl) cycleEl.textContent = getCycleLabel(saved.cycle);
+    if (courseEl) courseEl.textContent = saved.course || "-";
+    if (typeEl) typeEl.textContent = saved.typeLabel || "-";
+    if (boxEl) boxEl.style.display = "block";
 }
 
 async function repeatLastMassiveQuery() {
@@ -787,7 +814,7 @@ async function loadStudentCourses() {
     try {
         const data = await fetchJson(`/students/options/courses?cycle=${encodeURIComponent(cycle)}`);
         setOptions("studentCourse", data.courses || [], "Seleccione un curso");
-    } catch (error) {
+    } catch {
         setOptions("studentCourse", [], "No se pudieron cargar los cursos");
     }
 }
@@ -816,7 +843,7 @@ async function loadStudents() {
         );
         individualStudents = data.students || [];
         setOptions("studentSelect", individualStudents, "Seleccione un estudiante");
-    } catch (error) {
+    } catch {
         individualStudents = [];
         setOptions("studentSelect", [], "No se pudieron cargar los estudiantes");
     }
@@ -824,22 +851,29 @@ async function loadStudents() {
 
 function updateStudentButtons() {
     const cycle = getIndividualCycle();
-    const studentId = document.getElementById("studentSelect").value;
+    const studentId = document.getElementById("studentSelect")?.value || "";
     const role = (getAuthUser()?.role || "").toLowerCase();
     const canGenerate = ["admin", "registro"].includes(role);
     const disabled = !studentId || !canGenerate;
 
-    document.getElementById("btnBulletinHtml").disabled = disabled;
-    document.getElementById("btnBulletinPdf").disabled = disabled;
-    document.getElementById("btnBlocksHtml").disabled = disabled;
-    document.getElementById("btnBlocksPdf").disabled = disabled;
+    const btnBulletinHtml = document.getElementById("btnBulletinHtml");
+    const btnBulletinPdf = document.getElementById("btnBulletinPdf");
+    const btnBlocksHtml = document.getElementById("btnBlocksHtml");
+    const btnBlocksPdf = document.getElementById("btnBlocksPdf");
+    const btnModulesHtml = document.getElementById("btnModulesHtml");
+    const btnModulesPdf = document.getElementById("btnModulesPdf");
+
+    if (btnBulletinHtml) btnBulletinHtml.disabled = disabled;
+    if (btnBulletinPdf) btnBulletinPdf.disabled = disabled;
+    if (btnBlocksHtml) btnBlocksHtml.disabled = disabled;
+    if (btnBlocksPdf) btnBlocksPdf.disabled = disabled;
 
     if (cycle === "Primer_Ciclo" || !cycle) {
-        document.getElementById("btnModulesHtml").disabled = true;
-        document.getElementById("btnModulesPdf").disabled = true;
+        if (btnModulesHtml) btnModulesHtml.disabled = true;
+        if (btnModulesPdf) btnModulesPdf.disabled = true;
     } else {
-        document.getElementById("btnModulesHtml").disabled = disabled;
-        document.getElementById("btnModulesPdf").disabled = disabled;
+        if (btnModulesHtml) btnModulesHtml.disabled = disabled;
+        if (btnModulesPdf) btnModulesPdf.disabled = disabled;
     }
 }
 
@@ -926,7 +960,7 @@ async function openStudentRoute(routeSuffix) {
     try {
         const cycle = getIndividualCycle();
         const course = getIndividualCourse();
-        const studentId = document.getElementById("studentSelect").value;
+        const studentId = document.getElementById("studentSelect")?.value || "";
         const studentLabel = getSelectedStudentLabel();
         const url = buildStudentRoute(routeSuffix);
         const presetKey = getPresetKeyForStudentRoute(routeSuffix);
@@ -977,7 +1011,7 @@ async function loadMassiveCourses() {
     try {
         const data = await fetchJson(`/students/options/courses?cycle=${encodeURIComponent(cycle)}`);
         setOptions("massiveCourse", data.courses || [], "Seleccione un curso");
-    } catch (error) {
+    } catch {
         setOptions("massiveCourse", [], "No se pudieron cargar los cursos");
     }
 
@@ -991,10 +1025,15 @@ function updateMassiveButtons() {
     const canGenerate = ["admin", "registro"].includes(role);
     const hasCourse = !!course && canGenerate;
 
-    document.getElementById("btnZipComplete").disabled = !hasCourse;
-    document.getElementById("btnZipBlocks").disabled = !(hasCourse && cycle === "Primer_Ciclo");
-    document.getElementById("btnZipModules").disabled = !(hasCourse && cycle === "Segundo_Ciclo");
-    document.getElementById("btnZipBlocksModules").disabled = !(hasCourse && cycle === "Segundo_Ciclo");
+    const btnZipComplete = document.getElementById("btnZipComplete");
+    const btnZipBlocks = document.getElementById("btnZipBlocks");
+    const btnZipModules = document.getElementById("btnZipModules");
+    const btnZipBlocksModules = document.getElementById("btnZipBlocksModules");
+
+    if (btnZipComplete) btnZipComplete.disabled = !hasCourse;
+    if (btnZipBlocks) btnZipBlocks.disabled = !(hasCourse && cycle === "Primer_Ciclo");
+    if (btnZipModules) btnZipModules.disabled = !(hasCourse && cycle === "Segundo_Ciclo");
+    if (btnZipBlocksModules) btnZipBlocksModules.disabled = !(hasCourse && cycle === "Segundo_Ciclo");
 
     if (!cycle) {
         setMassiveStatus("Selecciona un ciclo para continuar.");
@@ -1100,7 +1139,7 @@ function initializeLoginPage() {
     }
 }
 
-async function initializePanelPage() {
+async function initializeProtectedUiPage() {
     const ok = await requirePanelSession();
     if (!ok) return;
 
@@ -1115,7 +1154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         initializeLoginPage();
     }
 
-    if (document.getElementById("studentCycle")) {
-        initializePanelPage();
+    if (document.getElementById("sessionUserName")) {
+        initializeProtectedUiPage();
     }
 });

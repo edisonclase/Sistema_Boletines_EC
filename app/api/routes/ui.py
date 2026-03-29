@@ -18,6 +18,11 @@ def panel_page():
     return FileResponse(UI_DIR / "panel.html")
 
 
+@router.get("/boletines", response_class=FileResponse)
+def boletines_page():
+    return FileResponse(UI_DIR / "boletines.html")
+
+
 @router.get("/ui/styles.css", response_class=FileResponse)
 def ui_styles():
     return FileResponse(UI_DIR / "styles.css", media_type="text/css")
