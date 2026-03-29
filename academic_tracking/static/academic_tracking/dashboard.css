@@ -1,6 +1,6 @@
 :root {
     /* =========================
-       Tema base Clase Edutech
+       Tema base CLASE EducTech
        ========================= */
     --system-primary: #1f6f43;
     --system-primary-dark: #185735;
@@ -8,8 +8,6 @@
 
     /* =========================
        Variables sobrescribibles por centro
-       Si luego el body o un contenedor define estas,
-       reemplazan los valores base.
        ========================= */
     --primary: var(--center-primary, var(--system-primary));
     --primary-dark: var(--center-primary-dark, var(--system-primary-dark));
@@ -45,7 +43,6 @@
        ========================= */
     --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
     --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.08);
 
     --radius-sm: 10px;
     --radius-md: 14px;
@@ -98,18 +95,12 @@ body {
     color: var(--text);
 }
 
-/* =========================
-   Elementos base
-   ========================= */
 h1,
 h2,
 h3,
 h4,
 h5,
-h6 {
-    margin-top: 0;
-}
-
+h6,
 p {
     margin-top: 0;
 }
@@ -192,6 +183,31 @@ strong {
     letter-spacing: 0.2px;
 }
 
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+/* =========================
+   Topbar institucional
+   ========================= */
+.dashboard-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.dashboard-topbar-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
 /* =========================
    Formularios y filtros
    ========================= */
@@ -199,6 +215,7 @@ strong {
     display: grid;
     grid-template-columns: repeat(6, minmax(160px, 1fr));
     gap: 14px;
+    align-items: end;
 }
 
 .field {
@@ -271,7 +288,6 @@ strong {
         border-color 0.18s ease,
         color 0.18s ease,
         box-shadow 0.18s ease;
-    box-shadow: none;
 }
 
 .btn:hover {
@@ -304,157 +320,38 @@ strong {
 }
 
 /* =========================
-   Resumen general
+   Resumen compacto
    ========================= */
-.summary-grid {
+.compact-summary-row {
     display: grid;
-    grid-template-columns: repeat(5, minmax(180px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 18px;
+    align-items: stretch;
 }
 
-.summary-box {
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 18px;
+.compact-metric {
     background: var(--white);
-    box-shadow: var(--shadow-sm);
-    min-width: 0;
-}
-
-.summary-box h3 {
-    margin: 0 0 10px;
-    font-size: var(--font-size-md);
-    color: var(--muted);
-    font-weight: 700;
-    letter-spacing: 0.15px;
-}
-
-.summary-box .number {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--primary-dark);
-    line-height: 1.1;
-    word-break: break-word;
-}
-
-/* =========================
-   Resumen por período
-   ========================= */
-.period-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(220px, 1fr));
-    gap: 16px;
-}
-
-.period-card {
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 16px;
-    background: var(--white);
-    box-shadow: var(--shadow-sm);
-}
-
-.period-card h3 {
-    margin: 0 0 12px;
-    color: var(--primary-dark);
-    font-size: var(--font-size-xl);
-}
-
-.period-card ul {
-    margin: 0;
-    padding-left: 18px;
-}
-
-.period-card li {
-    margin-bottom: 8px;
-    font-size: var(--font-size-md);
-    color: var(--text);
-}
-
-.period-card li:last-child {
-    margin-bottom: 0;
-}
-
-/* =========================
-   Bloques por curso
-   ========================= */
-.course-block {
-    margin-bottom: 28px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    background: var(--white);
-    box-shadow: var(--shadow-sm);
-}
-
-.course-block:last-child {
-    margin-bottom: 0;
-}
-
-.course-header {
-    padding: 18px 20px;
-    background: var(--primary-soft);
-    border-bottom: 1px solid var(--border);
-}
-
-.course-header h3 {
-    margin: 0 0 6px;
-    color: var(--primary-dark);
-    font-size: var(--font-size-xl);
-}
-
-.course-header p {
-    margin: 0;
-    color: var(--muted);
-    font-size: var(--font-size-md);
-}
-
-.period-section {
+    border-radius: 16px;
     padding: 20px;
-    border-bottom: 1px solid var(--border-soft);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 96px;
 }
 
-.period-section:last-child {
-    border-bottom: none;
+.compact-label {
+    font-size: 0.92rem;
+    color: #64748b;
+    margin-bottom: 8px;
 }
 
-.period-section h4 {
-    margin: 0 0 14px;
-    font-size: var(--font-size-xl);
-    color: var(--primary-dark);
-    letter-spacing: 0.15px;
-}
-
-.period-meta {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(180px, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.meta-box {
-    border-radius: 12px;
-    padding: 12px;
-    background: #f9fbfa;
-    border: 1px solid var(--border);
-    min-width: 0;
-}
-
-.meta-box span {
-    display: block;
-    font-size: var(--font-size-xs);
-    color: var(--muted);
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.meta-box strong {
-    display: block;
-    font-size: var(--font-size-xl);
-    color: var(--text);
-    line-height: 1.15;
-    word-break: break-word;
+.compact-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--primary);
 }
 
 /* =========================
@@ -465,13 +362,12 @@ strong {
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--white);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 1100px;
+    min-width: 980px;
     background: var(--white);
 }
 
@@ -507,8 +403,16 @@ tbody tr:last-child td {
     border-bottom: none;
 }
 
+.row-danger {
+    background-color: #fff1f2;
+}
+
+.row-warning {
+    background-color: #fff7ed;
+}
+
 /* =========================
-   Badges de estado
+   Badges y microcomponentes
    ========================= */
 .badge {
     display: inline-flex;
@@ -540,41 +444,28 @@ tbody tr:last-child td {
     border-color: rgba(180, 35, 24, 0.14);
 }
 
-/* =========================
-   Lista de estudiantes en riesgo
-   ========================= */
-.students-risk-list {
-    margin-top: 18px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 14px;
-    background: #fcfdfc;
+.sub-detail {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
 }
 
-.students-risk-list h5 {
-    margin: 0 0 12px;
+.mini-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: var(--primary-soft);
     color: var(--primary-dark);
-    font-size: var(--font-size-lg);
-    letter-spacing: 0.15px;
-}
-
-.students-risk-list ul {
-    margin: 0;
-    padding-left: 18px;
-}
-
-.students-risk-list li {
-    margin-bottom: 8px;
-    font-size: var(--font-size-md);
-    color: var(--text);
-}
-
-.students-risk-list li:last-child {
-    margin-bottom: 0;
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    border: 1px solid rgba(31, 111, 67, 0.12);
 }
 
 /* =========================
-   Auditoría
+   Auditoría / nota final
    ========================= */
 .audit-box {
     background: var(--white);
@@ -594,28 +485,14 @@ tbody tr:last-child td {
 }
 
 /* =========================
-   Estado vacío
-   ========================= */
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--muted);
-}
-
-.empty-state p {
-    margin-bottom: 8px;
-    font-size: var(--font-size-lg);
-}
-
-.empty-state p:last-child {
-    margin-bottom: 0;
-}
-
-/* =========================
-   Utilidad para texto tenue
+   Utilidades
    ========================= */
 .text-muted {
     color: var(--muted);
+}
+
+.no-print {
+    display: block;
 }
 
 /* =========================
@@ -643,11 +520,14 @@ tbody tr:last-child td {
    Responsive
    ========================= */
 @media (max-width: 1200px) {
-    .filters-grid,
-    .summary-grid,
-    .period-grid,
-    .period-meta {
-        grid-template-columns: repeat(2, minmax(180px, 1fr));
+    .filters-grid {
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .compact-summary-row {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -672,10 +552,7 @@ tbody tr:last-child td {
         padding: 16px;
     }
 
-    .filters-grid,
-    .summary-grid,
-    .period-grid,
-    .period-meta {
+    .filters-grid {
         grid-template-columns: 1fr;
     }
 
@@ -698,51 +575,44 @@ tbody tr:last-child td {
         font-size: 22px;
     }
 
-    .summary-box .number {
-        font-size: 24px;
-    }
-
-    .card h2,
-    .period-section h4,
-    .course-header h3,
-    .period-card h3 {
+    .card h2 {
         word-break: break-word;
     }
 }
 
-.compact-summary-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
-    gap: 18px;
-    align-items: stretch;
-}
+/* =========================
+   Impresión
+   ========================= */
+@media print {
+    body {
+        background: #ffffff;
+    }
 
-.compact-metric {
-    background: #f7faf8;
-    border: 1px solid #dbe7df;
-    border-radius: 14px;
-    padding: 18px 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 92px;
-}
+    .page {
+        max-width: 100%;
+        padding: 0;
+    }
 
-.compact-label {
-    font-size: 0.95rem;
-    color: #4e6474;
-    margin-bottom: 8px;
-}
+    .header,
+    .card {
+        box-shadow: none;
+    }
 
-.compact-value {
-    font-size: 1.8rem;
-    line-height: 1;
-    color: var(--center-primary-dark);
-    font-weight: 700;
-}
+    .no-print {
+        display: none !important;
+    }
 
-@media (max-width: 900px) {
-    .compact-summary-row {
-        grid-template-columns: 1fr;
+    .table-wrap {
+        overflow: visible;
+        border: 1px solid #d9d9d9;
+    }
+
+    table {
+        min-width: 100%;
+    }
+
+    th,
+    td {
+        font-size: 11px;
     }
 }

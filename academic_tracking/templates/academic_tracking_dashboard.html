@@ -39,17 +39,38 @@
     <section class="card no-print">
         <form method="GET">
             <div class="filters-grid">
-                <input name="curso" placeholder="Curso" value="{{ dashboard.filters.curso or '' }}">
-                <input name="periodo" placeholder="Período (P1-P4)" value="{{ dashboard.filters.periodo or '' }}">
-                <input name="asignatura" placeholder="Asignatura" value="{{ dashboard.filters.asignatura or '' }}">
-                <select name="estado">
-                    <option value="">Estado</option>
-                    <option value="en_riesgo" {% if dashboard.filters.estado == "en_riesgo" %}selected{% endif %}>En riesgo</option>
-                    <option value="no_recuperado" {% if dashboard.filters.estado == "no_recuperado" %}selected{% endif %}>No recuperó</option>
-                    <option value="pendiente" {% if dashboard.filters.estado == "pendiente" %}selected{% endif %}>Pendiente</option>
-                </select>
-                <button class="btn btn-primary">Filtrar</button>
-                <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
+                <div class="field">
+                    <label for="curso">Curso</label>
+                    <input id="curso" name="curso" placeholder="Curso" value="{{ dashboard.filters.curso or '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="periodo">Período</label>
+                    <input id="periodo" name="periodo" placeholder="Período (P1-P4)" value="{{ dashboard.filters.periodo or '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="asignatura">Asignatura</label>
+                    <input id="asignatura" name="asignatura" placeholder="Asignatura" value="{{ dashboard.filters.asignatura or '' }}">
+                </div>
+
+                <div class="field">
+                    <label for="estado">Estado</label>
+                    <select id="estado" name="estado">
+                        <option value="">Todos</option>
+                        <option value="en_riesgo" {% if dashboard.filters.estado == "en_riesgo" %}selected{% endif %}>En riesgo</option>
+                        <option value="no_recuperado" {% if dashboard.filters.estado == "no_recuperado" %}selected{% endif %}>No recuperó</option>
+                        <option value="pendiente" {% if dashboard.filters.estado == "pendiente" %}selected{% endif %}>Pendiente</option>
+                    </select>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-primary" type="submit">Filtrar</button>
+                </div>
+
+                <div class="actions">
+                    <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
+                </div>
             </div>
         </form>
     </section>
@@ -60,10 +81,12 @@
                 <span class="compact-label">Estudiantes afectados</span>
                 <strong class="compact-value">{{ dashboard.summary.compact_cards.students_affected }}</strong>
             </div>
+
             <div class="compact-metric">
                 <span class="compact-label">Cursos con casos</span>
                 <strong class="compact-value">{{ dashboard.summary.compact_cards.courses_with_cases }}</strong>
             </div>
+
             <div class="compact-metric">
                 <span class="compact-label">Asignaturas con casos</span>
                 <strong class="compact-value">{{ dashboard.summary.compact_cards.subjects_with_cases }}</strong>
@@ -99,7 +122,7 @@
 
                     <tbody>
                         {% for row in dashboard.operational_rows %}
-                            <tr>
+                            <tr class="{% if row.status == 'no_recuperado' %}row-danger{% elif row.status == 'en_riesgo' %}row-warning{% endif %}">
                                 <td>{{ row.numero or '—' }}</td>
                                 <td><strong>{{ row.student_name or '—' }}</strong></td>
                                 <td>{{ row.course_name or '—' }}</td>
@@ -109,9 +132,7 @@
                                     {% if row.failed_blocks %}
                                         <div class="sub-detail">
                                             {% for block in row.failed_blocks %}
-                                                <span class="mini-badge">
-                                                    {{ block.block_code }}
-                                                </span>
+                                                <span class="mini-badge">{{ block.block_code }}</span>
                                             {% endfor %}
                                         </div>
                                     {% else %}
@@ -197,7 +218,7 @@
         {% endif %}
     </section>
 
-    <section class="card">
+    <section class="card audit-box">
         <p class="text-muted" style="margin: 0;">
             {{ dashboard.audit_and_recovery.message }}
         </p>
