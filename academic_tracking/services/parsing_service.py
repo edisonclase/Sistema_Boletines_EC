@@ -20,6 +20,7 @@ Importante:
 from __future__ import annotations
 
 import re
+import unicodedata
 from typing import Any, Optional
 
 
@@ -44,7 +45,6 @@ SUBJECT_LABELS = {
     "FOR": "Formación Humana",
 }
 
-# Prefijos no académicos que debemos ignorar en este módulo.
 NON_ACADEMIC_PREFIXES = {
     "MOD1",
     "MOD2",
@@ -59,6 +59,68 @@ ACADEMIC_BLOCK_COLUMN_PATTERN = re.compile(
 
 VALID_PERIOD_CODES = {"P1", "P2", "P3", "P4"}
 VALID_BLOCK_CODES = {"C1", "C2", "C3", "C4"}
+
+IDENTITY_COLUMN_CANDIDATES = {
+    "id_estudiante": [
+        "ID_ESTUDIANTE",
+        "ID ESTUDIANTE",
+        "ID",
+        "MATRICULA",
+        "MATRÍCULA",
+        "CODIGO",
+        "CÓDIGO",
+        "CODIGO_ESTUDIANTE",
+        "CODIGO DEL ESTUDIANTE",
+    ],
+    "nombre_estudiante": [
+        "NOMBRE_ESTUDIANTE",
+        "NOMBRE ESTUDIANTE",
+        "NOMBRE",
+        "ESTUDIANTE",
+        "NOMBRE_COMPLETO",
+        "NOMBRE COMPLETO",
+        "APELLIDOS Y NOMBRES",
+        "NOMBRES Y APELLIDOS",
+    ],
+    "numero": [
+        "NUMERO",
+        "NÚMERO",
+        "NO",
+        "NO.",
+        "N0",
+        "#",
+        "NUM",
+        "NUM.",
+        "NUM_LISTA",
+        "NUMERO_LISTA",
+        "NÚMERO_LISTA",
+        "LISTA",
+        "NO_LISTA",
+    ],
+    "curso": [
+        "CURSO",
+        "GRADO",
+        "SECCION",
+        "SECCIÓN",
+        "CURSO_SECCION",
+        "CURSO_SECCIÓN",
+        "CURSO / SECCION",
+        "CURSO / SECCIÓN",
+        "GRADO_SECCION",
+        "GRADO_SECCIÓN",
+    ],
+    "prof_titular": [
+        "PROF_TITULAR",
+        "PROF TITULAR",
+        "PROFESOR_TITULAR",
+        "PROFESOR TITULAR",
+        "DOCENTE_TITULAR",
+        "DOCENTE TITULAR",
+        "TITULAR",
+        "MAESTRO_TITULAR",
+        "MAESTRO TITULAR",
+    ],
+}
 
 
 def normalize_sheet_identifier(value: Any) -> str:
@@ -103,6 +165,28 @@ def normalize_text(value: Any) -> str:
     return text
 
 
+def normalize_header_key(value: Any) -> str:
+    """
+    Normaliza encabezados para comparación flexible:
+    - quita tildes
+    - pasa a mayúsculas
+    - reemplaza espacios, puntos, guiones y slash por underscore
+    - colapsa underscores repetidos
+    """
+    text = normalize_text(value)
+    if not text:
+        return ""
+
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    text = text.upper().strip()
+
+    text = re.sub(r"[\s\./\\\-]+", "_", text)
+    text = re.sub(r"_+", "_", text).strip("_")
+
+    return text
+
+
 def safe_float(value: Any) -> Optional[float]:
     """
     Convierte un valor a float de forma segura.
@@ -129,7 +213,6 @@ def safe_float(value: Any) -> Optional[float]:
     if not text or text.lower() == "nan":
         return None
 
-    # Soporte básico por si viene coma decimal
     text = text.replace(",", ".")
 
     try:
@@ -139,34 +222,21 @@ def safe_float(value: Any) -> Optional[float]:
 
 
 def get_subject_name(subject_code: str) -> str:
-    """
-    Retorna el nombre legible de la asignatura.
-    """
     subject_code = normalize_text(subject_code).upper()
     return SUBJECT_LABELS.get(subject_code, subject_code)
 
 
 def get_competency_block_label(block_code: str) -> str:
-    """
-    Retorna la etiqueta del bloque de competencia.
-    """
     block_code = normalize_text(block_code).upper()
     return COMPETENCY_BLOCK_LABELS.get(block_code, block_code)
 
 
 def is_non_academic_prefix(subject_code: str) -> bool:
-    """
-    Indica si el prefijo pertenece a módulos formativos u otros campos
-    que no deben procesarse en seguimiento académico.
-    """
     subject_code = normalize_text(subject_code).upper()
     return subject_code in NON_ACADEMIC_PREFIXES
 
 
 def is_supported_academic_subject(subject_code: str) -> bool:
-    """
-    Verifica si el código pertenece a una asignatura académica soportada.
-    """
     subject_code = normalize_text(subject_code).upper()
 
     if not subject_code:
@@ -179,16 +249,12 @@ def is_supported_academic_subject(subject_code: str) -> bool:
 
 
 def is_academic_block_column(column_name: str) -> bool:
-    """
-    Verifica si una columna corresponde a un bloque académico
-    con patrón tipo: LEN_C1_P1
-    """
     if not column_name:
         return False
 
-    column_name = normalize_text(column_name).upper()
+    normalized = normalize_header_key(column_name)
 
-    match = ACADEMIC_BLOCK_COLUMN_PATTERN.match(column_name)
+    match = ACADEMIC_BLOCK_COLUMN_PATTERN.match(normalized)
     if not match:
         return False
 
@@ -214,21 +280,11 @@ def is_academic_block_column(column_name: str) -> bool:
 def parse_academic_block_column(column_name: str) -> Optional[dict[str, str]]:
     """
     Parsea una columna académica válida y devuelve sus partes.
-
-    Ejemplo:
-    LEN_C1_P1 ->
-    {
-        "subject_code": "LEN",
-        "subject_name": "Lengua Española",
-        "block_code": "C1",
-        "block_label": "Competencia Comunicativa",
-        "period_code": "P1",
-    }
     """
     if not column_name:
         return None
 
-    normalized = normalize_text(column_name).upper()
+    normalized = normalize_header_key(column_name)
     match = ACADEMIC_BLOCK_COLUMN_PATTERN.match(normalized)
 
     if not match:
@@ -251,23 +307,69 @@ def parse_academic_block_column(column_name: str) -> Optional[dict[str, str]]:
     }
 
 
+def _build_normalized_row_lookup(row: dict[str, Any]) -> dict[str, Any]:
+    """
+    Crea un índice flexible por encabezado normalizado.
+    """
+    normalized_lookup: dict[str, Any] = {}
+
+    for raw_key, raw_value in row.items():
+        normalized_key = normalize_header_key(raw_key)
+        if normalized_key and normalized_key not in normalized_lookup:
+            normalized_lookup[normalized_key] = raw_value
+
+    return normalized_lookup
+
+
+def _get_first_matching_value(
+    normalized_row: dict[str, Any],
+    candidates: list[str],
+) -> Any:
+    for candidate in candidates:
+        normalized_candidate = normalize_header_key(candidate)
+        if normalized_candidate in normalized_row:
+            return normalized_row[normalized_candidate]
+    return None
+
+
 def build_student_identity(row: dict[str, Any]) -> dict[str, str]:
     """
-    Construye la identidad base del estudiante a partir de la fila cruda.
+    Construye la identidad base del estudiante a partir de la fila cruda,
+    tolerando variantes comunes de encabezados.
     """
+    normalized_row = _build_normalized_row_lookup(row)
+
+    raw_id = _get_first_matching_value(
+        normalized_row,
+        IDENTITY_COLUMN_CANDIDATES["id_estudiante"],
+    )
+    raw_name = _get_first_matching_value(
+        normalized_row,
+        IDENTITY_COLUMN_CANDIDATES["nombre_estudiante"],
+    )
+    raw_numero = _get_first_matching_value(
+        normalized_row,
+        IDENTITY_COLUMN_CANDIDATES["numero"],
+    )
+    raw_curso = _get_first_matching_value(
+        normalized_row,
+        IDENTITY_COLUMN_CANDIDATES["curso"],
+    )
+    raw_prof_titular = _get_first_matching_value(
+        normalized_row,
+        IDENTITY_COLUMN_CANDIDATES["prof_titular"],
+    )
+
     return {
-        "id_estudiante": normalize_sheet_identifier(row.get("ID_ESTUDIANTE")),
-        "nombre_estudiante": normalize_text(row.get("NOMBRE_ESTUDIANTE")),
-        "numero": normalize_sheet_identifier(row.get("NUMERO")),
-        "curso": normalize_text(row.get("CURSO")),
-        "prof_titular": normalize_text(row.get("PROF_TITULAR")),
+        "id_estudiante": normalize_sheet_identifier(raw_id),
+        "nombre_estudiante": normalize_text(raw_name),
+        "numero": normalize_sheet_identifier(raw_numero),
+        "curso": normalize_text(raw_curso),
+        "prof_titular": normalize_text(raw_prof_titular),
     }
 
 
 def initialize_subject_period_structure() -> dict[str, dict[str, Any]]:
-    """
-    Estructura base para períodos P1..P4 de una asignatura.
-    """
     return {
         "P1": {"blocks": {}},
         "P2": {"blocks": {}},
@@ -279,40 +381,17 @@ def initialize_subject_period_structure() -> dict[str, dict[str, Any]]:
 def parse_student_row(row: dict[str, Any]) -> dict[str, Any]:
     """
     Convierte una fila cruda del sheet en una estructura académica utilizable.
-
-    Estructura de salida:
-    {
-        "student": {...},
-        "subjects": {
-            "MAT": {
-                "subject_code": "MAT",
-                "subject_name": "Matemática",
-                "periods": {
-                    "P1": {
-                        "blocks": {
-                            "C1": {
-                                "block_code": "C1",
-                                "block_label": "...",
-                                "score": 85.0,
-                                "column_name": "MAT_C1_P1",
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
     """
     student = build_student_identity(row)
     subjects: dict[str, dict[str, Any]] = {}
 
     for raw_column_name, raw_value in row.items():
-        column_name = normalize_text(raw_column_name).upper()
+        normalized_column_name = normalize_header_key(raw_column_name)
 
-        if not is_academic_block_column(column_name):
+        if not is_academic_block_column(normalized_column_name):
             continue
 
-        parsed_column = parse_academic_block_column(column_name)
+        parsed_column = parse_academic_block_column(normalized_column_name)
         if not parsed_column:
             continue
 
@@ -335,7 +414,7 @@ def parse_student_row(row: dict[str, Any]) -> dict[str, Any]:
             "block_code": block_code,
             "block_label": block_label,
             "score": score,
-            "column_name": column_name,
+            "column_name": normalized_column_name,
         }
 
     return {
@@ -345,9 +424,6 @@ def parse_student_row(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def parse_student_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """
-    Parsea múltiples filas.
-    """
     parsed_rows: list[dict[str, Any]] = []
 
     for row in rows:
@@ -359,9 +435,6 @@ def parse_student_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def get_detected_academic_subject_codes(rows: list[dict[str, Any]]) -> list[str]:
-    """
-    Detecta los códigos de asignaturas académicas presentes en las filas.
-    """
     detected: set[str] = set()
 
     for row in rows:
@@ -377,9 +450,6 @@ def get_detected_academic_subject_codes(rows: list[dict[str, Any]]) -> list[str]
 
 
 def get_detected_academic_subjects(rows: list[dict[str, Any]]) -> list[dict[str, str]]:
-    """
-    Retorna asignaturas detectadas con código y nombre.
-    """
     subject_codes = get_detected_academic_subject_codes(rows)
 
     return [
@@ -392,14 +462,8 @@ def get_detected_academic_subjects(rows: list[dict[str, Any]]) -> list[dict[str,
 
 
 def get_supported_period_codes() -> list[str]:
-    """
-    Retorna la lista ordenada de períodos soportados.
-    """
     return ["P1", "P2", "P3", "P4"]
 
 
 def get_supported_block_codes() -> list[str]:
-    """
-    Retorna la lista ordenada de bloques soportados.
-    """
     return ["C1", "C2", "C3", "C4"]
