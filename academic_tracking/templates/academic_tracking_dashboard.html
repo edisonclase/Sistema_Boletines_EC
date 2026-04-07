@@ -127,7 +127,7 @@
             <div class="filter-actions">
                 <button class="btn btn-primary" type="submit">Filtrar</button>
                 <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
-                <button type="button" class="btn btn-secondary" onclick="window.print()">Imprimir</button>
+                <button type="button" class="btn btn-secondary" id="print-current-view-btn">Imprimir vista</button>
             </div>
         </form>
     </section>
@@ -153,39 +153,80 @@
 
     {% if dashboard.metadata.has_active_filters %}
     <section class="card">
-        <div class="section-heading">
+        <div class="section-heading section-heading-actions">
             <div>
                 <h2 style="margin-bottom: 6px;">Listado operativo de incidencias</h2>
                 <p class="text-muted" style="margin: 0;">
                     Vista agrupada por estudiante para coordinación, seguimiento y atención a familias.
                 </p>
             </div>
+
+            {% if dashboard.grouped_operational_rows %}
+            <div class="listing-actions no-print">
+                <label class="select-all-inline">
+                    <input type="checkbox" id="select-all-students">
+                    <span>Seleccionar todos</span>
+                </label>
+
+                <button type="button" class="btn btn-secondary btn-sm" id="print-selected-btn">
+                    Imprimir seleccionados
+                </button>
+            </div>
+            {% endif %}
         </div>
 
         {% if dashboard.grouped_operational_rows %}
             <div class="table-wrap">
-                <table>
+                <table id="tracking-table">
                     <thead>
                         <tr>
+                            <th class="col-select no-print">Sel.</th>
                             <th>No.</th>
                             <th>Estudiante</th>
                             <th>Curso</th>
                             <th>Período</th>
-                            <th>Asignaturas pendientes y competencias afectadas</th>
+                            <th>Asignaturas pendientes y bloques de competencias</th>
                             <th>Estado general</th>
+                            <th class="col-actions no-print">Acción</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         {% for row in dashboard.grouped_operational_rows %}
-                            <tr class="{% if row.status == 'no_recuperado' %}row-danger{% elif row.status == 'en_riesgo' %}row-warning{% endif %}">
+                            <tr
+                                class="tracking-row {% if row.status == 'no_recuperado' %}row-danger{% elif row.status == 'en_riesgo' %}row-warning{% endif %}"
+                                data-student-id="{{ row.student_id }}"
+                                data-student-name="{{ row.student_name }}"
+                                data-course-name="{{ row.course_name }}"
+                                data-period-code="{{ row.period_code }}"
+                                data-status-label="{{ row.status_label }}"
+                            >
+                                <td class="no-print">
+                                    <label class="row-selector">
+                                        <input
+                                            type="checkbox"
+                                            class="student-row-checkbox"
+                                            value="{{ row.student_id }}::{{ row.course_name }}::{{ row.period_code }}"
+                                        >
+                                    </label>
+                                </td>
+
                                 <td>{{ row.numero or '—' }}</td>
-                                <td><strong>{{ row.student_name or '—' }}</strong></td>
+
+                                <td>
+                                    <div class="student-name-cell">
+                                        <strong>{{ row.student_name or '—' }}</strong>
+                                        <div class="student-id-subline">ID: {{ row.student_id or '—' }}</div>
+                                    </div>
+                                </td>
+
                                 <td>
                                     <strong>{{ row.grade_label or '—' }}</strong>
                                     <div class="course-subline">{{ row.section_label or '—' }}</div>
                                 </td>
+
                                 <td>{{ row.period_code or '—' }}</td>
+
                                 <td>
                                     {% if row.subjects %}
                                         <div class="subject-stack">
@@ -199,8 +240,8 @@
                                                         <div class="block-label-vertical-list">
                                                             {% for block in subject.failed_blocks %}
                                                                 <div class="block-label-line">
+                                                                    <span class="block-bullet">-</span>
                                                                     <span class="block-label-name">{{ block.block_label }}</span>
-                                                                    <span class="block-label-separator">—</span>
                                                                     <span class="block-label-score-text">Calificación del bloque de competencia:</span>
                                                                     <span class="block-label-score-value">{{ block.score if block.score is not none else '—' }}</span>
                                                                 </div>
@@ -210,8 +251,8 @@
                                                         <div class="block-label-vertical-list">
                                                             {% for label in subject.failed_block_labels %}
                                                                 <div class="block-label-line">
+                                                                    <span class="block-bullet">-</span>
                                                                     <span class="block-label-name">{{ label }}</span>
-                                                                    <span class="block-label-separator">—</span>
                                                                     <span class="block-label-score-text">Calificación del bloque de competencia:</span>
                                                                     <span class="block-label-score-value">{{ subject.lowest_score if subject.lowest_score is not none else '—' }}</span>
                                                                 </div>
@@ -227,6 +268,7 @@
                                         —
                                     {% endif %}
                                 </td>
+
                                 <td>
                                     {% if row.status == "no_recuperado" %}
                                         <span class="badge badge-pendiente">No recuperó</span>
@@ -235,6 +277,12 @@
                                     {% else %}
                                         <span class="badge">Pendiente</span>
                                     {% endif %}
+                                </td>
+
+                                <td class="no-print">
+                                    <button type="button" class="btn btn-secondary btn-sm btn-print-one">
+                                        Imprimir
+                                    </button>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -249,110 +297,6 @@
 
 </div>
 
-<script>
-(function () {
-    const cycleSelect = document.getElementById("ciclo");
-    const gradeSelect = document.getElementById("grado");
-    const sectionSelect = document.getElementById("seccion");
-
-    if (!cycleSelect || !gradeSelect || !sectionSelect) {
-        return;
-    }
-
-    const originalGradeOptions = Array.from(gradeSelect.options).map((option) => ({
-        value: option.value,
-        text: option.text,
-        cycle: option.getAttribute("data-cycle") || ""
-    }));
-
-    const originalSectionOptions = Array.from(sectionSelect.options).map((option) => ({
-        value: option.value,
-        text: option.text,
-        cycle: option.getAttribute("data-cycle") || "",
-        gradeList: option.getAttribute("data-grade-list") || ""
-    }));
-
-    function renderGrades() {
-        const selectedCycle = cycleSelect.value || "";
-        const currentGrade = gradeSelect.value || "";
-
-        gradeSelect.innerHTML = "";
-
-        originalGradeOptions.forEach((item) => {
-            if (item.value === "") {
-                const option = document.createElement("option");
-                option.value = "";
-                option.textContent = item.text;
-                gradeSelect.appendChild(option);
-                return;
-            }
-
-            if (!selectedCycle || item.cycle === selectedCycle) {
-                const option = document.createElement("option");
-                option.value = item.value;
-                option.textContent = item.text;
-                if (item.value === currentGrade) {
-                    option.selected = true;
-                }
-                gradeSelect.appendChild(option);
-            }
-        });
-
-        const availableGradeValues = Array.from(gradeSelect.options).map((opt) => opt.value);
-        if (!availableGradeValues.includes(currentGrade)) {
-            gradeSelect.value = "";
-        }
-    }
-
-    function renderSections() {
-        const selectedCycle = cycleSelect.value || "";
-        const selectedGrade = gradeSelect.value || "";
-        const currentSection = sectionSelect.value || "";
-
-        sectionSelect.innerHTML = "";
-
-        originalSectionOptions.forEach((item) => {
-            if (item.value === "") {
-                const option = document.createElement("option");
-                option.value = "";
-                option.textContent = item.text;
-                sectionSelect.appendChild(option);
-                return;
-            }
-
-            const grades = item.gradeList.split("|").filter(Boolean);
-
-            const cycleOk = !selectedCycle || item.cycle === selectedCycle;
-            const gradeOk = !selectedGrade || grades.includes(selectedGrade);
-
-            if (cycleOk && gradeOk) {
-                const option = document.createElement("option");
-                option.value = item.value;
-                option.textContent = item.text;
-                if (item.value === currentSection) {
-                    option.selected = true;
-                }
-                sectionSelect.appendChild(option);
-            }
-        });
-
-        const availableSectionValues = Array.from(sectionSelect.options).map((opt) => opt.value);
-        if (!availableSectionValues.includes(currentSection)) {
-            sectionSelect.value = "";
-        }
-    }
-
-    cycleSelect.addEventListener("change", function () {
-        renderGrades();
-        renderSections();
-    });
-
-    gradeSelect.addEventListener("change", renderSections);
-
-    renderGrades();
-    renderSections();
-})();
-</script>
-
+<script src="{{ url_for('static', path='academic_tracking/dashboard.js') }}"></script>
 </body>
 </html>

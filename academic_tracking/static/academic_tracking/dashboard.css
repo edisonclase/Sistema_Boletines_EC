@@ -661,3 +661,127 @@ tbody tr:last-child td {
         font-size: 11px;
     }
 }
+
+.section-heading-actions {
+    align-items: center;
+}
+
+.listing-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.select-all-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.select-all-inline input,
+.row-selector input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.col-select,
+.col-actions {
+    white-space: nowrap;
+    width: 1%;
+}
+
+.row-selector {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+}
+
+.student-name-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.student-id-subline {
+    font-size: var(--font-size-xs);
+    color: var(--muted);
+}
+
+.btn-sm {
+    min-height: 34px;
+    padding: 8px 12px;
+    font-size: var(--font-size-sm);
+    border-radius: 9px;
+}
+
+.btn-print-one {
+    min-width: 88px;
+}
+
+.block-label-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    font-size: var(--font-size-sm);
+    color: var(--text);
+    line-height: 1.5;
+    padding-left: 2px;
+}
+
+.block-bullet {
+    font-weight: 700;
+    color: var(--primary-dark);
+    min-width: 10px;
+}
+
+.block-label-name {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.block-label-score-text {
+    color: var(--muted);
+}
+
+.block-label-score-value {
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.tracking-row td {
+    background-clip: padding-box;
+}
+
+@media (max-width: 900px) {
+    .section-heading-actions {
+        align-items: flex-start;
+    }
+
+    .listing-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@media print {
+    .col-select,
+    .col-actions,
+    .row-selector,
+    .listing-actions,
+    #print-selected-btn,
+    #print-current-view-btn,
+    .btn-print-one,
+    #select-all-students {
+        display: none !important;
+    }
+}
