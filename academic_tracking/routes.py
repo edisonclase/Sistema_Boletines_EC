@@ -16,7 +16,10 @@ from .services.data_loader_service import (
     load_academic_rows_from_source,
     load_teacher_assignments_from_source,
 )
+
 from .services.tracking_service import build_tracking_dashboard_data
+from .services.final_status_service import build_final_status_report
+
 from app.core.settings import settings
 
 
@@ -36,6 +39,7 @@ def _parse_min_approval_score(
         return default
 
     raw_value = str(raw_value).strip()
+
     if not raw_value:
         return default
 
@@ -46,13 +50,23 @@ def _parse_min_approval_score(
 
 
 def _resolve_institution_name() -> str:
-    return str(getattr(settings, "institution_name", "") or "Centro Educativo Ejemplo").strip()
+    return str(
+        getattr(settings, "institution_name", "")
+        or "Centro Educativo Ejemplo"
+    ).strip()
 
 
-def _resolve_school_year(fallback: Optional[str] = None) -> str:
-    configured = str(getattr(settings, "school_year", "") or "").strip()
+def _resolve_school_year(
+    fallback: Optional[str] = None,
+) -> str:
+    configured = str(
+        getattr(settings, "school_year", "")
+        or ""
+    ).strip()
+
     if configured:
         return configured
+
     return str(fallback or "2025-2026").strip()
 
 
@@ -62,16 +76,19 @@ def _resolve_institution_logos() -> list[dict[str, str]]:
     def to_asset_url(path: str) -> str:
         if not path:
             return ""
+
         filename = path.split("/")[-1]
         return f"/assets/{filename}"
 
     institution_logo = getattr(settings, "institution_logo", "")
 
     if institution_logo:
-        logos.append({
-            "src": to_asset_url(institution_logo),
-            "alt": "Logo del centro educativo",
-        })
+        logos.append(
+            {
+                "src": to_asset_url(institution_logo),
+                "alt": "Logo del centro educativo",
+            }
+        )
 
     return logos
 
@@ -132,7 +149,11 @@ def _build_dashboard_payload(
     return dashboard_data
 
 
-@router.get("/", response_class=HTMLResponse, name="academic_tracking_dashboard")
+@router.get(
+    "/",
+    response_class=HTMLResponse,
+    name="academic_tracking_dashboard",
+)
 def dashboard(
     request: Request,
     center_id: Optional[str] = Query(default=None),
@@ -146,7 +167,10 @@ def dashboard(
     estado: Optional[str] = Query(default=None),
     min_approval_score: Optional[str] = Query(default=None),
 ):
-    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
+    min_score = _parse_min_approval_score(
+        min_approval_score,
+        default=70.0,
+    )
 
     dashboard_payload = _build_dashboard_payload(
         center_id=center_id,
@@ -171,7 +195,11 @@ def dashboard(
     )
 
 
-@router.get("/primer-ciclo", response_class=HTMLResponse, name="academic_tracking_primer_ciclo")
+@router.get(
+    "/primer-ciclo",
+    response_class=HTMLResponse,
+    name="academic_tracking_primer_ciclo",
+)
 def primer_ciclo_dashboard(
     request: Request,
     center_id: Optional[str] = Query(default=None),
@@ -184,7 +212,10 @@ def primer_ciclo_dashboard(
     estado: Optional[str] = Query(default=None),
     min_approval_score: Optional[str] = Query(default=None),
 ):
-    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
+    min_score = _parse_min_approval_score(
+        min_approval_score,
+        default=70.0,
+    )
 
     dashboard_payload = _build_dashboard_payload(
         center_id=center_id,
@@ -209,7 +240,11 @@ def primer_ciclo_dashboard(
     )
 
 
-@router.get("/segundo-ciclo", response_class=HTMLResponse, name="academic_tracking_segundo_ciclo")
+@router.get(
+    "/segundo-ciclo",
+    response_class=HTMLResponse,
+    name="academic_tracking_segundo_ciclo",
+)
 def segundo_ciclo_dashboard(
     request: Request,
     center_id: Optional[str] = Query(default=None),
@@ -222,7 +257,10 @@ def segundo_ciclo_dashboard(
     estado: Optional[str] = Query(default=None),
     min_approval_score: Optional[str] = Query(default=None),
 ):
-    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
+    min_score = _parse_min_approval_score(
+        min_approval_score,
+        default=70.0,
+    )
 
     dashboard_payload = _build_dashboard_payload(
         center_id=center_id,
@@ -247,7 +285,10 @@ def segundo_ciclo_dashboard(
     )
 
 
-@router.get("/data", name="academic_tracking_dashboard_data")
+@router.get(
+    "/data",
+    name="academic_tracking_dashboard_data",
+)
 def dashboard_data(
     center_id: Optional[str] = Query(default=None),
     school_year: Optional[str] = Query(default=None),
@@ -260,7 +301,10 @@ def dashboard_data(
     estado: Optional[str] = Query(default=None),
     min_approval_score: Optional[str] = Query(default=None),
 ):
-    min_score = _parse_min_approval_score(min_approval_score, default=70.0)
+    min_score = _parse_min_approval_score(
+        min_approval_score,
+        default=70.0,
+    )
 
     dashboard_payload = _build_dashboard_payload(
         center_id=center_id,
@@ -278,7 +322,42 @@ def dashboard_data(
     return dashboard_payload
 
 
-@router.get("/health", name="academic_tracking_health")
+@router.get(
+    "/situacion-final/data",
+    name="academic_tracking_final_status_data",
+)
+def final_status_data(
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_final_status_report(rows)
+
+    return {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+        },
+        "report": report,
+    }
+
+
+@router.get(
+    "/health",
+    name="academic_tracking_health",
+)
 def healthcheck():
     return {
         "module": "academic_tracking",
