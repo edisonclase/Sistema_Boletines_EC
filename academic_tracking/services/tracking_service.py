@@ -60,12 +60,38 @@ DEFAULT_SECTION_DISPLAY_BY_CYCLE = {
     },
 }
 
+GRADE_WORD_TO_NUMBER = {
+    "1": 1,
+    "1RO": 1,
+    "1ERO": 1,
+    "PRIMERO": 1,
+    "2": 2,
+    "2DO": 2,
+    "SEGUNDO": 2,
+    "3": 3,
+    "3RO": 3,
+    "TERCERO": 3,
+    "4": 4,
+    "4TO": 4,
+    "CUARTO": 4,
+    "5": 5,
+    "5TO": 5,
+    "QUINTO": 5,
+    "6": 6,
+    "6TO": 6,
+    "SEXTO": 6,
+}
+
 
 def _normalize_filter_value(value: Optional[Any]) -> Optional[str]:
     if value is None:
         return None
     text = str(value).strip()
     return text or None
+
+
+def _normalize_compare_text(value: Any) -> str:
+    return str(value or "").strip().lower()
 
 
 def _safe_int_for_sort(value: Any) -> tuple[int, str]:
@@ -80,24 +106,14 @@ def _safe_int_for_sort(value: Any) -> tuple[int, str]:
         return (999999999, text)
 
 
-def _split_course_name(course_name: str) -> tuple[str, str]:
-    text = str(course_name or "").strip()
-    if not text:
-        return ("", "")
-
-    parts = text.split()
-    if len(parts) >= 2:
-        grado = " ".join(parts[:-1]).strip()
-        seccion = parts[-1].strip()
-        return (grado, seccion)
-
-    return (text, "")
-
-
 def _extract_grade_number(raw_grade: str) -> Optional[int]:
-    text = str(raw_grade or "").strip()
+    text = str(raw_grade or "").strip().upper()
     if not text:
         return None
+
+    cleaned = re.sub(r"[^A-Z0-9ÁÉÍÓÚÑ]", "", text)
+    if cleaned in GRADE_WORD_TO_NUMBER:
+        return GRADE_WORD_TO_NUMBER[cleaned]
 
     match = re.search(r"([1-6])", text)
     if not match:
@@ -107,6 +123,45 @@ def _extract_grade_number(raw_grade: str) -> Optional[int]:
         return int(match.group(1))
     except ValueError:
         return None
+
+
+def _split_course_name(course_name: str) -> tuple[str, str]:
+    """
+    Divide el curso en grado y sección.
+
+    Soporta formatos como:
+    - 2do A
+    - 4to A
+    - 4to Servicios de Alojamiento
+    - Cuarto A
+    - Quinto Logística y Transporte
+
+    Importante:
+    Para Segundo Ciclo no toma solo la última palabra como sección.
+    Toma todo lo que queda después del grado.
+    """
+    text = str(course_name or "").strip()
+    if not text:
+        return ("", "")
+
+    text = re.sub(r"\s+", " ", text)
+
+    pattern = re.compile(
+        r"^(?P<grade>1ro|1ero|primero|2do|segundo|3ro|tercero|4to|cuarto|5to|quinto|6to|sexto|[1-6])\s*(?P<section>.*)$",
+        re.IGNORECASE,
+    )
+
+    match = pattern.match(text)
+    if match:
+        grade = match.group("grade").strip()
+        section = match.group("section").strip()
+        return (grade, section)
+
+    parts = text.split(maxsplit=1)
+    if len(parts) == 2:
+        return (parts[0].strip(), parts[1].strip())
+
+    return (text, "")
 
 
 def _infer_cycle_from_grade(raw_grade: str) -> Optional[str]:
@@ -170,7 +225,8 @@ def _extract_grades_and_sections(
             continue
 
         inferred_cycle = _infer_cycle_from_grade(raw_grade)
-        if normalized_selected_cycle and inferred_cycle and inferred_cycle != normalized_selected_cycle:
+
+        if normalized_selected_cycle and inferred_cycle != normalized_selected_cycle:
             continue
 
         grade_display = _get_grade_display(raw_grade)
@@ -184,8 +240,10 @@ def _extract_grades_and_sections(
             }
 
         if raw_section:
-            if raw_section not in sections_map:
-                sections_map[raw_section] = {
+            section_key = f"{inferred_cycle or ''}|{raw_section}"
+
+            if section_key not in sections_map:
+                sections_map[section_key] = {
                     "value": raw_section,
                     "label": section_display or raw_section,
                     "cycle": inferred_cycle or "",
@@ -193,6 +251,7 @@ def _extract_grades_and_sections(
 
             sections_by_grade.setdefault(raw_grade, [])
             existing_values = {item["value"] for item in sections_by_grade[raw_grade]}
+
             if raw_section not in existing_values:
                 sections_by_grade[raw_grade].append(
                     {
@@ -270,9 +329,7 @@ def _build_recovery_follow_up(entries: list[dict[str, Any]]) -> list[dict[str, A
         )
         period = str(entry.get("period_code", "")).strip()
 
-        if key not in grouped:
-            grouped[key] = {}
-
+        grouped.setdefault(key, {})
         grouped[key][period] = entry
 
     rows: list[dict[str, Any]] = []
@@ -354,49 +411,55 @@ def _apply_operational_filters(
         filtered = [
             entry
             for entry in filtered
-            if _infer_cycle_from_grade(_split_course_name(str(entry.get("curso", "")).strip())[0]) == normalized_cycle
+            if _infer_cycle_from_grade(
+                _split_course_name(str(entry.get("curso", "")).strip())[0]
+            ) == normalized_cycle
         ]
 
     if normalized_course:
         filtered = [
             entry
             for entry in filtered
-            if str(entry.get("curso", "")).strip() == normalized_course
+            if _normalize_compare_text(entry.get("curso")) == _normalize_compare_text(normalized_course)
         ]
 
     if normalized_grade:
         filtered = [
             entry
             for entry in filtered
-            if _split_course_name(str(entry.get("curso", "")).strip())[0] == normalized_grade
+            if _normalize_compare_text(
+                _split_course_name(str(entry.get("curso", "")).strip())[0]
+            ) == _normalize_compare_text(normalized_grade)
         ]
 
     if normalized_section:
         filtered = [
             entry
             for entry in filtered
-            if _split_course_name(str(entry.get("curso", "")).strip())[1] == normalized_section
+            if _normalize_compare_text(
+                _split_course_name(str(entry.get("curso", "")).strip())[1]
+            ) == _normalize_compare_text(normalized_section)
         ]
 
     if normalized_period:
         filtered = [
             entry
             for entry in filtered
-            if str(entry.get("period_code", "")).strip() == normalized_period
+            if _normalize_compare_text(entry.get("period_code")) == _normalize_compare_text(normalized_period)
         ]
 
     if normalized_subject:
         filtered = [
             entry
             for entry in filtered
-            if str(entry.get("subject_code", "")).strip() == normalized_subject
+            if _normalize_compare_text(entry.get("subject_code")) == _normalize_compare_text(normalized_subject)
         ]
 
     if normalized_student_id:
         filtered = [
             entry
             for entry in filtered
-            if str(entry.get("student_id", "")).strip() == normalized_student_id
+            if _normalize_compare_text(entry.get("student_id")) == _normalize_compare_text(normalized_student_id)
         ]
 
     return filtered
@@ -600,7 +663,8 @@ def _build_grouped_operational_rows(
                     existing_labels.add(label)
 
             block_index: dict[str, dict[str, Any]] = {
-                str(item.get("block_code", "")).strip() or str(item.get("block_label", "")).strip(): item
+                str(item.get("block_code", "")).strip()
+                or str(item.get("block_label", "")).strip(): item
                 for item in subject_map[subject_name]["failed_blocks"]
             }
 
@@ -723,13 +787,15 @@ def build_tracking_dashboard_data(
     courses_with_cases = {
         str(item.get("course_name", "")).strip()
         for item in operational_rows
-        if str(item.get("course_name", "")).strip() and str(item.get("course_name", "")).strip() != "—"
+        if str(item.get("course_name", "")).strip()
+        and str(item.get("course_name", "")).strip() != "—"
     }
 
     subjects_with_cases = {
         str(item.get("subject_name", "")).strip()
         for item in operational_rows
-        if str(item.get("subject_name", "")).strip() and str(item.get("subject_name", "")).strip() != "—"
+        if str(item.get("subject_name", "")).strip()
+        and str(item.get("subject_name", "")).strip() != "—"
     }
 
     has_active_filters = any([
@@ -743,7 +809,7 @@ def build_tracking_dashboard_data(
         _normalize_filter_value(student_id),
     ])
 
-    dashboard_data = {
+    return {
         "filters": {
             "center_id": center_id,
             "school_year": school_year,
@@ -788,5 +854,3 @@ def build_tracking_dashboard_data(
             ),
         },
     }
-
-    return dashboard_data
