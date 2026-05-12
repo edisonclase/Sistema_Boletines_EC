@@ -26,6 +26,35 @@ from app.data.fetchers.google_sheets import (
 )
 
 
+def normalize_cycle_key(ciclo: Optional[str] = None) -> Optional[str]:
+    """
+    Normaliza el nombre del ciclo para evitar conflictos entre:
+    - Primer Ciclo
+    - Primer_Ciclo
+    - primer ciclo
+    - primer_ciclo
+
+    Retorna:
+    - "Primer Ciclo"
+    - "Segundo Ciclo"
+    - None
+    """
+    if ciclo is None:
+        return None
+
+    text = str(ciclo).strip().lower()
+    text = text.replace("_", " ")
+    text = " ".join(text.split())
+
+    if text in {"primer ciclo", "primer"}:
+        return "Primer Ciclo"
+
+    if text in {"segundo ciclo", "segundo"}:
+        return "Segundo Ciclo"
+
+    return None
+
+
 def normalize_row_keys(row: Dict[str, Any]) -> Dict[str, Any]:
     """
     Limpia llaves de una fila importada.
@@ -90,6 +119,7 @@ def filter_teacher_assignments(
     Filtra asignaciones de docentes de manera flexible.
     """
     results: List[Dict[str, Any]] = []
+    normalized_cycle = normalize_cycle_key(ciclo)
 
     for row in teacher_rows:
         if center_id not in (None, "", "null"):
@@ -100,8 +130,9 @@ def filter_teacher_assignments(
             if str(row.get("school_year", "")).strip() != str(school_year).strip():
                 continue
 
-        if ciclo:
-            if str(row.get("ciclo", "")).strip() != str(ciclo).strip():
+        if normalized_cycle:
+            row_cycle = normalize_cycle_key(row.get("ciclo"))
+            if row_cycle != normalized_cycle:
                 continue
 
         if curso:
@@ -129,29 +160,30 @@ def load_academic_rows_from_source(
     """
     Punto único de carga de filas académicas.
 
-    IMPORTANTE:
-    Aquí se conecta la fuente actual real del proyecto.
-
     Fuente actual:
     - Primer ciclo: CSV remoto vía settings.url_primer_ciclo
     - Segundo ciclo: CSV remoto vía settings.url_segundo_ciclo
 
     Esta implementación:
     - reutiliza la misma fuente del sistema de boletines
-    - unifica ambos ciclos en una sola lista de filas
-    - queda lista para filtrar por centro cuando exista center_id en los datos
+    - carga correctamente Primer Ciclo o Segundo Ciclo según el filtro recibido
+    - unifica ambos ciclos cuando no se selecciona un ciclo específico
+    - mantiene la exclusión de módulos formativos en parsing_service
     """
     rows: List[Dict[str, Any]] = []
 
     try:
-        df_primer = load_primer_ciclo()
-        df_segundo = load_segundo_ciclo()
+        normalized_cycle = normalize_cycle_key(ciclo)
 
-        if ciclo == "Primer_Ciclo":
-            df = df_primer.copy()
-        elif ciclo == "Segundo_Ciclo":
-            df = df_segundo.copy()
+        if normalized_cycle == "Primer Ciclo":
+            df = load_primer_ciclo().copy()
+
+        elif normalized_cycle == "Segundo Ciclo":
+            df = load_segundo_ciclo().copy()
+
         else:
+            df_primer = load_primer_ciclo()
+            df_segundo = load_segundo_ciclo()
             df = pd.concat([df_primer, df_segundo], ignore_index=True)
 
         rows = df.to_dict(orient="records")
