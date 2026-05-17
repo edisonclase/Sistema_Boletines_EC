@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Situación Final Académica</title>
+
+    <link rel="icon" type="image/png" href="/assets/interface_logo.png">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='academic_tracking/dashboard.css') }}"
+    >
+</head>
+
+<body
+    style="
+        --center-primary: #1f8f4a;
+        --center-primary-dark: #0b3d24;
+        --center-primary-soft: #eaf5ef;
+    "
+>
+
+<div class="page">
+
+    <section class="header">
+
+        <div class="header-brand-row">
+
+            <div class="header-title-block">
+
+                <h1>Situación Final Académica</h1>
+
+                <p>
+                    Reporte institucional de promovidos,
+                    completivo, extraordinario y evaluación especial.
+                </p>
+
+            </div>
+
+            <div class="header-logos header-logos-right">
+
+                {% for logo in dashboard.institution.logos %}
+                    <img src="{{ logo.src }}" alt="{{ logo.alt }}">
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="card">
+
+        <div class="dashboard-topbar">
+
+            <div>
+
+                <h2 style="margin-bottom: 6px;">
+                    {{ dashboard.institution.name }}
+                </h2>
+
+                <p class="text-muted" style="margin: 0;">
+                    Año escolar:
+                    {{ dashboard.institution.school_year }}
+                </p>
+
+            </div>
+
+            <div class="filter-actions" style="margin-top: 0;">
+
+                <a
+                    href="{{ url_for('academic_tracking_dashboard') }}"
+                    class="btn btn-secondary"
+                >
+                    Volver
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="card no-print">
+
+        <form
+            method="GET"
+            action="{{ url_for('academic_tracking_final_status_dashboard') }}"
+        >
+
+            <div
+                class="filters-grid"
+                style="
+                    grid-template-columns:
+                    repeat(5, minmax(180px, 1fr));
+                "
+            >
+
+                <div class="field">
+
+                    <label for="ciclo">Ciclo</label>
+
+                    <select id="ciclo" name="ciclo">
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        <option
+                            value="Primer Ciclo"
+                            {% if dashboard.filters.ciclo == "Primer Ciclo" %}
+                                selected
+                            {% endif %}
+                        >
+                            Primer Ciclo
+                        </option>
+
+                        <option
+                            value="Segundo Ciclo"
+                            {% if dashboard.filters.ciclo == "Segundo Ciclo" %}
+                                selected
+                            {% endif %}
+                        >
+                            Segundo Ciclo
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="field">
+
+                    <label for="situacion">
+                        Situación final
+                    </label>
+
+                    <select
+                        id="situacion"
+                        name="situacion"
+                    >
+
+                        {% for option in dashboard.metadata.situation_options %}
+
+                            <option
+                                value="{{ option.value }}"
+                                {% if dashboard.filters.situacion == option.value %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ option.label }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="field">
+
+                    <label for="grado">Grado</label>
+
+                    <select
+                        id="grado"
+                        name="grado"
+                    >
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        {% for grade in dashboard.metadata.grades_catalog %}
+
+                            <option
+                                value="{{ grade.value }}"
+                                {% if dashboard.filters.grado == grade.value %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ grade.label }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="field">
+
+                    <label for="seccion">
+                        Sección
+                    </label>
+
+                    <select
+                        id="seccion"
+                        name="seccion"
+                    >
+
+                        <option value="">
+                            Todas
+                        </option>
+
+                        {% for section in dashboard.metadata.sections_catalog %}
+
+                            <option
+                                value="{{ section.value }}"
+                                {% if dashboard.filters.seccion == section.value %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ section.label }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="field">
+
+                    <label for="curso">
+                        Curso
+                    </label>
+
+                    <select
+                        id="curso"
+                        name="curso"
+                    >
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        {% for course in dashboard.metadata.courses_catalog %}
+
+                            <option
+                                value="{{ course.value }}"
+                                {% if dashboard.filters.curso == course.value %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ course.label }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div
+                class="filter-actions"
+                style="
+                    margin-top: 18px;
+                    display: flex;
+                    gap: 12px;
+                    flex-wrap: wrap;
+                "
+            >
+
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                >
+                    Ver resultados
+                </button>
+
+                <a
+                    class="btn btn-secondary"
+                    href="{{ url_for('academic_tracking_final_status_dashboard') }}"
+                >
+                    Limpiar
+                </a>
+
+                <a
+                    class="btn btn-secondary"
+                    target="_blank"
+                    href="
+                    {{ url_for('academic_tracking_final_status_pdf') }}
+                    ?ciclo={{ dashboard.filters.ciclo or '' }}
+                    &situacion={{ dashboard.filters.situacion or '' }}
+                    &grado={{ dashboard.filters.grado or '' }}
+                    &seccion={{ dashboard.filters.seccion or '' }}
+                    &curso={{ dashboard.filters.curso or '' }}
+                    "
+                >
+                    Generar reporte PDF
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+    <section class="card">
+
+        <div
+            class="compact-summary-row"
+            style="
+                grid-template-columns:
+                repeat(6, minmax(160px, 1fr));
+            "
+        >
+
+            <div class="compact-metric">
+                <span class="compact-label">
+                    Inscritos
+                </span>
+
+                <strong class="compact-value">
+                    {{ dashboard.report.summary.total_enrolled_students }}
+                </strong>
+            </div>
+
+            <div class="compact-metric">
+                <span class="compact-label">
+                    Activos
+                </span>
+
+                <strong class="compact-value">
+                    {{ dashboard.report.summary.active_students }}
+                </strong>
+            </div>
+
+            <div class="compact-metric">
+                <span class="compact-label">
+                    Promovidos
+                </span>
+
+                <strong class="compact-value">
+                    {{ dashboard.report.summary.promoted }}
+                </strong>
+            </div>
+
+            <div class="compact-metric">
+                <span class="compact-label">
+                    Completivo
+                </span>
+
+                <strong class="compact-value">
+                    {{ dashboard.report.summary.completivo }}
+                </strong>
+            </div>
+
+            <div class="compact-metric">
+                <span class="compact-label">
+                    Extraordinario
+                </span>
+
+                <strong class="compact-value">
+                    {{ dashboard.report.summary.extraordinario }}
+                </strong>
+            </div>
+
+            <div class="compact-metric">
+                <span class="compact-label">
+                    Especial
+                </span>
+
+                <strong class="compact-value">
+                    {{
+                        dashboard.report.summary.especial
+                        +
+                        dashboard.report.summary.modulo_especial
+                    }}
+                </strong>
+            </div>
+
+        </div>
+
+    </section>
+
+    {% if dashboard.show_students %}
+
+        <section class="card">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2 style="margin-bottom: 6px;">
+
+                        {% if dashboard.filters.situacion == "promovido" %}
+                            Estudiantes promovidos
+                        {% elif dashboard.filters.situacion == "completivo" %}
+                            Estudiantes en completivo
+                        {% elif dashboard.filters.situacion == "extraordinario" %}
+                            Estudiantes en extraordinario
+                        {% elif dashboard.filters.situacion == "especial" %}
+                            Estudiantes en evaluación especial
+                        {% elif dashboard.filters.situacion == "modulo_especial" %}
+                            Módulos formativos especiales
+                        {% elif dashboard.filters.situacion == "sin_datos" %}
+                            Estudiantes sin calificaciones finales
+                        {% else %}
+                            Estudiantes encontrados
+                        {% endif %}
+
+                    </h2>
+
+                    <p class="text-muted" style="margin: 0;">
+
+                        Total:
+                        {{ dashboard.report.students|length }}
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            {% if dashboard.report.students %}
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>No.</th>
+                                <th>Estudiante</th>
+                                <th>Curso</th>
+                                <th>Situación</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for student in dashboard.report.students %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ student.numero or "—" }}
+                                    </td>
+
+                                    <td>
+
+                                        <strong>
+                                            {{ student.student_name }}
+                                        </strong>
+
+                                        <br>
+
+                                        <span class="text-muted">
+                                            ID:
+                                            {{ student.student_id }}
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+                                        {{ student.course_name }}
+                                    </td>
+
+                                    <td>
+
+                                        <span class="badge badge-reportado">
+
+                                            {{ student.final_status_label }}
+
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <p class="text-muted">
+                    No se encontraron estudiantes.
+                </p>
+
+            {% endif %}
+
+        </section>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

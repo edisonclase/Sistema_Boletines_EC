@@ -785,3 +785,118 @@ tbody tr:last-child td {
         display: none !important;
     }
 }
+
+.student-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.student-final-card {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.student-final-header {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.student-final-number {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: white;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.student-final-info h3 {
+    margin: 0 0 10px;
+    color: var(--primary-dark);
+    font-size: 22px;
+}
+
+.student-final-meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.student-final-meta span {
+    background: #f4f7f5;
+    border: 1px solid var(--border-soft);
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+}
+
+.student-status-badge {
+    background: #fff4e5 !important;
+    color: #b54708;
+    font-weight: 700;
+}
+
+.pending-subjects-box {
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 18px;
+    background: #fbfcfb;
+}
+
+.pending-title {
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 14px;
+    font-size: 16px;
+}
+
+.pending-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.pending-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    background: white;
+}
+
+.pending-subject-name {
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.pending-subject-score {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+
+    .student-final-header {
+        flex-direction: column;
+    }
+
+    .student-final-meta {
+        flex-direction: column;
+    }
+
+    .pending-grid {
+        grid-template-columns: 1fr;
+    }
+
+}

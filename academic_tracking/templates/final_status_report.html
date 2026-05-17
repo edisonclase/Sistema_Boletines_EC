@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <style>
+        @page {
+            size: Letter landscape;
+            margin: 10mm;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #1e293b;
+            font-size: 11px;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            border-bottom: 2px solid #1f8f4a;
+            padding-bottom: 12px;
+        }
+
+        .report-header-left h1 {
+            margin: 0;
+            color: #0b3d24;
+            font-size: 24px;
+        }
+
+        .report-header-left p {
+            margin: 4px 0;
+            color: #475569;
+        }
+
+        .report-logo img {
+            max-height: 78px;
+            object-fit: contain;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 12px;
+            background: #f8fafc;
+        }
+
+        .summary-card span {
+            display: block;
+            font-size: 10px;
+            color: #64748b;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .summary-card strong {
+            font-size: 22px;
+            color: #0b3d24;
+        }
+
+        .filters-box {
+            border: 1px solid #dbe4ee;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: #f8fafc;
+        }
+
+        .filters-box h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #0b3d24;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .filter-item span {
+            display: block;
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .filter-item strong {
+            font-size: 12px;
+            color: #1e293b;
+        }
+
+        .section-title {
+            margin-top: 18px;
+            margin-bottom: 10px;
+            color: #0b3d24;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1f8f4a;
+            color: white;
+        }
+
+        th {
+            padding: 10px;
+            text-align: left;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 9px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .subject-item {
+            margin-bottom: 6px;
+        }
+
+        .subject-item strong {
+            display: block;
+            color: #0f172a;
+        }
+
+        .subject-item small {
+            color: #64748b;
+        }
+
+        .footer {
+            margin-top: 22px;
+            padding-top: 10px;
+            border-top: 1px solid #dbe4ee;
+            font-size: 10px;
+            color: #64748b;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="report-header">
+
+        <div class="report-header-left">
+            <h1>Reporte de Situación Final</h1>
+
+            <p>
+                {{ dashboard.institution.name }}
+            </p>
+
+            <p>
+                Año escolar: {{ dashboard.institution.school_year }}
+            </p>
+        </div>
+
+        <div class="report-logo">
+            {% if dashboard.institution.logos %}
+                <img src="{{ dashboard.institution.logos[0].src }}">
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+            <span>Activos</span>
+            <strong>{{ dashboard.report.summary.total_students }}</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>Promovidos</span>
+            <strong>{{ dashboard.report.summary.promoted }}</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>Completivo</span>
+            <strong>{{ dashboard.report.summary.completivo }}</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>Extraordinario</span>
+            <strong>{{ dashboard.report.summary.extraordinario }}</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>Especial</span>
+            <strong>
+                {{ dashboard.report.summary.especial + dashboard.report.summary.modulo_especial }}
+            </strong>
+        </div>
+
+    </div>
+
+    <div class="filters-box">
+
+        <h3>Filtros aplicados</h3>
+
+        <div class="filters-grid">
+
+            <div class="filter-item">
+                <span>Ciclo</span>
+                <strong>{{ dashboard.filters.ciclo or "Todos" }}</strong>
+            </div>
+
+            <div class="filter-item">
+                <span>Situación</span>
+                <strong>{{ dashboard.filters.situacion or "Resumen general" }}</strong>
+            </div>
+
+            <div class="filter-item">
+                <span>Curso</span>
+                <strong>{{ dashboard.filters.curso or "Todos" }}</strong>
+            </div>
+
+            <div class="filter-item">
+                <span>Sección</span>
+                <strong>{{ dashboard.filters.seccion or "Todas" }}</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+    {% set students = dashboard.report.students %}
+
+    {% if students %}
+
+        <h2 class="section-title">
+            Estudiantes encontrados: {{ students|length }}
+        </h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th style="width: 60px;">No.</th>
+                    <th>Estudiante</th>
+                    <th style="width: 160px;">Curso</th>
+                    <th style="width: 180px;">Situación</th>
+                    <th>Detalles</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for student in students %}
+
+                    <tr>
+
+                        <td>
+                            {{ student.numero or "—" }}
+                        </td>
+
+                        <td>
+                            <strong>{{ student.student_name }}</strong><br>
+                            <small>ID: {{ student.student_id }}</small>
+                        </td>
+
+                        <td>
+                            {{ student.course_name }}
+                        </td>
+
+                        <td>
+                            {{ student.final_status_label }}
+                        </td>
+
+                        <td>
+
+                            {% if student.subjects_to_completivo %}
+
+                                {% for subject in student.subjects_to_completivo %}
+                                    <div class="subject-item">
+                                        <strong>{{ subject.subject_name }}</strong>
+                                        <small>
+                                            CF Final:
+                                            {{ subject.cf_final }}
+                                        </small>
+                                    </div>
+                                {% endfor %}
+
+                            {% endif %}
+
+                            {% if student.subjects_to_extraordinario %}
+
+                                {% for subject in student.subjects_to_extraordinario %}
+                                    <div class="subject-item">
+                                        <strong>{{ subject.subject_name }}</strong>
+                                        <small>
+                                            CCF:
+                                            {{ subject.ccf }}
+                                        </small>
+                                    </div>
+                                {% endfor %}
+
+                            {% endif %}
+
+                            {% if student.subjects_to_especial %}
+
+                                {% for subject in student.subjects_to_especial %}
+                                    <div class="subject-item">
+                                        <strong>{{ subject.subject_name }}</strong>
+                                        <small>
+                                            CEXF:
+                                            {{ subject.cexf }}
+                                        </small>
+                                    </div>
+                                {% endfor %}
+
+                            {% endif %}
+
+                            {% if student.modules_to_special_evaluation %}
+
+                                {% for module in student.modules_to_special_evaluation %}
+                                    <div class="subject-item">
+                                        <strong>{{ module.module_name }}</strong>
+                                        <small>
+                                            CF módulo:
+                                            {{ module.module_cf }}
+                                        </small>
+                                    </div>
+                                {% endfor %}
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <h3>No se encontraron estudiantes con los filtros seleccionados.</h3>
+
+    {% endif %}
+
+    <div class="footer">
+        Generado por Aula Nova · Seguimiento Académico
+    </div>
+
+</body>
+</html>
