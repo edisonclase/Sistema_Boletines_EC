@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import APIRouter, Query, Request
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 
@@ -20,6 +19,7 @@ from .services.data_loader_service import (
 )
 from .services.tracking_service import build_tracking_dashboard_data
 from .services.final_status_service import build_final_status_report
+from .services.completivo_projection_service import build_completivo_projection_report
 from app.core.settings import settings
 
 
@@ -88,12 +88,6 @@ def _project_root() -> Path:
 
 
 def _render_pdf_bytes_from_html(html: str, base_url: Optional[str] = None) -> bytes:
-    """
-    Genera PDF desde HTML sin depender de app.pdf.services ni app.services.pdf_service.
-
-    Primero intenta wkhtmltopdf/pdfkit.
-    Si falla, intenta WeasyPrint.
-    """
     engine = str(getattr(settings, "pdf_engine", "") or "").strip().lower()
 
     if engine == "weasyprint":
@@ -150,6 +144,22 @@ def _render_pdf_bytes_weasyprint(html: str, base_url: Optional[str] = None) -> b
         string=html,
         base_url=base_url or str(_project_root()),
     ).write_pdf()
+
+
+def _render_template_to_html(
+    template_name: str,
+    request: Request,
+    dashboard_payload: dict[str, Any],
+) -> str:
+    template_response = templates.TemplateResponse(
+        template_name,
+        {
+            "request": request,
+            "dashboard": dashboard_payload,
+        },
+    )
+
+    return template_response.body.decode("utf-8")
 
 
 def _build_dashboard_payload(
@@ -725,11 +735,10 @@ def final_status_pdf(
         "report": report,
     }
 
-    rendered_html = templates.get_template(
-        "final_status_report.html"
-    ).render(
+    rendered_html = _render_template_to_html(
+        "final_status_report.html",
         request=request,
-        dashboard=jsonable_encoder(dashboard_payload),
+        dashboard_payload=dashboard_payload,
     )
 
     pdf_bytes = _render_pdf_bytes_from_html(
@@ -741,6 +750,198 @@ def final_status_pdf(
         "situacion_final",
         ciclo or "general",
         situacion or "resumen",
+    ]
+
+    filename = "_".join(
+        str(part).replace(" ", "_").lower()
+        for part in filename_parts
+        if part
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'inline; filename="{filename}.pdf"'
+        },
+    )
+
+
+@router.get(
+    "/proyeccion-completivo/data",
+    name="academic_tracking_completivo_projection_data",
+)
+def completivo_projection_data(
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    riesgo: Optional[str] = Query(default=None),
+    tendencia: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_completivo_projection_report(
+        rows=rows,
+        curso=curso,
+        asignatura=asignatura,
+        riesgo=riesgo,
+        tendencia=tendencia,
+    )
+
+    return {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "curso": curso,
+            "asignatura": asignatura,
+            "riesgo": riesgo,
+            "tendencia": tendencia,
+        },
+        "report": report,
+    }
+
+
+@router.get(
+    "/proyeccion-completivo",
+    response_class=HTMLResponse,
+    name="academic_tracking_completivo_projection_dashboard",
+)
+def completivo_projection_dashboard(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    riesgo: Optional[str] = Query(default=None),
+    tendencia: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_completivo_projection_report(
+        rows=rows,
+        curso=curso,
+        asignatura=asignatura,
+        riesgo=riesgo,
+        tendencia=tendencia,
+    )
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": _resolve_institution_logos(),
+            "favicon": "/assets/interface_logo.png",
+        },
+        "theme": {
+            "primary_color": "#1f8f4a",
+            "primary_dark": "#0b3d24",
+            "primary_soft": "#eaf5ef",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "curso": curso,
+            "asignatura": asignatura,
+            "riesgo": riesgo,
+            "tendencia": tendencia,
+        },
+        "report": report,
+    }
+
+    return templates.TemplateResponse(
+        "completivo_projection_dashboard.html",
+        {
+            "request": request,
+            "dashboard": dashboard_payload,
+        },
+    )
+
+
+@router.get(
+    "/proyeccion-completivo/reporte.pdf",
+    name="academic_tracking_completivo_projection_pdf",
+)
+def completivo_projection_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    riesgo: Optional[str] = Query(default=None),
+    tendencia: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_completivo_projection_report(
+        rows=rows,
+        curso=curso,
+        asignatura=asignatura,
+        riesgo=riesgo,
+        tendencia=tendencia,
+    )
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": _resolve_institution_logos(),
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "curso": curso,
+            "asignatura": asignatura,
+            "riesgo": riesgo,
+            "tendencia": tendencia,
+        },
+        "report": report,
+    }
+
+    rendered_html = _render_template_to_html(
+        "completivo_projection_report.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    filename_parts = [
+        "proyeccion_completivo",
+        ciclo or "general",
+        curso or "todos",
+        asignatura or "todas",
+        riesgo or "todos_los_riesgos",
+        tendencia or "todas_las_tendencias",
     ]
 
     filename = "_".join(
