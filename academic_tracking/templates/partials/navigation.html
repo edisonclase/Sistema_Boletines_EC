@@ -1,0 +1,70 @@
+<aside class="app-sidebar no-print">
+
+    <div class="app-brand">
+        <div class="app-brand-mark">
+            AN
+        </div>
+
+        <div>
+            <strong>Aula Nova</strong>
+            <span>Gestión educativa</span>
+        </div>
+    </div>
+
+    <nav class="app-nav">
+
+        <div class="app-nav-group-title">
+            Academic Tracking
+        </div>
+
+        <a
+            class="app-nav-link {% if active_page == 'tracking' %}active{% endif %}"
+            href="{{ url_for('academic_tracking_dashboard') }}"
+        >
+            <span>Seguimiento académico</span>
+        </a>
+
+        <a
+            class="app-nav-link {% if active_page == 'final_status' %}active{% endif %}"
+            href="{{ url_for('academic_tracking_final_status_dashboard') }}"
+        >
+            <span>Situación final</span>
+        </a>
+
+        <a
+            class="app-nav-link {% if active_page == 'projection' %}active{% endif %}"
+            href="{{ url_for('academic_tracking_completivo_projection_dashboard') }}"
+        >
+            <span>Proyección a completivo</span>
+        </a>
+
+        <div class="app-nav-group-title">
+            Módulos Aula Nova
+        </div>
+
+        <a class="app-nav-link" href="/boletines">
+            <span>Boletines</span>
+        </a>
+
+        <a class="app-nav-link" href="/nova-id">
+            <span>Nova ID</span>
+        </a>
+
+        <a class="app-nav-link" href="/registro-impresion">
+            <span>Registro e impresión</span>
+        </a>
+
+    </nav>
+
+    <div class="app-sidebar-footer">
+        <strong>
+            {{ dashboard.institution.name if dashboard and dashboard.institution else "Centro educativo" }}
+        </strong>
+
+        <span>
+            Año escolar:
+            {{ dashboard.institution.school_year if dashboard and dashboard.institution else "—" }}
+        </span>
+    </div>
+
+</aside>

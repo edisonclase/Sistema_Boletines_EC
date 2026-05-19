@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <title>
+        {% block title %}
+            {{ page_title or "Aula Nova" }}
+        {% endblock %}
+    </title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ dashboard.institution.favicon if dashboard and dashboard.institution and dashboard.institution.favicon else '/assets/interface_logo.png' }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='academic_tracking/global.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='academic_tracking/dashboard.css') }}"
+    >
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body
+    style="
+        --center-primary: {{ dashboard.theme.primary_color if dashboard and dashboard.theme else '#1f8f4a' }};
+        --center-primary-dark: {{ dashboard.theme.primary_dark if dashboard and dashboard.theme else '#0b3d24' }};
+        --center-primary-soft: {{ dashboard.theme.primary_soft if dashboard and dashboard.theme else '#eaf5ef' }};
+    "
+>
+
+<div class="app-shell">
+
+    {% include "partials/navigation.html" %}
+
+    <main class="app-main">
+
+        <section class="header">
+            <div class="header-brand-row">
+                <div class="header-title-block">
+                    <h1>{{ page_title or "Aula Nova" }}</h1>
+
+                    {% if page_subtitle %}
+                        <p>{{ page_subtitle }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="header-logos header-logos-right">
+                    {% if dashboard and dashboard.institution and dashboard.institution.logos %}
+                        {% for logo in dashboard.institution.logos %}
+                            <img src="{{ logo.src }}" alt="{{ logo.alt }}">
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        {% block content %}{% endblock %}
+
+    </main>
+
+</div>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>
