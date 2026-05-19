@@ -1,302 +1,297 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Seguimiento Académico</title>
-    <link rel="icon" type="image/png" href="{{ dashboard.institution.favicon or '/assets/interface_logo.png' }}">
-    <link rel="stylesheet" href="{{ url_for('static', path='academic_tracking/dashboard.css') }}">
-</head>
+{% extends "base.html" %}
 
-<body
-    style="
-        --center-primary: {{ dashboard.theme.primary_color if dashboard.theme else '#1f8f4a' }};
-        --center-primary-dark: {{ dashboard.theme.primary_dark if dashboard.theme else '#0b3d24' }};
-        --center-primary-soft: {{ dashboard.theme.primary_soft if dashboard.theme else '#eaf5ef' }};
-    "
->
-<div class="page">
+{% set page_title = "Seguimiento Académico" %}
+{% set page_subtitle = "Estudiantes con incidencias académicas por período, asignatura y bloque de competencia." %}
+{% set active_page = "tracking" %}
 
-    <section class="header">
-        <div class="header-brand-row">
-            <div class="header-title-block">
-                <h1>Seguimiento Académico</h1>
-                <p>Estudiantes con incidencias académicas por período, asignatura y bloque de competencia.</p>
+{% block title %}Seguimiento Académico{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <div class="dashboard-topbar">
+        <div>
+            <h2 style="margin-bottom: 6px;">{{ dashboard.institution.name }}</h2>
+            <p class="text-muted" style="margin: 0;">
+                Año escolar: {{ dashboard.institution.school_year }} |
+                Ciclo: {{ dashboard.institution.ciclo }}
+            </p>
+        </div>
+
+        <div class="module-actions module-actions-right no-print">
+            <a href="{{ url_for('academic_tracking_final_status_dashboard') }}" class="btn btn-secondary">
+                Situación final
+            </a>
+
+            <a href="{{ url_for('academic_tracking_completivo_projection_dashboard') }}" class="btn btn-secondary">
+                Proyección a completivo
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="card no-print">
+    <form method="GET" action="{{ url_for('academic_tracking_dashboard') }}">
+        <div class="filters-grid">
+            <div class="field">
+                <label for="ciclo">Ciclo</label>
+                <select id="ciclo" name="ciclo">
+                    <option value="">Todos</option>
+                    {% for cycle in dashboard.metadata.cycle_options %}
+                        <option value="{{ cycle.value }}" {% if dashboard.filters.ciclo == cycle.value %}selected{% endif %}>
+                            {{ cycle.label }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
 
-            <div class="header-logos header-logos-right">
-                {% for logo in dashboard.institution.logos %}
-                    <img src="{{ logo.src }}" alt="{{ logo.alt }}">
-                {% endfor %}
+            <div class="field">
+                <label for="grado">Curso / grado</label>
+                <select id="grado" name="grado">
+                    <option value="">Todos</option>
+                    {% for grade in dashboard.metadata.grades_catalog %}
+                        <option
+                            value="{{ grade.value }}"
+                            data-cycle="{{ grade.cycle }}"
+                            {% if dashboard.filters.grado == grade.value %}selected{% endif %}
+                        >
+                            {{ grade.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="seccion">Sección</label>
+                <select id="seccion" name="seccion">
+                    <option value="">Todas</option>
+                    {% for section in dashboard.metadata.sections_catalog %}
+                        <option
+                            value="{{ section.value }}"
+                            data-cycle="{{ section.cycle }}"
+                            data-grade-list="{% for grade, section_list in dashboard.metadata.sections_by_grade.items() %}{% for section_item in section_list %}{% if section.value == section_item.value %}{{ grade }}|{% endif %}{% endfor %}{% endfor %}"
+                            {% if dashboard.filters.seccion == section.value %}selected{% endif %}
+                        >
+                            {{ section.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="periodo">Período</label>
+                <select id="periodo" name="periodo">
+                    <option value="">Todos</option>
+                    {% for periodo in dashboard.metadata.periods_detected %}
+                        <option value="{{ periodo }}" {% if dashboard.filters.periodo == periodo %}selected{% endif %}>
+                            {{ periodo }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="asignatura">Asignatura</label>
+                <select id="asignatura" name="asignatura">
+                    <option value="">Todas las asignaturas</option>
+                    {% for subject in dashboard.metadata.subjects_catalog %}
+                        <option value="{{ subject.subject_code }}" {% if dashboard.filters.asignatura == subject.subject_code %}selected{% endif %}>
+                            {{ subject.subject_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado">
+                    <option value="">Todos</option>
+                    <option value="en_riesgo" {% if dashboard.filters.estado == "en_riesgo" %}selected{% endif %}>
+                        Recuperación pedagógica
+                    </option>
+                    <option value="no_recuperado" {% if dashboard.filters.estado == "no_recuperado" %}selected{% endif %}>
+                        No recuperó
+                    </option>
+                    <option value="pendiente" {% if dashboard.filters.estado == "pendiente" %}selected{% endif %}>
+                        Pendiente
+                    </option>
+                </select>
             </div>
         </div>
-    </section>
 
-    <section class="card">
-        <div class="dashboard-topbar">
-            <div>
-                <h2 style="margin-bottom: 6px;">{{ dashboard.institution.name }}</h2>
-                <p class="text-muted" style="margin: 0;">
-                    Año escolar: {{ dashboard.institution.school_year }} |
-                    Ciclo: {{ dashboard.institution.ciclo }}
-                </p>
-            </div>
+        <div class="filter-actions">
+            <button class="btn btn-primary" type="submit">Filtrar</button>
+            <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
+            <button type="button" class="btn btn-secondary" id="print-current-view-btn">Imprimir vista</button>
         </div>
-    </section>
+    </form>
+</section>
 
-    <section class="card no-print">
-        <form method="GET" action="{{ url_for('academic_tracking_dashboard') }}">
-            <div class="filters-grid">
-                <div class="field">
-                    <label for="ciclo">Ciclo</label>
-                    <select id="ciclo" name="ciclo">
-                        <option value="">Todos</option>
-                        {% for cycle in dashboard.metadata.cycle_options %}
-                            <option value="{{ cycle.value }}" {% if dashboard.filters.ciclo == cycle.value %}selected{% endif %}>
-                                {{ cycle.label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="grado">Curso / grado</label>
-                    <select id="grado" name="grado">
-                        <option value="">Todos</option>
-                        {% for grade in dashboard.metadata.grades_catalog %}
-                            <option
-                                value="{{ grade.value }}"
-                                data-cycle="{{ grade.cycle }}"
-                                {% if dashboard.filters.grado == grade.value %}selected{% endif %}
-                            >
-                                {{ grade.label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="seccion">Sección</label>
-                    <select id="seccion" name="seccion">
-                        <option value="">Todas</option>
-                        {% for section in dashboard.metadata.sections_catalog %}
-                            <option
-                                value="{{ section.value }}"
-                                data-cycle="{{ section.cycle }}"
-                                data-grade-list="{% for grade, section_list in dashboard.metadata.sections_by_grade.items() %}{% for section_item in section_list %}{% if section.value == section_item.value %}{{ grade }}|{% endif %}{% endfor %}{% endfor %}"
-                                {% if dashboard.filters.seccion == section.value %}selected{% endif %}
-                            >
-                                {{ section.label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="periodo">Período</label>
-                    <select id="periodo" name="periodo">
-                        <option value="">Todos</option>
-                        {% for periodo in dashboard.metadata.periods_detected %}
-                            <option value="{{ periodo }}" {% if dashboard.filters.periodo == periodo %}selected{% endif %}>{{ periodo }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="asignatura">Asignatura</label>
-                    <select id="asignatura" name="asignatura">
-                        <option value="">Todas las asignaturas</option>
-                        {% for subject in dashboard.metadata.subjects_catalog %}
-                            <option value="{{ subject.subject_code }}" {% if dashboard.filters.asignatura == subject.subject_code %}selected{% endif %}>
-                                {{ subject.subject_name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="estado">Estado</label>
-                    <select id="estado" name="estado">
-                        <option value="">Todos</option>
-                        <option value="en_riesgo" {% if dashboard.filters.estado == "en_riesgo" %}selected{% endif %}>Recuperación pedagógica</option>
-                        <option value="no_recuperado" {% if dashboard.filters.estado == "no_recuperado" %}selected{% endif %}>No recuperó</option>
-                        <option value="pendiente" {% if dashboard.filters.estado == "pendiente" %}selected{% endif %}>Pendiente</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="filter-actions">
-                <button class="btn btn-primary" type="submit">Filtrar</button>
-                <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
-                <button type="button" class="btn btn-secondary" id="print-current-view-btn">Imprimir vista</button>
-            </div>
-        </form>
-    </section>
-
-    <section class="card">
-        <div class="compact-summary-row">
-            <div class="compact-metric">
-                <span class="compact-label">Estudiantes afectados</span>
-                <strong class="compact-value">{{ dashboard.summary.compact_cards.students_affected }}</strong>
-            </div>
-
-            <div class="compact-metric">
-                <span class="compact-label">Cursos con casos</span>
-                <strong class="compact-value">{{ dashboard.summary.compact_cards.courses_with_cases }}</strong>
-            </div>
-
-            <div class="compact-metric">
-                <span class="compact-label">Asignaturas con casos</span>
-                <strong class="compact-value">{{ dashboard.summary.compact_cards.subjects_with_cases }}</strong>
-            </div>
+<section class="card">
+    <div class="compact-summary-row">
+        <div class="compact-metric">
+            <span class="compact-label">Estudiantes afectados</span>
+            <strong class="compact-value">{{ dashboard.summary.compact_cards.students_affected }}</strong>
         </div>
-    </section>
 
-    {% if dashboard.metadata.has_active_filters %}
-    <section class="card">
-        <div class="section-heading section-heading-actions">
-            <div>
-                <h2 style="margin-bottom: 6px;">Listado operativo de incidencias</h2>
-                <p class="text-muted" style="margin: 0;">
-                    Vista agrupada por estudiante para coordinación, seguimiento y atención a familias.
-                </p>
-            </div>
+        <div class="compact-metric">
+            <span class="compact-label">Cursos con casos</span>
+            <strong class="compact-value">{{ dashboard.summary.compact_cards.courses_with_cases }}</strong>
+        </div>
 
-            {% if dashboard.grouped_operational_rows %}
-            <div class="listing-actions no-print">
-                <label class="select-all-inline">
-                    <input type="checkbox" id="select-all-students">
-                    <span>Seleccionar todos</span>
-                </label>
+        <div class="compact-metric">
+            <span class="compact-label">Asignaturas con casos</span>
+            <strong class="compact-value">{{ dashboard.summary.compact_cards.subjects_with_cases }}</strong>
+        </div>
+    </div>
+</section>
 
-                <button type="button" class="btn btn-secondary btn-sm" id="print-selected-btn">
-                    Imprimir seleccionados
-                </button>
-            </div>
-            {% endif %}
+{% if dashboard.metadata.has_active_filters %}
+<section class="card">
+    <div class="section-heading section-heading-actions">
+        <div>
+            <h2 style="margin-bottom: 6px;">Listado operativo de incidencias</h2>
+            <p class="text-muted" style="margin: 0;">
+                Vista agrupada por estudiante para coordinación, seguimiento y atención a familias.
+            </p>
         </div>
 
         {% if dashboard.grouped_operational_rows %}
-            <div class="table-wrap">
-                <table id="tracking-table">
-                    <thead>
-                        <tr>
-                            <th class="col-select no-print">Sel.</th>
-                            <th>No.</th>
-                            <th>Estudiante</th>
-                            <th>Curso</th>
-                            <th>Período</th>
-                            <th>Asignaturas pendientes y bloques de competencias</th>
-                            <th>Estado general</th>
-                            <th class="col-actions no-print">Acción</th>
-                        </tr>
-                    </thead>
+        <div class="listing-actions no-print">
+            <label class="select-all-inline">
+                <input type="checkbox" id="select-all-students">
+                <span>Seleccionar todos</span>
+            </label>
 
-                    <tbody>
-                        {% for row in dashboard.grouped_operational_rows %}
-                            <tr
-                                class="tracking-row {% if row.status == 'no_recuperado' %}row-danger{% elif row.status == 'en_riesgo' %}row-warning{% endif %}"
-                                data-student-id="{{ row.student_id }}"
-                                data-student-name="{{ row.student_name }}"
-                                data-course-name="{{ row.course_name }}"
-                                data-period-code="{{ row.period_code }}"
-                                data-status-label="{{ row.status_label }}"
-                            >
-                                <td class="no-print">
-                                    <label class="row-selector">
-                                        <input
-                                            type="checkbox"
-                                            class="student-row-checkbox"
-                                            value="{{ row.student_id }}::{{ row.course_name }}::{{ row.period_code }}"
-                                        >
-                                    </label>
-                                </td>
-
-                                <td>{{ row.numero or '—' }}</td>
-
-                                <td>
-                                    <div class="student-name-cell">
-                                        <strong>{{ row.student_name or '—' }}</strong>
-                                        <div class="student-id-subline">ID: {{ row.student_id or '—' }}</div>
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <strong>{{ row.grade_label or '—' }}</strong>
-                                    <div class="course-subline">{{ row.section_label or '—' }}</div>
-                                </td>
-
-                                <td>{{ row.period_code or '—' }}</td>
-
-                                <td>
-                                    {% if row.subjects %}
-                                        <div class="subject-stack">
-                                            {% for subject in row.subjects %}
-                                                <div class="subject-item">
-                                                    <div class="subject-name-row">
-                                                        <strong class="subject-name">{{ subject.subject_name }}:</strong>
-                                                    </div>
-
-                                                    {% if subject.failed_blocks %}
-                                                        <div class="block-label-vertical-list">
-                                                            {% for block in subject.failed_blocks %}
-                                                                <div class="block-label-line">
-                                                                    <span class="block-bullet">-</span>
-                                                                    <span class="block-label-name">{{ block.block_label }}</span>
-                                                                    <span class="block-label-score-text">Calificación del bloque de competencia:</span>
-                                                                    <span class="block-label-score-value">{{ block.score if block.score is not none else '—' }}</span>
-                                                                </div>
-                                                            {% endfor %}
-                                                        </div>
-                                                    {% elif subject.failed_block_labels %}
-                                                        <div class="block-label-vertical-list">
-                                                            {% for label in subject.failed_block_labels %}
-                                                                <div class="block-label-line">
-                                                                    <span class="block-bullet">-</span>
-                                                                    <span class="block-label-name">{{ label }}</span>
-                                                                    <span class="block-label-score-text">Calificación del bloque de competencia:</span>
-                                                                    <span class="block-label-score-value">{{ subject.lowest_score if subject.lowest_score is not none else '—' }}</span>
-                                                                </div>
-                                                            {% endfor %}
-                                                        </div>
-                                                    {% else %}
-                                                        <span class="text-muted">Sin bloques identificados.</span>
-                                                    {% endif %}
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
-
-                                <td>
-                                    {% if row.status == "no_recuperado" %}
-                                        <span class="badge badge-pendiente">No recuperó</span>
-                                    {% elif row.status == "en_riesgo" %}
-                                        <span class="badge badge-parcial">Recuperación pedagógica</span>
-                                    {% else %}
-                                        <span class="badge">Pendiente</span>
-                                    {% endif %}
-                                </td>
-
-                                <td class="no-print">
-                                    <button type="button" class="btn btn-secondary btn-sm btn-print-one">
-                                        Imprimir
-                                    </button>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p class="text-muted">No se detectaron incidencias para la combinación de filtros seleccionada.</p>
+            <button type="button" class="btn btn-secondary btn-sm" id="print-selected-btn">
+                Imprimir seleccionados
+            </button>
+        </div>
         {% endif %}
-    </section>
+    </div>
+
+    {% if dashboard.grouped_operational_rows %}
+        <div class="table-wrap">
+            <table id="tracking-table">
+                <thead>
+                    <tr>
+                        <th class="col-select no-print">Sel.</th>
+                        <th>No.</th>
+                        <th>Estudiante</th>
+                        <th>Curso</th>
+                        <th>Período</th>
+                        <th>Asignaturas pendientes y bloques de competencias</th>
+                        <th>Estado general</th>
+                        <th class="col-actions no-print">Acción</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in dashboard.grouped_operational_rows %}
+                        <tr
+                            class="tracking-row {% if row.status == 'no_recuperado' %}row-danger{% elif row.status == 'en_riesgo' %}row-warning{% endif %}"
+                            data-student-id="{{ row.student_id }}"
+                            data-student-name="{{ row.student_name }}"
+                            data-course-name="{{ row.course_name }}"
+                            data-period-code="{{ row.period_code }}"
+                            data-status-label="{{ row.status_label }}"
+                        >
+                            <td class="no-print">
+                                <label class="row-selector">
+                                    <input
+                                        type="checkbox"
+                                        class="student-row-checkbox"
+                                        value="{{ row.student_id }}::{{ row.course_name }}::{{ row.period_code }}"
+                                    >
+                                </label>
+                            </td>
+
+                            <td>{{ row.numero or '—' }}</td>
+
+                            <td>
+                                <div class="student-name-cell">
+                                    <strong>{{ row.student_name or '—' }}</strong>
+                                    <div class="student-id-subline">ID: {{ row.student_id or '—' }}</div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <strong>{{ row.grade_label or '—' }}</strong>
+                                <div class="course-subline">{{ row.section_label or '—' }}</div>
+                            </td>
+
+                            <td>{{ row.period_code or '—' }}</td>
+
+                            <td>
+                                {% if row.subjects %}
+                                    <div class="subject-stack">
+                                        {% for subject in row.subjects %}
+                                            <div class="subject-item">
+                                                <div class="subject-name-row">
+                                                    <strong class="subject-name">{{ subject.subject_name }}:</strong>
+                                                </div>
+
+                                                {% if subject.failed_blocks %}
+                                                    <div class="block-label-vertical-list">
+                                                        {% for block in subject.failed_blocks %}
+                                                            <div class="block-label-line">
+                                                                <span class="block-bullet">-</span>
+                                                                <span class="block-label-name">{{ block.block_label }}</span>
+                                                                <span class="block-label-score-text">Calificación del bloque de competencia:</span>
+                                                                <span class="block-label-score-value">{{ block.score if block.score is not none else '—' }}</span>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% elif subject.failed_block_labels %}
+                                                    <div class="block-label-vertical-list">
+                                                        {% for label in subject.failed_block_labels %}
+                                                            <div class="block-label-line">
+                                                                <span class="block-bullet">-</span>
+                                                                <span class="block-label-name">{{ label }}</span>
+                                                                <span class="block-label-score-text">Calificación del bloque de competencia:</span>
+                                                                <span class="block-label-score-value">{{ subject.lowest_score if subject.lowest_score is not none else '—' }}</span>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    <span class="text-muted">Sin bloques identificados.</span>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if row.status == "no_recuperado" %}
+                                    <span class="badge badge-pendiente">No recuperó</span>
+                                {% elif row.status == "en_riesgo" %}
+                                    <span class="badge badge-parcial">Recuperación pedagógica</span>
+                                {% else %}
+                                    <span class="badge">Pendiente</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="no-print">
+                                <button type="button" class="btn btn-secondary btn-sm btn-print-one">
+                                    Imprimir
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">No se detectaron incidencias para la combinación de filtros seleccionada.</p>
     {% endif %}
+</section>
+{% endif %}
 
-</div>
+{% endblock %}
 
+{% block scripts %}
 <script src="{{ url_for('static', path='academic_tracking/dashboard.js') }}"></script>
-</body>
-</html>
+{% endblock %}
