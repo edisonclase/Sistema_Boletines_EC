@@ -12,6 +12,7 @@
     <div class="dashboard-topbar">
         <div>
             <h2 style="margin-bottom: 6px;">{{ dashboard.institution.name }}</h2>
+
             <p class="text-muted" style="margin: 0;">
                 Año escolar: {{ dashboard.institution.school_year }} |
                 Ciclo: {{ dashboard.filters.ciclo or "Todos" }}
@@ -31,12 +32,14 @@
 </section>
 
 <section class="card no-print">
+
     <form method="GET" action="{{ url_for('academic_tracking_completivo_projection_dashboard') }}">
 
         <div class="filters-grid" style="grid-template-columns: repeat(5, minmax(180px, 1fr));">
 
             <div class="field">
                 <label for="ciclo">Ciclo</label>
+
                 <select id="ciclo" name="ciclo">
                     <option value="">Todos</option>
 
@@ -52,32 +55,93 @@
 
             <div class="field">
                 <label for="curso">Curso</label>
+
                 <select id="curso" name="curso">
                     <option value="">Todos</option>
 
-                    {% for course in dashboard.report.metadata.courses_catalog %}
-                        <option value="{{ course.value }}" {% if dashboard.filters.curso == course.value %}selected{% endif %}>
-                            {{ course.label }}
-                        </option>
+                    {% set course_ns = namespace(seen="|") %}
+
+                    {% for student in dashboard.report.students|sort(attribute="course_name") %}
+                        {% set course_name = student.course_name|string %}
+
+                        {% if course_name and course_name != "None" %}
+                            {% set course_key = "|" ~ course_name ~ "|" %}
+
+                            {% if course_key not in course_ns.seen %}
+                                <option value="{{ course_name }}" {% if dashboard.filters.curso == course_name %}selected{% endif %}>
+                                    {{ course_name }}
+                                </option>
+
+                                {% set course_ns.seen = course_ns.seen ~ course_name ~ "|" %}
+                            {% endif %}
+                        {% endif %}
                     {% endfor %}
+
+                    {% set alojamiento_course = "Sexto Servicios de Alojamiento" %}
+                    {% set alojamiento_key = "|" ~ alojamiento_course ~ "|" %}
+
+                    {% if alojamiento_key not in course_ns.seen %}
+                        <option value="{{ alojamiento_course }}" {% if dashboard.filters.curso == alojamiento_course %}selected{% endif %}>
+                            {{ alojamiento_course }}
+                        </option>
+                    {% endif %}
+
+                    {% if dashboard.filters.curso %}
+                        {% set selected_course_key = "|" ~ dashboard.filters.curso ~ "|" %}
+
+                        {% if selected_course_key not in course_ns.seen and dashboard.filters.curso != alojamiento_course %}
+                            <option value="{{ dashboard.filters.curso }}" selected>
+                                {{ dashboard.filters.curso }}
+                            </option>
+                        {% endif %}
+                    {% endif %}
                 </select>
             </div>
 
             <div class="field">
                 <label for="asignatura">Asignatura</label>
+
                 <select id="asignatura" name="asignatura">
                     <option value="">Todas</option>
 
-                    {% for subject in dashboard.report.metadata.subjects_catalog %}
-                        <option value="{{ subject.value }}" {% if dashboard.filters.asignatura == subject.value %}selected{% endif %}>
-                            {{ subject.label }}
-                        </option>
+                    {% set subject_ns = namespace(seen="|") %}
+
+                    {% for student in dashboard.report.students %}
+                        {% for subject in student.projected_subjects %}
+                            {% set subject_value = subject.subject_code or subject.subject_name %}
+                            {% set subject_label = subject.subject_name %}
+                            {% set subject_key = "|" ~ subject_value ~ "|" %}
+
+                            {% if subject_value and subject_key not in subject_ns.seen %}
+                                <option
+                                    value="{{ subject_value }}"
+                                    {% if dashboard.filters.asignatura == subject.subject_code or dashboard.filters.asignatura == subject.subject_name %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ subject_label }}
+                                </option>
+
+                                {% set subject_ns.seen = subject_ns.seen ~ subject_value ~ "|" %}
+                            {% endif %}
+                        {% endfor %}
                     {% endfor %}
+
+                    {% if dashboard.filters.asignatura %}
+                        {% set selected_subject_key = "|" ~ dashboard.filters.asignatura ~ "|" %}
+
+                        {% if selected_subject_key not in subject_ns.seen %}
+                            <option value="{{ dashboard.filters.asignatura }}" selected>
+                                {{ dashboard.filters.asignatura }}
+                            </option>
+                        {% endif %}
+                    {% endif %}
                 </select>
             </div>
 
             <div class="field">
                 <label for="riesgo">Nivel de riesgo</label>
+
                 <select id="riesgo" name="riesgo">
                     <option value="">Todos</option>
 
@@ -97,6 +161,7 @@
 
             <div class="field">
                 <label for="tendencia">Tendencia</label>
+
                 <select id="tendencia" name="tendencia">
                     <option value="">Todas</option>
 
@@ -117,6 +182,7 @@
         </div>
 
         <div class="filter-actions" style="margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap;">
+
             <button class="btn btn-primary" type="submit">
                 Ver resultados
             </button>
@@ -132,9 +198,11 @@
             >
                 Generar reporte PDF
             </a>
+
         </div>
 
     </form>
+
 </section>
 
 <section class="card">
@@ -168,7 +236,11 @@
         <div class="compact-metric">
             <span class="compact-label">Tendencia fuerte/final</span>
             <strong class="compact-value">
-                {{ dashboard.report.summary.strength_counts.fuerte + dashboard.report.summary.strength_counts.final }}
+                {{
+                    dashboard.report.summary.strength_counts.fuerte
+                    +
+                    dashboard.report.summary.strength_counts.final
+                }}
             </strong>
         </div>
 
@@ -178,7 +250,10 @@
 <section class="card">
     <div class="section-heading">
         <div>
-            <h2 style="margin-bottom: 6px;">Listado preventivo de estudiantes</h2>
+            <h2 style="margin-bottom: 6px;">
+                Listado preventivo de estudiantes
+            </h2>
+
             <p class="text-muted" style="margin: 0;">
                 Estudiantes con asignaturas proyectadas por debajo de 70 según calificaciones publicadas.
             </p>
@@ -208,7 +283,9 @@
                             <td>
                                 <strong>{{ student.student_name }}</strong>
                                 <br>
-                                <span class="text-muted">ID: {{ student.student_id }}</span>
+                                <span class="text-muted">
+                                    ID: {{ student.student_id }}
+                                </span>
                             </td>
 
                             <td>{{ student.course_name }}</td>
@@ -237,11 +314,17 @@
                                 {% for subject in student.projected_subjects %}
                                     {% if subject.points_needed == max_points %}
                                         {% if subject.risk_level == "alto" %}
-                                            <span class="risk-chip risk-alto">{{ subject.subject_name }}</span>
+                                            <span class="risk-chip risk-alto">
+                                                {{ subject.subject_name }}
+                                            </span>
                                         {% elif subject.risk_level == "medio" %}
-                                            <span class="risk-chip risk-medio">{{ subject.subject_name }}</span>
+                                            <span class="risk-chip risk-medio">
+                                                {{ subject.subject_name }}
+                                            </span>
                                         {% else %}
-                                            <span class="risk-chip risk-bajo">{{ subject.subject_name }}</span>
+                                            <span class="risk-chip risk-bajo">
+                                                {{ subject.subject_name }}
+                                            </span>
                                         {% endif %}
                                     {% endif %}
                                 {% endfor %}
