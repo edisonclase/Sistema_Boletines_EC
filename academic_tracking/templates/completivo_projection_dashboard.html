@@ -1,376 +1,261 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
+{% extends "base.html" %}
 
-    <title>Proyección a Completivo</title>
+{% set page_title = "Proyección Preventiva a Completivo" %}
+{% set page_subtitle = "Detección temprana de estudiantes con probabilidad de ir a completivo según períodos publicados." %}
+{% set active_page = "projection" %}
 
-    <link rel="icon" type="image/png" href="/assets/interface_logo.png">
+{% block title %}Proyección Preventiva a Completivo{% endblock %}
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', path='academic_tracking/dashboard.css') }}"
-    >
-</head>
+{% block content %}
 
-<body
-    style="
-        --center-primary: #1f8f4a;
-        --center-primary-dark: #0b3d24;
-        --center-primary-soft: #eaf5ef;
-    "
->
-
-<div class="page">
-
-    <section class="header">
-        <div class="header-brand-row">
-            <div class="header-title-block">
-                <h1>Proyección Preventiva a Completivo</h1>
-                <p>
-                    Identificación de estudiantes con tendencia a quedar por debajo de 70 puntos
-                    en la calificación final por asignatura.
-                </p>
-            </div>
-
-            <div class="header-logos header-logos-right">
-                {% for logo in dashboard.institution.logos %}
-                    <img src="{{ logo.src }}" alt="{{ logo.alt }}">
-                {% endfor %}
-            </div>
-        </div>
-    </section>
-
-    <section class="card">
-        <div class="dashboard-topbar">
-            <div>
-                <h2 style="margin-bottom: 6px;">
-                    {{ dashboard.institution.name }}
-                </h2>
-
-                <p class="text-muted" style="margin: 0;">
-                    Año escolar: {{ dashboard.institution.school_year }}
-                </p>
-            </div>
-
-            <div class="filter-actions">
-                <a
-                    href="{{ url_for('academic_tracking_dashboard') }}"
-                    class="btn btn-secondary"
-                >
-                    Volver al seguimiento académico
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <section class="card no-print">
-        <form
-            method="GET"
-            action="{{ url_for('academic_tracking_completivo_projection_dashboard') }}"
-        >
-            <div
-                class="filters-grid"
-                style="grid-template-columns: repeat(5, minmax(180px, 1fr));"
-            >
-
-                <div class="field">
-                    <label for="ciclo">Ciclo</label>
-
-                    <select id="ciclo" name="ciclo">
-                        <option value="">Todos</option>
-
-                        <option
-                            value="Primer Ciclo"
-                            {% if dashboard.filters.ciclo == "Primer Ciclo" %}selected{% endif %}
-                        >
-                            Primer Ciclo
-                        </option>
-
-                        <option
-                            value="Segundo Ciclo"
-                            {% if dashboard.filters.ciclo == "Segundo Ciclo" %}selected{% endif %}
-                        >
-                            Segundo Ciclo
-                        </option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="curso">Curso</label>
-
-                    <select id="curso" name="curso">
-                        <option value="">Todos</option>
-
-                        {% for course in dashboard.report.courses %}
-                            <option
-                                value="{{ course }}"
-                                {% if dashboard.filters.curso == course %}selected{% endif %}
-                            >
-                                {{ course }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="asignatura">Asignatura</label>
-
-                    <select id="asignatura" name="asignatura">
-                        <option value="">Todas</option>
-
-                        {% for subject in dashboard.report.subjects_catalog %}
-                            <option
-                                value="{{ subject.value }}"
-                                {% if dashboard.filters.asignatura == subject.value %}selected{% endif %}
-                            >
-                                {{ subject.label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="riesgo">Nivel de riesgo</label>
-
-                    <select id="riesgo" name="riesgo">
-                        {% for risk in dashboard.report.risk_level_options %}
-                            <option
-                                value="{{ risk.value }}"
-                                {% if dashboard.filters.riesgo == risk.value %}selected{% endif %}
-                            >
-                                {{ risk.label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label for="tendencia">Tendencia</label>
-
-                    <select id="tendencia" name="tendencia">
-                        {% for trend in dashboard.report.projection_strength_options %}
-                            <option
-                                value="{{ trend.value }}"
-                                {% if dashboard.filters.tendencia == trend.value %}selected{% endif %}
-                            >
-                                {{ trend.label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-            </div>
-
-            <div
-                class="filter-actions"
-                style="margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap;"
-            >
-                <button class="btn btn-primary" type="submit">
-                    Ver resultados
-                </button>
-
-                <a
-                    class="btn btn-secondary"
-                    href="{{ url_for('academic_tracking_completivo_projection_dashboard') }}"
-                >
-                    Limpiar
-                </a>
-
-                <a
-                    class="btn btn-secondary"
-                    target="_blank"
-                    href="{{ url_for('academic_tracking_completivo_projection_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&curso={{ dashboard.filters.curso or '' }}&asignatura={{ dashboard.filters.asignatura or '' }}&riesgo={{ dashboard.filters.riesgo or '' }}&tendencia={{ dashboard.filters.tendencia or '' }}"
-                >
-                    Generar reporte PDF
-                </a>
-            </div>
-        </form>
-    </section>
-
-    <section class="card">
-        <div
-            class="compact-summary-row"
-            style="grid-template-columns: repeat(6, minmax(150px, 1fr));"
-        >
-            <div class="compact-metric">
-                <span class="compact-label">Estudiantes proyectados</span>
-                <strong class="compact-value">
-                    {{ dashboard.report.summary.students_projected }}
-                </strong>
-            </div>
-
-            <div class="compact-metric">
-                <span class="compact-label">Casos por asignatura</span>
-                <strong class="compact-value">
-                    {{ dashboard.report.summary.subject_cases }}
-                </strong>
-            </div>
-
-            <div class="compact-metric">
-                <span class="compact-label">Riesgo alto</span>
-                <strong class="compact-value">
-                    {{ dashboard.report.summary.risk_counts.alto }}
-                </strong>
-            </div>
-
-            <div class="compact-metric">
-                <span class="compact-label">Riesgo medio</span>
-                <strong class="compact-value">
-                    {{ dashboard.report.summary.risk_counts.medio }}
-                </strong>
-            </div>
-
-            <div class="compact-metric">
-                <span class="compact-label">Riesgo bajo</span>
-                <strong class="compact-value">
-                    {{ dashboard.report.summary.risk_counts.bajo }}
-                </strong>
-            </div>
-
-            <div class="compact-metric">
-                <span class="compact-label">Tendencia fuerte/final</span>
-                <strong class="compact-value">
-                    {{
-                        dashboard.report.summary.strength_counts.fuerte
-                        +
-                        dashboard.report.summary.strength_counts.final
-                    }}
-                </strong>
-            </div>
-        </div>
-    </section>
-
-    <section class="card">
-        <div class="section-heading">
-            <div>
-                <h2 style="margin-bottom: 6px;">
-                    Estudiantes con tendencia a completivo
-                </h2>
-
-                <p class="text-muted" style="margin: 0;">
-                    Se muestran estudiantes activos cuya proyección actual está por debajo de 70 puntos.
-                </p>
-            </div>
-        </div>
-
-        {% if dashboard.report.students %}
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>Estudiante</th>
-                            <th>Curso</th>
-                            <th>Asignaturas en riesgo</th>
-                            <th>Mayor riesgo</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {% for student in dashboard.report.students %}
-                            <tr>
-                                <td>{{ student.numero or "—" }}</td>
-
-                                <td>
-                                    <strong>{{ student.student_name }}</strong><br>
-                                    <span class="text-muted">
-                                        ID: {{ student.student_id }}
-                                    </span>
-                                </td>
-
-                                <td>{{ student.course_name }}</td>
-
-                                <td>
-                                    <div
-                                        style="
-                                            display: flex;
-                                            flex-wrap: wrap;
-                                            gap: 8px;
-                                            align-items: stretch;
-                                        "
-                                    >
-                                        {% for subject in student.projected_subjects %}
-                                            <div
-                                                style="
-                                                    border: 1px solid #e2e8f0;
-                                                    border-radius: 12px;
-                                                    padding: 10px 12px;
-                                                    background: #f8fafc;
-                                                    min-width: 190px;
-                                                "
-                                            >
-                                                <strong>
-                                                    {{ subject.subject_name }}
-                                                </strong>
-
-                                                <div class="text-muted" style="margin-top: 4px;">
-                                                    Promedio:
-                                                    <strong>{{ subject.current_average }}</strong>
-                                                </div>
-
-                                                <div class="text-muted">
-                                                    Faltan:
-                                                    <strong>{{ subject.points_needed }}</strong>
-                                                    puntos
-                                                </div>
-
-                                                <div style="margin-top: 6px;">
-                                                    {% if subject.risk_level == "alto" %}
-                                                        <span class="badge badge-danger">
-                                                            {{ subject.risk_label }}
-                                                        </span>
-                                                    {% elif subject.risk_level == "medio" %}
-                                                        <span class="badge badge-warning">
-                                                            {{ subject.risk_label }}
-                                                        </span>
-                                                    {% else %}
-                                                        <span class="badge badge-reportado">
-                                                            {{ subject.risk_label }}
-                                                        </span>
-                                                    {% endif %}
-                                                </div>
-
-                                                <div class="text-muted" style="margin-top: 6px;">
-                                                    {{ subject.projection_strength_label }}
-                                                </div>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <strong>
-                                        {{ student.highest_risk_label or "—" }}
-                                    </strong>
-
-                                    <br>
-
-                                    <span class="text-muted">
-                                        Mayor falta:
-                                        {{ student.highest_points_needed or "—" }}
-                                    </span>
-
-                                    <br>
-
-                                    <span class="text-muted">
-                                        Prom. menor:
-                                        {{ student.lowest_average or "—" }}
-                                    </span>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p class="text-muted">
-                No se encontraron estudiantes con tendencia a completivo para los filtros seleccionados.
+<section class="card">
+    <div class="dashboard-topbar">
+        <div>
+            <h2 style="margin-bottom: 6px;">{{ dashboard.institution.name }}</h2>
+            <p class="text-muted" style="margin: 0;">
+                Año escolar: {{ dashboard.institution.school_year }} |
+                Ciclo: {{ dashboard.filters.ciclo or "Todos" }}
             </p>
-        {% endif %}
-    </section>
+        </div>
 
-</div>
+        <div class="module-actions module-actions-right no-print">
+            <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">
+                Seguimiento académico
+            </a>
 
-</body>
-</html>
+            <a href="{{ url_for('academic_tracking_final_status_dashboard') }}" class="btn btn-secondary">
+                Situación final
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="card no-print">
+    <form method="GET" action="{{ url_for('academic_tracking_completivo_projection_dashboard') }}">
+
+        <div class="filters-grid" style="grid-template-columns: repeat(5, minmax(180px, 1fr));">
+
+            <div class="field">
+                <label for="ciclo">Ciclo</label>
+                <select id="ciclo" name="ciclo">
+                    <option value="">Todos</option>
+
+                    <option value="Primer Ciclo" {% if dashboard.filters.ciclo == "Primer Ciclo" %}selected{% endif %}>
+                        Primer Ciclo
+                    </option>
+
+                    <option value="Segundo Ciclo" {% if dashboard.filters.ciclo == "Segundo Ciclo" %}selected{% endif %}>
+                        Segundo Ciclo
+                    </option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="curso">Curso</label>
+                <select id="curso" name="curso">
+                    <option value="">Todos</option>
+
+                    {% for course in dashboard.report.metadata.courses_catalog %}
+                        <option value="{{ course.value }}" {% if dashboard.filters.curso == course.value %}selected{% endif %}>
+                            {{ course.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="asignatura">Asignatura</label>
+                <select id="asignatura" name="asignatura">
+                    <option value="">Todas</option>
+
+                    {% for subject in dashboard.report.metadata.subjects_catalog %}
+                        <option value="{{ subject.value }}" {% if dashboard.filters.asignatura == subject.value %}selected{% endif %}>
+                            {{ subject.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="riesgo">Nivel de riesgo</label>
+                <select id="riesgo" name="riesgo">
+                    <option value="">Todos</option>
+
+                    <option value="alto" {% if dashboard.filters.riesgo == "alto" %}selected{% endif %}>
+                        Alto
+                    </option>
+
+                    <option value="medio" {% if dashboard.filters.riesgo == "medio" %}selected{% endif %}>
+                        Medio
+                    </option>
+
+                    <option value="bajo" {% if dashboard.filters.riesgo == "bajo" %}selected{% endif %}>
+                        Bajo
+                    </option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="tendencia">Tendencia</label>
+                <select id="tendencia" name="tendencia">
+                    <option value="">Todas</option>
+
+                    <option value="preliminar" {% if dashboard.filters.tendencia == "preliminar" %}selected{% endif %}>
+                        Preliminar
+                    </option>
+
+                    <option value="fuerte" {% if dashboard.filters.tendencia == "fuerte" %}selected{% endif %}>
+                        Fuerte
+                    </option>
+
+                    <option value="final" {% if dashboard.filters.tendencia == "final" %}selected{% endif %}>
+                        Final
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="filter-actions" style="margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn btn-primary" type="submit">
+                Ver resultados
+            </button>
+
+            <a class="btn btn-secondary" href="{{ url_for('academic_tracking_completivo_projection_dashboard') }}">
+                Limpiar
+            </a>
+
+            <a
+                class="btn btn-secondary"
+                target="_blank"
+                href="{{ url_for('academic_tracking_completivo_projection_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&curso={{ dashboard.filters.curso or '' }}&asignatura={{ dashboard.filters.asignatura or '' }}&riesgo={{ dashboard.filters.riesgo or '' }}&tendencia={{ dashboard.filters.tendencia or '' }}"
+            >
+                Generar reporte PDF
+            </a>
+        </div>
+
+    </form>
+</section>
+
+<section class="card">
+    <div class="compact-summary-row" style="grid-template-columns: repeat(6, minmax(150px, 1fr));">
+
+        <div class="compact-metric">
+            <span class="compact-label">Estudiantes proyectados</span>
+            <strong class="compact-value">{{ dashboard.report.summary.students_projected }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Casos por asignatura</span>
+            <strong class="compact-value">{{ dashboard.report.summary.subject_cases }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Riesgo alto</span>
+            <strong class="compact-value">{{ dashboard.report.summary.risk_counts.alto }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Riesgo medio</span>
+            <strong class="compact-value">{{ dashboard.report.summary.risk_counts.medio }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Riesgo bajo</span>
+            <strong class="compact-value">{{ dashboard.report.summary.risk_counts.bajo }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Tendencia fuerte/final</span>
+            <strong class="compact-value">
+                {{ dashboard.report.summary.strength_counts.fuerte + dashboard.report.summary.strength_counts.final }}
+            </strong>
+        </div>
+
+    </div>
+</section>
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <h2 style="margin-bottom: 6px;">Listado preventivo de estudiantes</h2>
+            <p class="text-muted" style="margin: 0;">
+                Estudiantes con asignaturas proyectadas por debajo de 70 según calificaciones publicadas.
+            </p>
+        </div>
+    </div>
+
+    {% if dashboard.report.students %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Estudiante</th>
+                        <th>Curso</th>
+                        <th>Asignaturas proyectadas</th>
+                        <th>Asignaturas de mayor riesgo</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for student in dashboard.report.students %}
+                        {% set max_points = student.highest_points_needed %}
+
+                        <tr>
+                            <td>{{ student.numero or "—" }}</td>
+
+                            <td>
+                                <strong>{{ student.student_name }}</strong>
+                                <br>
+                                <span class="text-muted">ID: {{ student.student_id }}</span>
+                            </td>
+
+                            <td>{{ student.course_name }}</td>
+
+                            <td>
+                                <div class="subjects-wrap">
+                                    {% for subject in student.projected_subjects %}
+                                        <span class="subject-chip">
+                                            <strong>{{ subject.subject_name }}</strong>
+                                            <span>Prom.: {{ subject.current_average }}</span>
+                                            <span>Faltan: {{ subject.points_needed }}</span>
+
+                                            {% if subject.risk_level == "alto" %}
+                                                <span>Riesgo: Alto</span>
+                                            {% elif subject.risk_level == "medio" %}
+                                                <span>Riesgo: Medio</span>
+                                            {% else %}
+                                                <span>Riesgo: Bajo</span>
+                                            {% endif %}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+
+                            <td>
+                                {% for subject in student.projected_subjects %}
+                                    {% if subject.points_needed == max_points %}
+                                        {% if subject.risk_level == "alto" %}
+                                            <span class="risk-chip risk-alto">{{ subject.subject_name }}</span>
+                                        {% elif subject.risk_level == "medio" %}
+                                            <span class="risk-chip risk-medio">{{ subject.subject_name }}</span>
+                                        {% else %}
+                                            <span class="risk-chip risk-bajo">{{ subject.subject_name }}</span>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">
+            No se encontraron estudiantes proyectados a completivo con los filtros seleccionados.
+        </p>
+    {% endif %}
+</section>
+
+{% endblock %}
