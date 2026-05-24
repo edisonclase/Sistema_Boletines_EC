@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia de Entrega</title>
+
+    <style>
+        @page {
+            size: Letter portrait;
+            margin: 16mm 14mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", Arial, Helvetica, sans-serif;
+            color: #000000;
+            font-size: 12px;
+        }
+
+        .course-sheet {
+            page-break-after: always;
+        }
+
+        .course-sheet:last-child {
+            page-break-after: auto;
+        }
+
+        .header {
+            display: table;
+            width: 100%;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 8px;
+        }
+
+        .logo-box {
+            display: table-cell;
+            width: 82px;
+            vertical-align: middle;
+        }
+
+        .logo {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 10px;
+        }
+
+        .school-name {
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.1;
+        }
+
+        .document-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .meta {
+            margin-top: 4px;
+            line-height: 1.25;
+        }
+
+        .paragraph {
+            border: 1px solid #000000;
+            padding: 10px;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            text-align: justify;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 14px;
+        }
+
+        th {
+            border: 1px solid #000000;
+            padding: 6px 5px;
+            text-align: center;
+            font-size: 12px;
+            background: #ffffff;
+            font-weight: bold;
+        }
+
+        td {
+            border: 1px solid #000000;
+            padding: 4px 5px;
+            font-size: 12px;
+            vertical-align: middle;
+            line-height: 1.1;
+        }
+
+        .col-numero {
+            width: 10%;
+            text-align: center;
+        }
+
+        .col-id {
+            width: 18%;
+            text-align: center;
+        }
+
+        .col-name {
+            width: 42%;
+        }
+
+        .col-signature {
+            width: 30%;
+        }
+
+        .footer-area {
+            margin-top: 30px;
+        }
+
+        .date-line {
+            margin-bottom: 40px;
+            font-size: 12px;
+        }
+
+        .teacher-signature {
+            width: 320px;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid #000000;
+            margin-bottom: 4px;
+            height: 22px;
+        }
+
+        .teacher-name {
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .signature-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-top: 18px;
+        }
+
+        .signature-summary-table td {
+            border: none;
+            padding: 4px 6px;
+            vertical-align: bottom;
+            font-size: 12px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+{% for course_group in dashboard.students_by_course %}
+
+    <section class="course-sheet">
+
+        <div class="header">
+
+            <div class="logo-box">
+
+                {% if dashboard.institution.logos and dashboard.institution.logos[0].src %}
+                    <img
+                        class="logo"
+                        src="{{ dashboard.institution.logos[0].src }}"
+                        alt="Logo del centro"
+                    >
+                {% endif %}
+
+            </div>
+
+            <div class="header-text">
+
+                <div class="school-name">
+                    {{ dashboard.institution.name }}
+                </div>
+
+                <div class="document-title">
+                    Constancia de entrega y notificación académica
+                </div>
+
+                <div class="meta">
+                    <strong>Año escolar:</strong> {{ dashboard.institution.school_year }}
+                    &nbsp; | &nbsp;
+                    <strong>Curso:</strong> {{ course_group.course_name }}
+                    &nbsp; | &nbsp;
+                    <strong>Proceso:</strong>
+                    {% if dashboard.filters.situacion == "completivo" %}
+                        Completivo
+                    {% elif dashboard.filters.situacion == "extraordinario" %}
+                        Extraordinario
+                    {% elif dashboard.filters.situacion == "especial" %}
+                        Evaluación especial
+                    {% else %}
+                        Situación académica
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="paragraph">
+
+            Los estudiantes abajo firmantes declaran haber recibido del profesor/a titular
+            <strong>{{ course_group.prof_titular or "________________________________" }}</strong>
+            información sobre su situación académica y las asignaturas pendientes correspondientes al presente proceso académico.
+
+        </div>
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th class="col-numero">No.</th>
+                    <th class="col-id">ID</th>
+                    <th class="col-name">Estudiante</th>
+                    <th class="col-signature">Firma</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for student in course_group.students %}
+
+                    <tr>
+
+                        <td class="col-numero">
+                            {{ student.numero or "—" }}
+                        </td>
+
+                        <td class="col-id">
+                            {{ student.student_id }}
+                        </td>
+
+                        <td class="col-name">
+                            {{ student.student_name }}
+                        </td>
+
+                        <td class="col-signature"></td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        <div class="footer-area">
+            <table class="signature-summary-table">
+                <tbody>
+                    <tr>
+                        <td style="width: 45%;">
+                            <strong>Fecha:</strong>
+                            __________________________________
+                        </td>
+
+                        <td style="width: 55%; text-align: center;">
+                            <div class="signature-line"></div>
+                            <strong>{{ course_group.prof_titular or "Profesor/a titular" }}</strong>
+                            <br>
+                            Profesor/a titular
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Aula Nova · ECS
+        </div>
+
+    </section>
+
+{% endfor %}
+
+</body>
+</html>

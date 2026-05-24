@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Fichas de Situación Final</title>
+
+    <style>
+        @page {
+            size: Letter portrait;
+            margin: 7mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", Arial, Helvetica, sans-serif;
+            color: #000000;
+            font-size: 12px;
+        }
+
+        .course-sheet {
+            page-break-after: always;
+        }
+
+        .course-sheet:last-child {
+            page-break-after: auto;
+        }
+
+        .sheet-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 3mm 3mm;
+            table-layout: fixed;
+        }
+
+        .sheet-cell {
+            width: 50%;
+            height: 129mm;
+            vertical-align: top;
+            border: 1px dashed #000000;
+            padding: 1mm;
+        }
+
+        .slip {
+            width: 100%;
+            height: 124mm;
+            border: 1px solid #000000;
+            border-radius: 6px;
+            padding: 5px;
+            overflow: hidden;
+        }
+
+        .slip-header {
+            display: table;
+            width: 100%;
+            border-bottom: 1px solid #000000;
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+        }
+
+        .logo-box {
+            display: table-cell;
+            width: 54px;
+            vertical-align: middle;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 6px;
+        }
+
+        .school-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #000000;
+            line-height: 1.05;
+        }
+
+        .slip-title {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #000000;
+            margin-top: 1px;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 4px;
+        }
+
+        .meta-table td {
+            border: none;
+            padding: 1px 2px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.1;
+            font-size: 11px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .value {
+            font-weight: normal;
+            color: #000000;
+        }
+
+        .notice {
+            border: 1px solid #000000;
+            background: #ffffff;
+            padding: 4px;
+            border-radius: 5px;
+            line-height: 1.12;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #000000;
+        }
+
+        .grade-box {
+            border: 1px solid #000000;
+            padding: 0;
+            margin-bottom: 5px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin: 0;
+        }
+
+        .items-table th {
+            background: #ffffff;
+            color: #000000;
+            font-size: 11px;
+            padding: 3px 2px;
+            text-align: center;
+            border: 1px solid #000000;
+            font-weight: bold;
+        }
+
+        .items-table th:first-child {
+            text-align: left;
+        }
+
+        .items-table td {
+            border: 1px solid #000000;
+            padding: 3px 2px;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 1.1;
+            font-size: 11px;
+            color: #000000;
+        }
+
+        .items-table td:first-child {
+            text-align: left;
+            font-weight: normal;
+        }
+
+        .score-chip {
+            display: inline;
+            min-width: auto;
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
+            border: none;
+            color: #000000;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .module-mark {
+            display: block;
+            margin-top: 1px;
+            font-size: 10px;
+            color: #000000;
+            font-weight: normal;
+        }
+
+        .footer {
+            margin-top: 3px;
+            text-align: right;
+            color: #000000;
+            font-size: 9px;
+        }
+    </style>
+</head>
+
+<body>
+
+{% for course_group in dashboard.students_by_course %}
+
+    <div class="course-sheet">
+
+        <table class="sheet-table">
+            <tbody>
+                {% for row_students in course_group.students|batch(2, none) %}
+                    <tr>
+                        {% for student in row_students %}
+                            <td class="sheet-cell">
+                                {% if student %}
+                                    <article class="slip">
+
+                                        <div class="slip-header">
+                                            <div class="logo-box">
+                                                {% if dashboard.institution.logos and dashboard.institution.logos[0].src %}
+                                                    <img
+                                                        class="logo"
+                                                        src="{{ dashboard.institution.logos[0].src }}"
+                                                        alt="Logo del centro"
+                                                    >
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="header-text">
+                                                <div class="school-name">
+                                                    {{ dashboard.institution.name }}
+                                                </div>
+
+                                                <div>
+                                                    Año escolar: {{ dashboard.institution.school_year }}
+                                                </div>
+
+                                                <div class="slip-title">
+                                                    Notificación académica
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <table class="meta-table">
+                                            <tbody>
+                                                <tr>
+                                                    <td style="width: 58%;">
+                                                        <span class="label">Estudiante:</span>
+                                                        <span class="value">{{ student.student_name }}</span>
+                                                    </td>
+
+                                                    <td style="width: 42%;">
+                                                        <span class="label">ID:</span>
+                                                        <span class="value">{{ student.student_id }}</span>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td>
+                                                        <span class="label">Curso:</span>
+                                                        <span class="value">{{ student.course_name }}</span>
+                                                    </td>
+
+                                                    <td>
+                                                        <span class="label">No. lista:</span>
+                                                        <span class="value">{{ student.numero or "—" }}</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <div class="notice">
+                                            {% if dashboard.filters.situacion == "completivo" %}
+                                                Las asignaturas mostradas a continuación fueron enviadas a proceso de completivo debido a que su calificación final fue menor a 70 puntos.
+                                            {% elif dashboard.filters.situacion == "extraordinario" %}
+                                                Las asignaturas mostradas a continuación fueron enviadas a proceso de extraordinario debido a que la calificación obtenida en completivo fue menor a 70 puntos.
+                                            {% elif dashboard.filters.situacion == "especial" %}
+                                                Las asignaturas mostradas a continuación fueron enviadas a evaluación especial debido a que la calificación obtenida en extraordinario fue menor a 70 puntos.
+                                            {% else %}
+                                                Las asignaturas mostradas requieren proceso académico complementario.
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="grade-box">
+                                            <table class="items-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 72%;">Asignatura / módulo</th>
+
+                                                        <th style="width: 28%;">
+                                                            {% if dashboard.filters.situacion == "completivo" %}
+                                                                Calificación final
+                                                            {% elif dashboard.filters.situacion == "extraordinario" %}
+                                                                Calificación completivo
+                                                            {% elif dashboard.filters.situacion == "especial" %}
+                                                                Calificación extraordinario
+                                                            {% else %}
+                                                                Calificación
+                                                            {% endif %}
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    {% for item in student.slip_items %}
+                                                        <tr>
+                                                            <td>
+                                                                {{ item.name }}
+
+                                                                {% if item.item_type == "module" %}
+                                                                    <span class="module-mark">Módulo formativo</span>
+                                                                {% endif %}
+                                                            </td>
+
+                                                            <td>
+                                                                <span class="score-chip">
+                                                                    {{ item.score }}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div class="footer">
+                                            Aula Nova - ECS
+                                        </div>
+
+                                    </article>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+{% endfor %}
+
+</body>
+</html>

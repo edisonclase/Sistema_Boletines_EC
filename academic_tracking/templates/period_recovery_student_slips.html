@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Fichas de Recuperación Pedagógica</title>
+
+    <style>
+        @page {
+            size: Letter portrait;
+            margin: 6mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", Arial, Helvetica, sans-serif;
+            color: #000000;
+            font-size: 9px;
+        }
+
+        .sheet-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 2mm 2mm;
+            table-layout: fixed;
+        }
+
+        .sheet-cell {
+            width: 50%;
+            height: 84mm;
+            vertical-align: top;
+            border: 1px dashed #000000;
+            padding: 0.8mm;
+        }
+
+        .slip {
+            width: 100%;
+            height: 80mm;
+            border: 1px solid #000000;
+            border-radius: 5px;
+            padding: 4px;
+            overflow: hidden;
+        }
+
+        .slip-header {
+            display: table;
+            width: 100%;
+            border-bottom: 1px solid #000000;
+            padding-bottom: 2px;
+            margin-bottom: 3px;
+        }
+
+        .logo-box {
+            display: table-cell;
+            width: 36px;
+            vertical-align: middle;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 5px;
+        }
+
+        .school-name {
+            font-size: 8.8px;
+            font-weight: bold;
+            line-height: 1.02;
+        }
+
+        .slip-title {
+            font-size: 8.8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 1px;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 2px;
+        }
+
+        .meta-table td {
+            border: none;
+            padding: 1px;
+            text-align: left;
+            vertical-align: top;
+            line-height: 1.05;
+            font-size: 8.2px;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .notice {
+            border: 1px solid #000000;
+            background: #ffffff;
+            padding: 2px 3px;
+            border-radius: 4px;
+            line-height: 1.08;
+            margin-bottom: 3px;
+            font-size: 8.2px;
+            text-align: justify;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 2px;
+        }
+
+        .items-table th {
+            border: 1px solid #000000;
+            padding: 2px 1px;
+            font-size: 6.4px;
+            text-align: center;
+            font-weight: bold;
+            vertical-align: middle;
+            line-height: 1.02;
+        }
+
+        .items-table td {
+            border: 1px solid #000000;
+            padding: 2px 1px;
+            font-size: 8px;
+            vertical-align: middle;
+            line-height: 1.02;
+            text-align: center;
+        }
+
+        .items-table td:first-child {
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .score {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .empty-score {
+            color: #000000;
+            font-weight: normal;
+        }
+
+        .legend {
+            border: 1px solid #000000;
+            padding: 2px 3px;
+            font-size: 7.4px;
+            line-height: 1.08;
+            margin-top: 2px;
+        }
+
+        .footer {
+            margin-top: 2px;
+            text-align: right;
+            font-size: 7px;
+        }
+    </style>
+</head>
+
+<body>
+
+<table class="sheet-table">
+    <tbody>
+        {% for row_students in dashboard.students|batch(2, none) %}
+            <tr>
+                {% for student in row_students %}
+                    <td class="sheet-cell">
+                        {% if student %}
+                            <article class="slip">
+
+                                <div class="slip-header">
+                                    <div class="logo-box">
+                                        <img
+                                            class="logo"
+                                            src="file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png"
+                                            alt="Logo del centro"
+                                        >
+                                    </div>
+
+                                    <div class="header-text">
+                                        <div class="school-name">
+                                            {{ dashboard.institution.name }}
+                                        </div>
+
+                                        <div>
+                                            Año escolar: {{ dashboard.institution.school_year }}
+                                        </div>
+
+                                        <div class="slip-title">
+                                            Ficha de recuperación pedagógica
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <table class="meta-table">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 50%;">
+                                                <span class="label">Estudiante:</span>
+                                                {{ student.student_name }}
+                                            </td>
+
+                                            <td style="width: 25%;">
+                                                <span class="label">ID:</span>
+                                                {{ student.student_id }}
+                                            </td>
+
+                                            <td style="width: 25%;">
+                                                <span class="label">No.:</span>
+                                                {{ student.numero or "—" }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td colspan="2">
+                                                <span class="label">Curso:</span>
+                                                {{ student.course_name }}
+                                            </td>
+
+                                            <td>
+                                                <span class="label">Período:</span>
+                                                {{ student.period_code or dashboard.filters.periodo or "—" }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="notice">
+                                    El estudiante presenta bloques de competencia pendientes en el período indicado.
+                                </div>
+
+                                <table class="items-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 34%;">Asignatura</th>
+
+                                            {% for column in dashboard.block_columns %}
+                                                <th>
+                                                    {{ column.label }}
+                                                </th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {% for subject in student.formatted_subjects %}
+                                            <tr>
+                                                <td>
+                                                    {{ subject.subject_name }}
+                                                </td>
+
+                                                {% for column in dashboard.block_columns %}
+                                                    <td class="score">
+                                                        {% if subject.blocks[column.key] != "—" %}
+                                                            {{ subject.blocks[column.key] }}
+                                                        {% else %}
+                                                            <span class="empty-score">—</span>
+                                                        {% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+                                <div class="legend">
+                                    Las calificaciones indicadas corresponden a los bloques pendientes y requieren recuperación pedagógica.
+                                </div>
+
+                                <div class="footer">
+                                    Aula Nova · Academic Tracking
+                                </div>
+
+                            </article>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

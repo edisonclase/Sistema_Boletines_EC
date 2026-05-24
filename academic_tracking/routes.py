@@ -6,6 +6,8 @@ Rutas del módulo academic_tracking.
 
 from __future__ import annotations
 
+import re
+
 from pathlib import Path
 from typing import Any, Optional
 
@@ -67,7 +69,7 @@ def _resolve_institution_logos() -> list[dict[str, str]]:
         if not path:
             return ""
 
-        filename = path.split("/")[-1]
+        filename = path.replace("\\", "/").split("/")[-1]
         return f"/assets/{filename}"
 
     institution_logo = getattr(settings, "institution_logo", "")
@@ -766,6 +768,456 @@ def final_status_pdf(
         },
     )
 
+@router.get(
+    "/situacion-final/fichas.pdf",
+    name="academic_tracking_final_status_slips_pdf",
+)
+def final_status_slips_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    situacion: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+):
+    def format_score(value: Any) -> str:
+        if value is None:
+            return "—"
+
+        text = str(value).strip()
+
+        if not text:
+            return "—"
+
+        try:
+            number = float(text)
+            return str(int(round(number)))
+        except ValueError:
+            return text
+
+    def format_numero(value: Any) -> str:
+        if value is None:
+            return "—"
+
+        text = str(value).strip()
+
+        if not text:
+            return "—"
+
+        try:
+            number = float(text)
+            return str(int(number))
+        except ValueError:
+            return text
+
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    full_report = build_final_status_report(rows)
+
+    report = _filter_final_status_report(
+        report=full_report,
+        situacion=None,
+        curso=curso,
+        grado=grado,
+        seccion=seccion,
+    )
+
+    normalized_situacion = _normalize_text(situacion)
+
+    slip_students = []
+
+    for student in report.get("students", []):
+        slip_items = []
+
+        if not normalized_situacion or normalized_situacion == "completivo":
+            for subject in student.get("subjects_to_completivo", []):
+                slip_items.append({
+                    "name": subject.get("subject_name"),
+                    "score": format_score(subject.get("cf_final")),
+                    "stage": "completivo",
+                    "item_type": "subject",
+                })
+
+        if not normalized_situacion or normalized_situacion == "extraordinario":
+            for subject in student.get("subjects_to_extraordinario", []):
+                slip_items.append({
+                    "name": subject.get("subject_name"),
+                    "score": format_score(subject.get("ccf")),
+                    "stage": "extraordinario",
+                    "item_type": "subject",
+                })
+
+        if not normalized_situacion or normalized_situacion == "especial":
+            for subject in student.get("subjects_to_especial", []):
+                slip_items.append({
+                    "name": subject.get("subject_name"),
+                    "score": format_score(subject.get("cexf")),
+                    "stage": "especial",
+                    "item_type": "subject",
+                })
+
+        if not normalized_situacion or normalized_situacion == "modulo_especial":
+            for module in student.get("modules_to_special_evaluation", []):
+                slip_items.append({
+                    "name": module.get("module_name"),
+                    "score": format_score(module.get("module_cf")),
+                    "stage": "especial",
+                    "item_type": "module",
+                })
+
+        if slip_items:
+            student_copy = dict(student)
+            student_copy["numero"] = format_numero(student.get("numero"))
+            student_copy["slip_items"] = slip_items
+            slip_students.append(student_copy)
+
+    slip_students = sorted(
+        slip_students,
+        key=lambda item: (
+            _normalize_text(item.get("course_name")),
+            _normalize_text(item.get("numero")).zfill(4),
+            _normalize_text(item.get("student_name")),
+        ),
+    )
+
+    students_by_course = []
+    course_map: dict[str, list[dict[str, Any]]] = {}
+
+    for student in slip_students:
+        course_name = _normalize_text(student.get("course_name")) or "Sin curso"
+        course_map.setdefault(course_name, [])
+        course_map[course_name].append(student)
+
+    for course_name, students in course_map.items():
+        students_by_course.append({
+            "course_name": course_name,
+            "prof_titular": students[0].get("prof_titular"),
+            "students": students,
+            })
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": [
+                {
+                    "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                    "alt": "Logo del centro educativo",
+                }
+            ],
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "situacion": situacion,
+            "curso": curso,
+            "grado": grado,
+            "seccion": seccion,
+        },
+        "students": slip_students,
+        "students_by_course": students_by_course,
+    }
+
+    rendered_html = _render_template_to_html(
+        "final_status_student_slips.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="fichas_situacion_final.pdf"'
+        },
+    )
+    
+@router.get(
+    "/situacion-final/constancia-entrega.pdf",
+    name="academic_tracking_final_status_delivery_pdf",
+)
+def final_status_delivery_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    situacion: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    full_report = build_final_status_report(rows)
+
+    report = _filter_final_status_report(
+        report=full_report,
+        situacion=None,
+        curso=curso,
+        grado=grado,
+        seccion=seccion,
+    )
+
+    normalized_situacion = _normalize_text(situacion)
+
+    delivery_students = []
+
+    for student in report.get("students", []):
+        has_items = False
+
+        if normalized_situacion == "completivo":
+            has_items = bool(student.get("subjects_to_completivo"))
+
+        elif normalized_situacion == "extraordinario":
+            has_items = bool(student.get("subjects_to_extraordinario"))
+
+        elif normalized_situacion == "especial":
+            has_items = bool(student.get("subjects_to_especial"))
+
+        elif normalized_situacion == "modulo_especial":
+            has_items = bool(student.get("modules_to_special_evaluation"))
+
+        else:
+            has_items = bool(
+                student.get("subjects_to_completivo")
+                or student.get("subjects_to_extraordinario")
+                or student.get("subjects_to_especial")
+                or student.get("modules_to_special_evaluation")
+            )
+
+        if has_items:
+            delivery_students.append(student)
+
+    delivery_students = sorted(
+        delivery_students,
+        key=lambda item: (
+            _normalize_text(item.get("course_name")),
+            _normalize_text(item.get("numero")).zfill(4),
+            _normalize_text(item.get("student_name")),
+        ),
+    )
+
+    course_map: dict[str, list[dict[str, Any]]] = {}
+
+    for student in delivery_students:
+        course_name = _normalize_text(student.get("course_name")) or "Sin curso"
+        course_map.setdefault(course_name, [])
+        course_map[course_name].append(student)
+
+    students_by_course = []
+
+    for course_name, students in course_map.items():
+        students_by_course.append({
+            "course_name": course_name,
+            "prof_titular": students[0].get("prof_titular"),
+            "students": students,
+        })
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": [
+                {
+                    "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                    "alt": "Logo del centro educativo",
+                }
+            ],
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "situacion": situacion,
+            "curso": curso,
+            "grado": grado,
+            "seccion": seccion,
+        },
+        "students_by_course": students_by_course,
+    }
+
+    rendered_html = _render_template_to_html(
+        "final_status_delivery_report.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="constancia_entrega_situacion_final.pdf"'
+        },
+    )
+    
+@router.get(
+    "/recuperacion-pedagogica/fichas.pdf",
+    name="academic_tracking_recovery_slips_pdf",
+)
+def recovery_slips_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    periodo: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    min_approval_score: Optional[str] = Query(default=None),
+):
+    def format_score(value: Any) -> str:
+        if value is None:
+            return "—"
+
+        try:
+            return str(int(round(float(value))))
+        except (TypeError, ValueError):
+            return str(value).strip() or "—"
+
+    def block_sort_key(label: str) -> tuple[int, str]:
+        text = _normalize_text(label).upper()
+
+        if "COMUNICATIVA" in text:
+            return (1, text)
+
+        if "PENSAMIENTO" in text or "LOGICO" in text or "LÓGICO" in text or "CREATIVO" in text or "CRITICO" in text or "CRÍTICO" in text or "RESOLUCION" in text or "RESOLUCIÓN" in text:
+            return (2, text)
+
+        if "CIENTIFICA" in text or "CIENTÍFICA" in text or "TECNOLOGICA" in text or "TECNOLÓGICA" in text or "AMBIENTAL" in text or "SALUD" in text:
+            return (3, text)
+
+        if "ETICA" in text or "ÉTICA" in text or "CIUDADANA" in text or "DESARROLLO" in text or "ESPIRITUAL" in text:
+            return (4, text)
+
+        return (99, text)
+
+    min_score = _parse_min_approval_score(
+        min_approval_score,
+        default=70.0,
+    )
+
+    dashboard_payload = _build_dashboard_payload(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+        course_name=curso,
+        grade_name=grado,
+        section_name=seccion,
+        period_code=periodo,
+        subject_code=asignatura,
+        student_status="en_riesgo",
+        min_approval_score=min_score,
+    )
+
+    recovery_students = dashboard_payload.get("grouped_operational_rows", [])
+
+    block_labels_map: dict[str, str] = {}
+
+    for student in recovery_students:
+        for subject in student.get("subjects", []):
+            for block in subject.get("failed_blocks", []):
+                block_label = str(block.get("block_label") or "").strip()
+
+                if block_label:
+                    block_key = block_label.upper()
+                    block_labels_map[block_key] = block_label
+
+    block_columns = [
+        {
+            "key": key,
+            "label": label,
+        }
+        for key, label in sorted(
+            block_labels_map.items(),
+            key=lambda item: block_sort_key(item[1]),
+        )
+    ]
+
+    for student in recovery_students:
+        formatted_subjects = []
+
+        for subject in student.get("subjects", []):
+            block_scores = {
+                column["key"]: "—"
+                for column in block_columns
+            }
+
+            for block in subject.get("failed_blocks", []):
+                block_label = str(block.get("block_label") or "").strip()
+
+                if not block_label:
+                    continue
+
+                block_key = block_label.upper()
+                block_scores[block_key] = format_score(block.get("score"))
+
+            formatted_subjects.append(
+                {
+                    "subject_name": subject.get("subject_name"),
+                    "blocks": block_scores,
+                }
+            )
+
+        student["formatted_subjects"] = formatted_subjects
+
+    dashboard_payload["students"] = recovery_students
+    dashboard_payload["block_columns"] = block_columns
+    dashboard_payload["filters"] = {
+        **dashboard_payload.get("filters", {}),
+        "center_id": center_id,
+        "school_year": school_year,
+        "ciclo": ciclo,
+        "curso": curso,
+        "grado": grado,
+        "seccion": seccion,
+        "periodo": periodo,
+        "asignatura": asignatura,
+    }
+
+    rendered_html = _render_template_to_html(
+        "period_recovery_student_slips.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="fichas_recuperacion_pedagogica.pdf"'
+        },
+    )
 
 @router.get(
     "/proyeccion-completivo/data",
