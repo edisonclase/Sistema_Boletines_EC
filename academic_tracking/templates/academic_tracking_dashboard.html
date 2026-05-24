@@ -33,12 +33,17 @@
 <section class="card no-print">
     <form method="GET" action="{{ url_for('academic_tracking_dashboard') }}">
         <div class="filters-grid">
+
             <div class="field">
                 <label for="ciclo">Ciclo</label>
                 <select id="ciclo" name="ciclo">
                     <option value="">Todos</option>
+
                     {% for cycle in dashboard.metadata.cycle_options %}
-                        <option value="{{ cycle.value }}" {% if dashboard.filters.ciclo == cycle.value %}selected{% endif %}>
+                        <option
+                            value="{{ cycle.value }}"
+                            {% if dashboard.filters.ciclo == cycle.value %}selected{% endif %}
+                        >
                             {{ cycle.label }}
                         </option>
                     {% endfor %}
@@ -47,8 +52,10 @@
 
             <div class="field">
                 <label for="grado">Curso / grado</label>
+
                 <select id="grado" name="grado">
                     <option value="">Todos</option>
+
                     {% for grade in dashboard.metadata.grades_catalog %}
                         <option
                             value="{{ grade.value }}"
@@ -63,8 +70,10 @@
 
             <div class="field">
                 <label for="seccion">Sección</label>
+
                 <select id="seccion" name="seccion">
                     <option value="">Todas</option>
+
                     {% for section in dashboard.metadata.sections_catalog %}
                         <option
                             value="{{ section.value }}"
@@ -80,10 +89,15 @@
 
             <div class="field">
                 <label for="periodo">Período</label>
+
                 <select id="periodo" name="periodo">
                     <option value="">Todos</option>
+
                     {% for periodo in dashboard.metadata.periods_detected %}
-                        <option value="{{ periodo }}" {% if dashboard.filters.periodo == periodo %}selected{% endif %}>
+                        <option
+                            value="{{ periodo }}"
+                            {% if dashboard.filters.periodo == periodo %}selected{% endif %}
+                        >
                             {{ periodo }}
                         </option>
                     {% endfor %}
@@ -92,10 +106,15 @@
 
             <div class="field">
                 <label for="asignatura">Asignatura</label>
+
                 <select id="asignatura" name="asignatura">
                     <option value="">Todas las asignaturas</option>
+
                     {% for subject in dashboard.metadata.subjects_catalog %}
-                        <option value="{{ subject.subject_code }}" {% if dashboard.filters.asignatura == subject.subject_code %}selected{% endif %}>
+                        <option
+                            value="{{ subject.subject_code }}"
+                            {% if dashboard.filters.asignatura == subject.subject_code %}selected{% endif %}
+                        >
                             {{ subject.subject_name }}
                         </option>
                     {% endfor %}
@@ -104,53 +123,108 @@
 
             <div class="field">
                 <label for="estado">Estado</label>
+
                 <select id="estado" name="estado">
                     <option value="">Todos</option>
-                    <option value="en_riesgo" {% if dashboard.filters.estado == "en_riesgo" %}selected{% endif %}>
+
+                    <option
+                        value="en_riesgo"
+                        {% if dashboard.filters.estado == "en_riesgo" %}selected{% endif %}
+                    >
                         Recuperación pedagógica
                     </option>
-                    <option value="no_recuperado" {% if dashboard.filters.estado == "no_recuperado" %}selected{% endif %}>
+
+                    <option
+                        value="no_recuperado"
+                        {% if dashboard.filters.estado == "no_recuperado" %}selected{% endif %}
+                    >
                         No recuperó
                     </option>
-                    <option value="pendiente" {% if dashboard.filters.estado == "pendiente" %}selected{% endif %}>
+
+                    <option
+                        value="pendiente"
+                        {% if dashboard.filters.estado == "pendiente" %}selected{% endif %}
+                    >
                         Pendiente
                     </option>
                 </select>
             </div>
+
         </div>
 
         <div class="filter-actions">
-            <button class="btn btn-primary" type="submit">Filtrar</button>
-            <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">Limpiar</a>
-            <button type="button" class="btn btn-secondary" id="print-current-view-btn">Imprimir vista</button>
+
+            <button class="btn btn-primary" type="submit">
+                Filtrar
+            </button>
+
+            <a
+                href="{{ url_for('academic_tracking_dashboard') }}"
+                class="btn btn-secondary"
+            >
+                Limpiar
+            </a>
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                id="print-current-view-btn"
+            >
+                Imprimir vista
+            </button>
+
+            <a
+                class="btn btn-secondary"
+                target="_blank"
+                href="{{ url_for('academic_tracking_recovery_slips_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&grado={{ dashboard.filters.grado or '' }}&seccion={{ dashboard.filters.seccion or '' }}&periodo={{ dashboard.filters.periodo or '' }}&asignatura={{ dashboard.filters.asignatura or '' }}"
+            >
+                Fichas recuperación pedagógica
+            </a>
+
         </div>
     </form>
 </section>
 
 <section class="card">
     <div class="compact-summary-row">
+
         <div class="compact-metric">
             <span class="compact-label">Estudiantes afectados</span>
-            <strong class="compact-value">{{ dashboard.summary.compact_cards.students_affected }}</strong>
+
+            <strong class="compact-value">
+                {{ dashboard.summary.compact_cards.students_affected }}
+            </strong>
         </div>
 
         <div class="compact-metric">
             <span class="compact-label">Cursos con casos</span>
-            <strong class="compact-value">{{ dashboard.summary.compact_cards.courses_with_cases }}</strong>
+
+            <strong class="compact-value">
+                {{ dashboard.summary.compact_cards.courses_with_cases }}
+            </strong>
         </div>
 
         <div class="compact-metric">
             <span class="compact-label">Asignaturas con casos</span>
-            <strong class="compact-value">{{ dashboard.summary.compact_cards.subjects_with_cases }}</strong>
+
+            <strong class="compact-value">
+                {{ dashboard.summary.compact_cards.subjects_with_cases }}
+            </strong>
         </div>
+
     </div>
 </section>
 
 {% if dashboard.metadata.has_active_filters %}
 <section class="card">
+
     <div class="section-heading section-heading-actions">
+
         <div>
-            <h2 style="margin-bottom: 6px;">Listado operativo de incidencias</h2>
+            <h2 style="margin-bottom: 6px;">
+                Listado operativo de incidencias
+            </h2>
+
             <p class="text-muted" style="margin: 0;">
                 Vista agrupada por estudiante para coordinación, seguimiento y atención a familias.
             </p>
@@ -158,21 +232,29 @@
 
         {% if dashboard.grouped_operational_rows %}
         <div class="listing-actions no-print">
+
             <label class="select-all-inline">
                 <input type="checkbox" id="select-all-students">
                 <span>Seleccionar todos</span>
             </label>
 
-            <button type="button" class="btn btn-secondary btn-sm" id="print-selected-btn">
+            <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                id="print-selected-btn"
+            >
                 Imprimir seleccionados
             </button>
+
         </div>
         {% endif %}
     </div>
 
     {% if dashboard.grouped_operational_rows %}
         <div class="table-wrap">
+
             <table id="tracking-table">
+
                 <thead>
                     <tr>
                         <th class="col-select no-print">Sel.</th>
@@ -187,7 +269,9 @@
                 </thead>
 
                 <tbody>
+
                     {% for row in dashboard.grouped_operational_rows %}
+
                         <tr
                             class="tracking-row {% if row.status == 'no_recuperado' %}row-danger{% elif row.status == 'en_riesgo' %}row-warning{% endif %}"
                             data-student-id="{{ row.student_id }}"
@@ -196,6 +280,7 @@
                             data-period-code="{{ row.period_code }}"
                             data-status-label="{{ row.status_label }}"
                         >
+
                             <td class="no-print">
                                 <label class="row-selector">
                                     <input
@@ -211,82 +296,160 @@
                             <td>
                                 <div class="student-name-cell">
                                     <strong>{{ row.student_name or '—' }}</strong>
-                                    <div class="student-id-subline">ID: {{ row.student_id or '—' }}</div>
+
+                                    <div class="student-id-subline">
+                                        ID: {{ row.student_id or '—' }}
+                                    </div>
                                 </div>
                             </td>
 
                             <td>
                                 <strong>{{ row.grade_label or '—' }}</strong>
-                                <div class="course-subline">{{ row.section_label or '—' }}</div>
+
+                                <div class="course-subline">
+                                    {{ row.section_label or '—' }}
+                                </div>
                             </td>
 
                             <td>{{ row.period_code or '—' }}</td>
 
                             <td>
+
                                 {% if row.subjects %}
+
                                     <div class="subject-stack">
+
                                         {% for subject in row.subjects %}
+
                                             <div class="subject-item">
+
                                                 <div class="subject-name-row">
-                                                    <strong class="subject-name">{{ subject.subject_name }}:</strong>
+                                                    <strong class="subject-name">
+                                                        {{ subject.subject_name }}:
+                                                    </strong>
                                                 </div>
 
                                                 {% if subject.failed_blocks %}
+
                                                     <div class="block-label-vertical-list">
+
                                                         {% for block in subject.failed_blocks %}
+
                                                             <div class="block-label-line">
                                                                 <span class="block-bullet">-</span>
-                                                                <span class="block-label-name">{{ block.block_label }}</span>
-                                                                <span class="block-label-score-text">Calificación del bloque de competencia:</span>
-                                                                <span class="block-label-score-value">{{ block.score if block.score is not none else '—' }}</span>
+
+                                                                <span class="block-label-name">
+                                                                    {{ block.block_label }}
+                                                                </span>
+
+                                                                <span class="block-label-score-text">
+                                                                    Calificación del bloque de competencia:
+                                                                </span>
+
+                                                                <span class="block-label-score-value">
+                                                                    {{ block.score if block.score is not none else '—' }}
+                                                                </span>
                                                             </div>
+
                                                         {% endfor %}
+
                                                     </div>
+
                                                 {% elif subject.failed_block_labels %}
+
                                                     <div class="block-label-vertical-list">
+
                                                         {% for label in subject.failed_block_labels %}
+
                                                             <div class="block-label-line">
+
                                                                 <span class="block-bullet">-</span>
-                                                                <span class="block-label-name">{{ label }}</span>
-                                                                <span class="block-label-score-text">Calificación del bloque de competencia:</span>
-                                                                <span class="block-label-score-value">{{ subject.lowest_score if subject.lowest_score is not none else '—' }}</span>
+
+                                                                <span class="block-label-name">
+                                                                    {{ label }}
+                                                                </span>
+
+                                                                <span class="block-label-score-text">
+                                                                    Calificación del bloque de competencia:
+                                                                </span>
+
+                                                                <span class="block-label-score-value">
+                                                                    {{ subject.lowest_score if subject.lowest_score is not none else '—' }}
+                                                                </span>
+
                                                             </div>
+
                                                         {% endfor %}
+
                                                     </div>
+
                                                 {% else %}
-                                                    <span class="text-muted">Sin bloques identificados.</span>
+                                                    <span class="text-muted">
+                                                        Sin bloques identificados.
+                                                    </span>
                                                 {% endif %}
+
                                             </div>
+
                                         {% endfor %}
+
                                     </div>
+
                                 {% else %}
                                     —
                                 {% endif %}
+
                             </td>
 
                             <td>
+
                                 {% if row.status == "no_recuperado" %}
-                                    <span class="badge badge-pendiente">No recuperó</span>
+                                    <span class="badge badge-pendiente">
+                                        No recuperó
+                                    </span>
+
                                 {% elif row.status == "en_riesgo" %}
-                                    <span class="badge badge-parcial">Recuperación pedagógica</span>
+                                    <span class="badge badge-parcial">
+                                        Recuperación pedagógica
+                                    </span>
+
                                 {% else %}
-                                    <span class="badge">Pendiente</span>
+                                    <span class="badge">
+                                        Pendiente
+                                    </span>
                                 {% endif %}
+
                             </td>
 
                             <td class="no-print">
-                                <button type="button" class="btn btn-secondary btn-sm btn-print-one">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-secondary btn-sm btn-print-one"
+                                >
                                     Imprimir
                                 </button>
+
                             </td>
+
                         </tr>
+
                     {% endfor %}
+
                 </tbody>
+
             </table>
+
         </div>
+
     {% else %}
-        <p class="text-muted">No se detectaron incidencias para la combinación de filtros seleccionada.</p>
+
+        <p class="text-muted">
+            No se detectaron incidencias para la combinación de filtros seleccionada.
+        </p>
+
     {% endif %}
+
 </section>
 {% endif %}
 
