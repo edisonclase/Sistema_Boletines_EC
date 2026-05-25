@@ -18,7 +18,7 @@
             margin: 0;
             font-family: "Times New Roman", Arial, Helvetica, sans-serif;
             color: #000000;
-            font-size: 9px;
+            font-size: 12px;
         }
 
         .sheet-table {
@@ -88,7 +88,7 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 2px;
+            margin-bottom: 5px;
         }
 
         .meta-table td {
@@ -96,8 +96,8 @@
             padding: 1px;
             text-align: left;
             vertical-align: top;
-            line-height: 1.05;
-            font-size: 8.2px;
+            line-height: 1.08;
+            font-size: 8.8px;
         }
 
         .label {
@@ -107,11 +107,12 @@
         .notice {
             border: 1px solid #000000;
             background: #ffffff;
-            padding: 2px 3px;
+            padding: 3px 4px;
             border-radius: 4px;
-            line-height: 1.08;
-            margin-bottom: 3px;
-            font-size: 8.2px;
+            line-height: 1.12;
+            margin-top: 3px;
+            margin-bottom: 5px;
+            font-size: 8.8px;
             text-align: justify;
         }
 
@@ -119,36 +120,37 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 2px;
+            margin-top: 4px;
+            margin-bottom: 5px;
         }
 
         .items-table th {
             border: 1px solid #000000;
             padding: 2px 1px;
-            font-size: 6.4px;
+            font-size: 7.8px;
             text-align: center;
-            font-weight: bold;
+            font-weight: normal;
             vertical-align: middle;
-            line-height: 1.02;
+            line-height: 1.05;
         }
 
         .items-table td {
             border: 1px solid #000000;
             padding: 2px 1px;
-            font-size: 8px;
+            font-size: 8.6px;
             vertical-align: middle;
-            line-height: 1.02;
+            line-height: 1.08;
             text-align: center;
         }
 
         .items-table td:first-child {
-            font-weight: bold;
+            font-weight: normal;
             text-align: left;
         }
 
         .score {
             text-align: center;
-            font-weight: bold;
+            font-weight: normal;
         }
 
         .empty-score {
@@ -158,14 +160,14 @@
 
         .legend {
             border: 1px solid #000000;
-            padding: 2px 3px;
-            font-size: 7.4px;
-            line-height: 1.08;
-            margin-top: 2px;
+            padding: 3px 4px;
+            font-size: 8.6px;
+            line-height: 1.15;
+            margin-top: 5px;
         }
 
         .footer {
-            margin-top: 2px;
+            margin-top: 3px;
             text-align: right;
             font-size: 7px;
         }
@@ -251,7 +253,17 @@
 
                                             {% for column in dashboard.block_columns %}
                                                 <th>
-                                                    {{ column.label }}
+                                                    {% if loop.index == 1 %}
+                                                        Comunicativa
+                                                    {% elif loop.index == 2 %}
+                                                        Pensamiento Lógico, Creativo y Crítico - Resolución de Problemas
+                                                    {% elif loop.index == 3 %}
+                                                        Científica y Tecnológica - Ambiental y de Salud
+                                                    {% elif loop.index == 4 %}
+                                                        Ética y Ciudadana - Desarrollo Personal
+                                                    {% else %}
+                                                        {{ column.label }}
+                                                    {% endif %}
                                                 </th>
                                             {% endfor %}
                                         </tr>
@@ -279,11 +291,11 @@
                                 </table>
 
                                 <div class="legend">
-                                    Las calificaciones indicadas corresponden a los bloques pendientes y requieren recuperación pedagógica.
+                                    Las calificaciones indicadas requieren recuperación pedagógica.
                                 </div>
 
                                 <div class="footer">
-                                    Aula Nova · Academic Tracking
+                                    Aula Nova · ECS
                                 </div>
 
                             </article>

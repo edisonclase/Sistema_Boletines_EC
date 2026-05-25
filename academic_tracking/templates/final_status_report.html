@@ -159,18 +159,38 @@
 
 <body>
 
+    {% set selected_situation = dashboard.filters.situacion or "" %}
+    {% set students = dashboard.report.students %}
+    {% set ns = namespace(total=0) %}
+
+    {% for student in students %}
+        {% set include_student = false %}
+
+        {% if selected_situation == "completivo" and student.subjects_to_completivo %}
+            {% set include_student = true %}
+        {% elif selected_situation == "extraordinario" and student.subjects_to_extraordinario %}
+            {% set include_student = true %}
+        {% elif selected_situation == "especial" and (student.subjects_to_especial or student.modules_to_special_evaluation) %}
+            {% set include_student = true %}
+        {% elif selected_situation == "modulo_especial" and student.modules_to_special_evaluation %}
+            {% set include_student = true %}
+        {% elif not selected_situation and (student.subjects_to_completivo or student.subjects_to_extraordinario or student.subjects_to_especial or student.modules_to_special_evaluation) %}
+            {% set include_student = true %}
+        {% endif %}
+
+        {% if include_student %}
+            {% set ns.total = ns.total + 1 %}
+        {% endif %}
+    {% endfor %}
+
     <div class="report-header">
 
         <div class="report-header-left">
             <h1>Reporte de Situación Final</h1>
 
-            <p>
-                {{ dashboard.institution.name }}
-            </p>
+            <p>{{ dashboard.institution.name }}</p>
 
-            <p>
-                Año escolar: {{ dashboard.institution.school_year }}
-            </p>
+            <p>Año escolar: {{ dashboard.institution.school_year }}</p>
         </div>
 
         <div class="report-logo">
@@ -242,12 +262,10 @@
 
     </div>
 
-    {% set students = dashboard.report.students %}
-
-    {% if students %}
+    {% if ns.total > 0 %}
 
         <h2 class="section-title">
-            Estudiantes encontrados: {{ students|length }}
+            Estudiantes encontrados: {{ ns.total }}
         </h2>
 
         <table>
@@ -266,86 +284,97 @@
 
                 {% for student in students %}
 
-                    <tr>
+                    {% set include_student = false %}
 
-                        <td>
-                            {{ student.numero or "—" }}
-                        </td>
+                    {% if selected_situation == "completivo" and student.subjects_to_completivo %}
+                        {% set include_student = true %}
+                    {% elif selected_situation == "extraordinario" and student.subjects_to_extraordinario %}
+                        {% set include_student = true %}
+                    {% elif selected_situation == "especial" and (student.subjects_to_especial or student.modules_to_special_evaluation) %}
+                        {% set include_student = true %}
+                    {% elif selected_situation == "modulo_especial" and student.modules_to_special_evaluation %}
+                        {% set include_student = true %}
+                    {% elif not selected_situation and (student.subjects_to_completivo or student.subjects_to_extraordinario or student.subjects_to_especial or student.modules_to_special_evaluation) %}
+                        {% set include_student = true %}
+                    {% endif %}
 
-                        <td>
-                            <strong>{{ student.student_name }}</strong><br>
-                            <small>ID: {{ student.student_id }}</small>
-                        </td>
+                    {% if include_student %}
 
-                        <td>
-                            {{ student.course_name }}
-                        </td>
+                        <tr>
 
-                        <td>
-                            {{ student.final_status_label }}
-                        </td>
+                            <td>{{ student.numero or "—" }}</td>
 
-                        <td>
+                            <td>
+                                <strong>{{ student.student_name }}</strong><br>
+                                <small>ID: {{ student.student_id }}</small>
+                            </td>
 
-                            {% if student.subjects_to_completivo %}
+                            <td>{{ student.course_name }}</td>
 
-                                {% for subject in student.subjects_to_completivo %}
-                                    <div class="subject-item">
-                                        <strong>{{ subject.subject_name }}</strong>
-                                        <small>
-                                            CF Final:
-                                            {{ subject.cf_final }}
-                                        </small>
-                                    </div>
-                                {% endfor %}
+                            <td>
+                                {% if selected_situation == "completivo" %}
+                                    Completivo
+                                {% elif selected_situation == "extraordinario" %}
+                                    Extraordinario
+                                {% elif selected_situation == "especial" %}
+                                    Evaluación especial
+                                {% elif selected_situation == "modulo_especial" %}
+                                    Módulo especial
+                                {% else %}
+                                    {{ student.final_status_label }}
+                                {% endif %}
+                            </td>
 
-                            {% endif %}
+                            <td>
 
-                            {% if student.subjects_to_extraordinario %}
+                                {% if selected_situation == "completivo" or not selected_situation %}
+                                    {% for subject in student.subjects_to_completivo %}
+                                        <div class="subject-item">
+                                            <strong>{{ subject.subject_name }}</strong>
+                                            <small>Calificación final: {{ subject.cf_final }}</small>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
 
-                                {% for subject in student.subjects_to_extraordinario %}
-                                    <div class="subject-item">
-                                        <strong>{{ subject.subject_name }}</strong>
-                                        <small>
-                                            CCF:
-                                            {{ subject.ccf }}
-                                        </small>
-                                    </div>
-                                {% endfor %}
+                                {% if selected_situation == "extraordinario" or not selected_situation %}
+                                    {% for subject in student.subjects_to_extraordinario %}
+                                        <div class="subject-item">
+                                            <strong>{{ subject.subject_name }}</strong>
+                                            <small>Calificación completivo: {{ subject.ccf }}</small>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
 
-                            {% endif %}
+                                {% if selected_situation == "especial" or not selected_situation %}
+                                    {% for subject in student.subjects_to_especial %}
+                                        <div class="subject-item">
+                                            <strong>{{ subject.subject_name }}</strong>
+                                            <small>Calificación extraordinario: {{ subject.cexf }}</small>
+                                        </div>
+                                    {% endfor %}
 
-                            {% if student.subjects_to_especial %}
+                                    {% for module in student.modules_to_special_evaluation %}
+                                        <div class="subject-item">
+                                            <strong>{{ module.module_name }}</strong>
+                                            <small>CF módulo: {{ module.module_cf }}</small>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
 
-                                {% for subject in student.subjects_to_especial %}
-                                    <div class="subject-item">
-                                        <strong>{{ subject.subject_name }}</strong>
-                                        <small>
-                                            CEXF:
-                                            {{ subject.cexf }}
-                                        </small>
-                                    </div>
-                                {% endfor %}
+                                {% if selected_situation == "modulo_especial" %}
+                                    {% for module in student.modules_to_special_evaluation %}
+                                        <div class="subject-item">
+                                            <strong>{{ module.module_name }}</strong>
+                                            <small>CF módulo: {{ module.module_cf }}</small>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
 
-                            {% endif %}
+                            </td>
 
-                            {% if student.modules_to_special_evaluation %}
+                        </tr>
 
-                                {% for module in student.modules_to_special_evaluation %}
-                                    <div class="subject-item">
-                                        <strong>{{ module.module_name }}</strong>
-                                        <small>
-                                            CF módulo:
-                                            {{ module.module_cf }}
-                                        </small>
-                                    </div>
-                                {% endfor %}
-
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
+                    {% endif %}
 
                 {% endfor %}
 
@@ -355,7 +384,7 @@
 
     {% else %}
 
-        <h3>No se encontraron estudiantes con los filtros seleccionados.</h3>
+        <h3>No se encontraron estudiantes con asignaturas pendientes para la etapa seleccionada.</h3>
 
     {% endif %}
 
