@@ -130,6 +130,36 @@ def _normalize_percent_value(value):
         return safe_value(value).replace("%", "").strip()
 
 
+
+
+def _normalize_score_value(value):
+    text = safe_value(value).strip()
+
+    if text == "":
+        return ""
+
+    text = text.replace(",", ".")
+
+    # Google Sheets puede traer la CF del módulo como "90/100".
+    # Para el boletín se muestra el puntaje obtenido: 90.
+    if "/" in text:
+        first_part = text.split("/", 1)[0].strip()
+        try:
+            number = float(first_part)
+            if number.is_integer():
+                return str(int(number))
+            return str(round(number, 1))
+        except Exception:
+            return first_part
+
+    try:
+        number = float(text)
+        if number.is_integer():
+            return str(int(number))
+        return str(round(number, 1))
+    except Exception:
+        return text
+
 def _build_subject(prefix, label, row):
     asistencia_pct = _normalize_percent_value(
         _get_first_existing_value(
@@ -226,14 +256,16 @@ def _build_module(row, mod_number):
         "ra8": _get_value(row, f"MOD{mod_number}_RA8"),
         "ra9": _get_value(row, f"MOD{mod_number}_RA9"),
         "ra10": _get_value(row, f"MOD{mod_number}_RA10"),
-        "cf": _get_first_existing_value(
-            row,
-            [
-                f"MOD{mod_number}_CF",
-                f"MOD{mod_number}_CF_FINAL",
-                f"MOD{mod_number}_CALIFICACION_FINAL",
-                f"MOD{mod_number}_CALIF_FINAL",
-            ],
+        "cf": _normalize_score_value(
+            _get_first_existing_value(
+                row,
+                [
+                    f"MOD{mod_number}_CF",
+                    f"MOD{mod_number}_CF_FINAL",
+                    f"MOD{mod_number}_CALIFICACION_FINAL",
+                    f"MOD{mod_number}_CALIF_FINAL",
+                ],
+            )
         ),
         "situ_a": _get_value(row, f"MOD{mod_number}_SITU_A"),
         "situ_r": _get_value(row, f"MOD{mod_number}_SITU_R"),
