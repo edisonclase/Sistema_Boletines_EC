@@ -96,7 +96,7 @@ def _build_subject(prefix, label, row):
         "pc3": _get_value(row, f"{prefix}_PC3"),
         "pc4": _get_value(row, f"{prefix}_PC4"),
 
-        "final": _get_value(row, f"{prefix}_CF_FINAL"),
+        "final": _get_value(row, f"{prefix}_CF_AREA"),
         "asistencia_pct": _get_value(row, f"{prefix}_ASIST_PCT"),
 
         "comp_50cf": _get_value(row, f"{prefix}_COMP_50CF"),

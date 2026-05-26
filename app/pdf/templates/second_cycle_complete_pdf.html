@@ -152,8 +152,8 @@
         .sc-complete-table tbody td:nth-child(17),
         .sc-complete-table tbody td:nth-child(21),
         .sc-complete-table tbody td:nth-child(22),
-        .sc-complete-table tbody td:nth-child(26),
-        .sc-complete-table tbody td:nth-child(30),
+        .sc-complete-table tbody td:nth-child(23),
+        .sc-complete-table tbody td:nth-child(27),
         .sc-complete-table tbody td:nth-child(31),
         .sc-complete-table tbody td:nth-child(32) {
             border-right: 1px solid #66BB6A !important;
@@ -456,10 +456,10 @@
                                 <th colspan="4">PC</th>
 
                                 <th class="small-col" rowspan="2">CF</th>
+                                <th class="small-col" rowspan="2">ASIS</th>
                                 <th colspan="4">COMP</th>
                                 <th colspan="4">EXT</th>
                                 <th colspan="1">ESP</th>
-                                <th class="small-col" rowspan="2">ASIS</th>
                                 <th colspan="2">SIT</th>
                             </tr>
                             <tr>
@@ -535,6 +535,7 @@
                                 <td>{{ format_integer_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.final if subject.final is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.comp_50cf if subject.comp_50cf is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.comp_cec if subject.comp_cec is defined else none) }}</td>
@@ -547,8 +548,6 @@
                                 <td>{{ format_integer_grade(subject.cexf if subject.cexf is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
-
-                                <td>{{ format_integer_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
 
                                 <td>{% if subject.situ_a is defined and subject.situ_a %}{{ subject.situ_a }}{% else %}-{% endif %}</td>
                                 <td>{% if subject.situ_r is defined and subject.situ_r %}{{ subject.situ_r }}{% else %}-{% endif %}</td>
