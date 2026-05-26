@@ -1,3 +1,5 @@
+import re
+
 import pandas as pd
 
 from app.utils.helpers import safe_value
@@ -26,6 +28,29 @@ SUBJECTS_BY_CYCLE = {
         ("FOR", "Formación Integral Humana y Religiosa"),
     ],
 }
+
+
+def _normalize_column_name(value):
+    text = safe_value(value).strip().upper()
+    text = re.sub(r"\s+", "", text)
+    text = text.replace("-", "_")
+    return text
+
+
+def _find_column(row, column_name):
+    expected = _normalize_column_name(column_name)
+
+    try:
+        if column_name in row.index:
+            return column_name
+
+        for existing_column in row.index:
+            if _normalize_column_name(existing_column) == expected:
+                return existing_column
+    except Exception:
+        pass
+
+    return None
 
 
 def _extract_scalar(value):
@@ -58,16 +83,66 @@ def _extract_scalar(value):
 
 def _get_value(row, column_name):
     try:
-        if column_name not in row.index:
+        real_column = _find_column(row, column_name)
+
+        if real_column is None:
             return ""
-        value = row[column_name]
+
+        value = row[real_column]
         value = _extract_scalar(value)
         return safe_value(value)
     except Exception:
         return ""
 
 
+def _get_first_existing_value(row, column_names):
+    for column_name in column_names:
+        value = _get_value(row, column_name)
+        if safe_value(value) != "":
+            return value
+    return ""
+
+
+def _normalize_percent_value(value):
+    text = safe_value(value).strip()
+
+    if text == "":
+        return ""
+
+    text = text.replace(",", ".").replace("%", "").strip()
+
+    if text in ("", "0", "0.0", "0.00"):
+        return ""
+
+    try:
+        number = float(text)
+
+        # Si Google Sheets entrega el porcentaje como decimal, por ejemplo 0.90,
+        # se convierte a 90.
+        if 0 < number <= 1:
+            number = number * 100
+
+        if number.is_integer():
+            return str(int(number))
+
+        return str(round(number, 1))
+    except Exception:
+        return safe_value(value).replace("%", "").strip()
+
+
 def _build_subject(prefix, label, row):
+    asistencia_pct = _normalize_percent_value(
+        _get_first_existing_value(
+            row,
+            [
+                f"{prefix}_ASIST_PCT",
+                f"{prefix}_ASIST_PC",
+                f"{prefix}_ASISTENCIA_PCT",
+                f"{prefix}_ASISTENCIA_PC",
+            ],
+        )
+    )
+
     return {
         "asignatura": label,
 
@@ -96,8 +171,15 @@ def _build_subject(prefix, label, row):
         "pc3": _get_value(row, f"{prefix}_PC3"),
         "pc4": _get_value(row, f"{prefix}_PC4"),
 
-        "final": _get_value(row, f"{prefix}_CF_AREA"),
-        "asistencia_pct": _get_value(row, f"{prefix}_ASIST_PCT"),
+        "final": _get_first_existing_value(
+            row,
+            [
+                f"{prefix}_CF_AREA",
+                f"{prefix}_CF_FINAL",
+            ],
+        ),
+
+        "asistencia_pct": asistencia_pct,
 
         "comp_50cf": _get_value(row, f"{prefix}_COMP_50CF"),
         "comp_cec": _get_value(row, f"{prefix}_COMP_CEC"),
@@ -144,8 +226,17 @@ def _build_module(row, mod_number):
         "ra8": _get_value(row, f"MOD{mod_number}_RA8"),
         "ra9": _get_value(row, f"MOD{mod_number}_RA9"),
         "ra10": _get_value(row, f"MOD{mod_number}_RA10"),
-        "cf": _get_value(row, f"MOD{mod_number}_CF"),
+        "cf": _get_first_existing_value(
+            row,
+            [
+                f"MOD{mod_number}_CF",
+                f"MOD{mod_number}_CF_FINAL",
+                f"MOD{mod_number}_CALIFICACION_FINAL",
+                f"MOD{mod_number}_CALIF_FINAL",
+            ],
+        ),
         "situ_a": _get_value(row, f"MOD{mod_number}_SITU_A"),
+        "situ_r": _get_value(row, f"MOD{mod_number}_SITU_R"),
     }
 
 

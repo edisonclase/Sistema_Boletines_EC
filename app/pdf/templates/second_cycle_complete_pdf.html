@@ -325,6 +325,71 @@
             color: #222;
         }
 
+        .sc-complete-final-status-box {
+            border: 1px solid #66BB6A;
+            border-radius: 5px;
+            padding: 6px 7px;
+            margin: 8px 0 0 0;
+            background: #fcfffc;
+            color: #111;
+        }
+
+        .sc-complete-final-status-title {
+            font-size: 7.8pt;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .sc-complete-final-status-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .sc-complete-final-status-table td {
+            border: 1px solid #66BB6A !important;
+            padding: 3px 5px !important;
+            font-size: 7pt !important;
+            line-height: 1.08 !important;
+            vertical-align: middle;
+        }
+
+        .sc-complete-status-option {
+            font-weight: 700;
+            text-align: center;
+            width: 22%;
+        }
+
+        .sc-complete-status-mark {
+            display: inline-block;
+            min-width: 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sc-complete-special-note {
+            margin-top: 4px;
+            font-size: 6.8pt;
+            line-height: 1.12;
+            color: #111;
+        }
+
+        /* Bordes uniformes en la tabla principal del boletín */
+        .sc-complete-table,
+        .sc-complete-table th,
+        .sc-complete-table td {
+            border: 1px solid #66BB6A !important;
+        }
+
+        /* Bordes uniformes en la tabla de módulos técnicos */
+        .sc-complete-modules-table,
+        .sc-complete-modules-table th,
+        .sc-complete-modules-table td {
+            border: 1px solid #66BB6A !important;
+        }
+
         .sc-complete-content-bottom-space {
             height: 1mm;
         }
@@ -355,6 +420,27 @@
                 {{- "" -}}
             {%- else -%}
                 {{- value|float|round(0)|int -}}
+            {%- endif -%}
+        {%- endif -%}
+    {%- endmacro %}
+
+    {% macro format_percent_grade(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- else -%}
+            {%- set text = (value|string).strip().replace("%", "").replace(",", ".") -%}
+            {%- if text in ("", "0", "0.0", "0.00") -%}
+                {{- "" -}}
+            {%- else -%}
+                {%- set number = text|float -%}
+                {%- if number > 0 and number <= 1 -%}
+                    {%- set number = number * 100 -%}
+                {%- endif -%}
+                {%- if number == number|round(0) -%}
+                    {{- number|round(0)|int -}}%
+                {%- else -%}
+                    {{- "%.1f"|format(number) -}}%
+                {%- endif -%}
             {%- endif -%}
         {%- endif -%}
     {%- endmacro %}
@@ -509,33 +595,33 @@
                             <tr>
                                 <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
 
-                                <td>{{ format_decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
 
-                                <td>{{ format_decimal_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
 
-                                <td>{{ format_decimal_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
 
-                                <td>{{ format_decimal_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
-                                <td>{{ format_decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
 
-                                <td>{{ format_integer_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
-                                <td>{{ format_integer_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
-                                <td>{{ format_integer_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
-                                <td>{{ format_integer_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.final if subject.final is defined else none) }}</td>
-                                <td>{{ format_integer_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
+                                <td>{{ format_percent_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.comp_50cf if subject.comp_50cf is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.comp_cec if subject.comp_cec is defined else none) }}</td>
@@ -636,6 +722,44 @@
                                 ________________________________________________
                             {% endif %}
                         </div>
+                    </div>
+
+
+                    <div class="sc-complete-final-status-box">
+                        <div class="sc-complete-final-status-title">Situación final del estudiante</div>
+                        <table class="sc-complete-final-status-table">
+                            <tbody>
+                                <tr>
+                                    <td class="sc-complete-status-option">
+                                        Promovió:
+                                        <span class="sc-complete-status-mark">
+                                            {% if student.promovio_final is defined and student.promovio_final %}X{% else %}&nbsp;{% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="sc-complete-status-option">
+                                        Reprobó:
+                                        <span class="sc-complete-status-mark">
+                                            {% if student.reprobo_final is defined and student.reprobo_final %}X{% else %}&nbsp;{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if student.situacion_final_texto is defined and student.situacion_final_texto %}
+                                            {{ student.situacion_final_texto }}
+                                        {% else %}
+                                            Situación final pendiente de validación.
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        {% if student.asignaturas_especial is defined and student.asignaturas_especial %}
+                            <div class="sc-complete-special-note">
+                                <strong>Evaluación especial:</strong>
+                                el/la estudiante debe presentarse a evaluación especial en:
+                                {{ student.asignaturas_especial | join(", ") }}.
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="sc-complete-content-bottom-space"></div>
