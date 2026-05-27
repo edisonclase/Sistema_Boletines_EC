@@ -3,6 +3,15 @@
     const gradeSelect = document.getElementById("grado");
     const sectionSelect = document.getElementById("seccion");
 
+    function normalizeText(value) {
+        return String(value || "")
+            .trim()
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, " ");
+    }
+
     function setupDependentFilters() {
         if (!cycleSelect || !gradeSelect || !sectionSelect) {
             return;
@@ -21,6 +30,33 @@
             gradeList: option.getAttribute("data-grade-list") || ""
         }));
 
+        function sameCycle(optionCycle, selectedCycle) {
+            if (!selectedCycle) {
+                return true;
+            }
+
+            return normalizeText(optionCycle) === normalizeText(selectedCycle);
+        }
+
+        function gradeMatchesSection(sectionGradeList, selectedGrade) {
+            if (!selectedGrade) {
+                return true;
+            }
+
+            const normalizedSelectedGrade = normalizeText(selectedGrade);
+
+            const grades = String(sectionGradeList || "")
+                .split("|")
+                .map((item) => normalizeText(item))
+                .filter(Boolean);
+
+            if (!grades.length) {
+                return true;
+            }
+
+            return grades.includes(normalizedSelectedGrade);
+        }
+
         function renderGrades() {
             const selectedCycle = cycleSelect.value || "";
             const currentGrade = gradeSelect.value || "";
@@ -28,13 +64,14 @@
             gradeSelect.innerHTML = "";
 
             originalGradeOptions.forEach((item) => {
+                if (item.value !== "" && !sameCycle(item.cycle, selectedCycle)) {
+                    return;
+                }
+
                 const option = document.createElement("option");
                 option.value = item.value;
                 option.textContent = item.text;
-
-                if (item.value !== "" && selectedCycle && item.cycle !== selectedCycle) {
-                    return;
-                }
+                option.setAttribute("data-cycle", item.cycle);
 
                 if (item.value === currentGrade) {
                     option.selected = true;
@@ -44,6 +81,7 @@
             });
 
             const availableGradeValues = Array.from(gradeSelect.options).map((opt) => opt.value);
+
             if (!availableGradeValues.includes(currentGrade)) {
                 gradeSelect.value = "";
             }
@@ -57,22 +95,27 @@
             sectionSelect.innerHTML = "";
 
             originalSectionOptions.forEach((item) => {
-                const option = document.createElement("option");
-                option.value = item.value;
-                option.textContent = item.text;
 
                 if (item.value === "") {
+                    const option = document.createElement("option");
+                    option.value = item.value;
+                    option.textContent = item.text;
                     sectionSelect.appendChild(option);
                     return;
                 }
 
-                const grades = item.gradeList.split("|").filter(Boolean);
-                const cycleOk = !selectedCycle || item.cycle === selectedCycle;
-                const gradeOk = !selectedGrade || grades.includes(selectedGrade);
+                const cycleOk = sameCycle(item.cycle, selectedCycle);
+                const gradeOk = gradeMatchesSection(item.gradeList, selectedGrade);
 
                 if (!cycleOk || !gradeOk) {
                     return;
                 }
+
+                const option = document.createElement("option");
+                option.value = item.value;
+                option.textContent = item.text;
+                option.setAttribute("data-cycle", item.cycle);
+                option.setAttribute("data-grade-list", item.gradeList);
 
                 if (item.value === currentSection) {
                     option.selected = true;
@@ -82,17 +125,24 @@
             });
 
             const availableSectionValues = Array.from(sectionSelect.options).map((opt) => opt.value);
+
             if (!availableSectionValues.includes(currentSection)) {
                 sectionSelect.value = "";
             }
         }
 
         cycleSelect.addEventListener("change", function () {
+            gradeSelect.value = "";
+            sectionSelect.value = "";
+
             renderGrades();
             renderSections();
         });
 
-        gradeSelect.addEventListener("change", renderSections);
+        gradeSelect.addEventListener("change", function () {
+            sectionSelect.value = "";
+            renderSections();
+        });
 
         renderGrades();
         renderSections();
@@ -208,6 +258,7 @@
         printWindow.document.close();
 
         printWindow.focus();
+
         setTimeout(() => {
             printWindow.print();
         }, 300);
@@ -216,6 +267,7 @@
     function buildPrintableTableFromRows(rows) {
         const printableRows = rows.map((row) => {
             const cells = row.querySelectorAll("td");
+
             if (cells.length < 8) {
                 return "";
             }
@@ -251,6 +303,7 @@
                         <th>Estado general</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     ${printableRows}
                 </tbody>
@@ -279,8 +332,15 @@
 
         rowCheckboxes.forEach((checkbox) => {
             checkbox.addEventListener("change", function () {
-                if (!selectAllCheckbox) return;
-                const allChecked = rowCheckboxes.length > 0 && rowCheckboxes.every((item) => item.checked);
+
+                if (!selectAllCheckbox) {
+                    return;
+                }
+
+                const allChecked =
+                    rowCheckboxes.length > 0 &&
+                    rowCheckboxes.every((item) => item.checked);
+
                 selectAllCheckbox.checked = allChecked;
             });
         });
@@ -295,19 +355,31 @@
                 }
 
                 const tableHtml = buildPrintableTableFromRows(selectedRows);
-                openPrintWindow("Reporte de estudiantes seleccionados", tableHtml);
+
+                openPrintWindow(
+                    "Reporte de estudiantes seleccionados",
+                    tableHtml
+                );
             });
         }
 
         printOneButtons.forEach((button) => {
             button.addEventListener("click", function () {
                 const row = button.closest("tr");
-                if (!row) return;
 
-                const studentName = row.getAttribute("data-student-name") || "Estudiante";
+                if (!row) {
+                    return;
+                }
+
+                const studentName =
+                    row.getAttribute("data-student-name") || "Estudiante";
+
                 const tableHtml = buildPrintableTableFromRows([row]);
 
-                openPrintWindow(`Reporte individual - ${studentName}`, tableHtml);
+                openPrintWindow(
+                    `Reporte individual - ${studentName}`,
+                    tableHtml
+                );
             });
         });
     }
