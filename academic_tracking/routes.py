@@ -224,6 +224,85 @@ def _normalize_text(value: Optional[Any]) -> str:
     return str(value or "").strip()
 
 
+def _resolve_prof_titular_from_students(students: list[dict[str, Any]]) -> str:
+    """
+    Obtiene el profesor titular desde los datos disponibles del estudiante.
+    Se usa como respaldo para constancias por curso sin alterar la lógica existente.
+    """
+    possible_keys = [
+        "prof_titular",
+        "teacher_name",
+        "profesor_titular",
+        "titular",
+        "teacher",
+        "docente",
+    ]
+
+    for student in students:
+        for key in possible_keys:
+            value = _normalize_text(student.get(key))
+            if value:
+                return value
+
+    return ""
+
+
+
+def _build_p4_recovery_pending_student_ids(
+    center_id: Optional[Any] = None,
+    school_year: Optional[str] = None,
+    ciclo: Optional[str] = None,
+    curso: Optional[str] = None,
+    grado: Optional[str] = None,
+    seccion: Optional[str] = None,
+    min_approval_score: float = 70.0,
+) -> set[str]:
+    """
+    Devuelve los ID de estudiantes que todavía tienen recuperación pedagógica
+    pendiente en P4. Si un estudiante aparece aquí, no debe recibir ficha ni
+    constancia de completivo hasta cerrar esa recuperación.
+    """
+    dashboard_payload = _build_dashboard_payload(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+        course_name=curso,
+        grade_name=grado,
+        section_name=seccion,
+        period_code="P4",
+        subject_code=None,
+        student_status="en_riesgo",
+        min_approval_score=min_approval_score,
+    )
+
+    pending_ids: set[str] = set()
+
+    for student in dashboard_payload.get("grouped_operational_rows", []):
+        student_id = _normalize_text(
+            student.get("student_id")
+            or student.get("id_estudiante")
+            or student.get("ID_ESTUDIANTE")
+        )
+
+        if student_id:
+            pending_ids.add(student_id)
+
+    return pending_ids
+
+
+def _student_has_p4_recovery_pending(
+    student: dict[str, Any],
+    pending_student_ids: set[str],
+) -> bool:
+    student_id = _normalize_text(
+        student.get("student_id")
+        or student.get("id_estudiante")
+        or student.get("ID_ESTUDIANTE")
+    )
+
+    return bool(student_id and student_id in pending_student_ids)
+
+
 def _split_course_name(course_name: str) -> tuple[str, str]:
     text = _normalize_text(course_name)
 
@@ -830,12 +909,29 @@ def final_status_slips_pdf(
 
     normalized_situacion = _normalize_text(situacion)
 
+    p4_recovery_pending_student_ids = _build_p4_recovery_pending_student_ids(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+        curso=curso,
+        grado=grado,
+        seccion=seccion,
+        min_approval_score=70.0,
+    )
+
     slip_students = []
 
     for student in report.get("students", []):
         slip_items = []
+        has_p4_recovery_pending = _student_has_p4_recovery_pending(
+            student,
+            p4_recovery_pending_student_ids,
+        )
 
-        if not normalized_situacion or normalized_situacion == "completivo":
+        if (
+            not has_p4_recovery_pending
+            and (not normalized_situacion or normalized_situacion == "completivo")
+        ):
             for subject in student.get("subjects_to_completivo", []):
                 slip_items.append({
                     "name": subject.get("subject_name"),
@@ -978,13 +1074,30 @@ def final_status_delivery_pdf(
 
     normalized_situacion = _normalize_text(situacion)
 
+    p4_recovery_pending_student_ids = _build_p4_recovery_pending_student_ids(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+        curso=curso,
+        grado=grado,
+        seccion=seccion,
+        min_approval_score=70.0,
+    )
+
     delivery_students = []
 
     for student in report.get("students", []):
         has_items = False
+        has_p4_recovery_pending = _student_has_p4_recovery_pending(
+            student,
+            p4_recovery_pending_student_ids,
+        )
 
         if normalized_situacion == "completivo":
-            has_items = bool(student.get("subjects_to_completivo"))
+            has_items = (
+                not has_p4_recovery_pending
+                and bool(student.get("subjects_to_completivo"))
+            )
 
         elif normalized_situacion == "extraordinario":
             has_items = bool(student.get("subjects_to_extraordinario"))
@@ -997,7 +1110,10 @@ def final_status_delivery_pdf(
 
         else:
             has_items = bool(
-                student.get("subjects_to_completivo")
+                (
+                    not has_p4_recovery_pending
+                    and student.get("subjects_to_completivo")
+                )
                 or student.get("subjects_to_extraordinario")
                 or student.get("subjects_to_especial")
                 or student.get("modules_to_special_evaluation")
@@ -1218,6 +1334,149 @@ def recovery_slips_pdf(
             "Content-Disposition": 'inline; filename="fichas_recuperacion_pedagogica.pdf"'
         },
     )
+
+
+@router.get(
+    "/recuperacion-pedagogica/constancia-entrega.pdf",
+    name="academic_tracking_recovery_delivery_pdf",
+)
+def recovery_delivery_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    periodo: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    min_approval_score: Optional[str] = Query(default=None),
+):
+    def format_numero(value: Any) -> str:
+        if value is None:
+            return "—"
+
+        text = str(value).strip()
+
+        if not text:
+            return "—"
+
+        try:
+            number = float(text)
+            return str(int(number))
+        except ValueError:
+            return text
+
+    min_score = _parse_min_approval_score(
+        min_approval_score,
+        default=70.0,
+    )
+
+    dashboard_payload = _build_dashboard_payload(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+        course_name=curso,
+        grade_name=grado,
+        section_name=seccion,
+        period_code=periodo,
+        subject_code=asignatura,
+        student_status="en_riesgo",
+        min_approval_score=min_score,
+    )
+
+    recovery_students = dashboard_payload.get("grouped_operational_rows", [])
+
+    delivery_students = []
+
+    for student in recovery_students:
+        subjects = student.get("subjects", [])
+
+        if not subjects:
+            continue
+
+        student_copy = dict(student)
+        student_copy["numero"] = format_numero(student.get("numero"))
+        student_copy["recovery_subjects_text"] = ", ".join(
+            str(subject.get("subject_name") or "").strip()
+            for subject in subjects
+            if str(subject.get("subject_name") or "").strip()
+        )
+
+        delivery_students.append(student_copy)
+
+    delivery_students = sorted(
+        delivery_students,
+        key=lambda item: (
+            _normalize_text(item.get("course_name")),
+            _normalize_text(item.get("numero")).zfill(4),
+            _normalize_text(item.get("student_name")),
+        ),
+    )
+
+    course_map: dict[str, list[dict[str, Any]]] = {}
+
+    for student in delivery_students:
+        course_name = _normalize_text(student.get("course_name")) or "Sin curso"
+        course_map.setdefault(course_name, [])
+        course_map[course_name].append(student)
+
+    students_by_course = []
+
+    for course_name, students in course_map.items():
+        students_by_course.append({
+            "course_name": course_name,
+            "prof_titular": _resolve_prof_titular_from_students(students),
+            "students": students,
+        })
+
+    dashboard_payload["filters"] = {
+        **dashboard_payload.get("filters", {}),
+        "center_id": center_id,
+        "school_year": school_year,
+        "ciclo": ciclo,
+        "curso": curso,
+        "grado": grado,
+        "seccion": seccion,
+        "periodo": periodo,
+        "asignatura": asignatura,
+    }
+
+    dashboard_payload["institution"] = {
+        **dashboard_payload.get("institution", {}),
+        "name": _resolve_institution_name(),
+        "school_year": _resolve_school_year(school_year),
+        "ciclo": ciclo or "Vista general",
+        "logos": [
+            {
+                "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                "alt": "Logo del centro educativo",
+            }
+        ],
+        "favicon": "/assets/interface_logo.png",
+    }
+
+    dashboard_payload["students_by_course"] = students_by_course
+
+    rendered_html = _render_template_to_html(
+        "period_recovery_delivery_report.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="constancia_entrega_recuperacion_pedagogica.pdf"'
+        },
+    )
+
 
 @router.get(
     "/proyeccion-completivo/data",
