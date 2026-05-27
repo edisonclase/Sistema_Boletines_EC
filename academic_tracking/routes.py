@@ -248,6 +248,90 @@ def _resolve_prof_titular_from_students(students: list[dict[str, Any]]) -> str:
 
 
 
+
+def _build_teacher_by_course_map(teacher_assignments: Any) -> dict[str, str]:
+    """
+    Construye un mapa curso -> profesor titular a partir de las asignaciones docentes.
+    Es flexible porque la fuente puede traer nombres de columnas distintos.
+    """
+    course_keys = [
+        "course_name",
+        "curso",
+        "CURSO",
+        "course",
+        "grado_seccion",
+    ]
+
+    teacher_keys = [
+        "prof_titular",
+        "PROF_TITULAR",
+        "teacher_name",
+        "profesor_titular",
+        "titular",
+        "teacher",
+        "docente",
+        "nombre_docente",
+        "NOMBRE_DOCENTE",
+    ]
+
+    teacher_by_course: dict[str, str] = {}
+
+    if not teacher_assignments:
+        return teacher_by_course
+
+    try:
+        iterable = teacher_assignments.to_dict("records")
+    except Exception:
+        iterable = teacher_assignments
+
+    for item in iterable:
+        if not isinstance(item, dict):
+            continue
+
+        course_name = ""
+
+        for key in course_keys:
+            value = _normalize_text(item.get(key))
+            if value:
+                course_name = value
+                break
+
+        teacher_name = ""
+
+        for key in teacher_keys:
+            value = _normalize_text(item.get(key))
+            if value:
+                teacher_name = value
+                break
+
+        if course_name and teacher_name:
+            teacher_by_course[course_name] = teacher_name
+
+    return teacher_by_course
+
+
+def _resolve_prof_titular_for_course(
+    course_name: Any,
+    students: list[dict[str, Any]],
+    teacher_by_course: dict[str, str],
+) -> str:
+    """
+    Primero busca el titular dentro de los estudiantes.
+    Si no existe, lo busca en el mapa de asignaciones docentes por curso.
+    """
+    from_students = _resolve_prof_titular_from_students(students)
+
+    if from_students:
+        return from_students
+
+    normalized_course = _normalize_text(course_name)
+
+    if normalized_course and normalized_course in teacher_by_course:
+        return teacher_by_course[normalized_course]
+
+    return ""
+
+
 def _build_p4_recovery_pending_student_ids(
     center_id: Optional[Any] = None,
     school_year: Optional[str] = None,
@@ -1385,6 +1469,13 @@ def recovery_delivery_pdf(
         min_approval_score=min_score,
     )
 
+    teacher_assignments = load_teacher_assignments_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+    teacher_by_course = _build_teacher_by_course_map(teacher_assignments)
+
     recovery_students = dashboard_payload.get("grouped_operational_rows", [])
 
     delivery_students = []
@@ -1397,6 +1488,10 @@ def recovery_delivery_pdf(
 
         student_copy = dict(student)
         student_copy["numero"] = format_numero(student.get("numero"))
+        student_copy["prof_titular"] = (
+            _normalize_text(student.get("prof_titular"))
+            or teacher_by_course.get(_normalize_text(student.get("course_name")), "")
+        )
         student_copy["recovery_subjects_text"] = ", ".join(
             str(subject.get("subject_name") or "").strip()
             for subject in subjects
@@ -1426,7 +1521,11 @@ def recovery_delivery_pdf(
     for course_name, students in course_map.items():
         students_by_course.append({
             "course_name": course_name,
-            "prof_titular": _resolve_prof_titular_from_students(students),
+            "prof_titular": _resolve_prof_titular_for_course(
+                course_name,
+                students,
+                teacher_by_course,
+            ),
             "students": students,
         })
 

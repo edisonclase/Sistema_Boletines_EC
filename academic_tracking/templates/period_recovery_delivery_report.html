@@ -204,7 +204,7 @@
         <div class="paragraph">
 
             Los estudiantes abajo firmantes declaran haber recibido del profesor/a titular
-            <strong>{{ course_group.prof_titular or "________________________________" }}</strong>
+            <strong>{{ course_group.prof_titular or course_group.teacher_name or "________________________________" }}</strong>
             la notificación correspondiente al proceso de recuperación pedagógica
             del período
             <strong>{{ dashboard.filters.periodo or "indicado" }}</strong>.
@@ -268,7 +268,7 @@
 
                         <td style="width: 55%; text-align: center;">
                             <div class="signature-line"></div>
-                            <strong>{{ course_group.prof_titular or "Profesor/a titular" }}</strong>
+                            <strong>{{ course_group.prof_titular or course_group.teacher_name or "Profesor/a titular" }}</strong>
                             <br>
                             Profesor/a titular
                         </td>

@@ -612,8 +612,14 @@ def _build_grouped_operational_rows(
                 "period_code": row.get("period_code", "—"),
                 "status": row.get("status", "pendiente"),
                 "status_label": row.get("status_label", "Pendiente"),
+                "teacher_name": row.get("teacher_name", ""),
+                "prof_titular": row.get("teacher_name", ""),
                 "subjects": [],
             }
+
+        if not grouped[key].get("teacher_name") and row.get("teacher_name"):
+            grouped[key]["teacher_name"] = row.get("teacher_name", "")
+            grouped[key]["prof_titular"] = row.get("teacher_name", "")
 
         current_status = grouped[key]["status"]
         new_status = row.get("status", "pendiente")

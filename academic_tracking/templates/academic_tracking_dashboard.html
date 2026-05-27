@@ -181,6 +181,14 @@
                 Fichas recuperación pedagógica
             </a>
 
+            <a
+                class="btn btn-secondary"
+                target="_blank"
+                href="{{ url_for('academic_tracking_recovery_delivery_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&grado={{ dashboard.filters.grado or '' }}&seccion={{ dashboard.filters.seccion or '' }}&periodo={{ dashboard.filters.periodo or '' }}&asignatura={{ dashboard.filters.asignatura or '' }}"
+            >
+                Constancia recuperación pedagógica
+            </a>
+
         </div>
     </form>
 </section>
