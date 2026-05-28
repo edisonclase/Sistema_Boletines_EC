@@ -272,7 +272,6 @@
                         <th>Curso</th>
                         <th>Período</th>
                         <th>Asignaturas pendientes y bloques de competencias</th>
-                        <th>Estado general</th>
                         <th class="col-actions no-print">Acción</th>
                     </tr>
                 </thead>
@@ -282,7 +281,7 @@
                     {% for row in dashboard.grouped_operational_rows %}
 
                         <tr
-                            class="tracking-row {% if row.status == 'no_recuperado' %}row-danger{% elif row.status == 'en_riesgo' %}row-warning{% endif %}"
+                            class="tracking-row"
                             data-student-id="{{ row.student_id }}"
                             data-student-name="{{ row.student_name }}"
                             data-course-name="{{ row.course_name }}"
@@ -356,7 +355,7 @@
                                                                 </span>
 
                                                                 <span class="block-label-score-value">
-                                                                    {{ block.score if block.score is not none else '—' }}
+                                                                    {{ block.score|round(0)|int if block.score is not none else '—' }}
                                                                 </span>
                                                             </div>
 
@@ -383,7 +382,7 @@
                                                                 </span>
 
                                                                 <span class="block-label-score-value">
-                                                                    {{ subject.lowest_score if subject.lowest_score is not none else '—' }}
+                                                                    {{ subject.lowest_score|round(0)|int if subject.lowest_score is not none else '—' }}
                                                                 </span>
 
                                                             </div>
@@ -406,26 +405,6 @@
 
                                 {% else %}
                                     —
-                                {% endif %}
-
-                            </td>
-
-                            <td>
-
-                                {% if row.status == "no_recuperado" %}
-                                    <span class="badge badge-pendiente">
-                                        No recuperó
-                                    </span>
-
-                                {% elif row.status == "en_riesgo" %}
-                                    <span class="badge badge-parcial">
-                                        Recuperación pedagógica
-                                    </span>
-
-                                {% else %}
-                                    <span class="badge">
-                                        Pendiente
-                                    </span>
                                 {% endif %}
 
                             </td>
@@ -461,6 +440,52 @@
 
 </section>
 {% endif %}
+
+
+<style>
+    #tracking-table th,
+    #tracking-table td {
+        vertical-align: top;
+    }
+
+    #tracking-table .subject-item {
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+        border-bottom: 1px dashed #e5e7eb;
+    }
+
+    #tracking-table .subject-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    #tracking-table .block-label-vertical-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 8px;
+        margin-top: 4px;
+    }
+
+    #tracking-table .block-label-line {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        border: 1px solid #d9e3dc;
+        border-radius: 8px;
+        padding: 3px 6px;
+        background: #f8faf9;
+        line-height: 1.15;
+    }
+
+    #tracking-table .block-label-score-text {
+        display: none;
+    }
+
+    #tracking-table .block-label-score-value {
+        font-weight: 700;
+    }
+</style>
 
 {% endblock %}
 
