@@ -32,7 +32,7 @@
 <section class="card no-print">
     <form method="GET" action="{{ url_for('academic_tracking_final_status_dashboard') }}">
 
-        <div class="filters-grid" style="grid-template-columns: repeat(5, minmax(180px, 1fr));">
+        <div class="filters-grid" style="grid-template-columns: repeat(4, minmax(180px, 1fr));">
 
             <div class="field">
                 <label for="ciclo">Ciclo</label>
@@ -78,18 +78,6 @@
                 </select>
             </div>
 
-            <div class="field">
-                <label for="curso">Curso</label>
-                <select id="curso" name="curso">
-                    <option value="">Todos</option>
-                    {% for course in dashboard.metadata.courses_catalog %}
-                        <option value="{{ course.value }}" {% if dashboard.filters.curso == course.value %}selected{% endif %}>
-                            {{ course.label }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
         </div>
 
         <div class="filter-actions" style="margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap;">
@@ -104,7 +92,7 @@
             <a
                 class="btn btn-secondary"
                 target="_blank"
-                href="{{ url_for('academic_tracking_final_status_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&situacion={{ dashboard.filters.situacion or '' }}&grado={{ dashboard.filters.grado or '' }}&seccion={{ dashboard.filters.seccion or '' }}&curso={{ dashboard.filters.curso or '' }}"
+                href="{{ url_for('academic_tracking_final_status_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&situacion={{ dashboard.filters.situacion or '' }}&grado={{ dashboard.filters.grado or '' }}&seccion={{ dashboard.filters.seccion or '' }}"
             >
                 Generar reporte PDF
             </a>
@@ -112,7 +100,7 @@
             <a
                 class="btn btn-secondary"
                 target="_blank"
-                href="{{ url_for('academic_tracking_final_status_slips_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&situacion={{ dashboard.filters.situacion or '' }}&grado={{ dashboard.filters.grado or '' }}&seccion={{ dashboard.filters.seccion or '' }}&curso={{ dashboard.filters.curso or '' }}"
+                href="{{ url_for('academic_tracking_final_status_slips_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&situacion={{ dashboard.filters.situacion or '' }}&grado={{ dashboard.filters.grado or '' }}&seccion={{ dashboard.filters.seccion or '' }}"
             >
                 Fichas individuales
             </a>
@@ -120,7 +108,7 @@
             <a
                 class="btn btn-secondary"
                 target="_blank"
-                href="{{ url_for('academic_tracking_final_status_delivery_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&situacion={{ dashboard.filters.situacion or '' }}&grado={{ dashboard.filters.grado or '' }}&seccion={{ dashboard.filters.seccion or '' }}&curso={{ dashboard.filters.curso or '' }}"
+                href="{{ url_for('academic_tracking_final_status_delivery_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&situacion={{ dashboard.filters.situacion or '' }}&grado={{ dashboard.filters.grado or '' }}&seccion={{ dashboard.filters.seccion or '' }}"
             >
                 Constancia de entrega
             </a>
