@@ -161,27 +161,6 @@
 
     {% set selected_situation = dashboard.filters.situacion or "" %}
     {% set students = dashboard.report.students %}
-    {% set ns = namespace(total=0) %}
-
-    {% for student in students %}
-        {% set include_student = false %}
-
-        {% if selected_situation == "completivo" and student.subjects_to_completivo %}
-            {% set include_student = true %}
-        {% elif selected_situation == "extraordinario" and student.subjects_to_extraordinario %}
-            {% set include_student = true %}
-        {% elif selected_situation == "especial" and (student.subjects_to_especial or student.modules_to_special_evaluation) %}
-            {% set include_student = true %}
-        {% elif selected_situation == "modulo_especial" and student.modules_to_special_evaluation %}
-            {% set include_student = true %}
-        {% elif not selected_situation and (student.subjects_to_completivo or student.subjects_to_extraordinario or student.subjects_to_especial or student.modules_to_special_evaluation) %}
-            {% set include_student = true %}
-        {% endif %}
-
-        {% if include_student %}
-            {% set ns.total = ns.total + 1 %}
-        {% endif %}
-    {% endfor %}
 
     <div class="report-header">
 
@@ -249,8 +228,8 @@
             </div>
 
             <div class="filter-item">
-                <span>Curso</span>
-                <strong>{{ dashboard.filters.curso or "Todos" }}</strong>
+                <span>Grado</span>
+                <strong>{{ dashboard.filters.grado or "Todos" }}</strong>
             </div>
 
             <div class="filter-item">
@@ -262,10 +241,10 @@
 
     </div>
 
-    {% if ns.total > 0 %}
+    {% if students|length > 0 %}
 
         <h2 class="section-title">
-            Estudiantes encontrados: {{ ns.total }}
+            Estudiantes encontrados: {{ students|length }}
         </h2>
 
         <table>
@@ -283,22 +262,6 @@
             <tbody>
 
                 {% for student in students %}
-
-                    {% set include_student = false %}
-
-                    {% if selected_situation == "completivo" and student.subjects_to_completivo %}
-                        {% set include_student = true %}
-                    {% elif selected_situation == "extraordinario" and student.subjects_to_extraordinario %}
-                        {% set include_student = true %}
-                    {% elif selected_situation == "especial" and (student.subjects_to_especial or student.modules_to_special_evaluation) %}
-                        {% set include_student = true %}
-                    {% elif selected_situation == "modulo_especial" and student.modules_to_special_evaluation %}
-                        {% set include_student = true %}
-                    {% elif not selected_situation and (student.subjects_to_completivo or student.subjects_to_extraordinario or student.subjects_to_especial or student.modules_to_special_evaluation) %}
-                        {% set include_student = true %}
-                    {% endif %}
-
-                    {% if include_student %}
 
                         <tr>
 
@@ -370,11 +333,26 @@
                                     {% endfor %}
                                 {% endif %}
 
+                                {% if selected_situation == "promovido" %}
+                                    <div class="subject-item">
+                                        <strong>Promovido</strong>
+                                        <small>El/la estudiante no presenta asignaturas pendientes para este proceso.</small>
+                                    </div>
+                                {% elif selected_situation == "sin_datos" %}
+                                    <div class="subject-item">
+                                        <strong>Sin calificaciones finales</strong>
+                                        <small>No se identificaron calificaciones finales suficientes para clasificar la situación.</small>
+                                    </div>
+                                {% elif not selected_situation and not student.subjects_to_completivo and not student.subjects_to_extraordinario and not student.subjects_to_especial and not student.modules_to_special_evaluation %}
+                                    <div class="subject-item">
+                                        <strong>{{ student.final_status_label }}</strong>
+                                        <small>No registra asignaturas pendientes en el detalle del proceso.</small>
+                                    </div>
+                                {% endif %}
+
                             </td>
 
                         </tr>
-
-                    {% endif %}
 
                 {% endfor %}
 
@@ -384,7 +362,7 @@
 
     {% else %}
 
-        <h3>No se encontraron estudiantes con asignaturas pendientes para la etapa seleccionada.</h3>
+        <h3>No se encontraron estudiantes para los filtros seleccionados.</h3>
 
     {% endif %}
 
