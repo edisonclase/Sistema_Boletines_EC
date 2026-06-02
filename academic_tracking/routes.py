@@ -1886,7 +1886,14 @@ def p4_promoted_completivo_pending_pdf(
 
         student_id = _normalize_text(row.get("ID_ESTUDIANTE"))
         student_name = _normalize_text(row.get("NOMBRE_ESTUDIANTE"))
-        numero = _normalize_text(row.get("NUMERO"))
+
+        numero_value = safe_float_value(row.get("NUMERO"))
+
+        if numero_value is not None:
+            numero = str(int(numero_value))
+        else:
+            numero = _normalize_text(row.get("NUMERO"))
+
         prof_titular = _normalize_text(row.get("PROF_TITULAR"))
 
         if not student_id and not student_name:
