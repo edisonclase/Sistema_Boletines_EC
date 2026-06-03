@@ -190,6 +190,22 @@
                 Constancia recuperación pedagógica
             </button>
 
+            <a
+                class="btn btn-secondary"
+                target="_blank"
+                href="{{ url_for('academic_tracking_p4_promoted_completivo_pending_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&grado={{ dashboard.filters.grado or '' }}&seccion={{ dashboard.filters.seccion or '' }}&curso={{ dashboard.filters.curso or '' }}&asignatura={{ dashboard.filters.asignatura or '' }}"
+            >
+                P4 aprobado con completivo pendiente
+            </a>
+
+            <a
+                class="btn btn-secondary"
+                target="_blank"
+                href="{{ url_for('academic_tracking_attendance_completivo_pdf') }}?ciclo={{ dashboard.filters.ciclo or '' }}&grado={{ dashboard.filters.grado or '' }}&seccion={{ dashboard.filters.seccion or '' }}&curso={{ dashboard.filters.curso or '' }}&asignatura={{ dashboard.filters.asignatura or '' }}"
+            >
+                Completivo por asistencia
+            </a>
+
         </div>
     </form>
 </section>

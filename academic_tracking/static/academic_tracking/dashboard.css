@@ -259,13 +259,13 @@ strong {
 
 .filter-actions {
     display: flex;
-    gap: 14px;
-    align-items: center;
-    justify-content: flex-end;
     flex-wrap: wrap;
-    margin-top: 18px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border-soft);
+    gap: 8px;
+    align-items: center;
+}
+
+.filter-actions .btn {
+    white-space: nowrap;
 }
 
 .btn {
