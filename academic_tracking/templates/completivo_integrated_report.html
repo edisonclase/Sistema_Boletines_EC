@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <style>
+        @page {
+            size: Letter landscape;
+            margin: 9mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #0f172a;
+            font-size: 10px;
+        }
+
+        .cover-panel {
+            border: 1px solid #b7dcc7;
+            border-radius: 14px;
+            padding: 14px;
+            background: #f8fafc;
+            margin-bottom: 12px;
+        }
+
+        .header {
+            display: table;
+            width: 100%;
+            border-bottom: 3px solid #1f8f4a;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+
+        .header-text {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .header-logo {
+            display: table-cell;
+            width: 90px;
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        .header-logo img {
+            max-height: 76px;
+            object-fit: contain;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #0b3d24;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            margin: 5px 0 0;
+            color: #475569;
+            font-size: 11px;
+            line-height: 1.35;
+        }
+
+        .purpose-box {
+            border-left: 5px solid #1f8f4a;
+            background: #ffffff;
+            padding: 9px 11px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            color: #334155;
+            font-size: 11px;
+            line-height: 1.35;
+        }
+
+        .info-table,
+        .filters-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 8px;
+            table-layout: fixed;
+            margin-bottom: 10px;
+        }
+
+        .info-table td,
+        .filters-table td {
+            border: 1px solid #dbe4ee;
+            border-radius: 10px;
+            background: #ffffff;
+            padding: 9px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .info-table span,
+        .filters-table span {
+            display: block;
+            font-size: 8.5px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            letter-spacing: 0.2px;
+        }
+
+        .info-table strong {
+            display: block;
+            font-size: 20px;
+            color: #0b3d24;
+        }
+
+        .filters-table strong {
+            font-size: 10px;
+            color: #0f172a;
+        }
+
+        .course-title {
+            margin: 12px 0 6px;
+            font-size: 15px;
+            color: #0b3d24;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 3px;
+        }
+
+        .subject-title {
+            margin: 8px 0 4px;
+            font-size: 12px;
+            color: #1f2937;
+            background: #eaf5ef;
+            border: 1px solid #b7dcc7;
+            padding: 5px 7px;
+            border-radius: 6px;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 7px;
+        }
+
+        .data-table th {
+            background: #1f8f4a;
+            color: #ffffff;
+            padding: 6px;
+            font-size: 9.5px;
+            text-align: center;
+            border: 1px solid #0b3d24;
+        }
+
+        .data-table td {
+            padding: 6px;
+            font-size: 9.5px;
+            border: 1px solid #dbe4ee;
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .student-name {
+            font-weight: 700;
+        }
+
+        .muted {
+            color: #64748b;
+            font-size: 8.5px;
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 3px 7px;
+            font-size: 8.5px;
+            font-weight: 700;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .badge-grade {
+            background: #fffbeb;
+            border-color: #fde68a;
+            color: #92400e;
+        }
+
+        .badge-attendance {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #9a3412;
+        }
+
+        .badge-both {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .attendance-warning {
+            background: #fef3c7;
+            font-weight: 700;
+        }
+
+        .attendance-critical {
+            background: #fee2e2;
+            color: #991b1b;
+            font-weight: 800;
+        }
+
+        .cf-warning {
+            background: #fef3c7;
+            font-weight: 700;
+        }
+
+        .empty {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            text-align: center;
+            color: #475569;
+        }
+
+        .footer {
+            margin-top: 14px;
+            padding-top: 8px;
+            border-top: 1px solid #dbe4ee;
+            color: #64748b;
+            text-align: right;
+            font-size: 8.5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="cover-panel">
+        <div class="header">
+            <div class="header-text">
+                <h1>Reporte integrado de completivo pendiente</h1>
+
+                <p class="subtitle">
+                    {{ dashboard.institution.name }} · Año escolar {{ dashboard.institution.school_year }}
+                </p>
+
+                <p class="subtitle">
+                    Estudiantes activos que aprobaron todos los bloques del P4, pero requieren completivo por calificación final, asistencia o ambas condiciones.
+                </p>
+            </div>
+
+            <div class="header-logo">
+                {% if dashboard.institution.logos %}
+                    <img src="{{ dashboard.institution.logos[0].src }}" alt="Logo">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="purpose-box">
+            Este reporte unifica la revisión de completivo por calificación final y por asistencia anual.
+            Solo incluye asignaturas donde el estudiante tiene promovidos los cuatro bloques de competencia del P4.
+        </div>
+
+        <table class="info-table">
+            <tr>
+                <td>
+                    <span>Total casos</span>
+                    <strong>{{ dashboard.summary.total_cases }}</strong>
+                </td>
+
+                <td>
+                    <span>Por calificación</span>
+                    <strong>{{ dashboard.summary.by_grade }}</strong>
+                </td>
+
+                <td>
+                    <span>Por asistencia</span>
+                    <strong>{{ dashboard.summary.by_attendance }}</strong>
+                </td>
+
+                <td>
+                    <span>Ambas condiciones</span>
+                    <strong>{{ dashboard.summary.by_both }}</strong>
+                </td>
+
+                <td>
+                    <span>Asistencia ≤ 75%</span>
+                    <strong>{{ dashboard.summary.attendance_critical }}</strong>
+                </td>
+            </tr>
+        </table>
+
+        <table class="filters-table">
+            <tr>
+                <td>
+                    <span>Ciclo</span>
+                    <strong>{{ dashboard.filters.ciclo or "Todos" }}</strong>
+                </td>
+
+                <td>
+                    <span>Curso</span>
+                    <strong>{{ dashboard.filters.curso or "Todos" }}</strong>
+                </td>
+
+                <td>
+                    <span>Grado</span>
+                    <strong>{{ dashboard.filters.grado or "Todos" }}</strong>
+                </td>
+
+                <td>
+                    <span>Sección</span>
+                    <strong>{{ dashboard.filters.seccion or "Todas" }}</strong>
+                </td>
+
+                <td>
+                    <span>Asignatura</span>
+                    <strong>{{ dashboard.filters.asignatura or "Todas" }}</strong>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {% if dashboard.grouped_courses %}
+
+        {% for course in dashboard.grouped_courses %}
+
+            <h2 class="course-title">{{ course.course_name }}</h2>
+
+            {% for subject in course.subjects %}
+
+                <h3 class="subject-title">
+                    {{ subject.subject_name }} · {{ subject.students|length }} caso(s)
+                </h3>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 7%;">No.</th>
+                            <th style="width: 31%;">Estudiante</th>
+                            <th style="width: 22%;">Asignatura</th>
+                            <th style="width: 10%;">CF</th>
+                            <th style="width: 12%;">Asistencia</th>
+                            <th style="width: 18%;">Motivo</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for student in subject.students %}
+                            <tr>
+                                <td class="text-center">{{ student.numero or "—" }}</td>
+
+                                <td>
+                                    <div class="student-name">{{ student.student_name }}</div>
+                                    <div class="muted">ID: {{ student.student_id }}</div>
+                                </td>
+
+                                <td>{{ student.subject_name }}</td>
+
+                                <td class="text-center {% if student.reason_key in ['calificacion', 'ambas'] %}cf-warning{% endif %}">
+                                    {{ student.cf_final }}
+                                </td>
+
+                                <td class="text-center {% if student.attendance_level == 'critical' %}attendance-critical{% elif student.attendance_level == 'warning' %}attendance-warning{% endif %}">
+                                    {{ student.attendance_pct }}
+                                </td>
+
+                                <td class="text-center">
+                                    {% if student.reason_key == "calificacion" %}
+                                        <span class="badge badge-grade">Calificación final</span>
+                                    {% elif student.reason_key == "asistencia" %}
+                                        <span class="badge badge-attendance">Asistencia</span>
+                                    {% else %}
+                                        <span class="badge badge-both">Calificación y asistencia</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            {% endfor %}
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty">
+            No se encontraron estudiantes activos con completivo pendiente en los filtros seleccionados.
+        </div>
+
+    {% endif %}
+
+    <div class="footer">
+        Generado por Aula Nova · Academic Tracking
+    </div>
+
+</body>
+</html>

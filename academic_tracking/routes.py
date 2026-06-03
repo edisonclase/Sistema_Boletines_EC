@@ -2352,6 +2352,310 @@ def attendance_completivo_pdf(
             "Content-Disposition": 'inline; filename="completivo_por_asistencia.pdf"'
         },
     )
+    
+@router.get(
+    "/completivo/reporte-integrado.pdf",
+    name="academic_tracking_integrated_completivo_pdf",
+)
+def integrated_completivo_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+):
+    def safe_float_value(value: Any) -> Optional[float]:
+        if value is None:
+            return None
+
+        text = str(value).strip().replace("%", "")
+
+        if not text or text.lower() == "nan":
+            return None
+
+        try:
+            number = float(text)
+        except ValueError:
+            return None
+
+        if math.isnan(number):
+            return None
+
+        return number
+
+    def format_score(value: Any) -> str:
+        number = safe_float_value(value)
+        if number is None:
+            return "—"
+        return str(int(round(number)))
+
+    def format_percent(value: Any) -> str:
+        number = safe_float_value(value)
+        if number is None:
+            return "—"
+        return f"{int(round(number))}%"
+
+    def format_numero(value: Any) -> str:
+        number = safe_float_value(value)
+        if number is not None:
+            return str(int(number))
+
+        text = _normalize_text(value)
+        return text or "—"
+
+    def is_active_row(row: dict[str, Any]) -> bool:
+        estado = _normalize_text(row.get("ESTADO")).upper()
+
+        inactive_words = {
+            "ABANDONO",
+            "ABANDONÓ",
+            "RETIRADO",
+            "RETIRADA",
+            "TRANSFERIDO",
+            "TRANSFERIDA",
+            "TRASLADADO",
+            "TRASLADADA",
+            "INACTIVO",
+            "INACTIVA",
+            "BAJA",
+        }
+
+        if not estado:
+            return True
+
+        for word in inactive_words:
+            if word in estado:
+                return False
+
+        return True
+
+    subject_catalog = {
+        "LEN": "Lengua Española",
+        "ING": "Inglés",
+        "FRA": "Francés",
+        "MAT": "Matemática",
+        "SOC": "Ciencias Sociales",
+        "NAT": "Ciencias de la Naturaleza",
+        "ART": "Educación Artística",
+        "FIS": "Educación Física",
+        "FOR": "Formación Humana",
+    }
+
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    normalized_course = _normalize_text(curso)
+    normalized_grade = _normalize_text(grado)
+    normalized_section = _normalize_text(seccion)
+    normalized_subject = _normalize_text(asignatura)
+
+    report_rows = []
+
+    for row in rows:
+        if not is_active_row(row):
+            continue
+
+        course_name = _normalize_text(row.get("CURSO"))
+        raw_grade, raw_section = _split_course_name(course_name)
+
+        if normalized_course and course_name != normalized_course:
+            continue
+
+        if normalized_grade and raw_grade != normalized_grade:
+            continue
+
+        if normalized_section and raw_section != normalized_section:
+            continue
+
+        student_id = _normalize_text(row.get("ID_ESTUDIANTE"))
+        student_name = _normalize_text(row.get("NOMBRE_ESTUDIANTE"))
+        numero = format_numero(row.get("NUMERO"))
+
+        if not student_id and not student_name:
+            continue
+
+        for subject_code, subject_name in subject_catalog.items():
+            if normalized_subject and subject_code != normalized_subject:
+                continue
+
+            p4_block_scores = [
+                safe_float_value(row.get(f"{subject_code}_C1_P4")),
+                safe_float_value(row.get(f"{subject_code}_C2_P4")),
+                safe_float_value(row.get(f"{subject_code}_C3_P4")),
+                safe_float_value(row.get(f"{subject_code}_C4_P4")),
+            ]
+
+            reported_p4_blocks = [
+                score for score in p4_block_scores if score is not None
+            ]
+
+            p4_promoted = (
+                len(reported_p4_blocks) == 4
+                and all(score >= 70 for score in reported_p4_blocks)
+            )
+
+            cf_final = safe_float_value(row.get(f"{subject_code}_CF_FINAL"))
+            attendance_pct = safe_float_value(row.get(f"{subject_code}_ASIST_PCT"))
+
+            needs_by_grade = cf_final is not None and cf_final < 70
+            needs_by_attendance = attendance_pct is not None and attendance_pct < 80
+
+            if not needs_by_grade and not needs_by_attendance:
+                continue
+
+            if needs_by_grade and not p4_promoted:
+                continue
+
+            if needs_by_grade and needs_by_attendance:
+                reason = "Calificación final y asistencia"
+                reason_key = "ambas"
+            elif needs_by_grade:
+                reason = "Calificación final"
+                reason_key = "calificacion"
+            else:
+                reason = "Asistencia"
+                reason_key = "asistencia"
+
+            attendance_level = ""
+
+            if attendance_pct is not None:
+                if attendance_pct <= 75:
+                    attendance_level = "critical"
+                elif attendance_pct < 80:
+                    attendance_level = "warning"
+
+            report_rows.append(
+                {
+                    "numero": numero,
+                    "student_id": student_id,
+                    "student_name": student_name,
+                    "course_name": course_name,
+                    "grade": raw_grade,
+                    "section": raw_section,
+                    "subject_code": subject_code,
+                    "subject_name": subject_name,
+                    "cf_final": format_score(cf_final),
+                    "attendance_pct": format_percent(attendance_pct),
+                    "attendance_raw": attendance_pct,
+                    "attendance_level": attendance_level,
+                    "reason": reason,
+                    "reason_key": reason_key,
+                }
+            )
+
+    report_rows = sorted(
+        report_rows,
+        key=lambda item: (
+            _normalize_text(item.get("course_name")),
+            _normalize_text(item.get("subject_name")),
+            _normalize_text(item.get("numero")).zfill(4),
+            _normalize_text(item.get("student_name")),
+        ),
+    )
+
+    summary = {
+        "total_cases": len(report_rows),
+        "by_grade": sum(1 for item in report_rows if item["reason_key"] == "calificacion"),
+        "by_attendance": sum(1 for item in report_rows if item["reason_key"] == "asistencia"),
+        "by_both": sum(1 for item in report_rows if item["reason_key"] == "ambas"),
+        "attendance_critical": sum(
+            1 for item in report_rows if item.get("attendance_level") == "critical"
+        ),
+    }
+
+    grouped_by_course: dict[str, dict[str, Any]] = {}
+
+    for item in report_rows:
+        course_name = item.get("course_name") or "Sin curso"
+        subject_name = item.get("subject_name") or "Sin asignatura"
+
+        if course_name not in grouped_by_course:
+            grouped_by_course[course_name] = {
+                "course_name": course_name,
+                "subjects": {},
+            }
+
+        grouped_by_course[course_name]["subjects"].setdefault(
+            subject_name,
+            {
+                "subject_name": subject_name,
+                "students": [],
+            },
+        )
+
+        grouped_by_course[course_name]["subjects"][subject_name]["students"].append(item)
+
+    grouped_courses = []
+
+    for course_payload in grouped_by_course.values():
+        subject_groups = sorted(
+            course_payload["subjects"].values(),
+            key=lambda item: item["subject_name"],
+        )
+
+        grouped_courses.append(
+            {
+                "course_name": course_payload["course_name"],
+                "subjects": subject_groups,
+            }
+        )
+
+    grouped_courses = sorted(
+        grouped_courses,
+        key=lambda item: _normalize_text(item.get("course_name")),
+    )
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": [
+                {
+                    "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                    "alt": "Logo del centro educativo",
+                }
+            ],
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "curso": curso,
+            "grado": grado,
+            "seccion": seccion,
+            "asignatura": asignatura,
+        },
+        "summary": summary,
+        "rows": report_rows,
+        "grouped_courses": grouped_courses,
+    }
+
+    rendered_html = _render_template_to_html(
+        "completivo_integrated_report.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="reporte_integrado_completivo.pdf"'
+        },
+    )
 
 @router.get(
     "/health",

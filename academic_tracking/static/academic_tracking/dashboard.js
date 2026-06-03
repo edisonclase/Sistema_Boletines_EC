@@ -494,35 +494,62 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+
         const recoveryDeliveryBtn = document.getElementById("recovery-delivery-btn");
 
-        if (!recoveryDeliveryBtn) {
-            return;
+        if (recoveryDeliveryBtn) {
+            recoveryDeliveryBtn.addEventListener("click", function () {
+                const baseUrl = recoveryDeliveryBtn.dataset.url;
+
+                const params = new URLSearchParams();
+
+                const ciclo = document.getElementById("ciclo")?.value || "";
+                const grado = document.getElementById("grado")?.value || "";
+                const seccion = document.getElementById("seccion")?.value || "";
+                const periodo = document.getElementById("periodo")?.value || "";
+                const asignatura = document.getElementById("asignatura")?.value || "";
+
+                if (ciclo) params.set("ciclo", ciclo);
+                if (grado) params.set("grado", grado);
+                if (seccion) params.set("seccion", seccion);
+                if (periodo) params.set("periodo", periodo);
+                if (asignatura) params.set("asignatura", asignatura);
+
+                const finalUrl = params.toString()
+                    ? `${baseUrl}?${params.toString()}`
+                    : baseUrl;
+
+                window.open(finalUrl, "_blank");
+            });
         }
 
-        recoveryDeliveryBtn.addEventListener("click", function () {
-            const baseUrl = recoveryDeliveryBtn.dataset.url;
+        const integratedCompletivoBtn = document.getElementById("integrated-completivo-btn");
 
-            const params = new URLSearchParams();
+        if (integratedCompletivoBtn) {
+            integratedCompletivoBtn.addEventListener("click", function () {
 
-            const ciclo = document.getElementById("ciclo")?.value || "";
-            const grado = document.getElementById("grado")?.value || "";
-            const seccion = document.getElementById("seccion")?.value || "";
-            const periodo = document.getElementById("periodo")?.value || "";
-            const asignatura = document.getElementById("asignatura")?.value || "";
+                const baseUrl = integratedCompletivoBtn.dataset.url;
 
-            if (ciclo) params.set("ciclo", ciclo);
-            if (grado) params.set("grado", grado);
-            if (seccion) params.set("seccion", seccion);
-            if (periodo) params.set("periodo", periodo);
-            if (asignatura) params.set("asignatura", asignatura);
+                const params = new URLSearchParams();
 
-            const finalUrl = params.toString()
-                ? `${baseUrl}?${params.toString()}`
-                : baseUrl;
+                const ciclo = document.getElementById("ciclo")?.value || "";
+                const grado = document.getElementById("grado")?.value || "";
+                const seccion = document.getElementById("seccion")?.value || "";
+                const asignatura = document.getElementById("asignatura")?.value || "";
 
-            window.open(finalUrl, "_blank");
-        });
+                if (ciclo) params.set("ciclo", ciclo);
+                if (grado) params.set("grado", grado);
+                if (seccion) params.set("seccion", seccion);
+                if (asignatura) params.set("asignatura", asignatura);
+
+                const finalUrl = params.toString()
+                    ? `${baseUrl}?${params.toString()}`
+                    : baseUrl;
+
+                window.open(finalUrl, "_blank");
+            });
+        }
+
     });
 </script>
 {% endblock %}
