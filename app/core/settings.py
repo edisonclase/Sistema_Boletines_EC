@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 
     url_primer_ciclo: str = ""
     url_segundo_ciclo: str = ""
+    url_control_asistencia_completivo_primer_ciclo: str = ""
+    url_control_asistencia_completivo_segundo_ciclo: str = ""
 
     pdf_engine: str = "wkhtmltopdf"
     wkhtmltopdf_path: str = ""
