@@ -2546,6 +2546,67 @@ def integrated_completivo_pdf(
                     "attendance_level": attendance_level,
                     "reason": reason,
                     "reason_key": reason_key,
+                    "item_type": "subject",
+                }
+            )
+            
+        for module_number in range(1, 6):
+            module_code = f"MOD{module_number}"
+            module_name = _normalize_text(row.get(f"{module_code}_NOMBRE"))
+
+            if not module_name:
+                continue
+
+            if normalized_subject and module_code != normalized_subject:
+                continue
+
+            module_cf = safe_float_value(row.get(f"{module_code}_CF"))
+            module_attendance = safe_float_value(row.get(f"{module_code}_ASIST"))
+
+            needs_by_grade = module_cf is not None and module_cf < 70
+            needs_by_attendance = (
+                module_attendance is not None
+                and module_attendance < 80
+            )
+
+            if not needs_by_grade and not needs_by_attendance:
+                continue
+
+            if needs_by_grade and needs_by_attendance:
+                reason = "Calificación final y asistencia"
+                reason_key = "ambas"
+            elif needs_by_grade:
+                reason = "Calificación final"
+                reason_key = "calificacion"
+            else:
+                reason = "Asistencia"
+                reason_key = "asistencia"
+
+            attendance_level = ""
+
+            if module_attendance is not None:
+                if module_attendance <= 75:
+                    attendance_level = "critical"
+                elif module_attendance < 80:
+                    attendance_level = "warning"
+
+            report_rows.append(
+                {
+                    "numero": numero,
+                    "student_id": student_id,
+                    "student_name": student_name,
+                    "course_name": course_name,
+                    "grade": raw_grade,
+                    "section": raw_section,
+                    "subject_code": module_code,
+                    "subject_name": module_name,
+                    "cf_final": format_score(module_cf),
+                    "attendance_pct": format_percent(module_attendance),
+                    "attendance_raw": module_attendance,
+                    "attendance_level": attendance_level,
+                    "reason": reason,
+                    "reason_key": reason_key,
+                    "item_type": "module",
                 }
             )
 
