@@ -117,6 +117,14 @@
             <button type="button" class="btn btn-secondary" onclick="openCompletivoPdfReport()">
                 Generar reporte PDF
             </button>
+
+            <button type="button" class="btn btn-secondary" onclick="openCompletivoSlipsPdf()">
+                Fichas completivo
+            </button>
+
+            <button type="button" class="btn btn-secondary" onclick="openCompletivoIndividualSlipsZip()">
+                Fichas individuales ZIP
+            </button>
         </div>
     </form>
 </section>
@@ -233,26 +241,47 @@
 </section>
 
 <script>
-    function openCompletivoPdfReport() {
-        const params = new URLSearchParams();
+function buildCompletivoParams() {
+    const params = new URLSearchParams();
 
-        const ciclo = document.getElementById("ciclo")?.value || "";
-        const grado = document.getElementById("grado")?.value || "";
-        const seccion = document.getElementById("seccion")?.value || "";
-        const asignatura = document.getElementById("asignatura")?.value || "";
-        const motivo = document.getElementById("motivo")?.value || "";
+    const ciclo = document.getElementById("ciclo")?.value || "";
+    const grado = document.getElementById("grado")?.value || "";
+    const seccion = document.getElementById("seccion")?.value || "";
+    const asignatura = document.getElementById("asignatura")?.value || "";
+    const motivo = document.getElementById("motivo")?.value || "";
 
-        if (ciclo) params.set("ciclo", ciclo);
-        if (grado) params.set("grado", grado);
-        if (seccion) params.set("seccion", seccion);
-        if (asignatura) params.set("asignatura", asignatura);
-        if (motivo) params.set("motivo", motivo);
+    if (ciclo) params.set("ciclo", ciclo);
+    if (grado) params.set("grado", grado);
+    if (seccion) params.set("seccion", seccion);
+    if (asignatura) params.set("asignatura", asignatura);
+    if (motivo) params.set("motivo", motivo);
 
-        const baseUrl = "{{ url_for('academic_tracking_completivo_report_pdf') }}";
-        const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    return params;
+}
 
-        window.open(finalUrl, "_blank");
-    }
+function openCompletivoPdfReport() {
+    const params = buildCompletivoParams();
+    const baseUrl = "{{ url_for('academic_tracking_completivo_report_pdf') }}";
+    const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    window.open(finalUrl, "_blank");
+}
+
+function openCompletivoSlipsPdf() {
+    const params = buildCompletivoParams();
+    const baseUrl = "{{ url_for('academic_tracking_completivo_slips_pdf') }}";
+    const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    window.open(finalUrl, "_blank");
+}
+
+function openCompletivoIndividualSlipsZip() {
+    const params = buildCompletivoParams();
+    const baseUrl = "{{ url_for('academic_tracking_completivo_individual_slips_zip') }}";
+    const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    window.open(finalUrl, "_blank");
+}
 </script>
 
 {% endblock %}

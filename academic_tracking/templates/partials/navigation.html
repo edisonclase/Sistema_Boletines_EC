@@ -32,6 +32,13 @@
         </a>
 
         <a
+            class="app-nav-link {% if active_page == 'completivo' %}active{% endif %}"
+            href="{{ url_for('academic_tracking_completivo_dashboard') }}"
+        >
+            <span>Completivo</span>
+        </a>
+
+        <a
             class="app-nav-link {% if active_page == 'projection' %}active{% endif %}"
             href="{{ url_for('academic_tracking_completivo_projection_dashboard') }}"
         >

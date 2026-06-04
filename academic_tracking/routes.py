@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import math
 import re
+import io
+import zipfile
 
 from pathlib import Path
 from typing import Any, Optional
@@ -2756,7 +2758,7 @@ def completivo_dashboard(
         seccion=seccion,
         asignatura=asignatura,
         motivo=motivo,
-    )
+    ) 
 
     base_report = build_completivo_report(
         rows=rows,
@@ -3027,6 +3029,207 @@ def completivo_report_pdf(
         media_type="application/pdf",
         headers={
             "Content-Disposition": f'inline; filename="{filename}.pdf"'
+        },
+    )
+    
+@router.get(
+    "/completivo/fichas.pdf",
+    name="academic_tracking_completivo_slips_pdf",
+)
+def completivo_slips_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    motivo: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    attendance_control = load_completivo_attendance_control_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_completivo_report(
+        rows=rows,
+        attendance_rows_primer_ciclo=attendance_control["primer_ciclo"],
+        attendance_rows_segundo_ciclo=attendance_control["segundo_ciclo"],
+        ciclo=ciclo,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+        motivo=motivo,
+    )
+    
+    students_for_slips = []
+
+    for student in report.get("students", []):
+        student_copy = dict(student)
+        student_copy["pending_items"] = student.get("items", [])
+        students_for_slips.append(student_copy)
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": [
+                {
+                    "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                    "alt": "Logo del centro educativo",
+                }
+            ],
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "grado": grado,
+            "seccion": seccion,
+            "asignatura": asignatura,
+            "motivo": motivo,
+        },
+        "students": students_for_slips,
+        "report": report,
+    }
+
+    rendered_html = _render_template_to_html(
+        "completivo_student_slips.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="fichas_completivo.pdf"'
+        },
+    )
+    
+@router.get(
+    "/completivo/fichas-individuales.zip",
+    name="academic_tracking_completivo_individual_slips_zip",
+)
+def completivo_individual_slips_zip(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    motivo: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    attendance_control = load_completivo_attendance_control_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_completivo_report(
+        rows=rows,
+        attendance_rows_primer_ciclo=attendance_control["primer_ciclo"],
+        attendance_rows_segundo_ciclo=attendance_control["segundo_ciclo"],
+        ciclo=ciclo,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+        motivo=motivo,
+    )
+
+    students_for_slips = []
+
+    for student in report.get("students", []):
+        student_copy = dict(student)
+        student_copy["pending_items"] = student.get("items", [])
+        students_for_slips.append(student_copy)
+
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for student in students_for_slips:
+            dashboard_payload = {
+                "institution": {
+                    "name": _resolve_institution_name(),
+                    "school_year": _resolve_school_year(school_year),
+                    "ciclo": ciclo or "Vista general",
+                    "logos": [
+                        {
+                            "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                            "alt": "Logo del centro educativo",
+                        }
+                    ],
+                    "favicon": "/assets/interface_logo.png",
+                },
+                "filters": {
+                    "center_id": center_id,
+                    "school_year": school_year,
+                    "ciclo": ciclo,
+                    "grado": grado,
+                    "seccion": seccion,
+                    "asignatura": asignatura,
+                    "motivo": motivo,
+                },
+                "students": [student],
+                "report": report,
+            }
+
+            rendered_html = _render_template_to_html(
+                "completivo_student_slip_single.html",
+                request=request,
+                dashboard_payload=dashboard_payload,
+            )
+
+            pdf_bytes = _render_pdf_bytes_from_html(
+                rendered_html,
+                base_url=str(request.base_url),
+            )
+
+            student_name = _normalize_text(student.get("student_name")) or "estudiante"
+            course_name = _normalize_text(student.get("course_name")) or "curso"
+            numero = _normalize_text(student.get("numero")) or "sin_numero"
+
+            safe_filename = re.sub(
+                r"[^A-Za-z0-9ÁÉÍÓÚáéíóúÑñ _.-]",
+                "",
+                f"{course_name}_{numero}_{student_name}",
+            ).strip()
+
+            safe_filename = safe_filename.replace(" ", "_")
+
+            zip_file.writestr(
+                f"{safe_filename}.pdf",
+                pdf_bytes,
+            )
+
+    zip_buffer.seek(0)
+
+    return Response(
+        content=zip_buffer.getvalue(),
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": 'attachment; filename="fichas_individuales_completivo.zip"'
         },
     )
 

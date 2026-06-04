@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Fichas de Completivo</title>
+
+    <style>
+        @page {
+            size: Letter portrait;
+            margin: 6mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", Arial, Helvetica, sans-serif;
+            color: #000000;
+            font-size: 12px;
+        }
+
+        .sheet-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 2mm 2mm;
+            table-layout: fixed;
+        }
+
+        .sheet-cell {
+            width: 50%;
+            height: 84mm;
+            vertical-align: top;
+            border: 1px dashed #000000;
+            padding: 1mm;
+        }
+
+        .slip {
+            width: 100%;
+            height: 80mm;
+            border: 1px solid #000000;
+            border-radius: 4px;
+            padding: 4px;
+            overflow: hidden;
+        }
+
+        .slip-header {
+            display: table;
+            width: 100%;
+            border-bottom: 1px solid #000000;
+            padding-bottom: 3px;
+            margin-bottom: 4px;
+        }
+
+        .logo-box {
+            display: table-cell;
+            width: 40px;
+            vertical-align: middle;
+        }
+
+        .logo {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 6px;
+        }
+
+        .school-name {
+            font-size: 10.5px;
+            font-weight: bold;
+            line-height: 1.05;
+        }
+
+        .slip-title {
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+        }
+
+        .meta-table td {
+            border: none;
+            padding: 1px;
+            font-size: 8.5px;
+            line-height: 1.1;
+            vertical-align: top;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .notice {
+            border: 1px solid #000000;
+            padding: 4px;
+            margin-bottom: 5px;
+            font-size: 8.5px;
+            line-height: 1.15;
+            text-align: justify;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+        }
+
+        .items-table th {
+            border: 1px solid #000000;
+            padding: 2px;
+            font-size: 7.5px;
+            text-align: center;
+        }
+
+        .items-table td {
+            border: 1px solid #000000;
+            padding: 2px;
+            font-size: 7.8px;
+            line-height: 1.1;
+        }
+
+        .legend {
+            border: 1px solid #000000;
+            padding: 3px;
+            font-size: 7.8px;
+            line-height: 1.15;
+            text-align: justify;
+        }
+
+        .signature-row {
+            margin-top: 6px;
+            font-size: 8px;
+        }
+
+        .signature-line {
+            display: inline-block;
+            width: 65%;
+            border-bottom: 1px solid #000000;
+            height: 10px;
+        }
+
+        .footer {
+            margin-top: 4px;
+            text-align: right;
+            font-size: 7px;
+        }
+    </style>
+</head>
+
+<body>
+
+<table class="sheet-table">
+    <tbody>
+
+    {% for row_students in dashboard.students|batch(2, none) %}
+
+        <tr>
+
+            {% for student in row_students %}
+
+                <td class="sheet-cell">
+
+                    {% if student %}
+
+                    <article class="slip">
+
+                        <div class="slip-header">
+
+                            <div class="logo-box">
+
+                                {% if dashboard.institution.logos %}
+                                <img
+                                    class="logo"
+                                    src="{{ dashboard.institution.logos[0].src }}"
+                                    alt="Logo"
+                                >
+                                {% endif %}
+
+                            </div>
+
+                            <div class="header-text">
+
+                                <div class="school-name">
+                                    {{ dashboard.institution.name }}
+                                </div>
+
+                                <div style="font-size: 8px;">
+                                    Año escolar:
+                                    {{ dashboard.institution.school_year }}
+                                </div>
+
+                                <div class="slip-title">
+                                    Ficha de Completivo
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <table class="meta-table">
+                            <tr>
+                                <td colspan="2">
+                                    <span class="label">Estudiante:</span>
+                                    {{ student.student_name }}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="label">ID:</span>
+                                    {{ student.student_id }}
+                                </td>
+
+                                <td>
+                                    <span class="label">No.:</span>
+                                    {{ student.numero or "—" }}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <span class="label">Curso:</span>
+                                    {{ student.course_name }}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2">
+                                    <span class="label">Profesor titular:</span>
+                                    {{ student.prof_titular or "—" }}
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="notice">
+                            El/la estudiante debe participar en el proceso de completivo en las asignaturas o módulos detallados a continuación.
+                        </div>
+
+                        <table class="items-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Asignatura / Módulo</th>
+                                    <th>CF</th>
+                                    <th>Asistencia</th>
+                                    <th>Motivo</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                            {% for item in student.pending_items %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ item.item_name }}
+                                    </td>
+
+                                    <td style="text-align:center;">
+                                        {{ item.cf_final }}
+                                    </td>
+
+                                    <td style="text-align:center;">
+                                        {{ item.attendance_pct }}
+                                    </td>
+
+                                    <td style="text-align:center;">
+
+                                        {% if item.reason_key == "calificacion" %}
+                                            Calificación
+                                        {% elif item.reason_key == "asistencia" %}
+                                            Asistencia
+                                        {% else %}
+                                            Ambas
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                        <div class="legend">
+
+                            {% if student.reason_key == "asistencia" %}
+
+                                El/la estudiante pasa a completivo por no alcanzar el porcentaje mínimo de asistencia requerido, aunque haya obtenido una calificación aprobatoria.
+
+                            {% elif student.reason_key == "ambas" %}
+
+                                El/la estudiante presenta condición de completivo por calificación final insuficiente y por asistencia insuficiente.
+
+                            {% else %}
+
+                                El/la estudiante presenta condición de completivo por no alcanzar la calificación final mínima requerida.
+
+                            {% endif %}
+
+                        </div>
+
+                        <div class="signature-row">
+                            Firma del estudiante:
+                            <span class="signature-line"></span>
+                        </div>
+
+                        <div class="footer">
+                            Aula Nova · Completivo
+                        </div>
+
+                    </article>
+
+                    {% endif %}
+
+                </td>
+
+            {% endfor %}
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+</table>
+
+{% if not dashboard.students %}
+    <p>No hay estudiantes en completivo para los filtros seleccionados.</p>
+{% endif %}
+
+</body>
+</html>
+```
