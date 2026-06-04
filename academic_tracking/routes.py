@@ -2766,9 +2766,15 @@ def completivo_dashboard(
     )
 
     grades_catalog = sorted({
-        row.get("grade")
-        for row in base_report.get("rows", [])
-        if row.get("grade")
+        _split_course_name(row.get("CURSO"))[0]
+        for row in rows
+        if _split_course_name(row.get("CURSO"))[0]
+    })
+
+    sections_catalog = sorted({
+        _split_course_name(row.get("CURSO"))[1]
+        for row in rows
+        if _split_course_name(row.get("CURSO"))[1]
     })
 
     sections_catalog = sorted({
