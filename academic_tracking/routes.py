@@ -18,12 +18,14 @@ from fastapi.templating import Jinja2Templates
 
 from .services.data_loader_service import (
     load_academic_rows_from_source,
+    load_completivo_attendance_control_rows_from_source,
     load_teacher_assignments_from_source,
 )
 from .services.tracking_service import build_tracking_dashboard_data
 from .services.final_status_service import build_final_status_report
 from .services.completivo_projection_service import build_completivo_projection_report
 from app.core.settings import settings
+from .services.completivo_service import build_completivo_report
 
 
 router = APIRouter(
@@ -2715,6 +2717,310 @@ def integrated_completivo_pdf(
         media_type="application/pdf",
         headers={
             "Content-Disposition": 'inline; filename="reporte_integrado_completivo.pdf"'
+        },
+    )
+    
+@router.get(
+    "/completivo",
+    response_class=HTMLResponse,
+    name="academic_tracking_completivo_dashboard",
+)
+def completivo_dashboard(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    motivo: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    attendance_control = load_completivo_attendance_control_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_completivo_report(
+        rows=rows,
+        attendance_rows_primer_ciclo=attendance_control["primer_ciclo"],
+        attendance_rows_segundo_ciclo=attendance_control["segundo_ciclo"],
+        ciclo=ciclo,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+        motivo=motivo,
+    )
+
+    base_report = build_completivo_report(
+        rows=rows,
+        attendance_rows_primer_ciclo=attendance_control["primer_ciclo"],
+        attendance_rows_segundo_ciclo=attendance_control["segundo_ciclo"],
+        ciclo=ciclo,
+    )
+
+    grades_catalog = sorted({
+        row.get("grade")
+        for row in base_report.get("rows", [])
+        if row.get("grade")
+    })
+
+    sections_catalog = sorted({
+        row.get("section")
+        for row in base_report.get("rows", [])
+        if row.get("section")
+    })
+
+    academic_subjects_primer = [
+        {"code": "LEN", "name": "Lengua Española", "type": "subject", "cycle": "Primer Ciclo"},
+        {"code": "ING", "name": "Inglés", "type": "subject", "cycle": "Primer Ciclo"},
+        {"code": "FRA", "name": "Francés", "type": "subject", "cycle": "Primer Ciclo"},
+        {"code": "MAT", "name": "Matemática", "type": "subject", "cycle": "Primer Ciclo"},
+        {"code": "SOC", "name": "Ciencias Sociales", "type": "subject", "cycle": "Primer Ciclo"},
+        {"code": "NAT", "name": "Ciencias de la Naturaleza", "type": "subject", "cycle": "Primer Ciclo"},
+        {"code": "ART", "name": "Educación Artística", "type": "subject", "cycle": "Primer Ciclo"},
+        {"code": "FIS", "name": "Educación Física", "type": "subject", "cycle": "Primer Ciclo"},
+        {"code": "FOR", "name": "Formación Humana", "type": "subject", "cycle": "Primer Ciclo"},
+    ]
+
+    academic_subjects_segundo = [
+        {"code": "LEN", "name": "Lengua Española", "type": "subject", "cycle": "Segundo Ciclo"},
+        {"code": "ING", "name": "Inglés", "type": "subject", "cycle": "Segundo Ciclo"},
+        {"code": "MAT", "name": "Matemática", "type": "subject", "cycle": "Segundo Ciclo"},
+        {"code": "SOC", "name": "Ciencias Sociales", "type": "subject", "cycle": "Segundo Ciclo"},
+        {"code": "NAT", "name": "Ciencias de la Naturaleza", "type": "subject", "cycle": "Segundo Ciclo"},
+        {"code": "ART", "name": "Educación Artística", "type": "subject", "cycle": "Segundo Ciclo"},
+        {"code": "FIS", "name": "Educación Física", "type": "subject", "cycle": "Segundo Ciclo"},
+        {"code": "FOR", "name": "Formación Humana", "type": "subject", "cycle": "Segundo Ciclo"},
+    ]
+
+    module_catalog = sorted(
+        {
+            (
+                row.get("item_code"),
+                row.get("item_name"),
+            )
+            for row in base_report.get("rows", [])
+            if row.get("item_type") == "module"
+            and row.get("item_code")
+            and row.get("item_name")
+        },
+        key=lambda item: item[0],
+    )
+
+    module_items = [
+        {
+            "code": code,
+            "name": name,
+            "type": "module",
+            "cycle": "Segundo Ciclo",
+        }
+        for code, name in module_catalog
+    ]
+
+    if ciclo == "Primer Ciclo":
+        subjects_catalog = academic_subjects_primer
+
+    elif ciclo == "Segundo Ciclo":
+        subjects_catalog = academic_subjects_segundo + module_items
+
+    else:
+        subjects_catalog = academic_subjects_primer + academic_subjects_segundo + module_items
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": _resolve_institution_logos(),
+            "favicon": "/assets/interface_logo.png",
+        },
+        "theme": {
+            "primary_color": "#1f8f4a",
+            "primary_dark": "#0b3d24",
+            "primary_soft": "#eaf5ef",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "grado": grado,
+            "seccion": seccion,
+            "asignatura": asignatura,
+            "motivo": motivo,
+        },
+        "metadata": {
+            "grades_catalog": grades_catalog,
+            "sections_catalog": sections_catalog,
+            "subjects_catalog": subjects_catalog,
+        },
+        "report": report,
+    }
+
+    return templates.TemplateResponse(
+        "completivo_dashboard.html",
+        {
+            "request": request,
+            "dashboard": dashboard_payload,
+        },
+    )
+
+@router.get(
+    "/completivo/data",
+    name="academic_tracking_completivo_data",
+)
+def completivo_data(
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    motivo: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    attendance_control = load_completivo_attendance_control_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_completivo_report(
+        rows=rows,
+        attendance_rows_primer_ciclo=attendance_control["primer_ciclo"],
+        attendance_rows_segundo_ciclo=attendance_control["segundo_ciclo"],
+        ciclo=ciclo,
+        curso=curso,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+        motivo=motivo,
+    )
+
+    return {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "curso": curso,
+            "grado": grado,
+            "seccion": seccion,
+            "asignatura": asignatura,
+            "motivo": motivo,
+        },
+        "report": report,
+    }
+    
+@router.get(
+    "/completivo/reporte.pdf",
+    name="academic_tracking_completivo_report_pdf",
+)
+def completivo_report_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    motivo: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    attendance_control = load_completivo_attendance_control_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_completivo_report(
+        rows=rows,
+        attendance_rows_primer_ciclo=attendance_control["primer_ciclo"],
+        attendance_rows_segundo_ciclo=attendance_control["segundo_ciclo"],
+        ciclo=ciclo,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+        motivo=motivo,
+    )
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": [
+                {
+                    "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                    "alt": "Logo del centro educativo",
+                }
+            ],
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "grado": grado,
+            "seccion": seccion,
+            "asignatura": asignatura,
+            "motivo": motivo,
+        },
+        "report": report,
+    }
+
+    rendered_html = _render_template_to_html(
+        "completivo_report.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    filename_parts = [
+        "reporte_completivo",
+        ciclo or "general",
+        grado or "todos",
+        seccion or "todas",
+        asignatura or "todas",
+        motivo or "todos",
+    ]
+
+    filename = "_".join(
+        str(part).replace(" ", "_").replace("/", "-").lower()
+        for part in filename_parts
+        if part
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'inline; filename="{filename}.pdf"'
         },
     )
 

@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% set page_title = "Completivo" %}
+{% set page_subtitle = "Estudiantes que requieren completivo por calificación final, módulos formativos o asistencia validada por gestión." %}
+{% set active_page = "completivo" %}
+
+{% block title %}Completivo{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <div class="dashboard-topbar">
+        <div>
+            <h2 style="margin-bottom: 6px;">{{ dashboard.institution.name }}</h2>
+
+            <p class="text-muted" style="margin: 0;">
+                Año escolar: {{ dashboard.institution.school_year }} |
+                Ciclo: {{ dashboard.institution.ciclo }}
+            </p>
+        </div>
+
+        <div class="module-actions module-actions-right no-print">
+            <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">
+                Seguimiento académico
+            </a>
+
+            <a href="{{ url_for('academic_tracking_final_status_dashboard') }}" class="btn btn-secondary">
+                Situación final
+            </a>
+
+            <a href="{{ url_for('academic_tracking_completivo_projection_dashboard') }}" class="btn btn-secondary">
+                Proyección a completivo
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="card no-print">
+    <form method="GET" action="{{ url_for('academic_tracking_completivo_dashboard') }}">
+        <div class="filters-grid" style="grid-template-columns: repeat(5, minmax(180px, 1fr));">
+
+            <div class="field">
+                <label for="ciclo">Ciclo</label>
+                <select id="ciclo" name="ciclo">
+                    <option value="">Todos</option>
+                    <option value="Primer Ciclo" {% if dashboard.filters.ciclo == "Primer Ciclo" %}selected{% endif %}>Primer Ciclo</option>
+                    <option value="Segundo Ciclo" {% if dashboard.filters.ciclo == "Segundo Ciclo" %}selected{% endif %}>Segundo Ciclo</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="grado">Grado</label>
+                <select id="grado" name="grado">
+                    <option value="">Todos</option>
+                    {% for grade in dashboard.metadata.grades_catalog %}
+                        <option value="{{ grade }}" {% if dashboard.filters.grado == grade %}selected{% endif %}>
+                            {{ grade }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="seccion">Sección</label>
+                <select id="seccion" name="seccion">
+                    <option value="">Todas</option>
+                    {% for section in dashboard.metadata.sections_catalog %}
+                        <option value="{{ section }}" {% if dashboard.filters.seccion == section %}selected{% endif %}>
+                            {{ section }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="asignatura">Asignatura o módulo</label>
+                <select id="asignatura" name="asignatura" size="1" style="max-height: 220px; overflow-y: auto;">
+                    <option value="">Todas</option>
+
+                    {% for item in dashboard.metadata.subjects_catalog %}
+                        <option value="{{ item.code }}" {% if dashboard.filters.asignatura == item.code %}selected{% endif %}>
+                            {% if item.type == "module" %}
+                                {{ item.code }} - {{ item.name }}
+                            {% else %}
+                                {{ item.name }}
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="motivo">Motivo</label>
+                <select id="motivo" name="motivo">
+                    <option value="">Todos</option>
+                    <option value="calificacion" {% if dashboard.filters.motivo == "calificacion" %}selected{% endif %}>Calificación final</option>
+                    <option value="asistencia" {% if dashboard.filters.motivo == "asistencia" %}selected{% endif %}>Asistencia</option>
+                    <option value="ambas" {% if dashboard.filters.motivo == "ambas" %}selected{% endif %}>Calificación y asistencia</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="filter-actions" style="margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn-primary" type="submit">
+                Filtrar
+            </button>
+
+            <a class="btn btn-secondary" href="{{ url_for('academic_tracking_completivo_dashboard') }}">
+                Limpiar
+            </a>
+
+            <button type="button" class="btn btn-secondary" onclick="window.print()">
+                Imprimir vista
+            </button>
+
+            <button type="button" class="btn btn-secondary" onclick="openCompletivoPdfReport()">
+                Generar reporte PDF
+            </button>
+        </div>
+    </form>
+</section>
+
+<section class="card">
+    <div class="compact-summary-row" style="grid-template-columns: repeat(7, minmax(130px, 1fr));">
+        <div class="compact-metric">
+            <span class="compact-label">Casos asignatura/módulo</span>
+            <strong class="compact-value">{{ dashboard.report.summary.total_cases }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Estudiantes únicos</span>
+            <strong class="compact-value">{{ dashboard.report.summary.total_students }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Por calificación</span>
+            <strong class="compact-value">{{ dashboard.report.summary.by_grade }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Por asistencia</span>
+            <strong class="compact-value">{{ dashboard.report.summary.by_attendance }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Ambas</span>
+            <strong class="compact-value">{{ dashboard.report.summary.by_both }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Asignaturas</span>
+            <strong class="compact-value">{{ dashboard.report.summary.subjects_cases }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Módulos</span>
+            <strong class="compact-value">{{ dashboard.report.summary.modules_cases }}</strong>
+        </div>
+    </div>
+</section>
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <h2 style="margin-bottom: 6px;">Listado definitivo de completivo</h2>
+            <p class="text-muted" style="margin: 0;">
+                Incluye estudiantes activos con asignaturas o módulos por debajo de 70, y casos de asistencia marcados como COMPLETIVO por gestión.
+            </p>
+        </div>
+    </div>
+
+    {% if dashboard.report.grouped_courses %}
+        {% for course in dashboard.report.grouped_courses %}
+            <h3 style="margin-top: 18px; color: var(--primary-dark);">
+                {{ course.course_name }}
+            </h3>
+
+            {% for subject in course.subjects %}
+                <h4 style="margin-top: 14px;">
+                    {{ subject.subject_name }} · {{ subject.students|length }} caso(s)
+                </h4>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Estudiante</th>
+                                <th>Tipo</th>
+                                <th>CF</th>
+                                <th>Asistencia</th>
+                                <th>Decisión gestión</th>
+                                <th>Motivo</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for student in subject.students %}
+                                <tr>
+                                    <td>{{ student.numero or "—" }}</td>
+
+                                    <td>
+                                        <strong>{{ student.student_name }}</strong>
+                                        <br>
+                                        <span class="text-muted">ID: {{ student.student_id }}</span>
+                                    </td>
+
+                                    <td>
+                                        {% if student.item_type == "module" %}
+                                            Módulo
+                                        {% else %}
+                                            Asignatura
+                                        {% endif %}
+                                    </td>
+
+                                    <td>{{ student.cf_final }}</td>
+                                    <td>{{ student.attendance_pct }}</td>
+                                    <td>{{ student.attendance_decision }}</td>
+                                    <td>{{ student.reason }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">
+            No se encontraron estudiantes en completivo con los filtros seleccionados.
+        </p>
+    {% endif %}
+</section>
+
+<script>
+    function openCompletivoPdfReport() {
+        const params = new URLSearchParams();
+
+        const ciclo = document.getElementById("ciclo")?.value || "";
+        const grado = document.getElementById("grado")?.value || "";
+        const seccion = document.getElementById("seccion")?.value || "";
+        const asignatura = document.getElementById("asignatura")?.value || "";
+        const motivo = document.getElementById("motivo")?.value || "";
+
+        if (ciclo) params.set("ciclo", ciclo);
+        if (grado) params.set("grado", grado);
+        if (seccion) params.set("seccion", seccion);
+        if (asignatura) params.set("asignatura", asignatura);
+        if (motivo) params.set("motivo", motivo);
+
+        const baseUrl = "{{ url_for('academic_tracking_completivo_report_pdf') }}";
+        const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+        window.open(finalUrl, "_blank");
+    }
+</script>
+
+{% endblock %}
