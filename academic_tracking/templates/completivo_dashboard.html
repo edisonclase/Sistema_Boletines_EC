@@ -125,6 +125,10 @@
             <button type="button" class="btn btn-secondary" onclick="openCompletivoIndividualSlipsZip()">
                 Fichas individuales ZIP
             </button>
+
+            <button type="button" class="btn btn-secondary" onclick="openCompletivoDeliveryPdf()">
+                Constancia de entrega
+            </button>
         </div>
     </form>
 </section>
@@ -278,6 +282,14 @@ function openCompletivoSlipsPdf() {
 function openCompletivoIndividualSlipsZip() {
     const params = buildCompletivoParams();
     const baseUrl = "{{ url_for('academic_tracking_completivo_individual_slips_zip') }}";
+    const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    window.open(finalUrl, "_blank");
+}
+
+function openCompletivoDeliveryPdf() {
+    const params = buildCompletivoParams();
+    const baseUrl = "{{ url_for('academic_tracking_completivo_delivery_pdf') }}";
     const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
 
     window.open(finalUrl, "_blank");

@@ -3232,6 +3232,163 @@ def completivo_individual_slips_zip(
             "Content-Disposition": 'attachment; filename="fichas_individuales_completivo.zip"'
         },
     )
+    
+@router.get(
+    "/completivo/constancia-entrega.pdf",
+    name="academic_tracking_completivo_delivery_pdf",
+)
+def completivo_delivery_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+    motivo: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    attendance_control = load_completivo_attendance_control_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_completivo_report(
+        rows=rows,
+        attendance_rows_primer_ciclo=attendance_control["primer_ciclo"],
+        attendance_rows_segundo_ciclo=attendance_control["segundo_ciclo"],
+        ciclo=ciclo,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+        motivo=motivo,
+    )
+
+    students_for_delivery = []
+
+    for student in report.get("students", []):
+        student_copy = dict(student)
+        pending_items = student.get("items", [])
+
+        student_copy["pending_items"] = pending_items
+        student_copy["completivo_items_text"] = ", ".join(
+            str(item.get("item_name") or "").strip()
+            for item in pending_items
+            if str(item.get("item_name") or "").strip()
+        )
+
+        student_copy["motives_text"] = ", ".join(
+            sorted({
+                str(item.get("reason") or "").strip()
+                for item in pending_items
+                if str(item.get("reason") or "").strip()
+            })
+        )
+
+        students_for_delivery.append(student_copy)
+
+    students_for_delivery = sorted(
+        students_for_delivery,
+        key=lambda item: (
+            _normalize_text(item.get("course_name")),
+            _normalize_text(item.get("numero")).zfill(4),
+            _normalize_text(item.get("student_name")),
+        ),
+    )
+
+    course_map: dict[str, list[dict[str, Any]]] = {}
+
+    for student in students_for_delivery:
+        course_name = _normalize_text(student.get("course_name")) or "Sin curso"
+        course_map.setdefault(course_name, [])
+        course_map[course_name].append(student)
+
+    students_by_course = []
+
+    for course_name, students in course_map.items():
+        subject_summary_map: dict[str, int] = {}
+        total_cases = 0
+
+        for index, student in enumerate(students, start=1):
+            student["row_order"] = index
+
+            for item in student.get("pending_items", []):
+                item_name = _normalize_text(item.get("item_name")) or "Sin asignatura"
+                subject_summary_map[item_name] = subject_summary_map.get(item_name, 0) + 1
+                total_cases += 1
+
+        subject_summary = [
+            {
+                "item_name": item_name,
+                "total_students": total_students,
+            }
+            for item_name, total_students in sorted(
+                subject_summary_map.items(),
+                key=lambda item: item[0],
+            )
+        ]
+
+        students_by_course.append(
+            {
+                "course_name": course_name,
+                "prof_titular": students[0].get("prof_titular"),
+                "total_students": len(students),
+                "total_cases": total_cases,
+                "subject_summary": subject_summary,
+                "students": students,
+            }
+        )
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": [
+                {
+                    "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                    "alt": "Logo del centro educativo",
+                }
+            ],
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "grado": grado,
+            "seccion": seccion,
+            "asignatura": asignatura,
+            "motivo": motivo,
+        },
+        "students_by_course": students_by_course,
+        "report": report,
+    }
+
+    rendered_html = _render_template_to_html(
+        "completivo_delivery_report.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="constancia_entrega_completivo.pdf"'
+        },
+    )
 
 @router.get(
     "/health",

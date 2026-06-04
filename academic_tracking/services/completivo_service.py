@@ -164,9 +164,9 @@ def _is_active_row(row: dict[str, Any]) -> bool:
     status = _normalize_key(row.get("ESTADO"))
 
     if not status:
-        return True
+        return False
 
-    return not any(word in status for word in INACTIVE_STATUS_WORDS)
+    return status in {"ACTIVO", "ACTIVA"}
 
 
 def _split_course_name(course_name: Any) -> tuple[str, str]:
