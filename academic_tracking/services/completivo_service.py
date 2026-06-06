@@ -4,10 +4,11 @@ completivo_service.py
 Servicio definitivo para construir datos de completivo.
 
 Reglas:
-- Asignaturas académicas: CF_FINAL < 70 => Completivo.
+- Asignaturas académicas: *_CF_AREA < 70 => Completivo.
 - Módulos formativos: MODx_CF < 70 => Completivo.
 - Asistencia: solo entra si la hoja auxiliar indica DECISION_GESTION = COMPLETIVO.
 - DECISION_GESTION = PROMOVIDO no entra por asistencia.
+- *_CF_FINAL se reserva para procesos posteriores, especialmente evaluación especial.
 """
 
 from __future__ import annotations
@@ -18,8 +19,6 @@ from typing import Any, Optional
 
 
 INACTIVE_STATUS_WORDS = {
-    "ABANDONO",
-    "ABANDONO",
     "ABANDONO",
     "RETIRADO",
     "RETIRADA",
@@ -79,6 +78,7 @@ def _normalize_key(value: Any) -> str:
     text = unicodedata.normalize("NFD", text)
     text = "".join(char for char in text if unicodedata.category(char) != "Mn")
     return text.strip()
+
 
 def _has_sheet_error(value: Any) -> bool:
     text = _normalize_key(value)
@@ -395,9 +395,9 @@ def build_completivo_report(
         subject_catalog = _subject_catalog_for_cycle(detected_cycle)
 
         for subject_code, subject_name in subject_catalog.items():
-            cf_final = _safe_float(row.get(f"{subject_code}_CF_FINAL"))
+            cf_area = _safe_float(row.get(f"{subject_code}_CF_AREA"))
 
-            needs_by_grade = cf_final is not None and cf_final < min_score
+            needs_by_grade = cf_area is not None and cf_area < min_score
 
             attendance_value = None
             decision = ""
@@ -450,8 +450,8 @@ def build_completivo_report(
                     "item_code": subject_code,
                     "item_name": subject_name,
                     "item_type": "subject",
-                    "cf_final": _format_score(cf_final),
-                    "cf_raw": cf_final,
+                    "cf_final": _format_score(cf_area),
+                    "cf_raw": cf_area,
                     "attendance_pct": _format_percent(attendance_value),
                     "attendance_raw": _safe_float(attendance_value),
                     "attendance_level": _attendance_level(attendance_value),
