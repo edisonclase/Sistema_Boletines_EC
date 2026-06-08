@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% set page_title = "Extraordinario" %}
+{% set page_subtitle = "Estudiantes que no alcanzaron la calificación mínima en evaluación completiva y pasan a evaluación extraordinaria." %}
+{% set active_page = "extraordinario" %}
+
+{% block title %}Extraordinario{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <div class="dashboard-topbar">
+        <div>
+            <h2 style="margin-bottom: 6px;">{{ dashboard.institution.name }}</h2>
+
+            <p class="text-muted" style="margin: 0;">
+                Año escolar: {{ dashboard.institution.school_year }} |
+                Ciclo: {{ dashboard.institution.ciclo }}
+            </p>
+        </div>
+
+        <div class="module-actions module-actions-right no-print">
+            <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">
+                Seguimiento académico
+            </a>
+
+            <a href="{{ url_for('academic_tracking_completivo_dashboard') }}" class="btn btn-secondary">
+                Completivo
+            </a>
+
+            <a href="{{ url_for('academic_tracking_final_status_dashboard') }}" class="btn btn-secondary">
+                Situación final
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="card no-print">
+    <form method="GET" action="{{ url_for('academic_tracking_extraordinario_dashboard') }}">
+        <div class="filters-grid" style="grid-template-columns: repeat(4, minmax(180px, 1fr));">
+
+            <div class="field">
+                <label for="ciclo">Ciclo</label>
+                <select id="ciclo" name="ciclo">
+                    <option value="">Todos</option>
+                    <option value="Primer Ciclo" {% if dashboard.filters.ciclo == "Primer Ciclo" %}selected{% endif %}>
+                        Primer Ciclo
+                    </option>
+                    <option value="Segundo Ciclo" {% if dashboard.filters.ciclo == "Segundo Ciclo" %}selected{% endif %}>
+                        Segundo Ciclo
+                    </option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="grado">Grado</label>
+                <select id="grado" name="grado">
+                    <option value="">Todos</option>
+                    <option value="2do" {% if dashboard.filters.grado == "2do" %}selected{% endif %}>2do</option>
+                    <option value="3ro" {% if dashboard.filters.grado == "3ro" %}selected{% endif %}>3ro</option>
+                    <option value="Cuarto" {% if dashboard.filters.grado == "Cuarto" %}selected{% endif %}>Cuarto</option>
+                    <option value="Quinto" {% if dashboard.filters.grado == "Quinto" %}selected{% endif %}>Quinto</option>
+                    <option value="Sexto" {% if dashboard.filters.grado == "Sexto" %}selected{% endif %}>Sexto</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="seccion">Sección</label>
+                <select id="seccion" name="seccion">
+                    <option value="">Todas</option>
+                    <option value="A" {% if dashboard.filters.seccion == "A" %}selected{% endif %}>A</option>
+                    <option value="B" {% if dashboard.filters.seccion == "B" %}selected{% endif %}>B</option>
+                    <option value="C" {% if dashboard.filters.seccion == "C" %}selected{% endif %}>C</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="asignatura">Asignatura</label>
+                <select id="asignatura" name="asignatura">
+                    <option value="">Todas</option>
+                    <option value="LEN" {% if dashboard.filters.asignatura == "LEN" %}selected{% endif %}>Lengua Española</option>
+                    <option value="ING" {% if dashboard.filters.asignatura == "ING" %}selected{% endif %}>Inglés</option>
+                    <option value="FRA" {% if dashboard.filters.asignatura == "FRA" %}selected{% endif %}>Francés</option>
+                    <option value="MAT" {% if dashboard.filters.asignatura == "MAT" %}selected{% endif %}>Matemática</option>
+                    <option value="SOC" {% if dashboard.filters.asignatura == "SOC" %}selected{% endif %}>Ciencias Sociales</option>
+                    <option value="NAT" {% if dashboard.filters.asignatura == "NAT" %}selected{% endif %}>Ciencias de la Naturaleza</option>
+                    <option value="ART" {% if dashboard.filters.asignatura == "ART" %}selected{% endif %}>Educación Artística</option>
+                    <option value="FIS" {% if dashboard.filters.asignatura == "FIS" %}selected{% endif %}>Educación Física</option>
+                    <option value="FOR" {% if dashboard.filters.asignatura == "FOR" %}selected{% endif %}>Formación Humana</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="filter-actions" style="margin-top: 18px;">
+            <button class="btn btn-primary" type="submit">
+                Filtrar
+            </button>
+
+            <a class="btn btn-secondary" href="{{ url_for('academic_tracking_extraordinario_dashboard') }}">
+                Limpiar
+            </a>
+        </div>
+    </form>
+</section>
+
+<section class="card">
+    <div class="compact-summary-row" style="grid-template-columns: repeat(3, minmax(160px, 1fr));">
+
+        <div class="compact-metric">
+            <span class="compact-label">Casos asignatura</span>
+            <strong class="compact-value">{{ dashboard.report.summary.total_cases }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Estudiantes únicos</span>
+            <strong class="compact-value">{{ dashboard.report.summary.total_students }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Asignaturas</span>
+            <strong class="compact-value">{{ dashboard.report.summary.subjects_cases }}</strong>
+        </div>
+
+    </div>
+</section>
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <h2 style="margin-bottom: 6px;">Listado de evaluación extraordinaria</h2>
+            <p class="text-muted" style="margin: 0;">
+                Incluye estudiantes activos que no alcanzaron 70 puntos o más en la calificación completiva de una o más asignaturas.
+            </p>
+        </div>
+    </div>
+
+    {% if dashboard.report.grouped_courses %}
+        {% for course in dashboard.report.grouped_courses %}
+            <h3 style="margin-top: 18px; color: var(--primary-dark);">
+                {{ course.course_name }}
+            </h3>
+
+            {% for subject in course.subjects %}
+                <h4 style="margin-top: 14px;">
+                    {{ subject.subject_name }} · {{ subject.students|length }} caso(s)
+                </h4>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Estudiante</th>
+                                <th>Asignatura</th>
+                                <th>CCF</th>
+                                <th>Condición</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for student in subject.students %}
+                                <tr>
+                                    <td>{{ student.numero or "—" }}</td>
+
+                                    <td>
+                                        <strong>{{ student.student_name }}</strong>
+                                        <br>
+                                        <span class="text-muted">ID: {{ student.student_id }}</span>
+                                    </td>
+
+                                    <td>{{ student.item_name }}</td>
+
+                                    <td>{{ student.ccf }}</td>
+
+                                    <td>Extraordinario</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">
+            No se encontraron estudiantes en evaluación extraordinaria con los filtros seleccionados.
+        </p>
+    {% endif %}
+</section>
+
+{% endblock %}

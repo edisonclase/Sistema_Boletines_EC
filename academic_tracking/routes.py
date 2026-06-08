@@ -28,6 +28,7 @@ from .services.final_status_service import build_final_status_report
 from .services.completivo_projection_service import build_completivo_projection_report
 from app.core.settings import settings
 from .services.completivo_service import build_completivo_report
+from .services.extraordinario_service import build_extraordinario_report
 
 
 router = APIRouter(
@@ -3387,6 +3388,269 @@ def completivo_delivery_pdf(
         media_type="application/pdf",
         headers={
             "Content-Disposition": 'inline; filename="constancia_entrega_completivo.pdf"'
+        },
+    )
+    
+@router.get(
+    "/extraordinario",
+    response_class=HTMLResponse,
+    name="academic_tracking_extraordinario_dashboard",
+)
+def extraordinario_dashboard(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_extraordinario_report(
+        rows=rows,
+        ciclo=ciclo,
+        curso=curso,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+    )
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": _resolve_institution_logos(),
+            "favicon": "/assets/interface_logo.png",
+        },
+        "theme": {
+            "primary_color": "#1f8f4a",
+            "primary_dark": "#0b3d24",
+            "primary_soft": "#eaf5ef",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "curso": curso,
+            "grado": grado,
+            "seccion": seccion,
+            "asignatura": asignatura,
+        },
+        "report": report,
+    }
+
+    return templates.TemplateResponse(
+        "extraordinario_dashboard.html",
+        {
+            "request": request,
+            "dashboard": dashboard_payload,
+        },
+    )
+
+
+@router.get(
+    "/extraordinario/data",
+    name="academic_tracking_extraordinario_data",
+)
+def extraordinario_data(
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_extraordinario_report(
+        rows=rows,
+        ciclo=ciclo,
+        curso=curso,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+    )
+
+    return {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "curso": curso,
+            "grado": grado,
+            "seccion": seccion,
+            "asignatura": asignatura,
+        },
+        "report": report,
+    }
+    
+@router.get(
+    "/extraordinario/reporte.pdf",
+    name="academic_tracking_extraordinario_pdf",
+)
+def extraordinario_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_extraordinario_report(
+        rows=rows,
+        ciclo=ciclo,
+        curso=curso,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+    )
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": [
+                {
+                    "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                    "alt": "Logo del centro educativo",
+                }
+            ],
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "curso": curso,
+            "grado": grado,
+            "seccion": seccion,
+            "asignatura": asignatura,
+        },
+        "report": report,
+    }
+
+    rendered_html = _render_template_to_html(
+        "extraordinario_report.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="reporte_extraordinario.pdf"'
+        },
+    )
+    
+@router.get(
+    "/extraordinario/fichas.pdf",
+    name="academic_tracking_extraordinario_slips_pdf",
+)
+def extraordinario_slips_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_extraordinario_report(
+        rows=rows,
+        ciclo=ciclo,
+        curso=curso,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+    )
+
+    students_for_slips = []
+
+    for student in report.get("students", []):
+        student_copy = dict(student)
+        student_copy["items"] = student.get("items", [])
+        students_for_slips.append(student_copy)
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": [
+                {
+                    "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                    "alt": "Logo del centro educativo",
+                }
+            ],
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "grado": grado,
+            "seccion": seccion,
+            "asignatura": asignatura,
+        },
+        "students": students_for_slips,
+        "report": report,
+    }
+
+    rendered_html = _render_template_to_html(
+        "extraordinario_student_slips.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="fichas_extraordinario.pdf"'
         },
     )
 

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Fichas de Evaluación Extraordinaria</title>
+
+    <style>
+        @page {
+            size: Letter portrait;
+            margin: 10mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", Arial, Helvetica, sans-serif;
+            color: #000000;
+            font-size: 11px;
+        }
+
+        .slip {
+            border: 1px solid #000000;
+            padding: 9px;
+            margin-bottom: 10px;
+            page-break-inside: avoid;
+        }
+
+        .slip-header {
+            display: table;
+            width: 100%;
+            border-bottom: 1px solid #000000;
+            padding-bottom: 6px;
+            margin-bottom: 7px;
+        }
+
+        .logo-box {
+            display: table-cell;
+            width: 58px;
+            vertical-align: middle;
+        }
+
+        .logo {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 8px;
+        }
+
+        .school-name {
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 1.1;
+        }
+
+        .school-year {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .slip-title {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 7px;
+        }
+
+        .meta-table td {
+            border: none;
+            padding: 2px 3px;
+            font-size: 10.5px;
+            line-height: 1.15;
+            vertical-align: top;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .notice {
+            border: 1px solid #000000;
+            padding: 6px;
+            margin-bottom: 7px;
+            font-size: 10.5px;
+            line-height: 1.25;
+            text-align: justify;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 7px;
+        }
+
+        .items-table th {
+            border: 1px solid #000000;
+            padding: 5px 4px;
+            font-size: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .items-table td {
+            border: 1px solid #000000;
+            padding: 4px;
+            font-size: 10px;
+            line-height: 1.15;
+            vertical-align: middle;
+        }
+
+        .warning-box {
+            border: 1px solid #000000;
+            padding: 7px;
+            margin-top: 6px;
+            margin-bottom: 7px;
+            font-size: 10px;
+            line-height: 1.25;
+            text-align: justify;
+        }
+
+        .warning-title {
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .signature-row {
+            margin-top: 8px;
+            font-size: 10px;
+        }
+
+        .signature-line {
+            display: inline-block;
+            width: 58%;
+            border-bottom: 1px solid #000000;
+            height: 12px;
+        }
+
+        .footer {
+            margin-top: 5px;
+            text-align: right;
+            font-size: 8.5px;
+        }
+    </style>
+</head>
+
+<body>
+
+{% for student in dashboard.students %}
+
+<article class="slip">
+
+    <div class="slip-header">
+        <div class="logo-box">
+            {% if dashboard.institution.logos %}
+                <img
+                    class="logo"
+                    src="{{ dashboard.institution.logos[0].src }}"
+                    alt="Logo"
+                >
+            {% endif %}
+        </div>
+
+        <div class="header-text">
+            <div class="school-name">
+                {{ dashboard.institution.name }}
+            </div>
+
+            <div class="school-year">
+                Año escolar: {{ dashboard.institution.school_year }}
+            </div>
+
+            <div class="slip-title">
+                Ficha de Evaluación Extraordinaria
+            </div>
+        </div>
+    </div>
+
+    <table class="meta-table">
+        <tr>
+            <td colspan="2">
+                <span class="label">Estudiante:</span>
+                {{ student.student_name }}
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <span class="label">ID:</span>
+                {{ student.student_id }}
+            </td>
+
+            <td>
+                <span class="label">No.:</span>
+                {{ student.numero or "—" }}
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <span class="label">Curso:</span>
+                {{ student.course_name }}
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <span class="label">Profesor titular:</span>
+                {{ student.prof_titular or "—" }}
+            </td>
+        </tr>
+    </table>
+
+    <div class="notice">
+        El/la estudiante deberá presentarse al proceso de evaluación extraordinaria
+        en la(s) asignatura(s) indicada(s), por no haber alcanzado la calificación
+        mínima requerida durante el proceso de evaluación completiva.
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width: 60%;">Asignatura</th>
+                <th style="width: 20%;">Calificación completiva</th>
+                <th style="width: 20%;">Condición</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in student['items'] %}
+                <tr>
+                    <td>{{ item.item_name }}</td>
+                    <td style="text-align:center;">{{ item.ccf }}</td>
+                    <td style="text-align:center;">Extraordinario</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="warning-box">
+        <div class="warning-title">
+            Importante
+        </div>
+
+        Se recuerda al estudiante y a sus padres, madres o tutores que, si al tomar
+        las evaluaciones extraordinarias el estudiante reprueba más de dos (2)
+        asignaturas, reprueba el grado.
+
+        <br><br>
+
+        En caso de quedar pendiente en una (1) o dos (2) asignaturas después de las
+        evaluaciones extraordinarias, deberá presentarse a evaluaciones especiales
+        en dichas asignaturas.
+    </div>
+
+    <div class="signature-row">
+        Firma del estudiante:
+        <span class="signature-line"></span>
+    </div>
+
+    <div class="footer">
+        Aula Nova · Evaluación extraordinaria
+    </div>
+
+</article>
+
+{% endfor %}
+
+{% if not dashboard.students %}
+    <p>No hay estudiantes en evaluación extraordinaria para los filtros seleccionados.</p>
+{% endif %}
+
+</body>
+</html>
