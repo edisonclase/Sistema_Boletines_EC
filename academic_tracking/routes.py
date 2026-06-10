@@ -3653,6 +3653,109 @@ def extraordinario_slips_pdf(
             "Content-Disposition": 'inline; filename="fichas_extraordinario.pdf"'
         },
     )
+    
+@router.get(
+    "/extraordinario/fichas-individuales.zip",
+    name="academic_tracking_extraordinario_individual_slips_zip",
+)
+def extraordinario_individual_slips_zip(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    curso: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    asignatura: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_extraordinario_report(
+        rows=rows,
+        ciclo=ciclo,
+        curso=curso,
+        grado=grado,
+        seccion=seccion,
+        asignatura=asignatura,
+    )
+
+    students_for_slips = []
+
+    for student in report.get("students", []):
+        student_copy = dict(student)
+        student_copy["items"] = student.get("items", [])
+        students_for_slips.append(student_copy)
+
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for student in students_for_slips:
+            dashboard_payload = {
+                "institution": {
+                    "name": _resolve_institution_name(),
+                    "school_year": _resolve_school_year(school_year),
+                    "ciclo": ciclo or "Vista general",
+                    "logos": [
+                        {
+                            "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                            "alt": "Logo del centro educativo",
+                        }
+                    ],
+                    "favicon": "/assets/interface_logo.png",
+                },
+                "filters": {
+                    "center_id": center_id,
+                    "school_year": school_year,
+                    "ciclo": ciclo,
+                    "grado": grado,
+                    "seccion": seccion,
+                    "asignatura": asignatura,
+                },
+                "students": [student],
+                "report": report,
+            }
+
+            rendered_html = _render_template_to_html(
+                "extraordinario_student_slip_single.html",
+                request=request,
+                dashboard_payload=dashboard_payload,
+            )
+
+            pdf_bytes = _render_pdf_bytes_from_html(
+                rendered_html,
+                base_url=str(request.base_url),
+            )
+
+            student_name = _normalize_text(student.get("student_name")) or "estudiante"
+            course_name = _normalize_text(student.get("course_name")) or "curso"
+            numero = _normalize_text(student.get("numero")) or "sin_numero"
+
+            safe_filename = re.sub(
+                r"[^A-Za-z0-9ÁÉÍÓÚáéíóúÑñ _.-]",
+                "",
+                f"{course_name}_{numero}_{student_name}",
+            ).strip()
+
+            safe_filename = safe_filename.replace(" ", "_")
+
+            zip_file.writestr(
+                f"{safe_filename}.pdf",
+                pdf_bytes,
+            )
+
+    zip_buffer.seek(0)
+
+    return Response(
+        content=zip_buffer.getvalue(),
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": 'attachment; filename="fichas_individuales_extraordinario.zip"'
+        },
+    )
 
 @router.get(
     "/health",
