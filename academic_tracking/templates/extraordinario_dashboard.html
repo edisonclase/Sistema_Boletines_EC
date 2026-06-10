@@ -104,6 +104,35 @@
     </form>
 </section>
 
+<section class="card no-print">
+    <div class="section-heading">
+        <div>
+            <h2 style="margin-bottom: 6px;">Documentos de evaluación extraordinaria</h2>
+            <p class="text-muted" style="margin: 0;">
+                Los documentos se generan respetando los filtros seleccionados.
+            </p>
+        </div>
+    </div>
+
+    <div class="module-actions" style="margin-top: 14px; flex-wrap: wrap;">
+        <button type="button" class="btn btn-primary" onclick="openExtraordinarioReportPdf()">
+            Reporte PDF
+        </button>
+
+        <button type="button" class="btn btn-secondary" onclick="openExtraordinarioSlipsPdf()">
+            Fichas PDF
+        </button>
+
+        <button type="button" class="btn btn-secondary" onclick="openExtraordinarioIndividualSlipsZip()">
+            Fichas individuales ZIP
+        </button>
+
+        <button type="button" class="btn btn-secondary" onclick="openExtraordinarioDeliveryPdf()">
+            Constancia de entrega
+        </button>
+    </div>
+</section>
+
 <section class="card">
     <div class="compact-summary-row" style="grid-template-columns: repeat(3, minmax(160px, 1fr));">
 
@@ -188,4 +217,61 @@
     {% endif %}
 </section>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function buildExtraordinarioParams() {
+        const params = new URLSearchParams();
+
+        const fields = [
+            "ciclo",
+            "grado",
+            "seccion",
+            "asignatura"
+        ];
+
+        fields.forEach(function(fieldName) {
+            const field = document.getElementById(fieldName);
+
+            if (field && field.value) {
+                params.set(fieldName, field.value);
+            }
+        });
+
+        return params;
+    }
+
+    function openExtraordinarioReportPdf() {
+        const params = buildExtraordinarioParams();
+        const baseUrl = "{{ url_for('academic_tracking_extraordinario_pdf') }}";
+        const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+        window.open(finalUrl, "_blank");
+    }
+
+    function openExtraordinarioSlipsPdf() {
+        const params = buildExtraordinarioParams();
+        const baseUrl = "{{ url_for('academic_tracking_extraordinario_slips_pdf') }}";
+        const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+        window.open(finalUrl, "_blank");
+    }
+
+    function openExtraordinarioIndividualSlipsZip() {
+        const params = buildExtraordinarioParams();
+        const baseUrl = "{{ url_for('academic_tracking_extraordinario_individual_slips_zip') }}";
+        const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+        window.open(finalUrl, "_blank");
+    }
+
+    function openExtraordinarioDeliveryPdf() {
+        const params = buildExtraordinarioParams();
+        const baseUrl = "{{ url_for('academic_tracking_extraordinario_delivery_pdf') }}";
+        const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+        window.open(finalUrl, "_blank");
+    }
+</script>
 {% endblock %}

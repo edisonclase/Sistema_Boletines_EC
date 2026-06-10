@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia de Entrega - Evaluación Extraordinaria</title>
+
+    <style>
+        @page {
+            size: Letter portrait;
+            margin: 13mm 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", Arial, Helvetica, sans-serif;
+            color: #000000;
+            font-size: 11px;
+            letter-spacing: 0.15px;
+            word-spacing: 0.8px;
+        }
+
+        .course-sheet {
+            page-break-after: always;
+        }
+
+        .course-sheet:last-child {
+            page-break-after: auto;
+        }
+
+        .header {
+            display: table;
+            width: 100%;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 6px;
+        }
+
+        .logo-box {
+            display: table-cell;
+            width: 70px;
+            vertical-align: middle;
+        }
+
+        .logo {
+            width: 62px;
+            height: 62px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 8px;
+        }
+
+        .school-name {
+            font-size: 17px;
+            font-weight: bold;
+            line-height: 1.12;
+            letter-spacing: 0.2px;
+            word-spacing: 1px;
+        }
+
+        .document-title {
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 3px;
+            line-height: 1.18;
+            letter-spacing: 0.25px;
+            word-spacing: 1.1px;
+        }
+
+        .meta {
+            margin-top: 3px;
+            line-height: 1.25;
+            letter-spacing: 0.15px;
+            word-spacing: 0.8px;
+        }
+
+        .paragraph {
+            border: 1px solid #000000;
+            padding: 7px 8px;
+            margin-bottom: 8px;
+            line-height: 1.35;
+            text-align: justify;
+            letter-spacing: 0.12px;
+            word-spacing: 0.9px;
+        }
+
+        .summary-box {
+            border: 1px solid #000000;
+            padding: 6px 8px;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            letter-spacing: 0.12px;
+            word-spacing: 0.8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 9px;
+        }
+
+        th {
+            border: 1px solid #000000;
+            padding: 5px 4px;
+            text-align: center;
+            font-size: 10px;
+            background: #ffffff;
+            font-weight: bold;
+            line-height: 1.15;
+            letter-spacing: 0.15px;
+            word-spacing: 0.7px;
+        }
+
+        td {
+            border: 1px solid #000000;
+            padding: 4px 5px;
+            font-size: 10px;
+            vertical-align: middle;
+            line-height: 1.18;
+            letter-spacing: 0.12px;
+            word-spacing: 0.7px;
+        }
+
+        .subject-summary-title {
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-size: 11px;
+            letter-spacing: 0.15px;
+            word-spacing: 0.8px;
+        }
+
+        .subject-summary-table {
+            margin-bottom: 9px;
+        }
+
+        .subject-summary-table th {
+            font-size: 9px;
+            padding: 4px 3px;
+            height: 23px;
+        }
+
+        .subject-summary-table td {
+            font-size: 11px;
+            padding: 4px 3px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .col-order {
+            width: 6%;
+            text-align: center;
+        }
+
+        .col-numero {
+            width: 7%;
+            text-align: center;
+        }
+
+        .col-id {
+            width: 13%;
+            text-align: center;
+        }
+
+        .col-name {
+            width: 27%;
+        }
+
+        .col-subjects {
+            width: 30%;
+        }
+
+        .col-phone {
+            width: 17%;
+        }
+
+        .footer-area {
+            margin-top: 18px;
+        }
+
+        .signature-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-top: 10px;
+        }
+
+        .signature-summary-table td {
+            border: none;
+            padding: 3px 5px;
+            vertical-align: bottom;
+            font-size: 11px;
+            line-height: 1.2;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid #000000;
+            margin-bottom: 3px;
+            height: 18px;
+        }
+
+        .footer {
+            margin-top: 16px;
+            text-align: right;
+            font-size: 9px;
+            letter-spacing: 0.12px;
+            word-spacing: 0.7px;
+        }
+    </style>
+</head>
+
+<body>
+
+{% for course_group in dashboard.students_by_course %}
+
+    <section class="course-sheet">
+
+        <div class="header">
+
+            <div class="logo-box">
+                {% if dashboard.institution.logos and dashboard.institution.logos[0].src %}
+                    <img
+                        class="logo"
+                        src="{{ dashboard.institution.logos[0].src }}"
+                        alt="Logo del centro"
+                    >
+                {% endif %}
+            </div>
+
+            <div class="header-text">
+                <div class="school-name">
+                    {{ dashboard.institution.name }}
+                </div>
+
+                <div class="document-title">
+                    Constancia de entrega - estudiantes que van a evaluación extraordinaria
+                </div>
+
+                <div class="meta">
+                    <strong>Año escolar:</strong> {{ dashboard.institution.school_year }}
+                    &nbsp; | &nbsp;
+                    <strong>Curso:</strong> {{ course_group.course_name }}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="paragraph">
+            El/la profesor/a titular
+            <strong>{{ course_group.prof_titular or "________________________________" }}</strong>
+            hace constar que compartió con los estudiantes y sus familias la ficha de
+            evaluación extraordinaria correspondiente a los estudiantes detallados a
+            continuación, incluyendo las orientaciones y advertencias académicas
+            relacionadas con el proceso de promoción y permanencia escolar.
+        </div>
+
+        <div class="summary-box">
+            <strong>Total de estudiantes en evaluación extraordinaria:</strong>
+            {{ course_group.total_students }}
+            &nbsp; | &nbsp;
+            <strong>Total de casos asignatura:</strong>
+            {{ course_group.total_cases }}
+        </div>
+
+        {% if course_group.subject_summary %}
+            <div class="subject-summary-title">
+                Resumen por asignatura
+            </div>
+
+            <table class="subject-summary-table">
+                <thead>
+                    <tr>
+                        {% for item in course_group.subject_summary %}
+                            <th>
+                                {{ item.item_name }}
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        {% for item in course_group.subject_summary %}
+                            <td>
+                                {{ item.total_students }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        {% endif %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-order">Orden</th>
+                    <th class="col-numero">No.</th>
+                    <th class="col-id">ID</th>
+                    <th class="col-name">Estudiante</th>
+                    <th class="col-subjects">Asignatura(s)</th>
+                    <th class="col-phone">Firma del estudiante</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for student in course_group.students %}
+                    <tr>
+                        <td class="col-order">
+                            {{ student.row_order }}
+                        </td>
+
+                        <td class="col-numero">
+                            {{ student.numero or "—" }}
+                        </td>
+
+                        <td class="col-id">
+                            {{ student.student_id }}
+                        </td>
+
+                        <td class="col-name">
+                            {{ student.student_name }}
+                        </td>
+
+                        <td class="col-subjects">
+                            {{ student.extraordinario_items_text or "—" }}
+                        </td>
+
+                        <td class="col-phone"></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="footer-area">
+            <table class="signature-summary-table">
+                <tbody>
+                    <tr>
+                        <td style="width: 45%;">
+                            <strong>Fecha:</strong>
+                            __________________________________
+                        </td>
+
+                        <td style="width: 55%; text-align: center;">
+                            <div class="signature-line"></div>
+                            <strong>{{ course_group.prof_titular or "Profesor/a titular" }}</strong>
+                            <br>
+                            Profesor/a titular
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Generado por Aula Nova · Evaluación extraordinaria
+        </div>
+
+    </section>
+
+{% endfor %}
+
+{% if not dashboard.students_by_course %}
+    <p>No hay estudiantes en evaluación extraordinaria para los filtros seleccionados.</p>
+{% endif %}
+
+</body>
+</html>
