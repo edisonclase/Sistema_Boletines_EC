@@ -65,12 +65,25 @@
             </div>
 
             <div class="field">
-                <label for="seccion">Sección</label>
+                <label for="seccion">Sección / Área técnica</label>
                 <select id="seccion" name="seccion">
                     <option value="">Todas</option>
+
                     <option value="A" {% if dashboard.filters.seccion == "A" %}selected{% endif %}>A</option>
                     <option value="B" {% if dashboard.filters.seccion == "B" %}selected{% endif %}>B</option>
                     <option value="C" {% if dashboard.filters.seccion == "C" %}selected{% endif %}>C</option>
+
+                    <option value="- Servicios de Alojamiento" {% if dashboard.filters.seccion == "- Servicios de Alojamiento" %}selected{% endif %}>
+                        Servicios de Alojamiento
+                    </option>
+
+                    <option value="- Logística y Transporte" {% if dashboard.filters.seccion == "- Logística y Transporte" %}selected{% endif %}>
+                        Logística y Transporte
+                    </option>
+
+                    <option value="- Atención a Emergencias de Salud" {% if dashboard.filters.seccion == "- Atención a Emergencias de Salud" %}selected{% endif %}>
+                        Atención a Emergencias de Salud
+                    </option>
                 </select>
             </div>
 
