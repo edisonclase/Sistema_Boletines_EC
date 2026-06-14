@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Estadísticas Finales</title>
+
+    <style>
+        @page {
+            size: Letter landscape;
+            margin: 9mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #0f172a;
+            font-size: 9.5px;
+        }
+
+        .header {
+            display: table;
+            width: 100%;
+            border-bottom: 3px solid #1f8f4a;
+            padding-bottom: 9px;
+            margin-bottom: 10px;
+        }
+
+        .header-text {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .header-logo {
+            display: table-cell;
+            width: 90px;
+            text-align: right;
+            vertical-align: middle;
+        }
+
+        .header-logo img {
+            max-height: 72px;
+            object-fit: contain;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #0b3d24;
+            line-height: 1.1;
+        }
+
+        h2 {
+            margin: 12px 0 5px;
+            font-size: 13px;
+            color: #0b3d24;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 3px;
+        }
+
+        .subtitle {
+            margin: 4px 0 0;
+            color: #475569;
+            font-size: 10.5px;
+            line-height: 1.3;
+        }
+
+        .summary-box {
+            border: 1px solid #b7dcc7;
+            border-radius: 10px;
+            background: #f8fafc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .metrics-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 6px;
+            table-layout: fixed;
+        }
+
+        .metrics-table td {
+            border: 1px solid #dbe4ee;
+            border-radius: 8px;
+            background: #ffffff;
+            padding: 7px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .metric-label {
+            display: block;
+            font-size: 8px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .metric-value {
+            display: block;
+            font-size: 18px;
+            color: #0b3d24;
+            font-weight: bold;
+        }
+
+        .metric-percent {
+            display: block;
+            font-size: 8.5px;
+            color: #475569;
+            margin-top: 2px;
+        }
+
+        .filters-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 6px;
+            table-layout: fixed;
+            margin-bottom: 8px;
+        }
+
+        .filters-table td {
+            border: 1px solid #dbe4ee;
+            border-radius: 8px;
+            background: #ffffff;
+            padding: 6px;
+            text-align: center;
+        }
+
+        .filters-table span {
+            display: block;
+            font-size: 7.5px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .filters-table strong {
+            font-size: 9px;
+            color: #0f172a;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 8px;
+        }
+
+        .data-table th {
+            background: #1f8f4a;
+            color: #ffffff;
+            padding: 4px 3px;
+            font-size: 7.8px;
+            text-align: center;
+            border: 1px solid #0b3d24;
+            line-height: 1.05;
+        }
+
+        .data-table td {
+            padding: 4px 3px;
+            font-size: 7.8px;
+            border: 1px solid #dbe4ee;
+            vertical-align: middle;
+            text-align: center;
+            line-height: 1.05;
+        }
+
+        .data-table td:first-child {
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .notes {
+            margin-top: 8px;
+            border: 1px solid #dbe4ee;
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 8.5px;
+            color: #334155;
+            line-height: 1.25;
+        }
+
+        .notes ul {
+            margin: 4px 0 0 15px;
+            padding: 0;
+        }
+
+        .report-metadata {
+            margin-top: 10px;
+            text-align: right;
+            font-size: 8.5px;
+            color: #475569;
+            line-height: 1.4;
+        }
+
+        .footer {
+            margin-top: 10px;
+            padding-top: 6px;
+            border-top: 1px solid #dbe4ee;
+            color: #64748b;
+            text-align: right;
+            font-size: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-text">
+            <h1>Estadísticas finales del año escolar</h1>
+
+            <p class="subtitle">
+                {{ dashboard.institution.name }} · Año escolar {{ dashboard.institution.school_year }}
+            </p>
+
+            <p class="subtitle">
+                Reporte estadístico institucional por ciclo, grado, sección, área técnica y sexo.
+            </p>
+        </div>
+
+        <div class="header-logo">
+            {% if dashboard.institution.logos %}
+                <img src="{{ dashboard.institution.logos[0].src }}" alt="Logo">
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="summary-box">
+        <table class="metrics-table">
+            <tr>
+                <td>
+                    <span class="metric-label">Inscritos</span>
+                    <span class="metric-value">{{ dashboard.report.summary.inscritos }}</span>
+                </td>
+
+                <td>
+                    <span class="metric-label">Activos</span>
+                    <span class="metric-value">{{ dashboard.report.summary.activos }}</span>
+                    <span class="metric-percent">{{ dashboard.report.summary.percentages.activos_sobre_inscritos }}</span>
+                </td>
+
+                <td>
+                    <span class="metric-label">Completivo</span>
+                    <span class="metric-value">{{ dashboard.report.summary.fueron_completivo }}</span>
+                    <span class="metric-percent">{{ dashboard.report.summary.percentages.completivo_sobre_activos }}</span>
+                </td>
+
+                <td>
+                    <span class="metric-label">Extraordinario</span>
+                    <span class="metric-value">{{ dashboard.report.summary.fueron_extraordinario }}</span>
+                    <span class="metric-percent">{{ dashboard.report.summary.percentages.extraordinario_sobre_activos }}</span>
+                </td>
+
+                <td>
+                    <span class="metric-label">Especial</span>
+                    <span class="metric-value">{{ dashboard.report.summary.fueron_especial }}</span>
+                    <span class="metric-percent">{{ dashboard.report.summary.percentages.especial_sobre_activos }}</span>
+                </td>
+
+                <td>
+                    <span class="metric-label">Promovidos finales</span>
+                    <span class="metric-value">{{ dashboard.report.summary.promovidos_finales }}</span>
+                    <span class="metric-percent">{{ dashboard.report.summary.percentages.promovidos_finales_sobre_activos }}</span>
+                </td>
+            </tr>
+        </table>
+
+        <table class="filters-table">
+            <tr>
+                <td>
+                    <span>Ciclo</span>
+                    <strong>{{ dashboard.filters.ciclo or "Todos" }}</strong>
+                </td>
+
+                <td>
+                    <span>Grado</span>
+                    <strong>{{ dashboard.filters.grado or "Todos" }}</strong>
+                </td>
+
+                <td>
+                    <span>Sección / Área técnica</span>
+                    <strong>{{ dashboard.filters.seccion or "Todas" }}</strong>
+                </td>
+
+                <td>
+                    <span>Sexo</span>
+                    <strong>{{ dashboard.filters.sexo or "Todos" }}</strong>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <h2>Resumen general</h2>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 34%;">Indicador</th>
+                <th style="width: 16%;">Cantidad</th>
+                <th style="width: 25%;">% sobre inscritos</th>
+                <th style="width: 25%;">% sobre activos</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>Estudiantes inscritos</td>
+                <td>{{ dashboard.report.summary.inscritos }}</td>
+                <td>100.0%</td>
+                <td>—</td>
+            </tr>
+
+            <tr>
+                <td>Estudiantes activos</td>
+                <td>{{ dashboard.report.summary.activos }}</td>
+                <td>{{ dashboard.report.summary.percentages.activos_sobre_inscritos }}</td>
+                <td>100.0%</td>
+            </tr>
+
+            <tr>
+                <td>Abandono / transferidos / inactivos</td>
+                <td>{{ dashboard.report.summary.abandono_transferido }}</td>
+                <td>{{ dashboard.report.summary.percentages.abandono_transferido_sobre_inscritos }}</td>
+                <td>—</td>
+            </tr>
+
+            <tr>
+                <td>Promovidos sin completivo</td>
+                <td>{{ dashboard.report.summary.promovidos_sin_completivo }}</td>
+                <td>—</td>
+                <td>{{ dashboard.report.summary.percentages.promovidos_sin_completivo_sobre_activos }}</td>
+            </tr>
+
+            <tr>
+                <td>Fueron a completivo</td>
+                <td>{{ dashboard.report.summary.fueron_completivo }}</td>
+                <td>—</td>
+                <td>{{ dashboard.report.summary.percentages.completivo_sobre_activos }}</td>
+            </tr>
+
+            <tr>
+                <td>Fueron a extraordinario</td>
+                <td>{{ dashboard.report.summary.fueron_extraordinario }}</td>
+                <td>—</td>
+                <td>{{ dashboard.report.summary.percentages.extraordinario_sobre_activos }}</td>
+            </tr>
+
+            <tr>
+                <td>Fueron a especial</td>
+                <td>{{ dashboard.report.summary.fueron_especial }}</td>
+                <td>—</td>
+                <td>{{ dashboard.report.summary.percentages.especial_sobre_activos }}</td>
+            </tr>
+
+            <tr>
+                <td>Promovidos finales</td>
+                <td>{{ dashboard.report.summary.promovidos_finales }}</td>
+                <td>—</td>
+                <td>{{ dashboard.report.summary.percentages.promovidos_finales_sobre_activos }}</td>
+            </tr>
+
+            <tr>
+                <td>No promovidos / repitentes</td>
+                <td>{{ dashboard.report.summary.no_promovidos }}</td>
+                <td>—</td>
+                <td>{{ dashboard.report.summary.percentages.no_promovidos_sobre_activos }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    {% macro statistics_table(title, rows) %}
+        <h2>{{ title }}</h2>
+
+        {% if rows %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 14%;">Categoría</th>
+                        <th>Inscritos</th>
+                        <th>Activos</th>
+                        <th>% Act.</th>
+                        <th>Comp.</th>
+                        <th>% Comp.</th>
+                        <th>Ext.</th>
+                        <th>% Ext.</th>
+                        <th>Esp.</th>
+                        <th>% Esp.</th>
+                        <th>Prom. final</th>
+                        <th>% Prom.</th>
+                        <th>No prom.</th>
+                        <th>% No prom.</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td>{{ row.label }}</td>
+                            <td>{{ row.inscritos }}</td>
+                            <td>{{ row.activos }}</td>
+                            <td>{{ row.percentages.activos_sobre_inscritos }}</td>
+                            <td>{{ row.fueron_completivo }}</td>
+                            <td>{{ row.percentages.completivo_sobre_activos }}</td>
+                            <td>{{ row.fueron_extraordinario }}</td>
+                            <td>{{ row.percentages.extraordinario_sobre_activos }}</td>
+                            <td>{{ row.fueron_especial }}</td>
+                            <td>{{ row.percentages.especial_sobre_activos }}</td>
+                            <td>{{ row.promovidos_finales }}</td>
+                            <td>{{ row.percentages.promovidos_finales_sobre_activos }}</td>
+                            <td>{{ row.no_promovidos }}</td>
+                            <td>{{ row.percentages.no_promovidos_sobre_activos }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No hay datos disponibles para esta categoría.</p>
+        {% endif %}
+    {% endmacro %}
+
+    {{ statistics_table("Estadística por ciclo", dashboard.report.tables.by_cycle) }}
+    {{ statistics_table("Estadística por grado", dashboard.report.tables.by_grade) }}
+    {{ statistics_table("Estadística por sección / área técnica", dashboard.report.tables.by_section) }}
+    {{ statistics_table("Estadística por sexo", dashboard.report.tables.by_sex) }}
+
+    <div class="notes">
+        <strong>Notas metodológicas:</strong>
+
+        <ul>
+            {% for note in dashboard.report.metadata.notes %}
+                <li>{{ note }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="report-metadata">
+    <strong>Generado por:</strong>
+    {{ dashboard.report.generated_by }}
+    <br>
+
+    <strong>Fecha y hora de emisión:</strong>
+        {{ dashboard.report.generated_at }}
+    </div>
+
+    <div class="footer">
+        Generado por Aula Nova · Estadísticas finales del año escolar
+    </div>
+
+</body>
+</html>

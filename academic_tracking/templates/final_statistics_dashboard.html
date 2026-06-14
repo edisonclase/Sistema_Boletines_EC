@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% set page_title = "Estadísticas finales" %}
+{% set page_subtitle = "Resumen estadístico general del cierre académico por año escolar, ciclo, grado, sección, área técnica y sexo." %}
+{% set active_page = "final_statistics" %}
+
+{% block title %}Estadísticas finales{% endblock %}
+
+{% block content %}
+
+<section class="card">
+    <div class="dashboard-topbar">
+        <div>
+            <h2 style="margin-bottom: 6px;">{{ dashboard.institution.name }}</h2>
+
+            <p class="text-muted" style="margin: 0;">
+                Año escolar: {{ dashboard.institution.school_year }} |
+                Ciclo: {{ dashboard.institution.ciclo }}
+            </p>
+        </div>
+
+        <div class="module-actions module-actions-right no-print">
+            <a href="{{ url_for('academic_tracking_dashboard') }}" class="btn btn-secondary">
+                Seguimiento académico
+            </a>
+
+            <a href="{{ url_for('academic_tracking_completivo_dashboard') }}" class="btn btn-secondary">
+                Completivo
+            </a>
+
+            <a href="{{ url_for('academic_tracking_extraordinario_dashboard') }}" class="btn btn-secondary">
+                Extraordinario
+            </a>
+
+            <a href="{{ url_for('academic_tracking_final_status_dashboard') }}" class="btn btn-secondary">
+                Situación final
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="card no-print">
+    <form method="GET" action="{{ url_for('academic_tracking_final_statistics_dashboard') }}">
+        <div class="filters-grid" style="grid-template-columns: repeat(5, minmax(160px, 1fr));">
+
+            <div class="field">
+                <label for="ciclo">Ciclo</label>
+                <select id="ciclo" name="ciclo">
+                    <option value="">Todos</option>
+                    <option value="Primer Ciclo" {% if dashboard.filters.ciclo == "Primer Ciclo" %}selected{% endif %}>Primer Ciclo</option>
+                    <option value="Segundo Ciclo" {% if dashboard.filters.ciclo == "Segundo Ciclo" %}selected{% endif %}>Segundo Ciclo</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="grado">Grado</label>
+                <select id="grado" name="grado">
+                    <option value="">Todos</option>
+                    <option value="2do" {% if dashboard.filters.grado == "2do" %}selected{% endif %}>2do</option>
+                    <option value="3ro" {% if dashboard.filters.grado == "3ro" %}selected{% endif %}>3ro</option>
+                    <option value="Cuarto" {% if dashboard.filters.grado == "Cuarto" %}selected{% endif %}>Cuarto</option>
+                    <option value="Quinto" {% if dashboard.filters.grado == "Quinto" %}selected{% endif %}>Quinto</option>
+                    <option value="Sexto" {% if dashboard.filters.grado == "Sexto" %}selected{% endif %}>Sexto</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="seccion">Sección / Área técnica</label>
+                <select id="seccion" name="seccion">
+                    <option value="">Todas</option>
+                    <option value="A" {% if dashboard.filters.seccion == "A" %}selected{% endif %}>A</option>
+                    <option value="B" {% if dashboard.filters.seccion == "B" %}selected{% endif %}>B</option>
+                    <option value="C" {% if dashboard.filters.seccion == "C" %}selected{% endif %}>C</option>
+                    <option value="- Servicios de Alojamiento" {% if dashboard.filters.seccion == "- Servicios de Alojamiento" %}selected{% endif %}>Servicios de Alojamiento</option>
+                    <option value="- Logística y Transporte" {% if dashboard.filters.seccion == "- Logística y Transporte" %}selected{% endif %}>Logística y Transporte</option>
+                    <option value="- Atención a Emergencias de Salud" {% if dashboard.filters.seccion == "- Atención a Emergencias de Salud" %}selected{% endif %}>Atención a Emergencias de Salud</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="sexo">Sexo</label>
+                <select id="sexo" name="sexo">
+                    <option value="">Todos</option>
+                    <option value="Masculino" {% if dashboard.filters.sexo == "Masculino" %}selected{% endif %}>Masculino</option>
+                    <option value="Femenino" {% if dashboard.filters.sexo == "Femenino" %}selected{% endif %}>Femenino</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="school_year">Año escolar</label>
+                <input
+                    type="text"
+                    id="school_year"
+                    name="school_year"
+                    value="{{ dashboard.filters.school_year or '' }}"
+                    placeholder="{{ dashboard.institution.school_year }}"
+                >
+            </div>
+
+        </div>
+
+        <div class="filter-actions" style="margin-top: 18px;">
+            <button class="btn btn-primary" type="submit">
+                Filtrar
+            </button>
+
+            <a class="btn btn-secondary" href="{{ url_for('academic_tracking_final_statistics_dashboard') }}">
+                Limpiar
+            </a>
+
+            <a class="btn btn-secondary" href="/academic-tracking/estadisticas-finales/data" target="_blank">
+                Ver JSON
+            </a>
+        </div>
+    </form>
+</section>
+
+<section class="card">
+    <div class="compact-summary-row" style="grid-template-columns: repeat(5, minmax(140px, 1fr));">
+
+        <div class="compact-metric">
+            <span class="compact-label">Inscritos</span>
+            <strong class="compact-value">{{ dashboard.report.summary.inscritos }}</strong>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Activos</span>
+            <strong class="compact-value">{{ dashboard.report.summary.activos }}</strong>
+            <small class="text-muted">{{ dashboard.report.summary.percentages.activos_sobre_inscritos }}</small>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Completivo</span>
+            <strong class="compact-value">{{ dashboard.report.summary.fueron_completivo }}</strong>
+            <small class="text-muted">{{ dashboard.report.summary.percentages.completivo_sobre_activos }}</small>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Extraordinario</span>
+            <strong class="compact-value">{{ dashboard.report.summary.fueron_extraordinario }}</strong>
+            <small class="text-muted">{{ dashboard.report.summary.percentages.extraordinario_sobre_activos }}</small>
+        </div>
+
+        <div class="compact-metric">
+            <span class="compact-label">Promovidos finales</span>
+            <strong class="compact-value">{{ dashboard.report.summary.promovidos_finales }}</strong>
+            <small class="text-muted">{{ dashboard.report.summary.percentages.promovidos_finales_sobre_activos }}</small>
+        </div>
+
+    </div>
+</section>
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <h2 style="margin-bottom: 6px;">Resumen general</h2>
+            <p class="text-muted" style="margin: 0;">
+                Las cifras de procesos académicos cuentan estudiantes únicos, no cantidad de asignaturas.
+            </p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Indicador</th>
+                    <th>Cantidad</th>
+                    <th>% sobre inscritos</th>
+                    <th>% sobre activos</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>Estudiantes inscritos</td>
+                    <td>{{ dashboard.report.summary.inscritos }}</td>
+                    <td>100.0%</td>
+                    <td>—</td>
+                </tr>
+
+                <tr>
+                    <td>Estudiantes activos</td>
+                    <td>{{ dashboard.report.summary.activos }}</td>
+                    <td>{{ dashboard.report.summary.percentages.activos_sobre_inscritos }}</td>
+                    <td>100.0%</td>
+                </tr>
+
+                <tr>
+                    <td>Abandono / transferidos / inactivos</td>
+                    <td>{{ dashboard.report.summary.abandono_transferido }}</td>
+                    <td>{{ dashboard.report.summary.percentages.abandono_transferido_sobre_inscritos }}</td>
+                    <td>—</td>
+                </tr>
+
+                <tr>
+                    <td>Promovidos sin completivo</td>
+                    <td>{{ dashboard.report.summary.promovidos_sin_completivo }}</td>
+                    <td>—</td>
+                    <td>{{ dashboard.report.summary.percentages.promovidos_sin_completivo_sobre_activos }}</td>
+                </tr>
+
+                <tr>
+                    <td>Fueron a completivo</td>
+                    <td>{{ dashboard.report.summary.fueron_completivo }}</td>
+                    <td>—</td>
+                    <td>{{ dashboard.report.summary.percentages.completivo_sobre_activos }}</td>
+                </tr>
+
+                <tr>
+                    <td>Fueron a extraordinario</td>
+                    <td>{{ dashboard.report.summary.fueron_extraordinario }}</td>
+                    <td>—</td>
+                    <td>{{ dashboard.report.summary.percentages.extraordinario_sobre_activos }}</td>
+                </tr>
+
+                <tr>
+                    <td>Fueron a especial</td>
+                    <td>{{ dashboard.report.summary.fueron_especial }}</td>
+                    <td>—</td>
+                    <td>{{ dashboard.report.summary.percentages.especial_sobre_activos }}</td>
+                </tr>
+
+                <tr>
+                    <td>Promovidos finales</td>
+                    <td>{{ dashboard.report.summary.promovidos_finales }}</td>
+                    <td>—</td>
+                    <td>{{ dashboard.report.summary.percentages.promovidos_finales_sobre_activos }}</td>
+                </tr>
+
+                <tr>
+                    <td>No promovidos / repitentes</td>
+                    <td>{{ dashboard.report.summary.no_promovidos }}</td>
+                    <td>—</td>
+                    <td>{{ dashboard.report.summary.percentages.no_promovidos_sobre_activos }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% macro statistics_table(title, rows) %}
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <h2 style="margin-bottom: 6px;">{{ title }}</h2>
+            <p class="text-muted" style="margin: 0;">
+                Indicadores expresados en cantidad y porcentaje.
+            </p>
+        </div>
+    </div>
+
+    {% if rows %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Inscritos</th>
+                        <th>Activos</th>
+                        <th>% activos</th>
+                        <th>Completivo</th>
+                        <th>% comp.</th>
+                        <th>Extraord.</th>
+                        <th>% ext.</th>
+                        <th>Especial</th>
+                        <th>% esp.</th>
+                        <th>Promovidos finales</th>
+                        <th>% prom.</th>
+                        <th>No promovidos</th>
+                        <th>% no prom.</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td><strong>{{ row.label }}</strong></td>
+                            <td>{{ row.inscritos }}</td>
+                            <td>{{ row.activos }}</td>
+                            <td>{{ row.percentages.activos_sobre_inscritos }}</td>
+                            <td>{{ row.fueron_completivo }}</td>
+                            <td>{{ row.percentages.completivo_sobre_activos }}</td>
+                            <td>{{ row.fueron_extraordinario }}</td>
+                            <td>{{ row.percentages.extraordinario_sobre_activos }}</td>
+                            <td>{{ row.fueron_especial }}</td>
+                            <td>{{ row.percentages.especial_sobre_activos }}</td>
+                            <td>{{ row.promovidos_finales }}</td>
+                            <td>{{ row.percentages.promovidos_finales_sobre_activos }}</td>
+                            <td>{{ row.no_promovidos }}</td>
+                            <td>{{ row.percentages.no_promovidos_sobre_activos }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">No hay datos disponibles para esta categoría.</p>
+    {% endif %}
+</section>
+{% endmacro %}
+
+{{ statistics_table("Estadística por ciclo", dashboard.report.tables.by_cycle) }}
+{{ statistics_table("Estadística por grado", dashboard.report.tables.by_grade) }}
+{{ statistics_table("Estadística por sección / área técnica", dashboard.report.tables.by_section) }}
+{{ statistics_table("Estadística por sexo", dashboard.report.tables.by_sex) }}
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <h2 style="margin-bottom: 6px;">Notas metodológicas</h2>
+        </div>
+    </div>
+
+    <ul class="text-muted" style="margin-top: 0;">
+        {% for note in dashboard.report.metadata.notes %}
+            <li>{{ note }}</li>
+        {% endfor %}
+    </ul>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function buildFinalStatisticsParams() {
+        const params = new URLSearchParams();
+
+        const fields = [
+            "school_year",
+            "ciclo",
+            "grado",
+            "seccion",
+            "sexo"
+        ];
+
+        fields.forEach(function(fieldName) {
+            const field = document.getElementById(fieldName);
+
+            if (field && field.value) {
+                params.set(fieldName, field.value);
+            }
+        });
+
+        return params;
+    }
+
+    function openFinalStatisticsPdf() {
+        const params = buildFinalStatisticsParams();
+        let finalUrl = "/academic-tracking/estadisticas-finales/reporte.pdf";
+
+        if (params.toString()) {
+            finalUrl += "?" + params.toString();
+        }
+
+        window.open(finalUrl, "_blank");
+    }
+</script>
+{% endblock %}

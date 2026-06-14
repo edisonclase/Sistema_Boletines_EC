@@ -11,6 +11,7 @@ import re
 import io
 import zipfile
 
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
@@ -29,6 +30,7 @@ from .services.completivo_projection_service import build_completivo_projection_
 from app.core.settings import settings
 from .services.completivo_service import build_completivo_report
 from .services.extraordinario_service import build_extraordinario_report
+from .services.final_statistics_service import build_final_statistics_report
 
 
 router = APIRouter(
@@ -3895,6 +3897,127 @@ def extraordinario_delivery_pdf(
         headers={
             "Content-Disposition": 'inline; filename="constancia_entrega_extraordinario.pdf"'
         },
+    )
+    
+@router.get(
+    "/estadisticas-finales/data",
+    name="academic_tracking_final_statistics_data",
+)
+def final_statistics_data(
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    sexo: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_final_statistics_report(
+        rows=rows,
+        center_id=center_id,
+        school_year=_resolve_school_year(school_year),
+        ciclo=ciclo,
+        grado=grado,
+        seccion=seccion,
+        sexo=sexo,
+    )
+
+    return {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "grado": grado,
+            "seccion": seccion,
+            "sexo": sexo,
+        },
+        "report": report,
+    }
+    
+@router.get(
+    "/estadisticas-finales",
+    response_class=HTMLResponse,
+    name="academic_tracking_final_statistics_dashboard",
+)
+def final_statistics_dashboard(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    sexo: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_final_statistics_report(
+        rows=rows,
+        center_id=center_id,
+        school_year=_resolve_school_year(school_year),
+        ciclo=ciclo,
+        grado=grado,
+        seccion=seccion,
+        sexo=sexo,
+    )
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": _resolve_institution_logos(),
+            "favicon": "/assets/interface_logo.png",
+        },
+        "theme": {
+            "primary_color": "#1f8f4a",
+            "primary_dark": "#0b3d24",
+            "primary_soft": "#eaf5ef",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "grado": grado,
+            "seccion": seccion,
+            "sexo": sexo,
+        },
+        "report": report,
+    }
+
+    return templates.TemplateResponse(
+        "final_statistics_dashboard.html",
+        {
+            "request": request,
+            "dashboard": dashboard_payload,
+        },
+    )
+    
+@router.get(
+    "/estadisticas-finales/reporte.pdf",
+    name="academic_tracking_final_statistics_pdf",
+)
+def final_statistics_pdf():
+    return HTMLResponse(
+        content="""
+        <h2>PDF temporalmente desactivado</h2>
+        <p>El dashboard de estadísticas finales sigue funcionando correctamente.</p>
+        <p>Este PDF se retomará luego con calma.</p>
+        """,
+        status_code=200,
     )
 
 @router.get(
