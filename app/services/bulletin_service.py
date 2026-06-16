@@ -279,10 +279,10 @@ def calculate_student_final_status(subjects: list[dict], modules: list[dict] | N
         "promovio_final": False,
         "reprobo_final": True,
         "especial_final": False,
-        "situacion_final_texto": "Reprobó el grado por tener más de dos asignaturas reprobadas.",
+        "situacion_final_texto": "Reprobó el grado por exceder el máximo de asignaturas permitidas para Evaluación Especial.",
         "asignaturas_especial": [],
     }
-    
+
 
 def build_student_result_from_row(row, cycle: str) -> dict:
     if cycle == "Primer_Ciclo":
