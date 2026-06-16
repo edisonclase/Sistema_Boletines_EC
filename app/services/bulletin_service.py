@@ -126,8 +126,171 @@ def filter_modules_with_visible_ras(modules: list[dict]) -> list[dict]:
     return [module for module in modules if module.get("ras_visibles")]
 
 
+def to_number(value: Any) -> float | None:
+    if value is None:
+        return None
+
+    text = str(value).strip().replace("%", "").replace(",", ".")
+    if text in ("", "-", "—", "0", "0.0", "0.00", "None", "nan"):
+        return None
+
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def has_grade(value: Any) -> bool:
+    return to_number(value) is not None
+
+
+def get_subject_name(subject: dict) -> str:
+    return safe_value(subject.get("asignatura") or subject.get("ASIGNATURA") or "Asignatura")
+
+
+def get_last_subject_grade(subject: dict) -> float | None:
+    ce_especial = to_number(subject.get("ce_especial"))
+    if ce_especial is not None:
+        return ce_especial
+
+    cexf = to_number(subject.get("cexf"))
+    if cexf is not None:
+        return cexf
+
+    ccf = to_number(subject.get("ccf"))
+    if ccf is not None:
+        return ccf
+
+    return to_number(subject.get("final"))
+
+
+def get_special_cf(subject: dict) -> Any:
+    """
+    C.F de Evaluación Especial.
+    Si el estudiante llega a especial, esta columna debe mostrar
+    la calificación final con la que llega a esa evaluación.
+    """
+    ce_especial = to_number(subject.get("ce_especial"))
+    cexf = to_number(subject.get("cexf"))
+
+    if ce_especial is not None:
+        return subject.get("cexf") or subject.get("ccf") or subject.get("final")
+
+    if cexf is not None and cexf < 70:
+        return subject.get("cexf")
+
+    return None
+
+
+def enrich_subjects_for_final_status(subjects: list[dict]) -> list[dict]:
+    enriched_subjects = []
+
+    for subject in subjects:
+        item = dict(subject)
+
+        last_grade = get_last_subject_grade(item)
+
+        item["esp_cf"] = get_special_cf(item)
+
+        if last_grade is None:
+            item["situ_a"] = item.get("situ_a") or ""
+            item["situ_r"] = item.get("situ_r") or ""
+        elif last_grade >= 70:
+            item["situ_a"] = "A"
+            item["situ_r"] = ""
+        else:
+            item["situ_a"] = ""
+            item["situ_r"] = "R"
+
+        enriched_subjects.append(item)
+
+    return enriched_subjects
+
+
+def calculate_student_final_status(subjects: list[dict], modules: list[dict] | None = None) -> dict:
+    modules = modules or []
+
+    failed_after_extraordinary = []
+    failed_after_special = []
+
+    for subject in subjects:
+        name = get_subject_name(subject)
+
+        ce_especial = to_number(subject.get("ce_especial"))
+        cexf = to_number(subject.get("cexf"))
+        ccf = to_number(subject.get("ccf"))
+        final = to_number(subject.get("final"))
+
+        if ce_especial is not None:
+            if ce_especial < 70:
+                failed_after_special.append(name)
+            continue
+
+        if cexf is not None:
+            if cexf < 70:
+                failed_after_extraordinary.append(name)
+            continue
+
+        if ccf is not None:
+            if ccf < 70:
+                failed_after_extraordinary.append(name)
+            continue
+
+        if final is not None and final < 70:
+            failed_after_extraordinary.append(name)
+
+    for module in modules:
+        module_name = safe_value(module.get("modulo") or "Módulo")
+        module_cf = to_number(module.get("cf"))
+
+        if module_cf is not None and module_cf < 70:
+            failed_after_extraordinary.append(module_name)
+
+    total_failed_after_extraordinary = len(failed_after_extraordinary)
+
+    if failed_after_special:
+        return {
+            "promovio_final": False,
+            "reprobo_final": True,
+            "especial_final": False,
+            "situacion_final_texto": "Reprobó el grado.",
+            "asignaturas_especial": [],
+        }
+
+    if total_failed_after_extraordinary == 0:
+        return {
+            "promovio_final": True,
+            "reprobo_final": False,
+            "especial_final": False,
+            "situacion_final_texto": "Promovió el grado.",
+            "asignaturas_especial": [],
+        }
+
+    if total_failed_after_extraordinary <= 2:
+        return {
+            "promovio_final": False,
+            "reprobo_final": False,
+            "especial_final": True,
+            "situacion_final_texto": "Debe presentarse a Evaluación Especial.",
+            "asignaturas_especial": failed_after_extraordinary,
+        }
+
+    return {
+        "promovio_final": False,
+        "reprobo_final": True,
+        "especial_final": False,
+        "situacion_final_texto": "Reprobó el grado por tener más de dos asignaturas reprobadas.",
+        "asignaturas_especial": [],
+    }
+    
+
 def build_student_result_from_row(row, cycle: str) -> dict:
     if cycle == "Primer_Ciclo":
+        subjects = enrich_subjects_for_final_status(
+            build_subjects(row, "Primer_Ciclo")
+        )
+        final_status = calculate_student_final_status(subjects)
+
         return {
             "found": True,
             "cycle": "Primer_Ciclo",
@@ -141,9 +304,10 @@ def build_student_result_from_row(row, cycle: str) -> dict:
                 "situacion_promovido": safe_value(row.get("SITUACION_PROMOVIDO")),
                 "situacion_repitente": safe_value(row.get("SITUACION_REPITENTE")),
                 "comentario_final": safe_value(row.get("COMENTARIO_FINAL")),
-                "subjects": build_subjects(row, "Primer_Ciclo"),
+                "subjects": subjects,
                 "modules": [],
-                "modules_with_ras": []
+                "modules_with_ras": [],
+                **final_status,
             }
         }
 
@@ -151,6 +315,11 @@ def build_student_result_from_row(row, cycle: str) -> dict:
         raw_modules = build_modules(row)
         enriched_modules = enrich_modules_for_second_cycle(raw_modules)
         modules_with_ras = filter_modules_with_visible_ras(enriched_modules)
+
+        subjects = enrich_subjects_for_final_status(
+            build_subjects(row, "Segundo_Ciclo")
+        )
+        final_status = calculate_student_final_status(subjects, enriched_modules)
 
         return {
             "found": True,
@@ -165,9 +334,10 @@ def build_student_result_from_row(row, cycle: str) -> dict:
                 "situacion_repitente": safe_value(row.get("SITUACION_REPITENTE")),
                 "situacion_pendiente": safe_value(row.get("SITUACION_PENDIENTE")),
                 "comentario_final": safe_value(row.get("COMENTARIO_FINAL")),
-                "subjects": build_subjects(row, "Segundo_Ciclo"),
+                "subjects": subjects,
                 "modules": enriched_modules,
-                "modules_with_ras": modules_with_ras
+                "modules_with_ras": modules_with_ras,
+                **final_status,
             }
         }
 

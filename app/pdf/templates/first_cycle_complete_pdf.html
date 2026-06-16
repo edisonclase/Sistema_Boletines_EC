@@ -8,11 +8,6 @@
     <style>{{ bulletin_pdf_css | safe }}</style>
 
     <style>
-        /* =========================
-           AJUSTES AISLADOS SOLO PARA
-           first_cycle_complete_pdf.html
-           ========================= */
-
         .fc-complete-page {
             width: 100%;
             box-sizing: border-box;
@@ -44,22 +39,25 @@
             table-layout: fixed;
             border: 1.4px solid #66BB6A !important;
             margin: 0 0 10px 0;
+            box-sizing: border-box;
+            outline: 1px solid #66BB6A;
+            outline-offset: -1px;
         }
 
         .fc-complete-table col.subject-col-width {
-            width: 16%;
+            width: 12.8%;
         }
 
         .fc-complete-table col.grade-col-width {
-            width: 3.2%;
+            width: 3.05%;
         }
 
         .fc-complete-table col.small-grade-col-width {
-            width: 2.85%;
+            width: 2.7%;
         }
 
         .fc-complete-table col.situation-col-width {
-            width: 2%;
+            width: 1.85%;
         }
 
         .fc-complete-table th,
@@ -91,17 +89,29 @@
             hyphens: auto;
         }
 
-        /* Nombres completos de los bloques de competencia */
         .fc-complete-table thead tr:first-child th {
             border-bottom: 1px solid #66BB6A !important;
-            padding: 3px 2px;
-            font-size: 5.35pt !important;
-            line-height: 1.02 !important;
-            height: 34px !important;
+            padding: 2px 1px;
+            font-size: 4.9pt !important;
+            line-height: 1 !important;
+            height: 33px !important;
             white-space: normal !important;
         }
 
-        /* Encabezados internos abreviados */
+        .fc-complete-table thead tr:first-child th:nth-last-child(2),
+        .fc-complete-table thead tr:first-child th:nth-last-child(1) {
+            font-size: 4.75pt !important;
+            line-height: 0.95 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        .fc-complete-title-stack {
+            display: inline-block;
+            line-height: 0.95;
+            text-align: center;
+        }
+
         .fc-complete-table thead tr:nth-child(2) th {
             border-bottom: 1px solid #9cc79f !important;
             padding: 2px 0 !important;
@@ -135,13 +145,13 @@
         }
 
         .fc-complete-table .small-col {
-            width: 2.85%;
-            min-width: 2.85%;
+            width: 2.7%;
+            min-width: 2.7%;
         }
 
         .fc-complete-table .situation-col {
-            width: 2%;
-            min-width: 2%;
+            width: 1.85%;
+            min-width: 1.85%;
         }
 
         .fc-complete-table tbody td:nth-child(1) {
@@ -157,7 +167,7 @@
         .fc-complete-table tbody td:nth-child(23),
         .fc-complete-table tbody td:nth-child(27),
         .fc-complete-table tbody td:nth-child(31),
-        .fc-complete-table tbody td:nth-child(32) {
+        .fc-complete-table tbody td:nth-child(33) {
             border-right: 1px solid #66BB6A !important;
         }
 
@@ -168,7 +178,7 @@
         .fc-complete-table thead tr:nth-child(2) th:nth-child(20),
         .fc-complete-table thead tr:nth-child(2) th:nth-child(24),
         .fc-complete-table thead tr:nth-child(2) th:nth-child(28),
-        .fc-complete-table thead tr:nth-child(2) th:nth-child(29) {
+        .fc-complete-table thead tr:nth-child(2) th:nth-child(30) {
             border-right: 1px solid #66BB6A !important;
         }
 
@@ -176,7 +186,6 @@
             white-space: nowrap;
         }
 
-        /* Sin resaltado amarillo en este boletín */
         .fc-complete-table .low-grade,
         .fc-complete-table .fc-complete-low-grade {
             background: transparent !important;
@@ -289,7 +298,6 @@
             color: #111;
         }
 
-        /* Bordes uniformes en la tabla principal del boletín */
         .fc-complete-table,
         .fc-complete-table th,
         .fc-complete-table td {
@@ -356,10 +364,8 @@
     {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
     {% set director_name = director_name if director_name is defined else settings.institution_director %}
 
-    <!-- PORTADA APROBADA -->
     {% include "bulletin_cover_pdf.html" %}
 
-    <!-- SEGUNDA HOJA -->
     <div class="pdf-page">
         <div class="pdf-frame">
             <div class="fc-complete-page">
@@ -419,69 +425,39 @@
                             <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
                             <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
                             <col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
                             <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
                             <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
                             <col class="small-grade-col-width">
                             <col class="small-grade-col-width">
-                            <col class="situation-col-width"><col class="situation-col-width">
+                            <col class="situation-col-width">
+                            <col class="situation-col-width">
                         </colgroup>
                         <thead>
                             <tr>
-                                <th class="subject-col" rowspan="2">ASIG.</th>
-
+                                <th class="subject-col" rowspan="2">ASIGNATURA</th>
                                 <th colspan="4">COMUNICATIVA</th>
                                 <th colspan="4">PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO / RESOLUCIÓN DE PROBLEMAS</th>
                                 <th colspan="4">CIENTÍFICA Y TECNOLÓGICA / AMBIENTAL Y DE LA SALUD</th>
                                 <th colspan="4">ÉTICA Y CIUDADANA / DESARROLLO PERSONAL Y ESPIRITUAL</th>
                                 <th colspan="4">PROMEDIO GENERAL DE COMPETENCIAS ESPECÍFICAS</th>
-
                                 <th class="small-col" rowspan="2">CF</th>
                                 <th class="small-col" rowspan="2">ASIS</th>
                                 <th colspan="4">COMPLETIVO</th>
                                 <th colspan="4">EXTRAORDINARIO</th>
-                                <th colspan="1">ESPECIAL</th>
-                                <th colspan="2">SIT</th>
+                                <th colspan="2"><span class="fc-complete-title-stack">EVALUACIÓN<br>ESPECIAL</span></th>
+                                <th colspan="2"><span class="fc-complete-title-stack">SIT.<br>FINAL</span></th>
                             </tr>
                             <tr>
-                                <th class="tiny-col">P1</th>
-                                <th class="tiny-col">P2</th>
-                                <th class="tiny-col">P3</th>
-                                <th class="tiny-col">P4</th>
-
-                                <th class="tiny-col">P1</th>
-                                <th class="tiny-col">P2</th>
-                                <th class="tiny-col">P3</th>
-                                <th class="tiny-col">P4</th>
-
-                                <th class="tiny-col">P1</th>
-                                <th class="tiny-col">P2</th>
-                                <th class="tiny-col">P3</th>
-                                <th class="tiny-col">P4</th>
-
-                                <th class="tiny-col">P1</th>
-                                <th class="tiny-col">P2</th>
-                                <th class="tiny-col">P3</th>
-                                <th class="tiny-col">P4</th>
-
-                                <th class="tiny-col">PC1</th>
-                                <th class="tiny-col">PC2</th>
-                                <th class="tiny-col">PC3</th>
-                                <th class="tiny-col">PC4</th>
-
-                                <th class="tiny-col">50CF</th>
-                                <th class="tiny-col">CEC</th>
-                                <th class="tiny-col">50CEC</th>
-                                <th class="tiny-col">CCF</th>
-
-                                <th class="tiny-col">30CF</th>
-                                <th class="tiny-col">CEEX</th>
-                                <th class="tiny-col">70CE</th>
-                                <th class="tiny-col">CEXF</th>
-
-                                <th class="tiny-col">CE</th>
-
-                                <th class="situation-col">A</th>
-                                <th class="situation-col">R</th>
+                                <th class="tiny-col">P1</th><th class="tiny-col">P2</th><th class="tiny-col">P3</th><th class="tiny-col">P4</th>
+                                <th class="tiny-col">P1</th><th class="tiny-col">P2</th><th class="tiny-col">P3</th><th class="tiny-col">P4</th>
+                                <th class="tiny-col">P1</th><th class="tiny-col">P2</th><th class="tiny-col">P3</th><th class="tiny-col">P4</th>
+                                <th class="tiny-col">P1</th><th class="tiny-col">P2</th><th class="tiny-col">P3</th><th class="tiny-col">P4</th>
+                                <th class="tiny-col">PC1</th><th class="tiny-col">PC2</th><th class="tiny-col">PC3</th><th class="tiny-col">PC4</th>
+                                <th class="tiny-col">50CF</th><th class="tiny-col">CEC</th><th class="tiny-col">50CEC</th><th class="tiny-col">CCF</th>
+                                <th class="tiny-col">30CF</th><th class="tiny-col">CEEX</th><th class="tiny-col">70CE</th><th class="tiny-col">CEXF</th>
+                                <th class="tiny-col">CF</th><th class="tiny-col">CE</th>
+                                <th class="situation-col">A</th><th class="situation-col">R</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -489,7 +465,6 @@
                             <tr>
                                 <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
 
-                                <!-- Bloques de competencias: decimales -->
                                 <td>{{ format_integer_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
@@ -510,7 +485,6 @@
                                 <td>{{ format_integer_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
 
-                                <!-- Desde promedio por competencias en adelante: enteros -->
                                 <td>{{ format_decimal_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
                                 <td>{{ format_decimal_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
                                 <td>{{ format_decimal_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
@@ -529,6 +503,7 @@
                                 <td>{{ format_integer_grade(subject.ext_70ceex if subject.ext_70ceex is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.cexf if subject.cexf is defined else none) }}</td>
 
+                                <td>{{ format_integer_grade(subject.esp_cf if subject.esp_cf is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
 
                                 <td>{% if subject.situ_a is defined and subject.situ_a %}{{ subject.situ_a }}{% else %}-{% endif %}</td>
@@ -568,7 +543,6 @@
                             {% endif %}
                         </div>
                     </div>
-
 
                     <div class="fc-complete-final-status-box">
                         <div class="fc-complete-final-status-title">Situación final del estudiante</div>
