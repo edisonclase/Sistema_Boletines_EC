@@ -2,252 +2,402 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Evaluaciones - Primer Ciclo del Nivel Secundario</title>
+    <title>Boletín Completo PDF - Segundo Ciclo</title>
+
+    <style>{{ bulletin_cover_pdf_css | safe }}</style>
+    <style>{{ bulletin_pdf_css | safe }}</style>
+
     <style>
-        {{ bulletin_base_css | safe }}
-    </style>
-    <style>
-        {{ bulletin_specific_css | safe }}
-    </style>
-    <style>
-        .screen-toolbar {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: #ffffff;
-            border-bottom: 1px solid #d7e8d8;
-            padding: 8px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
+        /* =========================
+           AJUSTES AISLADOS SOLO PARA
+           second_cycle_complete_pdf.html
+           ========================= */
 
-        .toolbar-left {
-            font-size: 12px;
-            font-weight: 700;
-            color: #2E7D32;
-        }
-
-        .toolbar-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .zoom-btn {
-            border: 1px solid #bdd8c0;
-            background: #fff;
-            border-radius: 6px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .zoom-label {
-            font-size: 12px;
-            min-width: 52px;
-            text-align: center;
-            font-weight: 700;
-        }
-
-        .zoom-slider {
-            width: 140px;
-            accent-color: #2E7D32;
-            cursor: pointer;
-        }
-
-        .page-wrap {
-            overflow: auto;
-            padding: 8px 8px 4px 8px;
+        .sc-complete-page {
             width: 100%;
-            height: calc(100vh - 78px);
+            box-sizing: border-box;
         }
 
-        .zoom-container {
-            width: max-content;
-            min-width: 100%;
-            transform-origin: top left;
-            position: relative;
+        .sc-complete-content {
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        .page {
-            width: 1760px;
-            margin: 0;
-        }
-
-        .section-title {
-            margin: 8px 0 0 0;
-            padding: 6px 10px;
+        .sc-complete-section-title {
+            margin: 9px 0 0 0;
+            padding: 5px 10px;
             background: #E8F5E9;
-            border: 2px solid #66BB6A;
+            border: 1.4px solid #66BB6A;
             border-bottom: 0;
-            border-radius: 8px 8px 0 0;
+            border-radius: 6px 6px 0 0;
             font-weight: 700;
             text-transform: uppercase;
+            font-size: 8.4pt;
+            line-height: 1.05;
+            color: #111;
+            text-align: center;
         }
 
-        /* ====== tabla académica ====== */
-
-        .academic-table {
+        .sc-complete-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            border: 1px solid #66BB6A !important;
+            border: 1.4px solid #66BB6A !important;
+            margin: 0 0 9px 0;
         }
 
-        .academic-table col.subject-col-width {
-            width: 160px;
+        .sc-complete-table col.subject-col-width {
+            width: 16%;
         }
 
-        .academic-table col.grade-col-width {
-            width: 36px;
+        .sc-complete-table col.grade-col-width {
+            width: 3.2%;
         }
 
-        .academic-table col.small-grade-col-width {
-            width: 28px;
+        .sc-complete-table col.small-grade-col-width {
+            width: 2.85%;
         }
 
-        .academic-table col.situation-col-width {
-            width: 20px;
+        .sc-complete-table col.situation-col-width {
+            width: 2%;
         }
 
-        .academic-table th,
-        .academic-table td {
+        .sc-complete-table th,
+        .sc-complete-table td {
             border: 0 !important;
             border-right: 1px solid #c7ddc9 !important;
             border-bottom: 1px solid #c7ddc9 !important;
             text-align: center;
             vertical-align: middle;
             padding: 0;
+            color: #111;
         }
 
-        .academic-table th:last-child,
-        .academic-table td:last-child {
+        .sc-complete-table th:last-child,
+        .sc-complete-table td:last-child {
             border-right: 0 !important;
         }
 
-        .academic-table tbody tr:last-child td {
+        .sc-complete-table tbody tr:last-child td {
             border-bottom: 0 !important;
         }
 
-        .academic-table thead th {
+        .sc-complete-table thead th {
             background: #E8F5E9;
             color: #111;
             font-weight: 700;
-            white-space: normal !important;
-            word-break: break-word;
-            overflow-wrap: anywhere;
-            text-wrap: balance;
+            word-break: normal;
+            overflow-wrap: break-word;
+            hyphens: auto;
         }
 
-        .academic-table thead tr:first-child th {
+        .sc-complete-table thead tr:first-child th {
             border-bottom: 1px solid #66BB6A !important;
-            padding: 4px 4px;
-            font-size: 5.9px !important;
-            line-height: 1.15 !important;
-            height: 40px !important;
+            padding: 3px 2px;
+            font-size: 5.35pt !important;
+            line-height: 1.02 !important;
+            height: 34px !important;
+            white-space: normal !important;
         }
 
-        .academic-table thead tr:nth-child(2) th {
+        .sc-complete-table thead tr:nth-child(2) th {
             border-bottom: 1px solid #9cc79f !important;
-            padding: 3px 0 !important;
-            font-size: 6.6px !important;
+            padding: 2px 0 !important;
+            font-size: 5.35pt !important;
             line-height: 1 !important;
-            height: 20px !important;
+            height: 15px !important;
+            white-space: nowrap !important;
         }
 
-        .academic-table tbody td {
-            height: 22px;
-            padding: 2px 2px !important;
-            font-size: 7.2px !important;
-            line-height: 1.05 !important;
+        .sc-complete-table tbody td {
+            height: 16px;
+            padding: 1px 1px !important;
+            font-size: 6.1pt !important;
+            line-height: 1.08 !important;
         }
 
-        .academic-table tbody tr:nth-child(even) td {
+        .sc-complete-table tbody tr:nth-child(even) td {
             background: #fcfffc;
         }
 
-        .academic-table .subject-col {
+        .sc-complete-table .subject-col {
+            text-align: left !important;
+            font-weight: 700;
+            padding-left: 3px !important;
+            padding-right: 3px !important;
+            font-size: 6.1pt !important;
+            line-height: 1.08 !important;
+            white-space: normal !important;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .sc-complete-table .small-col {
+            width: 2.85%;
+            min-width: 2.85%;
+        }
+
+        .sc-complete-table .situation-col {
+            width: 2%;
+            min-width: 2%;
+        }
+
+        .sc-complete-table tbody td:nth-child(1) {
+            border-right: 1px solid #66BB6A !important;
+        }
+
+        .sc-complete-table tbody td:nth-child(5),
+        .sc-complete-table tbody td:nth-child(9),
+        .sc-complete-table tbody td:nth-child(13),
+        .sc-complete-table tbody td:nth-child(17),
+        .sc-complete-table tbody td:nth-child(21),
+        .sc-complete-table tbody td:nth-child(22),
+        .sc-complete-table tbody td:nth-child(23),
+        .sc-complete-table tbody td:nth-child(27),
+        .sc-complete-table tbody td:nth-child(31),
+        .sc-complete-table tbody td:nth-child(32) {
+            border-right: 1px solid #66BB6A !important;
+        }
+
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(4),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(8),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(12),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(16),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(20),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(24),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(28),
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(29) {
+            border-right: 1px solid #66BB6A !important;
+        }
+
+        .sc-complete-table tbody td:not(.subject-col) {
+            white-space: nowrap;
+        }
+
+        /* Sin resaltado amarillo en este boletín */
+        .sc-complete-table .low-grade,
+        .sc-complete-table .sc-complete-low-grade {
+            background: transparent !important;
+            font-weight: inherit !important;
+        }
+
+        .sc-complete-modules-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 1.4px solid #66BB6A !important;
+            margin: 0 0 9px 0;
+        }
+
+        .sc-complete-modules-table th,
+        .sc-complete-modules-table td {
+            border: 1px solid #a5c9a7 !important;
+            text-align: center;
+            vertical-align: middle;
+            color: #111;
+        }
+
+        .sc-complete-modules-table th {
+            background: #E8F5E9;
+            font-weight: 700;
+            font-size: 6.4pt;
+            line-height: 1.02;
+            padding: 3px 2px;
+            height: 17px;
+        }
+
+        .sc-complete-modules-table td {
+            font-size: 6.2pt;
+            line-height: 1.06;
+            padding: 2px 2px;
+            height: 16px;
+        }
+
+        .sc-complete-modules-table tbody tr:nth-child(even) td {
+            background: #fcfffc;
+        }
+
+        .sc-complete-modules-table .module-col {
+            width: 29%;
             text-align: left !important;
             font-weight: 700;
             padding-left: 4px !important;
             padding-right: 4px !important;
-            font-size: 7.2px !important;
-            line-height: 1.1 !important;
+            white-space: normal !important;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
-        .academic-table .small-col {
-            width: 28px;
-            min-width: 28px;
+        .sc-complete-modules-table .ra-cell {
+            font-size: 6.1pt;
         }
 
-        .academic-table .situation-col {
-            width: 20px;
-            min-width: 20px;
+        .sc-complete-modules-table th:nth-child(2),
+        .sc-complete-modules-table th:nth-child(3),
+        .sc-complete-modules-table th:nth-child(4),
+        .sc-complete-modules-table th:nth-child(5),
+        .sc-complete-modules-table th:nth-child(6),
+        .sc-complete-modules-table th:nth-child(7),
+        .sc-complete-modules-table th:nth-child(8),
+        .sc-complete-modules-table th:nth-child(9),
+        .sc-complete-modules-table th:nth-child(10),
+        .sc-complete-modules-table th:nth-child(11),
+        .sc-complete-modules-table td:nth-child(2),
+        .sc-complete-modules-table td:nth-child(3),
+        .sc-complete-modules-table td:nth-child(4),
+        .sc-complete-modules-table td:nth-child(5),
+        .sc-complete-modules-table td:nth-child(6),
+        .sc-complete-modules-table td:nth-child(7),
+        .sc-complete-modules-table td:nth-child(8),
+        .sc-complete-modules-table td:nth-child(9),
+        .sc-complete-modules-table td:nth-child(10),
+        .sc-complete-modules-table td:nth-child(11) {
+            width: 5.1%;
         }
 
-        /* separaciones verticales limpias por bloque */
-        .academic-table tbody td:nth-child(1) {
-            border-right: 1px solid #66BB6A !important;
+        .sc-complete-modules-table th:nth-child(12),
+        .sc-complete-modules-table td:nth-child(12) {
+            width: 6.4%;
         }
 
-        .academic-table tbody td:nth-child(5),
-        .academic-table tbody td:nth-child(9),
-        .academic-table tbody td:nth-child(13),
-        .academic-table tbody td:nth-child(17),
-        .academic-table tbody td:nth-child(21),
-        .academic-table tbody td:nth-child(22),
-        .academic-table tbody td:nth-child(26),
-        .academic-table tbody td:nth-child(30),
-        .academic-table tbody td:nth-child(31),
-        .academic-table tbody td:nth-child(32) {
-            border-right: 1px solid #66BB6A !important;
+        .sc-complete-modules-table th:nth-child(13),
+        .sc-complete-modules-table td:nth-child(13) {
+            width: 8.6%;
         }
 
-        .academic-table thead tr:nth-child(2) th:nth-child(4),
-        .academic-table thead tr:nth-child(2) th:nth-child(8),
-        .academic-table thead tr:nth-child(2) th:nth-child(12),
-        .academic-table thead tr:nth-child(2) th:nth-child(16),
-        .academic-table thead tr:nth-child(2) th:nth-child(20),
-        .academic-table thead tr:nth-child(2) th:nth-child(24),
-        .academic-table thead tr:nth-child(2) th:nth-child(28),
-        .academic-table thead tr:nth-child(2) th:nth-child(29) {
-            border-right: 1px solid #66BB6A !important;
+        .sc-complete-modules-table .low-grade {
+            background: transparent !important;
+            font-weight: inherit !important;
         }
 
-        /* uniformidad de casillas numéricas */
-        .academic-table tbody td:not(.subject-col) {
-            width: 28px;
+        .sc-complete-legend-box {
+            border: 1.1px solid #66BB6A;
+            border-radius: 5px;
+            padding: 6px 7px;
+            margin: 8px 0 8px 0;
+            background: #fcfffc;
         }
 
-        @media print {
-            .screen-toolbar {
-                display: none !important;
-            }
+        .sc-complete-legend-title {
+            font-size: 7.8pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            color: #111;
+        }
 
-            .page-wrap {
-                padding: 0;
-                overflow: visible;
-                height: auto;
-            }
+        .sc-complete-legend-grid {
+            font-size: 6.6pt;
+            line-height: 1.12;
+            color: #111;
+        }
 
-            .zoom-container {
-                transform: none !important;
-                width: 100% !important;
-                min-width: 100% !important;
-                height: auto !important;
-            }
+        .sc-complete-legend-grid table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-            .page {
-                width: 100%;
-            }
+        .sc-complete-legend-grid td {
+            padding: 1px 6px 1px 0;
+            vertical-align: top;
+        }
+
+        .sc-complete-comment-box {
+            border: 1.1px solid #66BB6A;
+            border-radius: 5px;
+            padding: 6px 7px;
+            margin: 8px 0 0 0;
+            background: #fcfffc;
+        }
+
+        .sc-complete-comment-title {
+            font-size: 7.8pt;
+            font-weight: 700;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .sc-complete-comment-content {
+            min-height: 8mm;
+            font-size: 6.9pt;
+            line-height: 1.1;
+            color: #222;
+        }
+
+        .sc-complete-final-status-box {
+            border: 1px solid #66BB6A;
+            border-radius: 5px;
+            padding: 6px 7px;
+            margin: 8px 0 0 0;
+            background: #fcfffc;
+            color: #111;
+        }
+
+        .sc-complete-final-status-title {
+            font-size: 7.8pt;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            color: #111;
+        }
+
+        .sc-complete-final-status-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .sc-complete-final-status-table td {
+            border: 1px solid #66BB6A !important;
+            padding: 3px 5px !important;
+            font-size: 7pt !important;
+            line-height: 1.08 !important;
+            vertical-align: middle;
+        }
+
+        .sc-complete-status-option {
+            font-weight: 700;
+            text-align: center;
+            width: 22%;
+        }
+
+        .sc-complete-status-mark {
+            display: inline-block;
+            min-width: 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .sc-complete-special-note {
+            margin-top: 4px;
+            font-size: 6.8pt;
+            line-height: 1.12;
+            color: #111;
+        }
+
+        /* Bordes uniformes en la tabla principal del boletín */
+        .sc-complete-table,
+        .sc-complete-table th,
+        .sc-complete-table td {
+            border: 1px solid #66BB6A !important;
+        }
+
+        /* Bordes uniformes en la tabla de módulos técnicos */
+        .sc-complete-modules-table,
+        .sc-complete-modules-table th,
+        .sc-complete-modules-table td {
+            border: 1px solid #66BB6A !important;
+        }
+
+        .sc-complete-content-bottom-space {
+            height: 1mm;
         }
     </style>
 </head>
-<body style="--low-grade-color: {{ settings.low_grade_highlight_color if settings and settings.low_grade_highlight_color else '#FFF59D' }};">
+
+<body>
+
     {% macro format_decimal_grade(value) -%}
         {%- if value is none -%}
             {{- "" -}}
@@ -274,22 +424,36 @@
         {%- endif -%}
     {%- endmacro %}
 
-    {% macro text_value(value) %}
-        {% if value is none %}
-            {{ "" }}
-        {% elif value is string %}
-            {{ value }}
-        {% elif value is iterable %}
-            {{ value | join(" / ") }}
-        {% else %}
-            {{ value }}
-        {% endif %}
-    {% endmacro %}
+    {% macro format_percent_grade(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- else -%}
+            {%- set text = (value|string).strip().replace("%", "").replace(",", ".") -%}
+            {%- if text in ("", "0", "0.0", "0.00") -%}
+                {{- "" -}}
+            {%- else -%}
+                {%- set number = text|float -%}
+                {%- if number > 0 and number <= 1 -%}
+                    {%- set number = number * 100 -%}
+                {%- endif -%}
+                {%- if number == number|round(0) -%}
+                    {{- number|round(0)|int -}}%
+                {%- else -%}
+                    {{- "%.1f"|format(number) -}}%
+                {%- endif -%}
+            {%- endif -%}
+        {%- endif -%}
+    {%- endmacro %}
 
-    {% macro block_cell_class(value) -%}
-        {%- set visible = format_decimal_grade(value)|trim -%}
-        {%- if visible != "" and (value|float) >= 1 and (value|float) < 70 -%}
-            low-grade
+    {% macro text_value(value) -%}
+        {%- if value is none -%}
+            {{- "" -}}
+        {%- elif value is string -%}
+            {{- value -}}
+        {%- elif value is iterable -%}
+            {{- value | join(" / ") -}}
+        {%- else -%}
+            {{- value -}}
         {%- endif -%}
     {%- endmacro %}
 
@@ -298,62 +462,39 @@
     {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
     {% set director_name = director_name if director_name is defined else settings.institution_director %}
 
-    <div class="screen-toolbar">
-        <div class="toolbar-left">Vista previa del boletín</div>
-        <div class="toolbar-right">
-            <button class="zoom-btn" type="button" onclick="changeZoom(-0.1)">−</button>
-            <input class="zoom-slider" id="zoomSlider" type="range" min="60" max="160" step="5" value="100" oninput="setZoomFromSlider(this.value)">
-            <div class="zoom-label" id="zoomLabel">100%</div>
-            <button class="zoom-btn" type="button" onclick="changeZoom(0.1)">+</button>
-            <button class="zoom-btn" type="button" onclick="fitToScreen()">Ajustar</button>
-            <button class="zoom-btn" type="button" onclick="resetZoom()">100%</button>
-        </div>
-    </div>
+    <!-- PORTADA APROBADA -->
+    {% include "bulletin_cover_pdf.html" %}
 
-    <div class="page-wrap" id="pageWrap">
-        <div class="zoom-container" id="zoomContainer">
-            <div class="page">
-                <div class="page-inner">
-                    <div class="header">
-                        <table class="header-table">
+    <!-- SEGUNDA HOJA -->
+    <div class="pdf-page">
+        <div class="pdf-frame">
+            <div class="sc-complete-page">
+
+                <div class="sc-complete-content">
+                    <div class="pdf-header">
+                        <table class="pdf-header-table">
                             <tr>
-                                <td class="logo-cell">
+                                <td class="pdf-logo-cell">
                                     {% if institution_logo_src %}
-                                        <img src="{{ institution_logo_src }}" alt="Logo institucional" class="header-logo">
+                                        <img src="{{ institution_logo_src }}" alt="Logo institucional" class="pdf-header-logo">
                                     {% endif %}
                                 </td>
-                                <td class="title-cell">
-                                    <div class="institution-name">{{ settings.institution_name }}</div>
-
-                                    {% if settings.institution_motto %}
-                                        <div class="institution-motto">{{ settings.institution_motto }}</div>
-                                    {% endif %}
-
-                                    <div class="institution-contact">
-                                        {% if settings.institution_address %}<div>{{ settings.institution_address }}</div>{% endif %}
-                                        {% if settings.institution_email or settings.institution_phone %}
-                                            <div>
-                                                {% if settings.institution_email %}{{ settings.institution_email }}{% endif %}
-                                                {% if settings.institution_email and settings.institution_phone %} | {% endif %}
-                                                {% if settings.institution_phone %}{{ settings.institution_phone }}{% endif %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="department-title">{{ settings.institution_academic_department }}</div>
-                                    <div class="bulletin-title">Reporte de Evaluaciones</div>
+                                <td class="pdf-title-cell">
+                                    <div class="pdf-institution-name">{{ settings.institution_name }}</div>
+                                    <div class="pdf-department-title">{{ settings.institution_academic_department }}</div>
+                                    <div class="pdf-report-title">REPORTE DE EVALUACIONES DEL SEGUNDO CICLO</div>
                                 </td>
-                                <td class="logo-cell">
+                                <td class="pdf-logo-cell">
                                     {% if minerd_logo_src %}
-                                        <img src="{{ minerd_logo_src }}" alt="Logo Minerd" class="header-logo">
+                                        <img src="{{ minerd_logo_src }}" alt="Logo MINERD" class="pdf-header-logo">
                                     {% endif %}
                                 </td>
                             </tr>
                         </table>
                     </div>
 
-                    <div class="student-strip">
-                        <table class="student-strip-table">
+                    <table class="student-inline-table">
+                        <tbody>
                             <tr>
                                 <th>Año escolar</th>
                                 <td>{{ school_year if school_year is defined else "2025-2026" }}</td>
@@ -370,12 +511,12 @@
                                 <th>Profesor titular</th>
                                 <td>{{ student.prof_titular }}</td>
                             </tr>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
 
-                    <div class="section-title">Áreas académicas</div>
+                    <div class="sc-complete-section-title">Áreas académicas</div>
 
-                    <table class="academic-table">
+                    <table class="sc-complete-table">
                         <colgroup>
                             <col class="subject-col-width">
                             <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
@@ -384,11 +525,13 @@
                             <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
                             <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
                             <col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
                             <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
                             <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
                             <col class="small-grade-col-width">
                             <col class="small-grade-col-width">
-                            <col class="situation-col-width"><col class="situation-col-width">
+                            <col class="situation-col-width">
+                            <col class="situation-col-width">
                         </colgroup>
                         <thead>
                             <tr>
@@ -401,11 +544,11 @@
                                 <th colspan="4">PC</th>
 
                                 <th class="small-col" rowspan="2">CF</th>
+                                <th class="small-col" rowspan="2">ASIS</th>
                                 <th colspan="4">COMP</th>
                                 <th colspan="4">EXT</th>
-                                <th colspan="1">ESP</th>
-                                <th class="small-col" rowspan="2">ASIS</th>
-                                <th colspan="2">SIT</th>
+                                <th colspan="2"><span class="academic-title-stack">EVALUACIÓN<br>ESPECIAL</span></th>
+                                <th colspan="2"><span class="academic-title-stack">SIT.<br>FINAL</span></th>
                             </tr>
                             <tr>
                                 <th class="tiny-col">P1</th>
@@ -443,6 +586,8 @@
                                 <th class="tiny-col">70CE</th>
                                 <th class="tiny-col">CEXF</th>
 
+                                <th class="tiny-col">CF</th>
+                                <th class="tiny-col">CF</th>
                                 <th class="tiny-col">CE</th>
 
                                 <th class="situation-col">A</th>
@@ -454,32 +599,33 @@
                             <tr>
                                 <td class="subject-col">{{ subject.asignatura if subject.asignatura is defined else "Asignatura" }}</td>
 
-                                <td class="{{ block_cell_class(subject.p1_c1 if subject.p1_c1 is defined else none) }}">{{ format_decimal_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p2_c1 if subject.p2_c1 is defined else none) }}">{{ format_decimal_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p3_c1 if subject.p3_c1 is defined else none) }}">{{ format_decimal_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p4_c1 if subject.p4_c1 is defined else none) }}">{{ format_decimal_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p1_c1 if subject.p1_c1 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p2_c1 if subject.p2_c1 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p3_c1 if subject.p3_c1 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p4_c1 if subject.p4_c1 is defined else none) }}</td>
 
-                                <td class="{{ block_cell_class(subject.p1_c2 if subject.p1_c2 is defined else none) }}">{{ format_decimal_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p2_c2 if subject.p2_c2 is defined else none) }}">{{ format_decimal_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p3_c2 if subject.p3_c2 is defined else none) }}">{{ format_decimal_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p4_c2 if subject.p4_c2 is defined else none) }}">{{ format_decimal_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p1_c2 if subject.p1_c2 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p2_c2 if subject.p2_c2 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p3_c2 if subject.p3_c2 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p4_c2 if subject.p4_c2 is defined else none) }}</td>
 
-                                <td class="{{ block_cell_class(subject.p1_c3 if subject.p1_c3 is defined else none) }}">{{ format_decimal_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p2_c3 if subject.p2_c3 is defined else none) }}">{{ format_decimal_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p3_c3 if subject.p3_c3 is defined else none) }}">{{ format_decimal_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p4_c3 if subject.p4_c3 is defined else none) }}">{{ format_decimal_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p1_c3 if subject.p1_c3 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p2_c3 if subject.p2_c3 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p3_c3 if subject.p3_c3 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p4_c3 if subject.p4_c3 is defined else none) }}</td>
 
-                                <td class="{{ block_cell_class(subject.p1_c4 if subject.p1_c4 is defined else none) }}">{{ format_decimal_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p2_c4 if subject.p2_c4 is defined else none) }}">{{ format_decimal_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p3_c4 if subject.p3_c4 is defined else none) }}">{{ format_decimal_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.p4_c4 if subject.p4_c4 is defined else none) }}">{{ format_decimal_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p1_c4 if subject.p1_c4 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p2_c4 if subject.p2_c4 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p3_c4 if subject.p3_c4 is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.p4_c4 if subject.p4_c4 is defined else none) }}</td>
 
-                                <td class="{{ block_cell_class(subject.pc1 if subject.pc1 is defined else none) }}">{{ format_decimal_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.pc2 if subject.pc2 is defined else none) }}">{{ format_decimal_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.pc3 if subject.pc3 is defined else none) }}">{{ format_decimal_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
-                                <td class="{{ block_cell_class(subject.pc4 if subject.pc4 is defined else none) }}">{{ format_decimal_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc1 if subject.pc1 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc2 if subject.pc2 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc3 if subject.pc3 is defined else none) }}</td>
+                                <td>{{ format_decimal_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.final if subject.final is defined else none) }}</td>
+                                <td>{{ format_percent_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.comp_50cf if subject.comp_50cf is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.comp_cec if subject.comp_cec is defined else none) }}</td>
@@ -491,9 +637,8 @@
                                 <td>{{ format_integer_grade(subject.ext_70ceex if subject.ext_70ceex is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.cexf if subject.cexf is defined else none) }}</td>
 
+                                <td>{{ format_integer_grade(subject.esp_cf if subject.esp_cf is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
-
-                                <td>{{ format_integer_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
 
                                 <td>{% if subject.situ_a is defined and subject.situ_a %}{{ subject.situ_a }}{% else %}-{% endif %}</td>
                                 <td>{% if subject.situ_r is defined and subject.situ_r %}{{ subject.situ_r }}{% else %}-{% endif %}</td>
@@ -503,65 +648,79 @@
                     </table>
 
                     {% if student.modules is defined and student.modules %}
-                    <div class="section-title">Módulos técnicos</div>
+                    <div class="sc-complete-section-title">Módulos técnicos</div>
 
-                    <table class="modules-table">
+                    <table class="sc-complete-modules-table">
                         <thead>
                             <tr>
-                                <th class="module-col">MÓDULO</th>
-                                <th class="tiny-col">RA1</th>
-                                <th class="tiny-col">RA2</th>
-                                <th class="tiny-col">RA3</th>
-                                <th class="tiny-col">RA4</th>
-                                <th class="tiny-col">RA5</th>
-                                <th class="tiny-col">RA6</th>
-                                <th class="tiny-col">RA7</th>
-                                <th class="tiny-col">RA8</th>
-                                <th class="tiny-col">RA9</th>
-                                <th class="tiny-col">RA10</th>
-                                <th class="small-col">CF</th>
-                                <th class="small-col">A</th>
+                                <th class="module-col">Módulo</th>
+                                <th>RA1</th>
+                                <th>RA2</th>
+                                <th>RA3</th>
+                                <th>RA4</th>
+                                <th>RA5</th>
+                                <th>RA6</th>
+                                <th>RA7</th>
+                                <th>RA8</th>
+                                <th>RA9</th>
+                                <th>RA10</th>
+                                <th>CF</th>
+                                <th>Situación</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for module in student.modules %}
                             <tr>
                                 <td class="module-col">{{ module.modulo if module.modulo is defined else "Módulo" }}</td>
-                                <td>{{ text_value(module.ra1 if module.ra1 is defined else none) }}</td>
-                                <td>{{ text_value(module.ra2 if module.ra2 is defined else none) }}</td>
-                                <td>{{ text_value(module.ra3 if module.ra3 is defined else none) }}</td>
-                                <td>{{ text_value(module.ra4 if module.ra4 is defined else none) }}</td>
-                                <td>{{ text_value(module.ra5 if module.ra5 is defined else none) }}</td>
-                                <td>{{ text_value(module.ra6 if module.ra6 is defined else none) }}</td>
-                                <td>{{ text_value(module.ra7 if module.ra7 is defined else none) }}</td>
-                                <td>{{ text_value(module.ra8 if module.ra8 is defined else none) }}</td>
-                                <td>{{ text_value(module.ra9 if module.ra9 is defined else none) }}</td>
-                                <td>{{ text_value(module.ra10 if module.ra10 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra1 if module.ra1 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra2 if module.ra2 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra3 if module.ra3 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra4 if module.ra4 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra5 if module.ra5 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra6 if module.ra6 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra7 if module.ra7 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra8 if module.ra8 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra9 if module.ra9 is defined else none) }}</td>
+                                <td class="ra-cell">{{ text_value(module.ra10 if module.ra10 is defined else none) }}</td>
                                 <td>{{ format_integer_grade(module.cf if module.cf is defined else none) }}</td>
-                                <td>{% if module.situ_a is defined and module.situ_a %}{{ module.situ_a }}{% else %}-{% endif %}</td>
+                                <td>
+                                    {% if module.situ_a is defined and module.situ_a %}
+                                        {{ module.situ_a }}
+                                    {% elif module.situ_r is defined and module.situ_r %}
+                                        {{ module.situ_r }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                     {% endif %}
 
-                    <div class="legend-box">
-                        <div class="legend-title">Leyenda de abreviaturas</div>
-                        <div class="legend-grid">
-                            <div class="legend-item"><strong>PC</strong> = Promedio de competencias</div>
-                            <div class="legend-item"><strong>CF</strong> = Calificación final</div>
-                            <div class="legend-item"><strong>COMP</strong> = Completivo</div>
-                            <div class="legend-item"><strong>EXT</strong> = Extraordinario</div>
-                            <div class="legend-item"><strong>ESP</strong> = Evaluación especial</div>
-                            <div class="legend-item"><strong>ASIS</strong> = Asistencia</div>
-                            <div class="legend-item"><strong>SIT</strong> = Situación final</div>
-                            <div class="legend-item"><strong>A / R</strong> = Aprobado / Reprobado</div>
+                    <div class="sc-complete-legend-box">
+                        <div class="sc-complete-legend-title">Leyenda de abreviaturas</div>
+                        <div class="sc-complete-legend-grid">
+                            <table>
+                                <tr>
+                                    <td><strong>PC</strong> = Promedio de competencias</td>
+                                    <td><strong>CF</strong> = Calificación final</td>
+                                    <td><strong>COMP</strong> = Completivo</td>
+                                    <td><strong>EXT</strong> = Extraordinario</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ESP</strong> = Evaluación especial</td>
+                                    <td><strong>ASIS</strong> = Asistencia</td>
+                                    <td><strong>SIT</strong> = Situación final</td>
+                                    <td><strong>A / R</strong> = Aprobado / Reprobado</td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
 
-                    <div class="comment-box">
-                        <div class="comment-title">Comentario del profesor titular</div>
-                        <div class="muted">
+                    <div class="sc-complete-comment-box">
+                        <div class="sc-complete-comment-title">Comentario del profesor titular</div>
+                        <div class="sc-complete-comment-content">
                             {% if student.comentario_final is defined and student.comentario_final %}
                                 {{ student.comentario_final }}
                             {% else %}
@@ -570,97 +729,72 @@
                         </div>
                     </div>
 
-                    <div class="signatures">
+
+                    <div class="sc-complete-final-status-box">
+                        <div class="sc-complete-final-status-title">Situación final del estudiante</div>
+                        <table class="sc-complete-final-status-table">
+                            <tbody>
+                                <tr>
+                                    <td class="sc-complete-status-option">
+                                        Promovió:
+                                        <span class="sc-complete-status-mark">
+                                            {% if student.promovio_final is defined and student.promovio_final %}X{% else %}&nbsp;{% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="sc-complete-status-option">
+                                        Reprobó:
+                                        <span class="sc-complete-status-mark">
+                                            {% if student.reprobo_final is defined and student.reprobo_final %}X{% else %}&nbsp;{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if student.situacion_final_texto is defined and student.situacion_final_texto %}
+                                            {{ student.situacion_final_texto }}
+                                        {% else %}
+                                            Situación final pendiente de validación.
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        {% if student.asignaturas_especial is defined and student.asignaturas_especial %}
+                            <div class="sc-complete-special-note">
+                                <strong>Evaluación especial:</strong>
+                                el/la estudiante debe presentarse a evaluación especial en:
+                                {{ student.asignaturas_especial | join(", ") }}.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="sc-complete-content-bottom-space"></div>
+                </div>
+
+                <div class="bottom-final">
+                    <div class="signatures signatures-wide">
                         <table class="signatures-table">
                             <tr>
-                                <td>
-                                    <div class="signature-line"></div>
-                                    <div class="signature-name">{{ director_name }}</div>
-                                    <div class="signature-role">Director(a)</div>
-                                </td>
-                                <td>
+                                <td class="signature-left">
                                     <div class="signature-line"></div>
                                     <div class="signature-name">{{ student.prof_titular }}</div>
                                     <div class="signature-role">Profesor(a) Titular</div>
+                                </td>
+                                <td class="signature-right">
+                                    <div class="signature-line"></div>
+                                    <div class="signature-name">{{ director_name }}</div>
+                                    <div class="signature-role">Director(a)</div>
                                 </td>
                             </tr>
                         </table>
                     </div>
 
                     <div class="footer">
-                        <div class="footer-left">
-                            Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %}
-                        </div>
-                        <div class="footer-right">
-                            Desarrollado por {{ settings.bulletin_author }}
-                        </div>
+                        Generado el {{ generated_at }} por {{ generated_by }}{% if generated_role %} | Rol: {{ generated_role }}{% endif %} | Desarrollado por {{ settings.bulletin_author }}
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
-
-    <script>
-        let currentZoom = 1.0;
-
-        function updateZoom() {
-            const wrap = document.getElementById("pageWrap");
-            const container = document.getElementById("zoomContainer");
-            const page = document.querySelector(".page");
-            const label = document.getElementById("zoomLabel");
-            const slider = document.getElementById("zoomSlider");
-
-            if (!wrap || !container || !page) return;
-
-            const baseWidth = page.offsetWidth;
-            const baseHeight = page.offsetHeight;
-
-            container.style.transform = `scale(${currentZoom})`;
-            container.style.width = `${baseWidth * currentZoom}px`;
-            container.style.height = `${baseHeight * currentZoom}px`;
-
-            label.textContent = `${Math.round(currentZoom * 100)}%`;
-            if (slider) slider.value = Math.round(currentZoom * 100);
-        }
-
-        function setZoomFromSlider(value) {
-            currentZoom = Number(value) / 100;
-            updateZoom();
-        }
-
-        function changeZoom(step) {
-            currentZoom += step;
-            if (currentZoom < 0.6) currentZoom = 0.6;
-            if (currentZoom > 1.6) currentZoom = 1.6;
-            updateZoom();
-        }
-
-        function resetZoom() {
-            currentZoom = 1.0;
-            updateZoom();
-        }
-
-        function fitToScreen() {
-            const wrap = document.getElementById("pageWrap");
-            const page = document.querySelector(".page");
-            if (!wrap || !page) return;
-
-            const available = wrap.clientWidth - 24;
-            const scale = available / page.offsetWidth;
-
-            currentZoom = Math.max(0.6, Math.min(1.2, scale));
-            updateZoom();
-        }
-
-        window.addEventListener("load", () => {
-            fitToScreen();
-            setTimeout(updateZoom, 50);
-        });
-
-        window.addEventListener("resize", () => {
-            fitToScreen();
-            setTimeout(updateZoom, 50);
-        });
-    </script>
 </body>
 </html>

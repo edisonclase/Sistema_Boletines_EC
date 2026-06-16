@@ -98,6 +98,25 @@
             border-collapse: collapse;
             table-layout: fixed;
             border: 1px solid #66BB6A !important;
+            box-sizing: border-box;
+            outline: 1px solid #66BB6A;
+            outline-offset: -1px;
+        }
+
+        .academic-table col.subject-col-width {
+            width: 140px;
+        }
+
+        .academic-table col.grade-col-width {
+            width: 36px;
+        }
+
+        .academic-table col.small-grade-col-width {
+            width: 28px;
+        }
+
+        .academic-table col.situation-col-width {
+            width: 20px;
         }
 
         .academic-table th,
@@ -136,6 +155,13 @@
             overflow-wrap: anywhere;
         }
 
+
+        .academic-title-stack {
+            display: inline-block;
+            line-height: 0.95;
+            text-align: center;
+        }
+
         .academic-table thead tr:nth-child(2) th {
             padding: 3px 0;
             font-size: 6.6px;
@@ -157,8 +183,8 @@
         }
 
         .academic-table .subject-col {
-            width: 150px;
-            min-width: 150px;
+            width: 140px;
+            min-width: 140px;
             text-align: left !important;
             font-weight: 700;
             padding-left: 4px !important;
@@ -192,10 +218,10 @@
         .academic-table tbody td:nth-child(17),
         .academic-table tbody td:nth-child(21),
         .academic-table tbody td:nth-child(22),
-        .academic-table tbody td:nth-child(26),
-        .academic-table tbody td:nth-child(30),
+        .academic-table tbody td:nth-child(23),
+        .academic-table tbody td:nth-child(27),
         .academic-table tbody td:nth-child(31),
-        .academic-table tbody td:nth-child(32) {
+        .academic-table tbody td:nth-child(33) {
             border-right: 1px solid #66BB6A !important;
         }
 
@@ -206,7 +232,7 @@
         .academic-table thead tr:nth-child(2) th:nth-child(20),
         .academic-table thead tr:nth-child(2) th:nth-child(24),
         .academic-table thead tr:nth-child(2) th:nth-child(28),
-        .academic-table thead tr:nth-child(2) th:nth-child(29) {
+        .academic-table thead tr:nth-child(2) th:nth-child(30) {
             border-right: 1px solid #66BB6A !important;
         }
 
@@ -462,6 +488,22 @@
 
                     <div class="section-title">Áreas académicas</div>
                     <table class="academic-table">
+                        <colgroup>
+                            <col class="subject-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
+                            <col class="situation-col-width">
+                            <col class="situation-col-width">
+                        </colgroup>
                         <thead>
                             <tr>
                                 <th class="subject-col" rowspan="2">ASIG.</th>
@@ -473,11 +515,11 @@
                                 <th colspan="4">PC</th>
 
                                 <th class="small-col" rowspan="2">CF</th>
+                                <th class="small-col" rowspan="2">ASIS</th>
                                 <th colspan="4">COMP</th>
                                 <th colspan="4">EXT</th>
-                                <th colspan="1">ESP</th>
-                                <th class="small-col" rowspan="2">ASIS</th>
-                                <th colspan="2">SIT</th>
+                                <th colspan="2"><span class="academic-title-stack">EVALUACIÓN<br>ESPECIAL</span></th>
+                                <th colspan="2"><span class="academic-title-stack">SIT.<br>FINAL</span></th>
                             </tr>
                             <tr>
                                 <th class="tiny-col">P1</th>
@@ -515,6 +557,7 @@
                                 <th class="tiny-col">70CE</th>
                                 <th class="tiny-col">CEXF</th>
 
+                                <th class="tiny-col">CF</th>
                                 <th class="tiny-col">CE</th>
 
                                 <th class="situation-col">A</th>
@@ -552,6 +595,7 @@
                                 <td class="{{ block_cell_class(subject.pc4 if subject.pc4 is defined else none) }}">{{ format_decimal_grade(subject.pc4 if subject.pc4 is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.final if subject.final is defined else none) }}</td>
+                                <td>{{ format_integer_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
 
                                 <td>{{ format_integer_grade(subject.comp_50cf if subject.comp_50cf is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.comp_cec if subject.comp_cec is defined else none) }}</td>
@@ -563,9 +607,8 @@
                                 <td>{{ format_integer_grade(subject.ext_70ceex if subject.ext_70ceex is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.cexf if subject.cexf is defined else none) }}</td>
 
+                                <td>{{ format_integer_grade(subject.esp_cf if subject.esp_cf is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
-
-                                <td>{{ format_integer_grade(subject.asistencia_pct if subject.asistencia_pct is defined else none) }}</td>
 
                                 <td>{% if subject.situ_a is defined and subject.situ_a %}{{ subject.situ_a }}{% else %}-{% endif %}</td>
                                 <td>{% if subject.situ_r is defined and subject.situ_r %}{{ subject.situ_r }}{% else %}-{% endif %}</td>

@@ -8,11 +8,6 @@
     <style>{{ bulletin_pdf_css | safe }}</style>
 
     <style>
-        /* =========================
-           AJUSTES AISLADOS SOLO PARA
-           second_cycle_complete_pdf.html
-           ========================= */
-
         .sc-complete-page {
             width: 100%;
             box-sizing: border-box;
@@ -44,22 +39,25 @@
             table-layout: fixed;
             border: 1.4px solid #66BB6A !important;
             margin: 0 0 9px 0;
+            box-sizing: border-box;
+            outline: 1px solid #66BB6A;
+            outline-offset: -1px;
         }
 
         .sc-complete-table col.subject-col-width {
-            width: 16%;
+            width: 12.8%;
         }
 
         .sc-complete-table col.grade-col-width {
-            width: 3.2%;
+            width: 3.05%;
         }
 
         .sc-complete-table col.small-grade-col-width {
-            width: 2.85%;
+            width: 2.7%;
         }
 
         .sc-complete-table col.situation-col-width {
-            width: 2%;
+            width: 1.85%;
         }
 
         .sc-complete-table th,
@@ -93,11 +91,25 @@
 
         .sc-complete-table thead tr:first-child th {
             border-bottom: 1px solid #66BB6A !important;
-            padding: 3px 2px;
-            font-size: 5.35pt !important;
-            line-height: 1.02 !important;
-            height: 34px !important;
+            padding: 2px 1px;
+            font-size: 4.9pt !important;
+            line-height: 1 !important;
+            height: 33px !important;
             white-space: normal !important;
+        }
+
+        .sc-complete-table thead tr:first-child th:nth-last-child(2),
+        .sc-complete-table thead tr:first-child th:nth-last-child(1) {
+            font-size: 4.75pt !important;
+            line-height: 0.95 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        .sc-complete-title-stack {
+            display: inline-block;
+            line-height: 0.95;
+            text-align: center;
         }
 
         .sc-complete-table thead tr:nth-child(2) th {
@@ -133,13 +145,13 @@
         }
 
         .sc-complete-table .small-col {
-            width: 2.85%;
-            min-width: 2.85%;
+            width: 2.7%;
+            min-width: 2.7%;
         }
 
         .sc-complete-table .situation-col {
-            width: 2%;
-            min-width: 2%;
+            width: 1.85%;
+            min-width: 1.85%;
         }
 
         .sc-complete-table tbody td:nth-child(1) {
@@ -155,7 +167,7 @@
         .sc-complete-table tbody td:nth-child(23),
         .sc-complete-table tbody td:nth-child(27),
         .sc-complete-table tbody td:nth-child(31),
-        .sc-complete-table tbody td:nth-child(32) {
+        .sc-complete-table tbody td:nth-child(33) {
             border-right: 1px solid #66BB6A !important;
         }
 
@@ -166,7 +178,7 @@
         .sc-complete-table thead tr:nth-child(2) th:nth-child(20),
         .sc-complete-table thead tr:nth-child(2) th:nth-child(24),
         .sc-complete-table thead tr:nth-child(2) th:nth-child(28),
-        .sc-complete-table thead tr:nth-child(2) th:nth-child(29) {
+        .sc-complete-table thead tr:nth-child(2) th:nth-child(30) {
             border-right: 1px solid #66BB6A !important;
         }
 
@@ -174,7 +186,6 @@
             white-space: nowrap;
         }
 
-        /* Sin resaltado amarillo en este boletín */
         .sc-complete-table .low-grade,
         .sc-complete-table .sc-complete-low-grade {
             background: transparent !important;
@@ -191,7 +202,7 @@
 
         .sc-complete-modules-table th,
         .sc-complete-modules-table td {
-            border: 1px solid #a5c9a7 !important;
+            border: 1px solid #66BB6A !important;
             text-align: center;
             vertical-align: middle;
             color: #111;
@@ -376,17 +387,9 @@
             color: #111;
         }
 
-        /* Bordes uniformes en la tabla principal del boletín */
         .sc-complete-table,
         .sc-complete-table th,
         .sc-complete-table td {
-            border: 1px solid #66BB6A !important;
-        }
-
-        /* Bordes uniformes en la tabla de módulos técnicos */
-        .sc-complete-modules-table,
-        .sc-complete-modules-table th,
-        .sc-complete-modules-table td {
             border: 1px solid #66BB6A !important;
         }
 
@@ -462,10 +465,8 @@
     {% set generated_role = generated_role if generated_role is defined else settings.bulletin_generated_role %}
     {% set director_name = director_name if director_name is defined else settings.institution_director %}
 
-    <!-- PORTADA APROBADA -->
     {% include "bulletin_cover_pdf.html" %}
 
-    <!-- SEGUNDA HOJA -->
     <div class="pdf-page">
         <div class="pdf-frame">
             <div class="sc-complete-page">
@@ -525,16 +526,17 @@
                             <col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width"><col class="grade-col-width">
                             <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
                             <col class="small-grade-col-width">
+                            <col class="small-grade-col-width">
                             <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
                             <col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width"><col class="small-grade-col-width">
                             <col class="small-grade-col-width">
                             <col class="small-grade-col-width">
-                            <col class="situation-col-width"><col class="situation-col-width">
+                            <col class="situation-col-width">
+                            <col class="situation-col-width">
                         </colgroup>
                         <thead>
                             <tr>
                                 <th class="subject-col" rowspan="2">ASIG.</th>
-
                                 <th colspan="4">COMUNICATIVA</th>
                                 <th colspan="4">PENSAMIENTO LÓGICO, CREATIVO Y CRÍTICO / RESOLUCIÓN DE PROBLEMAS</th>
                                 <th colspan="4">CIENTÍFICA Y TECNOLÓGICA / AMBIENTAL Y DE LA SALUD</th>
@@ -545,49 +547,19 @@
                                 <th class="small-col" rowspan="2">ASIS</th>
                                 <th colspan="4">COMP</th>
                                 <th colspan="4">EXT</th>
-                                <th colspan="1">ESP</th>
-                                <th colspan="2">SIT</th>
+                                <th colspan="2"><span class="sc-complete-title-stack">EVALUACIÓN<br>ESPECIAL</span></th>
+                                <th colspan="2"><span class="sc-complete-title-stack">SIT.<br>FINAL</span></th>
                             </tr>
                             <tr>
-                                <th class="tiny-col">P1</th>
-                                <th class="tiny-col">P2</th>
-                                <th class="tiny-col">P3</th>
-                                <th class="tiny-col">P4</th>
-
-                                <th class="tiny-col">P1</th>
-                                <th class="tiny-col">P2</th>
-                                <th class="tiny-col">P3</th>
-                                <th class="tiny-col">P4</th>
-
-                                <th class="tiny-col">P1</th>
-                                <th class="tiny-col">P2</th>
-                                <th class="tiny-col">P3</th>
-                                <th class="tiny-col">P4</th>
-
-                                <th class="tiny-col">P1</th>
-                                <th class="tiny-col">P2</th>
-                                <th class="tiny-col">P3</th>
-                                <th class="tiny-col">P4</th>
-
-                                <th class="tiny-col">PC1</th>
-                                <th class="tiny-col">PC2</th>
-                                <th class="tiny-col">PC3</th>
-                                <th class="tiny-col">PC4</th>
-
-                                <th class="tiny-col">50CF</th>
-                                <th class="tiny-col">CEC</th>
-                                <th class="tiny-col">50CEC</th>
-                                <th class="tiny-col">CCF</th>
-
-                                <th class="tiny-col">30CF</th>
-                                <th class="tiny-col">CEEX</th>
-                                <th class="tiny-col">70CE</th>
-                                <th class="tiny-col">CEXF</th>
-
-                                <th class="tiny-col">CE</th>
-
-                                <th class="situation-col">A</th>
-                                <th class="situation-col">R</th>
+                                <th class="tiny-col">P1</th><th class="tiny-col">P2</th><th class="tiny-col">P3</th><th class="tiny-col">P4</th>
+                                <th class="tiny-col">P1</th><th class="tiny-col">P2</th><th class="tiny-col">P3</th><th class="tiny-col">P4</th>
+                                <th class="tiny-col">P1</th><th class="tiny-col">P2</th><th class="tiny-col">P3</th><th class="tiny-col">P4</th>
+                                <th class="tiny-col">P1</th><th class="tiny-col">P2</th><th class="tiny-col">P3</th><th class="tiny-col">P4</th>
+                                <th class="tiny-col">PC1</th><th class="tiny-col">PC2</th><th class="tiny-col">PC3</th><th class="tiny-col">PC4</th>
+                                <th class="tiny-col">50CF</th><th class="tiny-col">CEC</th><th class="tiny-col">50CEC</th><th class="tiny-col">CCF</th>
+                                <th class="tiny-col">30CF</th><th class="tiny-col">CEEX</th><th class="tiny-col">70CE</th><th class="tiny-col">CEXF</th>
+                                <th class="tiny-col">CF</th><th class="tiny-col">CE</th>
+                                <th class="situation-col">A</th><th class="situation-col">R</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -633,6 +605,7 @@
                                 <td>{{ format_integer_grade(subject.ext_70ceex if subject.ext_70ceex is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.cexf if subject.cexf is defined else none) }}</td>
 
+                                <td>{{ format_integer_grade(subject.esp_cf if subject.esp_cf is defined else none) }}</td>
                                 <td>{{ format_integer_grade(subject.ce_especial if subject.ce_especial is defined else none) }}</td>
 
                                 <td>{% if subject.situ_a is defined and subject.situ_a %}{{ subject.situ_a }}{% else %}-{% endif %}</td>
@@ -723,7 +696,6 @@
                             {% endif %}
                         </div>
                     </div>
-
 
                     <div class="sc-complete-final-status-box">
                         <div class="sc-complete-final-status-title">Situación final del estudiante</div>
