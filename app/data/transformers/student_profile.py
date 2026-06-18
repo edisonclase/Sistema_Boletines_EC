@@ -267,6 +267,17 @@ def _build_module(row, mod_number):
                 ],
             )
         ),
+        "asistencia_pct": _normalize_percent_value(
+            _get_first_existing_value(
+                row,
+                [
+                    f"MOD{mod_number}_ASIST",
+                    f"MOD{mod_number}_ASIST_PCT",
+                    f"MOD{mod_number}_ASISTENCIA",
+                    f"MOD{mod_number}_ASISTENCIA_PCT",
+                ],
+            )
+        ),
         "situ_a": _get_value(row, f"MOD{mod_number}_SITU_A"),
         "situ_r": _get_value(row, f"MOD{mod_number}_SITU_R"),
     }
