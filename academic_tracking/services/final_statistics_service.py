@@ -83,6 +83,17 @@ def _normalize_key(value: Any) -> str:
     text = "".join(char for char in text if unicodedata.category(char) != "Mn")
     return text.strip()
 
+def _normalize_sex_label(value: Any) -> str:
+    sex_key = _normalize_key(value)
+
+    if sex_key in {"MASCULINO", "M", "VARON", "VARÓN"}:
+        return "Masculino"
+
+    if sex_key in {"FEMENINO", "F", "HEMBRA"}:
+        return "Femenino"
+
+    return "No especificado"
+
 
 def _safe_float(value: Any) -> Optional[float]:
     if value is None:
@@ -121,7 +132,8 @@ def _percent(part: int, total: int) -> float:
 
 
 def _is_active_status(status: Any) -> bool:
-    return _normalize_key(status) in {"ACTIVO", "ACTIVA"}
+    status_key = _normalize_key(status)
+    return status_key in {"ACTIVO", "ACTIVA"}
 
 
 def _is_inactive_status(status: Any) -> bool:
@@ -133,6 +145,8 @@ def _is_inactive_status(status: Any) -> bool:
         "RETIRADA",
         "TRANSFERIDO",
         "TRANSFERIDA",
+        "TRANFERIDO",
+        "TRANFERIDA",
         "TRASLADADO",
         "TRASLADADA",
         "INACTIVO",
@@ -458,7 +472,7 @@ def build_final_statistics_report(
         detected_cycle = _detect_cycle(row)
         course_name = _normalize_text(row.get("CURSO"))
         raw_grade, raw_section = _split_course_name(course_name)
-        sex_label = _normalize_text(row.get("SEXO")) or "No especificado"
+        sex_label = _normalize_sex_label(row.get("SEXO"))
         status = row.get("ESTADO")
 
         is_active = _is_active_status(status)

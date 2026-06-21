@@ -4010,14 +4010,80 @@ def final_statistics_dashboard(
     "/estadisticas-finales/reporte.pdf",
     name="academic_tracking_final_statistics_pdf",
 )
-def final_statistics_pdf():
-    return HTMLResponse(
-        content="""
-        <h2>PDF temporalmente desactivado</h2>
-        <p>El dashboard de estadísticas finales sigue funcionando correctamente.</p>
-        <p>Este PDF se retomará luego con calma.</p>
-        """,
-        status_code=200,
+def final_statistics_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+    sexo: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    report = build_final_statistics_report(
+        rows=rows,
+        center_id=center_id,
+        school_year=_resolve_school_year(school_year),
+        ciclo=ciclo,
+        grado=grado,
+        seccion=seccion,
+        sexo=sexo,
+    )
+
+    generated_at = datetime.now().strftime("%d/%m/%Y %I:%M:%S %p")
+    generated_by = "Edison Clase"
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "center_id": center_id or "Centro principal",
+            "logos": [
+                {
+                    "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                    "alt": "Logo del centro educativo",
+                }
+            ],
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "grado": grado,
+            "seccion": seccion,
+            "sexo": sexo,
+        },
+        "report": {
+            **report,
+            "generated_at": generated_at,
+            "generated_by": generated_by,
+        },
+    }
+
+    rendered_html = _render_template_to_html(
+        "final_statistics_report.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="estadisticas_finales.pdf"'
+        },
     )
 
 @router.get(
