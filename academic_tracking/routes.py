@@ -3900,6 +3900,139 @@ def extraordinario_delivery_pdf(
     )
     
 @router.get(
+    "/boletin-final/constancia-entrega.pdf",
+    name="academic_tracking_final_bulletin_delivery_pdf",
+)
+def final_bulletin_delivery_pdf(
+    request: Request,
+    center_id: Optional[str] = Query(default=None),
+    school_year: Optional[str] = Query(default=None),
+    ciclo: Optional[str] = Query(default=None),
+    grado: Optional[str] = Query(default=None),
+    seccion: Optional[str] = Query(default=None),
+):
+    rows = load_academic_rows_from_source(
+        center_id=center_id,
+        school_year=school_year,
+        ciclo=ciclo,
+    )
+
+    full_report = build_final_status_report(rows)
+
+    report = _filter_final_status_report(
+        report=full_report,
+        situacion=None,
+        curso=None,
+        grado=grado,
+        seccion=seccion,
+    )
+
+    def final_status_label(student: dict[str, Any]) -> str:
+        status = _normalize_text(student.get("final_status"))
+
+        if status == "promovido":
+            return "Promovido"
+
+        if status in {"especial", "modulo_especial"}:
+            return "Especial"
+
+        return "Reprobado"
+
+    students = []
+
+    for student in report.get("students", []):
+        student_copy = dict(student)
+        student_copy["final_status_label"] = final_status_label(student_copy)
+        students.append(student_copy)
+
+    students = sorted(
+        students,
+        key=lambda item: (
+            _normalize_text(item.get("course_name")),
+            _normalize_text(item.get("numero")).zfill(4),
+            _normalize_text(item.get("student_name")),
+        ),
+    )
+
+    course_map: dict[str, list[dict[str, Any]]] = {}
+
+    for student in students:
+        course_name = _normalize_text(student.get("course_name")) or "Sin curso"
+        course_map.setdefault(course_name, [])
+        course_map[course_name].append(student)
+
+    students_by_course = []
+
+    for course_name, course_students in course_map.items():
+        summary = {
+            "inscritos": len(course_students),
+            "promovidos": sum(
+                1 for item in course_students
+                if item.get("final_status_label") == "Promovido"
+            ),
+            "especial": sum(
+                1 for item in course_students
+                if item.get("final_status_label") == "Especial"
+            ),
+            "reprobados": sum(
+                1 for item in course_students
+                if item.get("final_status_label") == "Reprobado"
+            ),
+        }
+
+        students_by_course.append(
+            {
+                "course_name": course_name,
+                "prof_titular": course_students[0].get("prof_titular"),
+                "summary": summary,
+                "students": course_students,
+            }
+        )
+
+    dashboard_payload = {
+        "institution": {
+            "name": _resolve_institution_name(),
+            "school_year": _resolve_school_year(school_year),
+            "ciclo": ciclo or "Vista general",
+            "logos": [
+                {
+                    "src": "file:///D:/Sistema_Boletines_EC/academic_tracking/static/academic_tracking/images/logo.png",
+                    "alt": "Logo del centro educativo",
+                }
+            ],
+            "favicon": "/assets/interface_logo.png",
+        },
+        "filters": {
+            "center_id": center_id,
+            "school_year": school_year,
+            "ciclo": ciclo,
+            "grado": grado,
+            "seccion": seccion,
+        },
+        "students_by_course": students_by_course,
+        "report": report,
+    }
+
+    rendered_html = _render_template_to_html(
+        "final_bulletin_delivery_report.html",
+        request=request,
+        dashboard_payload=dashboard_payload,
+    )
+
+    pdf_bytes = _render_pdf_bytes_from_html(
+        rendered_html,
+        base_url=str(request.base_url),
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'inline; filename="constancia_entrega_boletin_final.pdf"'
+        },
+    )
+    
+@router.get(
     "/estadisticas-finales/data",
     name="academic_tracking_final_statistics_data",
 )

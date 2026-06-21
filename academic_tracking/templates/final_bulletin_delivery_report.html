@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia de Entrega - Boletín Final</title>
+
+    <style>
+        @page {
+            size: Letter portrait;
+            margin: 13mm 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", Arial, Helvetica, sans-serif;
+            color: #000000;
+            font-size: 11px;
+            letter-spacing: 0.1px;
+        }
+
+        .course-sheet {
+            page-break-after: always;
+        }
+
+        .course-sheet:last-child {
+            page-break-after: auto;
+        }
+
+        .header {
+            display: table;
+            width: 100%;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 6px;
+        }
+
+        .logo-box {
+            display: table-cell;
+            width: 70px;
+            vertical-align: middle;
+        }
+
+        .logo {
+            width: 62px;
+            height: 62px;
+            object-fit: contain;
+        }
+
+        .header-text {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 8px;
+        }
+
+        .school-name {
+            font-size: 17px;
+            font-weight: bold;
+            line-height: 1.08;
+        }
+
+        .document-title {
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .meta {
+            margin-top: 3px;
+            line-height: 1.2;
+        }
+
+        .paragraph {
+            border: 1px solid #000000;
+            padding: 7px 8px;
+            margin-bottom: 8px;
+            line-height: 1.25;
+            text-align: justify;
+        }
+
+        .summary-title {
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-size: 11px;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 9px;
+        }
+
+        .summary-table th {
+            border: 1px solid #000000;
+            padding: 4px 3px;
+            text-align: center;
+            font-size: 10px;
+            line-height: 1.05;
+            font-weight: bold;
+        }
+
+        .summary-table td {
+            border: 1px solid #000000;
+            padding: 4px 3px;
+            text-align: center;
+            font-size: 10.5px;
+            line-height: 1.05;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 9px;
+        }
+
+        th {
+            border: 1px solid #000000;
+            padding: 4px 3px;
+            text-align: center;
+            font-size: 10px;
+            background: #ffffff;
+            font-weight: bold;
+            line-height: 1.05;
+        }
+
+        td {
+            border: 1px solid #000000;
+            padding: 3px 4px;
+            font-size: 10px;
+            vertical-align: middle;
+            line-height: 1.08;
+        }
+
+        .col-numero {
+            width: 8%;
+            text-align: center;
+        }
+
+        .col-id {
+            width: 15%;
+            text-align: center;
+        }
+
+        .col-name {
+            width: 37%;
+        }
+
+        .col-status {
+            width: 20%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .col-signature {
+            width: 20%;
+        }
+
+        .footer-area {
+            margin-top: 18px;
+        }
+
+        .signature-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-top: 10px;
+        }
+
+        .signature-summary-table td {
+            border: none;
+            padding: 3px 5px;
+            vertical-align: bottom;
+            font-size: 11px;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid #000000;
+            margin-bottom: 3px;
+            height: 18px;
+        }
+
+        .footer {
+            margin-top: 16px;
+            text-align: right;
+            font-size: 9px;
+        }
+    </style>
+</head>
+
+<body>
+
+{% for course_group in dashboard.students_by_course %}
+
+<section class="course-sheet">
+
+    <div class="header">
+
+        <div class="logo-box">
+            {% if dashboard.institution.logos and dashboard.institution.logos[0].src %}
+                <img
+                    class="logo"
+                    src="{{ dashboard.institution.logos[0].src }}"
+                    alt="Logo del centro"
+                >
+            {% endif %}
+        </div>
+
+        <div class="header-text">
+            <div class="school-name">
+                {{ dashboard.institution.name }}
+            </div>
+
+            <div class="document-title">
+                Constancia de Entrega de Boletín Final
+            </div>
+
+            <div class="meta">
+                <strong>Año escolar:</strong> {{ dashboard.institution.school_year }}
+                &nbsp; | &nbsp;
+                <strong>Curso:</strong> {{ course_group.course_name }}
+            </div>
+        </div>
+
+    </div>
+
+    <div class="paragraph">
+        El/la profesor(a) titular
+        <strong>{{ course_group.prof_titular or "________________________________" }}</strong>
+        hace constar que realizó la entrega del boletín final correspondiente al año escolar indicado a los estudiantes detallados a continuación, informando la situación académica final obtenida al cierre de los procesos de evaluación establecidos.
+    </div>
+
+    <div class="summary-title">
+        Resumen de la sección
+    </div>
+
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th>Inscritos</th>
+                <th>Promovidos</th>
+                <th>Especial</th>
+                <th>Reprobados</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>{{ course_group.summary.inscritos }}</td>
+                <td>{{ course_group.summary.promovidos }}</td>
+                <td>{{ course_group.summary.especial }}</td>
+                <td>{{ course_group.summary.reprobados }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="col-numero">No.</th>
+                <th class="col-id">ID</th>
+                <th class="col-name">Estudiante</th>
+                <th class="col-status">Situación Final</th>
+                <th class="col-signature">Firma</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for student in course_group.students %}
+            <tr>
+
+                <td class="col-numero">
+                    {{ student.numero or "—" }}
+                </td>
+
+                <td class="col-id">
+                    {{ student.student_id }}
+                </td>
+
+                <td class="col-name">
+                    {{ student.student_name }}
+                </td>
+
+                <td class="col-status">
+                    {{ student.final_status_label }}
+                </td>
+
+                <td class="col-signature"></td>
+
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+
+    <div class="footer-area">
+        <table class="signature-summary-table">
+            <tbody>
+                <tr>
+
+                    <td style="width:45%;">
+                        <strong>Fecha:</strong>
+                        __________________________________
+                    </td>
+
+                    <td style="width:55%; text-align:center;">
+                        <div class="signature-line"></div>
+                        <strong>{{ course_group.prof_titular or "Profesor/a titular" }}</strong>
+                        <br>
+                        Profesor/a titular
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        Generado por Aula Nova · Boletín Final
+    </div>
+
+</section>
+
+{% endfor %}
+
+{% if not dashboard.students_by_course %}
+<p>No hay estudiantes para los filtros seleccionados.</p>
+{% endif %}
+
+</body>
+</html>

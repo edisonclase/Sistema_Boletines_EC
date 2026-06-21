@@ -36,6 +36,14 @@
                 Proyección a completivo
             </a>
 
+            <a href="{{ url_for('academic_tracking_final_statistics_dashboard') }}" class="btn btn-secondary">
+                Estadísticas finales
+            </a>
+
+            <a href="{{ url_for('academic_tracking_final_statistics_pdf') }}" target="_blank" class="btn btn-secondary">
+                PDF estadísticas finales
+            </a>
+
         </div>
     </div>
 </section>
@@ -198,6 +206,15 @@
                 data-url="{{ url_for('academic_tracking_recovery_delivery_pdf') }}"
             >
                 Constancia recuperación pedagógica
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                id="final-bulletin-delivery-btn"
+                data-url="{{ url_for('academic_tracking_final_bulletin_delivery_pdf') }}"
+            >
+                Constancia boletín final
             </button>
 
             <a
@@ -468,6 +485,14 @@
 
 
 <style>
+    .module-actions,
+    .filter-actions,
+    .listing-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
     #tracking-table th,
     #tracking-table td {
         vertical-align: top;
@@ -511,8 +536,6 @@
         font-weight: 700;
     }
 </style>
-
-
 
 {% endblock %}
 
@@ -567,6 +590,34 @@
                 if (seccion) params.set("seccion", seccion);
                 if (periodo) params.set("periodo", periodo);
                 if (asignatura) params.set("asignatura", asignatura);
+
+                const finalUrl = params.toString()
+                    ? `${baseUrl}?${params.toString()}`
+                    : baseUrl;
+
+                window.open(finalUrl, "_blank");
+
+            });
+
+        }
+
+        const finalBulletinDeliveryBtn = document.getElementById("final-bulletin-delivery-btn");
+
+        if (finalBulletinDeliveryBtn) {
+
+            finalBulletinDeliveryBtn.addEventListener("click", function () {
+
+                const baseUrl = finalBulletinDeliveryBtn.dataset.url;
+
+                const params = new URLSearchParams();
+
+                const ciclo = document.getElementById("ciclo")?.value || "";
+                const grado = document.getElementById("grado")?.value || "";
+                const seccion = document.getElementById("seccion")?.value || "";
+
+                if (ciclo) params.set("ciclo", ciclo);
+                if (grado) params.set("grado", grado);
+                if (seccion) params.set("seccion", seccion);
 
                 const finalUrl = params.toString()
                     ? `${baseUrl}?${params.toString()}`

@@ -6,12 +6,12 @@ Servicio para calcular la situación final del estudiante:
 - Completivo
 - Extraordinario
 - Especial
-- Evaluación especial de módulo formativo
+- Reprobado
 
-Reglas importantes:
-- La matrícula inscrita se cuenta por estudiantes únicos con ID, usando SEXO.
-- Las estadísticas académicas solo cuentan estudiantes activos.
-- Estudiantes transferidos, retirados, abandonaron o inactivos no cuentan en estadísticas de calificaciones.
+Regla clave después de extraordinario:
+- 0 asignaturas pendientes -> Promovido
+- 1 o 2 asignaturas pendientes -> Especial
+- 3 o más asignaturas pendientes -> Reprobado
 """
 
 from __future__ import annotations
@@ -44,6 +44,7 @@ STATUS_COMPLETIVO = "completivo"
 STATUS_EXTRAORDINARIO = "extraordinario"
 STATUS_ESPECIAL = "especial"
 STATUS_MODULO_ESPECIAL = "modulo_especial"
+STATUS_REPROBADO = "reprobado"
 STATUS_SIN_DATOS = "sin_datos"
 
 INACTIVE_STATUS_WORDS = {
@@ -55,6 +56,8 @@ INACTIVE_STATUS_WORDS = {
     "RETIRADA",
     "TRANSFERIDO",
     "TRANSFERIDA",
+    "TRANFERIDO",
+    "TRANFERIDA",
     "TRASLADADO",
     "TRASLADADA",
     "INACTIVO",
@@ -263,17 +266,43 @@ def analyze_academic_subject(
     cexf = _get_score(row, f"{subject_code}_CEXF")
     ce_especial = _get_score(row, f"{subject_code}_CE_ESPECIAL")
 
-    needs_completivo = _is_valid_score(cf_final) and cf_final < MIN_PASS_SCORE
-    needs_extraordinario = _is_valid_score(ccf) and ccf < MIN_PASS_SCORE
-    needs_especial = _is_valid_score(cexf) and cexf < MIN_PASS_SCORE
+    passed_by_final = _is_valid_score(cf_final) and cf_final >= MIN_PASS_SCORE
+    passed_by_completivo = _is_valid_score(ccf) and ccf >= MIN_PASS_SCORE
+    passed_by_extraordinario = _is_valid_score(cexf) and cexf >= MIN_PASS_SCORE
+    passed_by_especial = _is_valid_score(ce_especial) and ce_especial >= MIN_PASS_SCORE
+
+    needs_completivo = (
+        _is_valid_score(cf_final)
+        and cf_final < MIN_PASS_SCORE
+        and not _is_valid_score(ccf)
+        and not _is_valid_score(cexf)
+        and not _is_valid_score(ce_especial)
+    )
+
+    needs_extraordinario = (
+        _is_valid_score(ccf)
+        and ccf < MIN_PASS_SCORE
+        and not _is_valid_score(cexf)
+        and not _is_valid_score(ce_especial)
+    )
+
+    needs_especial = (
+        _is_valid_score(cexf)
+        and cexf < MIN_PASS_SCORE
+        and not _is_valid_score(ce_especial)
+    )
+
+    failed_after_special = (
+        _is_valid_score(ce_especial)
+        and ce_especial < MIN_PASS_SCORE
+    )
 
     passed = (
-        _is_valid_score(cf_final)
-        and cf_final >= MIN_PASS_SCORE
-        and not needs_completivo
-        and not needs_extraordinario
-        and not needs_especial
-    )
+        passed_by_final
+        or passed_by_completivo
+        or passed_by_extraordinario
+        or passed_by_especial
+    ) and not needs_completivo and not needs_extraordinario and not needs_especial and not failed_after_special
 
     return {
         "subject_code": subject_code,
@@ -286,6 +315,7 @@ def analyze_academic_subject(
         "needs_completivo": needs_completivo,
         "needs_extraordinario": needs_extraordinario,
         "needs_especial": needs_especial,
+        "failed_after_special": failed_after_special,
     }
 
 
@@ -353,6 +383,10 @@ def analyze_student_final_status(row: dict[str, Any]) -> Optional[dict[str, Any]
         item for item in academic_results if item["needs_especial"]
     ]
 
+    subjects_failed_after_special = [
+        item for item in academic_results if item["failed_after_special"]
+    ]
+
     modules_to_special_evaluation = [
         item for item in module_results if item["needs_special_module_evaluation"]
     ]
@@ -361,7 +395,19 @@ def analyze_student_final_status(row: dict[str, Any]) -> Optional[dict[str, Any]
         final_status = STATUS_SIN_DATOS
         final_status_label = "Sin calificaciones finales"
 
-    elif subjects_to_especial:
+    elif modules_to_special_evaluation:
+        final_status = STATUS_MODULO_ESPECIAL
+        final_status_label = "Evaluación especial de módulo formativo"
+
+    elif subjects_failed_after_special:
+        final_status = STATUS_REPROBADO
+        final_status_label = "Reprobado"
+
+    elif len(subjects_to_especial) >= 3:
+        final_status = STATUS_REPROBADO
+        final_status_label = "Reprobado"
+
+    elif len(subjects_to_especial) in {1, 2}:
         final_status = STATUS_ESPECIAL
         final_status_label = "Evaluación especial"
 
@@ -372,10 +418,6 @@ def analyze_student_final_status(row: dict[str, Any]) -> Optional[dict[str, Any]
     elif subjects_to_completivo:
         final_status = STATUS_COMPLETIVO
         final_status_label = "Completivo"
-
-    elif modules_to_special_evaluation:
-        final_status = STATUS_MODULO_ESPECIAL
-        final_status_label = "Evaluación especial de módulo formativo"
 
     else:
         final_status = STATUS_PROMOVIDO
@@ -400,6 +442,7 @@ def analyze_student_final_status(row: dict[str, Any]) -> Optional[dict[str, Any]
         "subjects_to_completivo": subjects_to_completivo,
         "subjects_to_extraordinario": subjects_to_extraordinario,
         "subjects_to_especial": subjects_to_especial,
+        "subjects_failed_after_special": subjects_failed_after_special,
         "modules_to_special_evaluation": modules_to_special_evaluation,
     }
 
@@ -485,6 +528,10 @@ def build_final_status_report(rows: list[dict[str, Any]]) -> dict[str, Any]:
         item for item in active_students if item["final_status"] == STATUS_MODULO_ESPECIAL
     ]
 
+    reprobado_students = [
+        item for item in active_students if item["final_status"] == STATUS_REPROBADO
+    ]
+
     sin_datos_students = [
         item for item in active_students if item["final_status"] == STATUS_SIN_DATOS
     ]
@@ -500,6 +547,7 @@ def build_final_status_report(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "extraordinario": len(extraordinario_students),
             "especial": len(especial_students),
             "modulo_especial": len(module_special_students),
+            "reprobado": len(reprobado_students),
             "sin_datos": len(sin_datos_students),
             "enrolled_by_sex": _count_by_sex(enrolled_students),
             "active_by_sex": _count_by_sex(active_students),
@@ -512,5 +560,6 @@ def build_final_status_report(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "extraordinario_students": extraordinario_students,
         "especial_students": especial_students,
         "module_special_students": module_special_students,
+        "reprobado_students": reprobado_students,
         "sin_datos_students": sin_datos_students,
     }
