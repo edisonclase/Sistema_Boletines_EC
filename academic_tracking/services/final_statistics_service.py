@@ -2,29 +2,6 @@
 final_statistics_service.py
 
 Servicio para construir la Estadística General Final del Año Escolar.
-
-Calcula:
-- Inscritos
-- Activos
-- Inactivos
-- Abandono / transferidos / retirados
-- Promovidos sin completivo
-- Estudiantes que fueron a completivo
-- Estudiantes que fueron a extraordinario
-- Estudiantes en especial
-- Promovidos finales
-- No promovidos / repitentes
-
-Incluye desglose por:
-- Ciclo
-- Grado
-- Sección / área técnica
-- Sexo
-
-Reglas confirmadas:
-- Completivo asignaturas: *_CF_AREA < 70
-- Extraordinario asignaturas: *_CCF < 70
-- Módulos: MODx_CF < 70 no van a extraordinario; se consideran no promovidos del grado técnico.
 """
 
 from __future__ import annotations
@@ -70,7 +47,6 @@ def _normalize_text(value: Any) -> str:
 
     if text.endswith(".0"):
         number_part = text[:-2]
-
         if number_part.isdigit():
             return number_part
 
@@ -83,10 +59,11 @@ def _normalize_key(value: Any) -> str:
     text = "".join(char for char in text if unicodedata.category(char) != "Mn")
     return text.strip()
 
+
 def _normalize_sex_label(value: Any) -> str:
     sex_key = _normalize_key(value)
 
-    if sex_key in {"MASCULINO", "M", "VARON", "VARÓN"}:
+    if sex_key in {"MASCULINO", "M", "VARON"}:
         return "Masculino"
 
     if sex_key in {"FEMENINO", "F", "HEMBRA"}:
@@ -131,16 +108,13 @@ def _percent(part: int, total: int) -> float:
     return round((part / total) * 100, 1)
 
 
-def _is_active_status(status: Any) -> bool:
-    status_key = _normalize_key(status)
-    return status_key in {"ACTIVO", "ACTIVA"}
-
-
 def _is_inactive_status(status: Any) -> bool:
     status_key = _normalize_key(status)
 
-    return status_key in {
+    inactive_words = {
         "ABANDONO",
+        "ABANDONO EL CENTRO",
+        "ABANDONO DEL CENTRO",
         "RETIRADO",
         "RETIRADA",
         "TRANSFERIDO",
@@ -154,6 +128,18 @@ def _is_inactive_status(status: Any) -> bool:
         "BAJA",
     }
 
+    if not status_key:
+        return False
+
+    if status_key in inactive_words:
+        return True
+
+    return any(word in status_key for word in inactive_words)
+
+
+def _is_active_status(status: Any) -> bool:
+    return not _is_inactive_status(status)
+
 
 def _detect_cycle(row: dict[str, Any], ciclo: Optional[str] = None) -> str:
     if ciclo:
@@ -161,32 +147,12 @@ def _detect_cycle(row: dict[str, Any], ciclo: Optional[str] = None) -> str:
 
     course_name = _normalize_text(row.get("CURSO"))
     course_key = _normalize_key(course_name)
-
-    primer_ciclo_markers = {
-        "1RO",
-        "1ERO",
-        "PRIMERO",
-        "2DO",
-        "SEGUNDO",
-        "3RO",
-        "TERCERO",
-    }
-
-    segundo_ciclo_markers = {
-        "4TO",
-        "CUARTO",
-        "5TO",
-        "QUINTO",
-        "6TO",
-        "SEXTO",
-    }
-
     first_word = course_key.split(maxsplit=1)[0] if course_key else ""
 
-    if first_word in primer_ciclo_markers:
+    if first_word in {"1RO", "1ERO", "PRIMERO", "2DO", "SEGUNDO", "3RO", "TERCERO"}:
         return "Primer Ciclo"
 
-    if first_word in segundo_ciclo_markers:
+    if first_word in {"4TO", "CUARTO", "5TO", "QUINTO", "6TO", "SEXTO"}:
         return "Segundo Ciclo"
 
     for module_number in range(1, 6):
@@ -254,6 +220,42 @@ def _matches_filters(
     return True
 
 
+def _subject_status(
+    row: dict[str, Any],
+    subject_code: str,
+    *,
+    min_score: float = 70.0,
+) -> dict[str, Any]:
+    cf_area = _safe_float(row.get(f"{subject_code}_CF_AREA"))
+    ccf = _safe_float(row.get(f"{subject_code}_CCF"))
+    cexf = _safe_float(row.get(f"{subject_code}_CEXF"))
+    ce_especial = _safe_float(row.get(f"{subject_code}_CE_ESPECIAL"))
+
+    went_completivo = cf_area is not None and cf_area < min_score
+    went_extraordinario = ccf is not None and ccf < min_score
+    pending_after_extraordinario = cexf is not None and cexf < min_score
+    failed_after_special = ce_especial is not None and ce_especial < min_score
+
+    if ce_especial is not None:
+        promoted = ce_especial >= min_score
+    elif cexf is not None:
+        promoted = cexf >= min_score
+    elif ccf is not None:
+        promoted = ccf >= min_score
+    elif cf_area is not None:
+        promoted = cf_area >= min_score
+    else:
+        promoted = True
+
+    return {
+        "promoted": promoted and not failed_after_special,
+        "went_completivo": went_completivo,
+        "went_extraordinario": went_extraordinario,
+        "pending_after_extraordinario": pending_after_extraordinario,
+        "failed_after_special": failed_after_special,
+    }
+
+
 def _student_went_to_completivo(
     row: dict[str, Any],
     *,
@@ -262,20 +264,10 @@ def _student_went_to_completivo(
     cycle = _detect_cycle(row)
     subject_catalog = _subject_catalog_for_cycle(cycle)
 
-    for subject_code in subject_catalog:
-        cf_area = _safe_float(row.get(f"{subject_code}_CF_AREA"))
-
-        if cf_area is not None and cf_area < min_score:
-            return True
-
-    if _normalize_key(cycle) == "SEGUNDO CICLO":
-        for module_number in range(1, 6):
-            module_cf = _safe_float(row.get(f"MOD{module_number}_CF"))
-
-            if module_cf is not None and module_cf < min_score:
-                return True
-
-    return False
+    return any(
+        _subject_status(row, subject_code, min_score=min_score)["went_completivo"]
+        for subject_code in subject_catalog
+    )
 
 
 def _student_went_to_extraordinario(
@@ -286,13 +278,25 @@ def _student_went_to_extraordinario(
     cycle = _detect_cycle(row)
     subject_catalog = _subject_catalog_for_cycle(cycle)
 
-    for subject_code in subject_catalog:
-        ccf = _safe_float(row.get(f"{subject_code}_CCF"))
+    return any(
+        _subject_status(row, subject_code, min_score=min_score)["went_extraordinario"]
+        for subject_code in subject_catalog
+    )
 
-        if ccf is not None and ccf < min_score:
-            return True
 
-    return False
+def _count_pending_after_extraordinario(
+    row: dict[str, Any],
+    *,
+    min_score: float = 70.0,
+) -> int:
+    cycle = _detect_cycle(row)
+    subject_catalog = _subject_catalog_for_cycle(cycle)
+
+    return sum(
+        1
+        for subject_code in subject_catalog
+        if _subject_status(row, subject_code, min_score=min_score)["pending_after_extraordinario"]
+    )
 
 
 def _student_went_to_especial(
@@ -300,21 +304,8 @@ def _student_went_to_especial(
     *,
     min_score: float = 70.0,
 ) -> bool:
-    """
-    Regla inicial:
-    - Si *_CEXF existe y es menor de 70, pasa a especial.
-    - Esta regla puede ajustarse cuando se valide formalmente el módulo Especial.
-    """
-    cycle = _detect_cycle(row)
-    subject_catalog = _subject_catalog_for_cycle(cycle)
-
-    for subject_code in subject_catalog:
-        cexf = _safe_float(row.get(f"{subject_code}_CEXF"))
-
-        if cexf is not None and cexf < min_score:
-            return True
-
-    return False
+    pending_count = _count_pending_after_extraordinario(row, min_score=min_score)
+    return pending_count in {1, 2}
 
 
 def _student_has_failed_module(
@@ -328,7 +319,11 @@ def _student_has_failed_module(
         return False
 
     for module_number in range(1, 6):
+        module_name = _normalize_text(row.get(f"MOD{module_number}_NOMBRE"))
         module_cf = _safe_float(row.get(f"MOD{module_number}_CF"))
+
+        if not module_name and module_cf is None:
+            continue
 
         if module_cf is not None and module_cf < min_score:
             return True
@@ -336,37 +331,7 @@ def _student_has_failed_module(
     return False
 
 
-def _get_subject_final_status(
-    row: dict[str, Any],
-    subject_code: str,
-    *,
-    min_score: float = 70.0,
-) -> bool:
-    cf_area = _safe_float(row.get(f"{subject_code}_CF_AREA"))
-    ccf = _safe_float(row.get(f"{subject_code}_CCF"))
-    cexf = _safe_float(row.get(f"{subject_code}_CEXF"))
-    cf_final = _safe_float(row.get(f"{subject_code}_CF_FINAL"))
-
-    # Si llegó a especial y tiene CF_FINAL, esa es la última referencia.
-    if cf_final is not None:
-        return cf_final >= min_score
-
-    # Si llegó a extraordinario, se evalúa CEXF.
-    if cexf is not None:
-        return cexf >= min_score
-
-    # Si llegó a completivo, se evalúa CCF.
-    if ccf is not None:
-        return ccf >= min_score
-
-    # Si no fue a procesos, se evalúa CF_AREA.
-    if cf_area is not None:
-        return cf_area >= min_score
-
-    return True
-
-
-def _is_promoted_final(
+def _student_failed_after_special(
     row: dict[str, Any],
     *,
     min_score: float = 70.0,
@@ -374,18 +339,49 @@ def _is_promoted_final(
     cycle = _detect_cycle(row)
     subject_catalog = _subject_catalog_for_cycle(cycle)
 
-    for subject_code in subject_catalog:
-        if not _get_subject_final_status(
-            row,
-            subject_code,
-            min_score=min_score,
-        ):
-            return False
+    return any(
+        _subject_status(row, subject_code, min_score=min_score)["failed_after_special"]
+        for subject_code in subject_catalog
+    )
 
+
+def _is_promoted_final(
+    row: dict[str, Any],
+    *,
+    min_score: float = 70.0,
+) -> bool:
     if _student_has_failed_module(row, min_score=min_score):
         return False
 
+    cycle = _detect_cycle(row)
+    subject_catalog = _subject_catalog_for_cycle(cycle)
+
+    for subject_code in subject_catalog:
+        subject_result = _subject_status(row, subject_code, min_score=min_score)
+
+        if not subject_result["promoted"]:
+            return False
+
     return True
+
+
+def _is_reprobado_final(
+    row: dict[str, Any],
+    *,
+    min_score: float = 70.0,
+) -> bool:
+    if _student_has_failed_module(row, min_score=min_score):
+        return True
+
+    if _student_failed_after_special(row, min_score=min_score):
+        return True
+
+    pending_after_extraordinario = _count_pending_after_extraordinario(
+        row,
+        min_score=min_score,
+    )
+
+    return pending_after_extraordinario >= 3
 
 
 def _build_empty_counter() -> dict[str, Any]:
@@ -407,7 +403,7 @@ def _counter_to_row(label: str, counter: dict[str, Any]) -> dict[str, Any]:
     inscritos = counter["inscritos"]
     activos = counter["activos"]
 
-    row = {
+    return {
         "label": label,
         **counter,
         "percentages": {
@@ -422,8 +418,6 @@ def _counter_to_row(label: str, counter: dict[str, Any]) -> dict[str, Any]:
             "no_promovidos_sobre_activos": _format_percent(_percent(counter["no_promovidos"], activos)),
         },
     }
-
-    return row
 
 
 def build_final_statistics_report(
@@ -476,7 +470,6 @@ def build_final_statistics_report(
         status = row.get("ESTADO")
 
         is_active = _is_active_status(status)
-        is_inactive = not is_active
         is_abandono_transferido = _is_inactive_status(status)
 
         went_completivo = False
@@ -491,31 +484,32 @@ def build_final_statistics_report(
                 row,
                 min_score=min_score,
             )
+
             went_extraordinario = _student_went_to_extraordinario(
                 row,
                 min_score=min_score,
             )
+
             went_especial = _student_went_to_especial(
                 row,
                 min_score=min_score,
             )
-            failed_module = _student_has_failed_module(
+
+            promoted_final = _is_promoted_final(
                 row,
                 min_score=min_score,
             )
-            promoted_final = _is_promoted_final(row, min_score=min_score)
+
+            no_promoted = _is_reprobado_final(
+                row,
+                min_score=min_score,
+            )
 
             promoted_without_completivo = (
                 promoted_final
                 and not went_completivo
                 and not went_extraordinario
                 and not went_especial
-                and not failed_module
-            )
-
-            no_promoted = (
-                not promoted_final
-                or failed_module
             )
 
         counters = [
@@ -555,7 +549,7 @@ def build_final_statistics_report(
             if no_promoted:
                 counter["no_promovidos"] += 1
 
-    report = {
+    return {
         "metadata": {
             "center_id": center_id,
             "school_year": school_year,
@@ -569,7 +563,8 @@ def build_final_statistics_report(
                 "Los porcentajes sobre inscritos incluyen estudiantes activos e inactivos.",
                 "Los porcentajes sobre activos excluyen abandono, transferidos, retirados e inactivos.",
                 "Un estudiante se cuenta una sola vez por proceso, aunque tenga varias asignaturas pendientes.",
-                "Los módulos formativos no pasan a extraordinario.",
+                "Los módulos formativos con calificación menor de 70 se consideran no promovidos del grado técnico.",
+                "Después de extraordinario, una o dos asignaturas pendientes pasan a especial; tres o más implican reprobación del grado.",
             ],
         },
         "summary": _counter_to_row("Total general", total_counter),
@@ -592,5 +587,3 @@ def build_final_statistics_report(
             ],
         },
     }
-
-    return report
