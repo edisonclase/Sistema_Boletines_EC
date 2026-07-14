@@ -45,3 +45,23 @@ temp/
 
 # Misc
 .python-version
+# Configuración local y secretos
+.env
+.env.*
+!.env.example
+
+# Entornos virtuales
+.venv/
+.venv_backup_old_pc/
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Archivos locales y respaldos
+*.backup
+*.bak
+*.dump
+*.log
